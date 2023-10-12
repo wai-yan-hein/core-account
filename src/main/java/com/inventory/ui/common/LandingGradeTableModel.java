@@ -6,9 +6,9 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.Util1;
 import com.inventory.model.LandingHisGrade;
 import com.inventory.model.LandingHisGradeKey;
-import com.inventory.model.LandingHisKey;
 import com.inventory.model.LandingHisPrice;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LandingGradeTableModel extends AbstractTableModel {
 
     private List<LandingHisGrade> listDetail = new ArrayList<>();
-    private final String[] columnNames = {"Stock Name", "Match", "Percent", "Choose"};
+    private final String[] columnNames = {"Stock Name", "Match", "%", "Choose"};
     private JTable table;
     private InventoryRepo inventoryRepo;
 
@@ -184,13 +184,13 @@ public class LandingGradeTableModel extends AbstractTableModel {
                 List<LandingHisGrade> list = new ArrayList<>();
                 match.forEach((t, u) -> {
                     LandingHisGrade g = new LandingHisGrade();
-                    LandingHisGradeKey key = new LandingHisGradeKey();
-                    key.setCompCode(Global.compCode);
-                    key.setStockCode(t);
-                    g.setKey(key);
+                    g.setStockCode(t);
                     g.setStockName(hmStock.get(t));
                     g.setMatchCount(u);
-                    g.setMatchPercent((u / listCriteria.size()) * 100);
+                    double count = Util1.getDouble(u);
+                    double size = listCriteria.size();
+                    double percent = count / size;
+                    g.setMatchPercent(percent * 100);
                     g.setChoose(false);
                     list.add(g);
                 });

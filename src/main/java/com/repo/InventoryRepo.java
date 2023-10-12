@@ -25,7 +25,6 @@ import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
 import com.inventory.model.LandingHisPrice;
 import com.inventory.model.LandingHis;
-import com.inventory.model.LandingHisDetail;
 import com.inventory.model.LandingHisGrade;
 import com.inventory.model.LandingHisKey;
 import com.inventory.model.LandingHisQty;
@@ -101,6 +100,7 @@ import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.VLanding;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VOrder;
 import com.inventory.model.VReturnIn;
@@ -3452,6 +3452,15 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToFlux(ReorderLevel.class)
                 .collectList();
+    }
+   public Mono<VLanding> getLandingReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getLandingReport")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(VLanding.class);
     }
 
 }

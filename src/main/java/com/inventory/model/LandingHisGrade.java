@@ -5,7 +5,7 @@
 package com.inventory.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -20,8 +20,10 @@ import lombok.Data;
 @Table(name = "landing_his_grade")
 public class LandingHisGrade {
 
-    @Embedded
+    @EmbeddedId
     private LandingHisGradeKey key;
+    @Column(name = "stock_code")
+    private String stockCode;
     @Column(name = "match_count")
     private double matchCount;
     @Column(name = "match_percent")

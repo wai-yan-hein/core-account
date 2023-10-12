@@ -187,10 +187,12 @@ public class LandingPriceTableModel extends AbstractTableModel {
         double percentAllow = l.getPercentAllow();
         double percent = l.getPercent();
         double price = l.getPrice();
-        if (percentAllow > 0) {
+        if (percentAllow > 0 && percent > 0) {
             if (percent <= percentAllow) {
                 double diff = percentAllow - percent;
                 l.setAmount(diff * price);
+            } else {
+                l.setAmount(0);
             }
         } else {
             l.setAmount(percent * price);

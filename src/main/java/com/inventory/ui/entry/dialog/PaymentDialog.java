@@ -18,7 +18,26 @@ public class PaymentDialog extends javax.swing.JDialog {
     private double vouTotal;
     private double vouPaid;
     private double vouBalance;
+    private double vouDiscount;
+    private double vouGrandTotal;
     private boolean confirm;
+
+    public double getVouGrandTotal() {
+        return vouGrandTotal;
+    }
+
+    public void setVouGrandTotal(double vouGrandTotal) {
+        this.vouGrandTotal = vouGrandTotal;
+    }
+
+    public double getVouDiscount() {
+        return vouDiscount;
+    }
+
+    public void setVouDiscount(double vouDiscount) {
+        txtVouDis.setText(Util1.getString(vouDiscount));
+        this.vouDiscount = vouDiscount;
+    }
 
     public double getVouTotal() {
         return vouTotal;
@@ -34,6 +53,7 @@ public class PaymentDialog extends javax.swing.JDialog {
     }
 
     public void setVouPaid(double vouPaid) {
+        txtVouPaid.setText(Util1.getString(vouPaid));
         this.vouPaid = vouPaid;
     }
 
@@ -42,6 +62,7 @@ public class PaymentDialog extends javax.swing.JDialog {
     }
 
     public void setVouBalance(double vouBalance) {
+        txtVouBalance.setText(Util1.getString(vouBalance));
         this.vouBalance = vouBalance;
     }
 
@@ -64,12 +85,13 @@ public class PaymentDialog extends javax.swing.JDialog {
         txtVouPaid.requestFocus();
     }
 
-    private void calPayment(boolean partial) {
+    public void calPayment(boolean partial) {
         setConfirm(false);
         vouTotal = Util1.getDouble(txtVouTotal.getText());
         vouPaid = Util1.getDouble(txtVouPaid.getText());
+        vouDiscount = Util1.getDouble(txtVouDis.getText());
         if (!partial) {
-            vouPaid = chkFullPaid.isSelected() ? vouTotal : 0;
+            vouPaid = chkFullPaid.isSelected() ? vouGrandTotal : 0;
         } else {
             if (vouPaid > vouTotal) {
                 JOptionPane.showMessageDialog(this, "Invalid Payment.");
@@ -79,7 +101,9 @@ public class PaymentDialog extends javax.swing.JDialog {
                 chkFullPaid.setSelected(true);
             }
         }
-        vouBalance = vouTotal - vouPaid;
+        vouGrandTotal = vouTotal - vouDiscount;
+        vouBalance = vouGrandTotal - vouPaid;
+        txtGrand.setText(Util1.getString(vouGrandTotal));
         txtVouPaid.setText(Util1.getString(vouPaid));
         txtVouBalance.setText(Util1.getString(vouBalance));
     }
@@ -105,10 +129,13 @@ public class PaymentDialog extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         txtVouBalance = new javax.swing.JTextField();
         chkFullPaid = new javax.swing.JCheckBox();
+        jLabel5 = new javax.swing.JLabel();
+        txtVouDis = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtGrand = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Payment Dialog");
-        setUndecorated(true);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -187,6 +214,24 @@ public class PaymentDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Vou Discount");
+
+        txtVouDis.setFont(Global.amtFont);
+        txtVouDis.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtVouDis.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtVouDisActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Grand Total");
+
+        txtGrand.setEditable(false);
+        txtGrand.setFont(Global.amtFont);
+        txtGrand.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -200,16 +245,20 @@ public class PaymentDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING))
+                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkFullPaid, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtVouBalance, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                            .addComponent(txtVouBalance, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                             .addComponent(txtVouTotal)
-                            .addComponent(txtVouPaid))))
+                            .addComponent(txtVouPaid)
+                            .addComponent(txtVouDis)
+                            .addComponent(txtGrand))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -221,6 +270,14 @@ public class PaymentDialog extends javax.swing.JDialog {
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtGrand)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtVouDis, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtVouPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -229,7 +286,7 @@ public class PaymentDialog extends javax.swing.JDialog {
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkFullPaid)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
@@ -282,6 +339,11 @@ public class PaymentDialog extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void txtVouDisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDisActionPerformed
+        // TODO add your handling code here:
+        calPayment(false);
+    }//GEN-LAST:event_txtVouDisActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkFullPaid;
@@ -291,9 +353,13 @@ public class PaymentDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JTextField txtGrand;
     private javax.swing.JTextField txtVouBalance;
+    private javax.swing.JTextField txtVouDis;
     private javax.swing.JTextField txtVouPaid;
     private javax.swing.JTextField txtVouTotal;
     // End of variables declaration//GEN-END:variables

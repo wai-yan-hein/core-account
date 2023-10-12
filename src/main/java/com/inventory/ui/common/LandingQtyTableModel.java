@@ -79,7 +79,7 @@ public class LandingQtyTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2, 3, 4, 5 ->
+            case 2, 3, 4, 6 ->
                 Double.class;
             default ->
                 String.class;
@@ -185,15 +185,17 @@ public class LandingQtyTableModel extends AbstractTableModel {
         double percentAllow = l.getPercentAllow();
         double percent = l.getPercent();
         double qty = l.getQty();
-        if (percentAllow > 0) {
+        if (percentAllow > 0 && percent > 0) {
             if (percent <= percentAllow) {
                 double diff = percentAllow - percent;
                 l.setTotalQty(diff * qty);
+            }else{
+                l.setTotalQty(0);
             }
         } else {
             l.setTotalQty(percent * qty);
         }
-        observer.selected("CAL_CRITERIA", "CAL_CRITERIA");
+        observer.selected("CAL_QTY", "CAL_QTY");
     }
 
     private void setSelection(int row, int column) {

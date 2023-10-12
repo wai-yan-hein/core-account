@@ -20,6 +20,6 @@ public class LandingHisGradeKey {
     private String vouNo;
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "stock_code")
-    private String stockCode;
+    @Column(name = "unique_id")
+    private int uniqueId;
 }

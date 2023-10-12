@@ -8,6 +8,7 @@ import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -21,6 +22,7 @@ import com.inventory.model.LandingHisKey;
 import com.inventory.model.LandingHisQty;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.inventory.model.VLanding;
 import com.inventory.ui.common.LandingPriceTableModel;
 import com.inventory.ui.common.LandingGradeTableModel;
 import com.inventory.ui.common.LandingQtyTableModel;
@@ -37,7 +39,13 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -45,6 +53,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -205,7 +218,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private void initTableQty() {
         landingQtyTableModel.setLblRec(lblRC);
         landingQtyTableModel.setObserver(this);
-        landingQtyTableModel.setParent(tblPrice);
+        landingQtyTableModel.setParent(tblQty);
         tblQty.setModel(landingQtyTableModel);
         tblQty.getTableHeader().setFont(Global.tblHeaderFont);
         tblQty.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -245,9 +258,9 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         tblGrade.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblGrade.setDefaultRenderer(Double.class, new TableCellRender());
         tblGrade.getColumnModel().getColumn(0).setPreferredWidth(100);
-        tblGrade.getColumnModel().getColumn(1).setPreferredWidth(30);
-        tblGrade.getColumnModel().getColumn(2).setPreferredWidth(30);
-        tblGrade.getColumnModel().getColumn(3).setPreferredWidth(10);
+        tblGrade.getColumnModel().getColumn(1).setPreferredWidth(10);
+        tblGrade.getColumnModel().getColumn(2).setPreferredWidth(10);
+        tblGrade.getColumnModel().getColumn(3).setPreferredWidth(20);
     }
 
     private void assignDefaultValue() {
@@ -260,6 +273,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         txtPurPrice.setFormatterFactory(Util1.getDecimalFormat2());
         txtPrice.setFormatterFactory(Util1.getDecimalFormat2());
         txtAmt.setFormatterFactory(Util1.getDecimalFormat2());
+        txtGQty.setFormatterFactory(Util1.getDecimalFormat2());
         txtQty.setFormatterFactory(Util1.getDecimalFormat2());
         txtWeight.setFormatterFactory(Util1.getDecimalFormat2());
         txtWtTotal.setFormatterFactory(Util1.getDecimalFormat2());
@@ -307,10 +321,14 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         txtPurPrice.setValue(purAmt / 100);
         txtCriteriaAmt.setValue(ttlCriteria);
         txtOriginalAmt.setValue(orgAmt);
+        checkGrade();
+    }
+
+    private void checkGrade() {
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
             String formulaCode = s.getFormulaCode();
-            landingGradeTableModel.checkGrade(formulaCode, listC);
+            landingGradeTableModel.checkGrade(formulaCode, landingPriceTableModel.getListDetail());
         }
     }
 
@@ -331,10 +349,9 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                         ld.setCriteriaCode(t.getCriteriaCode());
                         ld.setCriteriaName(t.getCriteriaName());
                         ld.setCriteriaUserCode(t.getUserCode());
-                        ld.setPercent(t.getPercent());
+                        ld.setPercent(0);
                         ld.setPrice(t.getPrice());
                         ld.setPercentAllow(t.getPercentAllow());
-                        ld.setAmount(t.getPercent() * t.getPrice());
                         landingPriceTableModel.addObject(ld);
                     });
                 }
@@ -352,11 +369,10 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                         ld.setCriteriaCode(t.getCriteriaCode());
                         ld.setCriteriaName(t.getCriteriaName());
                         ld.setCriteriaUserCode(t.getUserCode());
-                        ld.setPercent(t.getPercent());
+                        ld.setPercent(0);
                         ld.setQty(t.getQty());
                         ld.setUnit(t.getUnit());
                         ld.setPercentAllow(t.getPercentAllow());
-                        ld.setTotalQty(t.getPercent() * t.getQty());
                         landingQtyTableModel.addObject(ld);
                     });
                 }
@@ -397,15 +413,14 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             landing.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             landing.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             landing.setRemark(txtRemark.getText());
+            landing.setCargo(txtCargo.getText());
             landing.setMacId(Global.macId);
             landing.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-            landing.setQty(Util1.getDouble(txtQty.getValue()));
+            landing.setQty(Util1.getDouble(txtGQty.getValue()));
             landing.setWeight(Util1.getDouble(txtWeight.getValue()));
             landing.setTotalWeight(Util1.getDouble(txtWtTotal.getValue()));
             landing.setUnit(qtyUnitComboBoxModel.getSelectedObject().getKey().getUnitCode());
             landing.setWeightUnit(weightUnitComboBoxModel.getSelectedObject().getKey().getUnitCode());
-            landing.setRemark(txtRemark.getText());
-            landing.setRemark(txtCargo.getText());
             landing.setPrice(Util1.getDouble(txtPrice.getValue()));
             landing.setAmount(Util1.getDouble(txtAmt.getValue()));
             landing.setCriteriaAmt(Util1.getDouble(txtCriteriaAmt.getValue()));
@@ -425,7 +440,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         return true;
     }
 
-    private void saveLanding() {
+    private void saveLanding(boolean print) {
         if (isValidEntry()
                 && landingPriceTableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
@@ -442,6 +457,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             landing.setListGrade(landingGradeTableModel.getListGrade());
             inventoryRepo.save(landing).doOnSuccess((t) -> {
                 progress.setIndeterminate(false);
+                printReport(t.getKey().getVouNo());
                 clear();
             }).doOnError((e) -> {
                 observer.selected("save", true);
@@ -449,6 +465,42 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                 progress.setIndeterminate(false);
             }).subscribe();
         }
+    }
+
+    private void printReport(String vouNo) {
+        inventoryRepo.getLandingReport(vouNo).doOnSuccess((t) -> {
+            if (t != null) {
+                try {
+                    String reportName = "LandingVoucherA5";
+                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("p_print_date", Util1.getTodayDateTime());
+                    param.put("p_comp_name", Global.companyName);
+                    param.put("p_comp_address", Global.companyAddress);
+                    param.put("p_comp_phone", Global.companyPhone);
+                    param.put("p_logo_path", logoPath);
+                    param.put("p_vou_date", t.getVouDate());
+                    param.put("p_vou_no", t.getVouNo());
+                    param.put("p_loc_name", t.getLocName());
+                    param.put("p_trader_name", t.getTraderName());
+                    param.put("p_remark", t.getRemark());
+                    param.put("p_cargo", t.getCargo());
+                    param.put("p_stock_name", t.getStockName());
+                    param.put("p_grade_stock_name", t.getGradeStockName());
+                    param.put("p_pur_qty", t.getPurQty());
+                    param.put("p_pur_unit", t.getPurUnit());
+                    param.put("p_pur_price", t.getPurPrice());
+                    param.put("p_pur_amount", t.getPurAmt());
+                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+                    ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(t.getListDetail()));
+                    JsonDataSource ds = new JsonDataSource(jsonDataStream);
+                    JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
+                    JasperViewer.viewReport(js, false);
+                } catch (JRException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Landing Report", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }).subscribe();
     }
 
     private void clear() {
@@ -460,7 +512,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         txtVouNo.setText(null);
         txtRemark.setText(null);
         txtCargo.setText(null);
-        txtQty.setValue(null);
+        txtGQty.setValue(null);
         txtWeight.setValue(null);
         txtPrice.setValue(null);
         txtAmt.setValue(null);
@@ -485,7 +537,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private void setStock() {
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
-            txtQty.setValue(1);
+            txtGQty.setValue(1);
             txtWeight.setValue(s.getWeight());
             txtAmt.setValue(s.getPurAmt());
             inventoryRepo.findUnit(s.getPurUnitCode()).doOnSuccess((t) -> {
@@ -502,13 +554,17 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         }
     }
 
-    private void calQty() {
+    private void calQty(boolean g) {
+        double lossQty = landingQtyTableModel.getListDetail().stream().mapToDouble((t) -> t.getTotalQty()).sum();
         double ttlWt = Util1.getDouble(txtWtTotal.getValue());
         double weight = Util1.getDouble(txtWeight.getValue());
         double amt = Util1.getDouble(txtAmt.getValue());
-        double qty = ttlWt / weight;
+        double gQty = g ? ttlWt / weight : Util1.getDouble(txtGQty.getValue());
+        double qty = gQty - lossQty;
+        txtGQty.setValue(gQty);
         txtQty.setValue(qty);
         txtPrice.setValue(amt / qty);
+        calWtTotal();
         calCriteria();
     }
 
@@ -516,10 +572,8 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         double weight = Util1.getDouble(txtWeight.getValue());
         double qty = Util1.getDouble(txtQty.getValue());
         double price = Util1.getDouble(txtPrice.getValue());
-        txtQty.setValue(weight * qty);
+        txtWtTotal.setValue(weight * qty);
         txtAmt.setValue(qty * price);
-        calCriteria();
-
     }
 
     private void focusTable() {
@@ -547,7 +601,6 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void setVoucher(LandingHis his) {
-        landing = his;
         String vouNo = his.getKey().getVouNo();
         setLandingHis(vouNo);
         setLandingHisPrice(vouNo);
@@ -558,6 +611,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private void setLandingHis(String vouNo) {
         inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
             if (l != null) {
+                landing = l;
                 if (l.isDeleted()) {
                     lblStatus.setText("DELETED");
                     lblStatus.setForeground(Color.red);
@@ -571,7 +625,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                 txtVouDate.setDate(Util1.convertToDate(l.getVouDate()));
                 txtRemark.setText(l.getRemark());
                 txtCargo.setText(l.getCargo());
-                txtQty.setValue(Util1.getDouble(l.getQty()));
+                txtGQty.setValue(Util1.getDouble(l.getQty()));
                 txtWeight.setValue(Util1.getDouble(l.getWeight()));
                 txtWtTotal.setValue(Util1.getDouble(l.getTotalWeight()));
                 txtPrice.setValue(Util1.getDouble(l.getPrice()));
@@ -633,7 +687,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         txtRemark.setEnabled(t);
         txtCargo.setEnabled(t);
         txtStock.setEnabled(t);
-        txtQty.setEnabled(t);
+        txtGQty.setEnabled(t);
         txtWeight.setEnabled(t);
         cboQtyUnit.setEnabled(t);
         cboWUnit.setEnabled(t);
@@ -657,11 +711,16 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }
             paymentDialog.setVouTotal(purAmt);
             paymentDialog.setVouPaid(landing.getVouPaid());
+            paymentDialog.setVouGrandTotal(landing.getGrandTotal());
             paymentDialog.setVouBalance(landing.getVouBalance());
+            paymentDialog.setVouDiscount(landing.getVouDiscount());
+            paymentDialog.calPayment(true);
             paymentDialog.setVisible(true);
             if (paymentDialog.isConfirm()) {
                 landing.setVouPaid(paymentDialog.getVouPaid());
                 landing.setVouBalance(paymentDialog.getVouBalance());
+                landing.setGrandTotal(paymentDialog.getVouGrandTotal());
+                landing.setVouDiscount(paymentDialog.getVouDiscount());
                 save();
             }
         }
@@ -746,7 +805,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         jPanel5 = new javax.swing.JPanel();
         txtStock = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txtQty = new javax.swing.JFormattedTextField();
+        txtGQty = new javax.swing.JFormattedTextField();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         cboQtyUnit = new javax.swing.JComboBox<>();
@@ -761,6 +820,8 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel19 = new javax.swing.JLabel();
         txtAmt = new javax.swing.JFormattedTextField();
         lblStatus = new javax.swing.JLabel();
+        txtQty = new javax.swing.JFormattedTextField();
+        jLabel22 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblGrade = new javax.swing.JTable();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -1031,17 +1092,18 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Stock");
 
-        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtQty.setFont(Global.amtFont);
-        txtQty.setName("txtQty"); // NOI18N
-        txtQty.addActionListener(new java.awt.event.ActionListener() {
+        txtGQty.setEditable(false);
+        txtGQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtGQty.setFont(Global.amtFont);
+        txtGQty.setName("txtGQty"); // NOI18N
+        txtGQty.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtQtyActionPerformed(evt);
+                txtGQtyActionPerformed(evt);
             }
         });
 
         jLabel9.setFont(Global.lableFont);
-        jLabel9.setText("Qty");
+        jLabel9.setText("Gross Qty");
 
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Unit");
@@ -1051,6 +1113,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Weight");
 
+        txtWeight.setEditable(false);
         txtWeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtWeight.setFont(Global.amtFont);
         txtWeight.setName("txtWeight"); // NOI18N
@@ -1104,43 +1167,62 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         lblStatus.setFont(Global.menuFont);
         lblStatus.setText("NEW");
 
+        txtQty.setEditable(false);
+        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtQty.setFont(Global.amtFont);
+        txtQty.setName("txtQty"); // NOI18N
+        txtQty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtQtyActionPerformed(evt);
+            }
+        });
+
+        jLabel22.setFont(Global.lableFont);
+        jLabel22.setText("Qty");
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtQty, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                            .addComponent(txtWeight))
+                        .addComponent(txtGQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtWeight)
+                    .addComponent(txtStock))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel15))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(cboQtyUnit, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cboWUnit, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE))
-                    .addComponent(jLabel16))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtWtTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
-                    .addComponent(txtPrice)
-                    .addComponent(txtAmt))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cboWUnit, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
+                            .addComponent(txtAmt)))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel16)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtWtTotal)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 285, Short.MAX_VALUE)
                 .addComponent(lblStatus)
                 .addContainerGap())
         );
@@ -1160,10 +1242,12 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel18))
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtGQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel9)
                         .addComponent(jLabel10)
-                        .addComponent(cboQtyUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cboQtyUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel22)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1282,20 +1366,19 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 68, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1307,13 +1390,13 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void txtWtTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtWtTotalActionPerformed
         // TODO add your handling code here:
-        calQty();
+        calQty(true);
     }//GEN-LAST:event_txtWtTotalActionPerformed
 
-    private void txtQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtQtyActionPerformed
+    private void txtGQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtGQtyActionPerformed
         // TODO add your handling code here:
         calWtTotal();
-    }//GEN-LAST:event_txtQtyActionPerformed
+    }//GEN-LAST:event_txtGQtyActionPerformed
 
     private void txtWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtWeightActionPerformed
         // TODO add your handling code here:
@@ -1327,7 +1410,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void txtAmtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAmtActionPerformed
         // TODO add your handling code here:
-        calQty();
+        calQty(true);
     }//GEN-LAST:event_txtAmtActionPerformed
 
     private void chkPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPurchaseActionPerformed
@@ -1342,6 +1425,10 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private void txtTraderFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtTraderFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtTraderFocusGained
+
+    private void txtQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtQtyActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtQtyActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1362,6 +1449,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1388,6 +1476,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JFormattedTextField txtAmt;
     private javax.swing.JTextField txtCargo;
     private javax.swing.JFormattedTextField txtCriteriaAmt;
+    private javax.swing.JFormattedTextField txtGQty;
     private javax.swing.JTextField txtGrade;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtOriginalAmt;
@@ -1410,6 +1499,9 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         switch (src) {
             case "CAL_CRITERIA" ->
                 calCriteria();
+            case "CAL_QTY" -> {
+                calQty(false);
+            }
             case "STOCK" ->
                 setStock();
             case "LANDING-HISTORY" ->
@@ -1419,7 +1511,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
 
     @Override
     public void save() {
-        saveLanding();
+        saveLanding(false);
     }
 
     @Override
@@ -1439,6 +1531,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
 
     @Override
     public void print() {
+        saveLanding(true);
     }
 
     @Override
