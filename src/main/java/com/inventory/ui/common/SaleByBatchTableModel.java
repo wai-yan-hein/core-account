@@ -18,6 +18,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleByBatch;
+import com.inventory.ui.entry.dialog.StockBalanceDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
     private final List<SaleDetailKey> deleteList = new ArrayList();
-    private StockBalanceTableModel sbTableModel;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
     private JButton btnProgress;
@@ -49,6 +49,12 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     private boolean change = false;
     private JLabel lblRecord;
     private SaleByBatch sale;
+    private StockBalanceDialog dialog;
+
+    public void setDialog(StockBalanceDialog dialog) {
+        this.dialog = dialog;
+    }
+    
 
     public SaleByBatch getSale() {
         return sale;
@@ -58,14 +64,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         this.sale = sale;
     }
 
-    public StockBalanceTableModel getSbTableModel() {
-        return sbTableModel;
-    }
-
-    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
-        this.sbTableModel = sbTableModel;
-    }
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
@@ -250,7 +249,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                     case 2, 3 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            sbTableModel.calStockBalance(s.getKey().getStockCode());
+                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());

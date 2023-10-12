@@ -17,6 +17,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleByWeight;
+import com.inventory.ui.entry.dialog.StockBalanceDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +41,15 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<SaleDetailKey> deleteList = new ArrayList();
-    private StockBalanceTableModel sbTableModel;
     private InventoryRepo inventoryRepo;
-    private JLabel lblStockName;
-    private JButton btnProgress;
     private JDateChooser vouDate;
-    private boolean change = false;
     private JLabel lblRecord;
     private SaleByWeight sale;
+    private StockBalanceDialog dialog;
+
+    public void setDialog(StockBalanceDialog dialog) {
+        this.dialog = dialog;
+    }
 
     public SaleByWeight getSale() {
         return sale;
@@ -55,10 +57,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
 
     public void setSale(SaleByWeight sale) {
         this.sale = sale;
-    }
-
-    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
-        this.sbTableModel = sbTableModel;
     }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -69,20 +67,8 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         this.lblRecord = lblRecord;
     }
 
-    public void setChange(boolean change) {
-        this.change = change;
-    }
-
     public void setVouDate(JDateChooser vouDate) {
         this.vouDate = vouDate;
-    }
-
-    public void setLblStockName(JLabel lblStockName) {
-        this.lblStockName = lblStockName;
-    }
-
-    public void setBtnProgress(JButton btnProgress) {
-        this.btnProgress = btnProgress;
     }
 
     public void setParent(JTable parent) {
@@ -93,7 +79,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         this.observer = observer;
     }
 
-   
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -211,7 +196,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            sbTableModel.calStockBalance(s.getKey().getStockCode());
+                            dialog.calStock(s.getKey().getStockCode(),Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -308,7 +293,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                change = true;
                 assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
@@ -461,5 +445,4 @@ public class SaleByWeightTableModel extends AbstractTableModel {
             listDetail.clear();
         }
     }
-
 }

@@ -17,6 +17,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleByWeight;
+import com.inventory.ui.entry.dialog.StockBalanceDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +40,9 @@ public class SaleExportTableModel extends AbstractTableModel {
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<SaleDetailKey> deleteList = new ArrayList();
-    private StockBalanceTableModel sbTableModel;
+    private StockBalanceDialog dialog;
     private InventoryRepo inventoryRepo;
-    private JLabel lblStockName;
-    private JButton btnProgress;
     private JDateChooser vouDate;
-    private boolean change = false;
     private JLabel lblRecord;
     private SaleByWeight sale;
 
@@ -56,9 +54,11 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.sale = sale;
     }
 
-    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
-        this.sbTableModel = sbTableModel;
+    public void setDialog(StockBalanceDialog dialog) {
+        this.dialog = dialog;
     }
+
+   
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -68,22 +68,9 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.lblRecord = lblRecord;
     }
 
-    public void setChange(boolean change) {
-        this.change = change;
-    }
-
     public void setVouDate(JDateChooser vouDate) {
         this.vouDate = vouDate;
     }
-
-    public void setLblStockName(JLabel lblStockName) {
-        this.lblStockName = lblStockName;
-    }
-
-    public void setBtnProgress(JButton btnProgress) {
-        this.btnProgress = btnProgress;
-    }
-
     public void setParent(JTable parent) {
         this.parent = parent;
     }
@@ -206,7 +193,7 @@ public class SaleExportTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            sbTableModel.calStockBalance(s.getKey().getStockCode());
+                            dialog.calStock(s.getKey().getStockCode(),Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -299,7 +286,6 @@ public class SaleExportTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                change = true;
                 assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);

@@ -21,7 +21,7 @@ public class VStockBalance implements Serializable {
     private String stockName;
     private String locCode;
     private String locationName;
-    private Float totalQty;
-    private Float weight;
+    private double totalQty;
+    private double weight;
     private String unitName;
 }

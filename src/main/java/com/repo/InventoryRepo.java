@@ -3005,6 +3005,26 @@ public class InventoryRepo {
                     return Mono.error(e);
                 });
     }
+    public Mono<List<VStockBalance>> getStockBalanceByWeight(String stockCode, boolean summary) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getStockBalanceByWeight")
+                .queryParam("stockCode", stockCode)
+                .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
+                .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
+                .queryParam("calRI", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")))
+                .queryParam("calRO", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnout.stock")))
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .queryParam("macId", Global.macId)
+                .queryParam("summary", summary)
+                .build())
+                .retrieve().bodyToFlux(VStockBalance.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.error(e);
+                });
+    }
 
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId, boolean local) {
         if (local) {
