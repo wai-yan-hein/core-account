@@ -95,4 +95,9 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     public String getMaxDate() {
         return formulaDao.getMaxDate();
     }
+    
+    @Override
+    public StockFormula find(StockFormulaKey key) {
+        return formulaDao.find(key);
+    }
 }
