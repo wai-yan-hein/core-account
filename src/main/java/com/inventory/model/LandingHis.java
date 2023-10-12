@@ -51,6 +51,8 @@ public class LandingHis {
     private String locCode;
     @Column(name = "stock_code")
     private String stockCode;
+    @Column(name = "gross_qty")
+    private double grossQty;
     @Column(name = "qty")
     private double qty;
     @Column(name = "unit")
@@ -77,12 +79,22 @@ public class LandingHis {
     private double vouPaid;
     @Column(name = "vou_balance")
     private double vouBalance;
+    @Column(name = "vou_discount")
+    private double vouDiscount;
+    @Column(name = "grand_total")
+    private double grandTotal;
     @Column(name = "purchase")
     private boolean purchase;
     @Transient
-    private List<LandingHisCriteria> listDetail;
+    private List<LandingHisPrice> listPrice;
     @Transient
-    private List<LandingHisCriteriaKey> listDel;
+    private List<LandingHisPriceKey> listDelPrice;
+    @Transient
+    private List<LandingHisQty> listQty;
+    @Transient
+    private List<LandingHisQtyKey> listDelQty;
+    @Transient
+    private List<LandingHisGrade> listGrade;
     @Transient
     private String traderName;
     @Transient

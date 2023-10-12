@@ -23,13 +23,13 @@ public class Pattern {
     private String brandName;
     private String catName;
     private String relation;
-    private Float qty;
-    private Float price;
+    private double qty;
+    private double price;
     private String unitCode;
     private String locCode;
     private String locName;
     private Integer deptId;
     private String priceTypeCode;
     private String priceTypeName;
-    private Float amount;
+    private double amount;
 }

@@ -121,7 +121,8 @@ public class LandingHistoryDialog extends javax.swing.JDialog implements KeyList
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(80);
         tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(80);
-        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(5);
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(80);
+        tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(5);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

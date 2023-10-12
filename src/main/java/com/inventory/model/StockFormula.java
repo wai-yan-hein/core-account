@@ -1,6 +1,5 @@
 package com.inventory.model;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "stock_formula")
 public class StockFormula {
+
     @EmbeddedId
     private StockFormulaKey key;
     @Column(name = "formula_name")
@@ -33,6 +33,6 @@ public class StockFormula {
     private boolean active;
     @Column(name = "mac_id")
     private Integer macId;
-    @Transient
-    private List<StockFormulaDetail> listDtl;
+    private transient List<StockFormulaQty> listQty;
+    private transient List<StockFormulaPrice> listPrice;
 }

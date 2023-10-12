@@ -21,10 +21,13 @@ import com.inventory.model.GRN;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNKey;
 import com.inventory.model.General;
-import com.inventory.model.LandingHisCriteria;
+import com.inventory.model.GradeDetail;
+import com.inventory.model.GradeDetailKey;
+import com.inventory.model.LandingHisPrice;
 import com.inventory.model.LandingHis;
-import com.inventory.model.LandingHisDetail;
+import com.inventory.model.LandingHisGrade;
 import com.inventory.model.LandingHisKey;
+import com.inventory.model.LandingHisQty;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.Message;
@@ -76,9 +79,10 @@ import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.model.StockFormulaDetailKey;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.model.StockFormulaPriceKey;
 import com.inventory.model.StockFormulaKey;
+import com.inventory.model.StockFormulaQty;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -96,6 +100,7 @@ import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.VLanding;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VOrder;
 import com.inventory.model.VReturnIn;
@@ -225,17 +230,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockFormulaDetail>> getStockFormulaDetail(String formulaCode) {
-        if (localDatabase) {
-            return h2Repo.getStockFormulaDetail(formulaCode);
-        }
+    public Mono<List<StockFormulaPrice>> getStockFormulaPrice(String formulaCode) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getStockFormulaDetail")
+                .uri(builder -> builder.path("/setup/getStockFormulaPrice")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("formulaCode", formulaCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(StockFormulaDetail.class)
+                .bodyToFlux(StockFormulaPrice.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -243,14 +245,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<LandingHisCriteria>> getLandingCriteria(String vouNo) {
+    public Mono<List<StockFormulaQty>> getStockFormulaQty(String formulaCode) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/landing/getLandingCriteria")
-                .queryParam("vouNo", vouNo)
+                .uri(builder -> builder.path("/setup/getStockFormulaQty")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("formulaCode", formulaCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(LandingHisCriteria.class)
+                .bodyToFlux(StockFormulaQty.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -258,14 +260,75 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<LandingHisDetail>> getLandingHisDetail(String vouNo) {
+    public Mono<List<GradeDetail>> getGradeDetail(String formulaCode, String criteriaCode) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/landing/getLandingHisDetail")
+                .uri(builder -> builder.path("/setup/getGradeDetail")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("formulaCode", formulaCode)
+                .queryParam("criteriaCode", criteriaCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(GradeDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<GradeDetail>> getCriteriaByFormula(String formulaCode) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getCriteriaByFormula")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("formulaCode", formulaCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(GradeDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<LandingHisPrice>> getLandingHisPrice(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/landing/getLandingHisPrice")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(LandingHisDetail.class)
+                .bodyToFlux(LandingHisPrice.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<LandingHisQty>> getLandingHisQty(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/landing/getLandingHisQty")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(LandingHisQty.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<LandingHisGrade>> getLandingHisGrade(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/landing/getLandingHisGrade")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(LandingHisGrade.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -782,6 +845,9 @@ public class InventoryRepo {
     }
 
     public Mono<StockFormula> findStockFormula(String formualCode) {
+        if (localDatabase) {
+
+        }
         StockFormulaKey key = new StockFormulaKey();
         key.setCompCode(Global.compCode);
         key.setFormulaCode(formualCode);
@@ -1405,17 +1471,36 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockFormulaDetail> saveStockFormulaDetail(StockFormulaDetail s) {
+    public Mono<StockFormulaPrice> saveStockFormulaPrice(StockFormulaPrice s) {
         return inventoryApi.post()
-                .uri("/setup/saveStockFormulaDetail")
-                .body(Mono.just(s), StockFormulaDetail.class)
+                .uri("/setup/saveStockFormulaPrice")
+                .body(Mono.just(s), StockFormulaPrice.class)
                 .retrieve()
-                .bodyToMono(StockFormulaDetail.class)
-                .doOnSuccess((s1) -> {
-                    if (localDatabase) {
-                        h2Repo.save(s1);
-                    }
-                })
+                .bodyToMono(StockFormulaPrice.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<StockFormulaQty> saveStockFormulaQty(StockFormulaQty s) {
+        return inventoryApi.post()
+                .uri("/setup/saveStockFormulaQty")
+                .body(Mono.just(s), StockFormulaQty.class)
+                .retrieve()
+                .bodyToMono(StockFormulaQty.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<GradeDetail> saveGradeDetail(GradeDetail s) {
+        return inventoryApi.post()
+                .uri("/setup/saveGradeDetail")
+                .body(Mono.just(s), GradeDetail.class)
+                .retrieve()
+                .bodyToMono(GradeDetail.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1466,10 +1551,22 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> delete(StockFormulaDetailKey p) {
+    public Mono<Boolean> delete(StockFormulaPriceKey p) {
         return inventoryApi.post()
                 .uri("/setup/deleteStockFormulaDetail")
-                .body(Mono.just(p), StockFormulaDetailKey.class)
+                .body(Mono.just(p), StockFormulaPriceKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> delete(GradeDetailKey p) {
+        return inventoryApi.post()
+                .uri("/setup/deleteGradeDetail")
+                .body(Mono.just(p), GradeDetailKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .doOnSuccess((s1) -> {
@@ -3368,6 +3465,15 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToFlux(ReorderLevel.class)
                 .collectList();
+    }
+   public Mono<VLanding> getLandingReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getLandingReport")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(VLanding.class);
     }
 
 }

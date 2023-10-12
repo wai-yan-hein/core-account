@@ -495,7 +495,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         inventoryRepo.getPattern(code, deptId, Util1.toDateStr(vouDate, "yyyy-MM-dd")).subscribe((t) -> {
             if (!t.isEmpty()) {
                 String input = JOptionPane.showInputDialog("Enter Qty.");
-                float qty = Util1.getFloat(input);
+                double qty = Util1.getDouble(input);
                 if (qty > 0) {
                     txtQty.setValue(qty);
                     for (Pattern p : t) {

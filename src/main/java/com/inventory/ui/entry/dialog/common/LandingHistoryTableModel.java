@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LandingHistoryTableModel extends AbstractTableModel {
 
     private List<LandingHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Trader", "Stock Name", "Remark", "Cargo", "Created By"};
+    private final String[] columnNames = {"Date", "Vou No", "Trader", "Stock Name", "Remark", "Cargo", "Vou Total ", "Created By"};
 
     @Override
     public String getColumnName(int column) {
@@ -48,7 +48,7 @@ public class LandingHistoryTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return String.class;
+        return column == 6 ? Double.class : String.class;
     }
 
     @Override
@@ -88,6 +88,10 @@ public class LandingHistoryTableModel extends AbstractTableModel {
                         return his.getCargo();
                     }
                     case 6 -> {
+                        //user
+                        return his.getPurAmt();
+                    }
+                    case 7 -> {
                         //user
                         return Global.hmUser.get(his.getCreatedBy());
                     }

@@ -1,14 +1,14 @@
 package com.h2.dao;
 
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.model.StockFormulaDetailKey;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.model.StockFormulaPriceKey;
 import java.util.List;
 
 public interface StockFormulaDetailDao {
 
-    StockFormulaDetail save(StockFormulaDetail s);
+    StockFormulaPrice save(StockFormulaPrice s);
 
-    boolean delete(StockFormulaDetailKey key);
+    boolean delete(StockFormulaPriceKey key);
 
-    List<StockFormulaDetail> getFormulaDetail(String code, String compCode);
+    List<StockFormulaPrice> getFormulaDetail(String code, String compCode);
 }

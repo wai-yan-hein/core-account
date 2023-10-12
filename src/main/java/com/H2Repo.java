@@ -113,6 +113,7 @@ import com.h2.service.TransferHisDetailService;
 import com.h2.service.TransferHisService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.General;
+import com.inventory.model.GradeDetailKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHisDetail;
@@ -133,9 +134,9 @@ import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.model.StockFormulaDetailKey;
 import com.inventory.model.StockFormulaKey;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.model.StockFormulaPriceKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -352,7 +353,7 @@ public class H2Repo {
         return Mono.justOrEmpty(stockFormulaService.getFormula(compCode));
     }
     
-    public Mono<List<StockFormulaDetail>> getStockFormulaDetail(String formulaCode) {
+    public Mono<List<StockFormulaPrice>> getStockFormulaDetail(String formulaCode) {
         return Mono.justOrEmpty(stockFormulaService.getFormulaDetail(formulaCode, Global.compCode));
     }
     
@@ -532,7 +533,7 @@ public class H2Repo {
         return stockFormulaService.save(obj);
     }
     
-    public StockFormulaDetail save(StockFormulaDetail obj) {
+    public StockFormulaPrice save(StockFormulaPrice obj) {
         return stockFormulaService.save(obj);
     }
     
@@ -951,7 +952,11 @@ public class H2Repo {
         return menuService.delete(obj);
     }
     
-    public Boolean delete(StockFormulaDetailKey key) {
+    public boolean delete(GradeDetailKey key) {
+        return stockFormulaService.delete(key);
+    }
+    
+    public Boolean delete(StockFormulaPriceKey key) {
         return stockFormulaService.delete(key);
     }
     

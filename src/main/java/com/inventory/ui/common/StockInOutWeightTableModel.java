@@ -139,7 +139,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                     return amt == 0 ? null : amt;
                 }
                 case 11 -> {
-                    return Util1.toNull(io.getTotalWegiht());
+                    return Util1.toNull(io.getTotalWeight());
                 }
 
             }
@@ -293,7 +293,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
 
     private void calWeight(StockInOutDetail io) {
         double qty = io.getInQty() > 0 ? io.getInQty() : io.getOutQty();
-        io.setTotalWegiht(qty * io.getWeight());
+        io.setTotalWeight(qty * io.getWeight());
     }
 
     private void setSelection(int row, int column) {

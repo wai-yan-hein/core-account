@@ -193,13 +193,13 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                             opening.setTraderName(trader.getTraderName());
                             String coaCode = trader.getAccount();
                             if (coaCode != null) {
-                                accountRepo.findCOA(coaCode).subscribe((coa) -> {
+                                accountRepo.findCOA(coaCode).doOnSuccess((coa) -> {
                                     if (coa != null) {
                                         opening.setSourceAccId(coaCode);
                                         opening.setSrcAccName(coa.getCoaNameEng());
                                         opening.setCoaUsrCode(coa.getCoaCodeUsr());
                                     }
-                                });
+                                }).block();
                             }
                             parent.setRowSelectionInterval(rowIndex, rowIndex);
                             parent.setColumnSelectionInterval(4, 4);
@@ -269,7 +269,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     private boolean isValidEntry(OpeningBalance v, int col, int row) {
         boolean valid = true;
         if (Util1.isNull(v.getSourceAccId())) {
-            if (col > 1) {
+            if (col > 6) {
                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Account.");
                 parent.setRowSelectionInterval(row, row);
                 parent.setColumnSelectionInterval(0, 0);

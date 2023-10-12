@@ -1,11 +1,13 @@
 package com.h2.service;
 
 import com.common.Util1;
+import com.h2.dao.GradeDetailDao;
 import com.h2.dao.StockFormulaDao;
 import com.h2.dao.StockFormulaDetailDao;
+import com.inventory.model.GradeDetailKey;
 import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.model.StockFormulaDetailKey;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.model.StockFormulaPriceKey;
 import com.inventory.model.StockFormulaKey;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class StockFormulaServiceImpl implements StockFormulaService {
 
     private final StockFormulaDao formulaDao;
     private final StockFormulaDetailDao formulaDetailDao;
+    private final GradeDetailDao gradeDetailDao;
     @Autowired
     private SeqService seqService;
 
@@ -31,31 +34,6 @@ public class StockFormulaServiceImpl implements StockFormulaService {
             s.setCreatedDate(Util1.getTodayLocalDateTime());
         } else {
             s.setUpdatedDate(Util1.getTodayLocalDateTime());
-        }
-        List<StockFormulaDetail> listSD = s.getListDtl();
-        String vouNo = s.getKey().getFormulaCode();
-        if (listSD != null) {
-            for (int i = 0; i < listSD.size(); i++) {
-                StockFormulaDetail cSd = listSD.get(i);
-                if (Util1.isNullOrEmpty(cSd.getKey())) {
-                    StockFormulaDetailKey key = new StockFormulaDetailKey();
-                    key.setCompCode(s.getKey().getCompCode());
-                    key.setFormulaCode(vouNo);
-                    key.setUniqueId(0);
-                    cSd.setKey(key);
-                }
-                if (cSd.getKey().getFormulaCode() != null) {
-                    if (cSd.getKey().getUniqueId() == 0) {
-                        if (i == 0) {
-                            cSd.getKey().setUniqueId(1);
-                        } else {
-                            StockFormulaDetail pSd = listSD.get(i - 1);
-                            cSd.getKey().setUniqueId(pSd.getKey().getUniqueId() + 1);
-                        }
-                    }
-                    formulaDetailDao.save(cSd);
-                }
-            }
         }
         formulaDao.save(s);
         return s;
@@ -77,17 +55,22 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     }
 
     @Override
-    public StockFormulaDetail save(StockFormulaDetail s) {
+    public StockFormulaPrice save(StockFormulaPrice s) {
         return formulaDetailDao.save(s);
     }
 
     @Override
-    public boolean delete(StockFormulaDetailKey key) {
+    public boolean delete(StockFormulaPriceKey key) {
         return formulaDetailDao.delete(key);
     }
 
     @Override
-    public List<StockFormulaDetail> getFormulaDetail(String code, String compCode) {
+    public boolean delete(GradeDetailKey key) {
+        return gradeDetailDao.delete(key);
+    }
+
+    @Override
+    public List<StockFormulaPrice> getFormulaDetail(String code, String compCode) {
         return formulaDetailDao.getFormulaDetail(code, compCode);
     }
 
@@ -95,7 +78,7 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     public String getMaxDate() {
         return formulaDao.getMaxDate();
     }
-    
+
     @Override
     public StockFormula find(StockFormulaKey key) {
         return formulaDao.find(key);
