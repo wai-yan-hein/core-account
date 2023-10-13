@@ -85,6 +85,10 @@ public class LandingHis {
     private double grandTotal;
     @Column(name = "purchase")
     private boolean purchase;
+    @Column(name = "cur_code")
+    private String curCode;
+    @Column(name = "over_payment")
+    private double overPayment;
     @Transient
     private List<LandingHisPrice> listPrice;
     @Transient

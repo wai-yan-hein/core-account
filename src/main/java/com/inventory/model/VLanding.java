@@ -33,5 +33,7 @@ public class VLanding {
     private String locName;
     private String stockName;
     private String gradeStockName;
+    private String regionName;
+    private String traderPhoneNo;
     List<VLanding> listDetail;
 }

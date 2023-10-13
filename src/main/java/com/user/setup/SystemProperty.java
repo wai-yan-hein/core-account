@@ -183,6 +183,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferEdit.setName(ProUtil.TRANSFER_EDIT);
         chkTransferDelete.setName(ProUtil.TRANSFER_DELETE);
         chkDepLock.setName(ProUtil.DEPARTMENT_LOCK);
+        chkUsage.setName(ProUtil.MILLING_STOCK_USAGE);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -281,6 +282,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferEdit.addActionListener(action);
         chkTransferDelete.addActionListener(action);
         chkDepLock.addActionListener(action);
+        chkUsage.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -349,6 +351,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferEdit.setSelected(Util1.getBoolean(hmProperty.get(chkTransferEdit.getName())));
         chkTransferDelete.setSelected(Util1.getBoolean(hmProperty.get(chkTransferDelete.getName())));
         chkDepLock.setSelected(Util1.getBoolean(hmProperty.get(chkDepLock.getName())));
+        chkUsage.setSelected(Util1.getBoolean(hmProperty.get(chkUsage.getName())));
     }
 
     private void initTextBox() {
@@ -714,6 +717,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jPanel10 = new javax.swing.JPanel();
         chkTransferEdit = new javax.swing.JCheckBox();
         chkTransferDelete = new javax.swing.JCheckBox();
+        jPanel9 = new javax.swing.JPanel();
+        chkUsage = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1555,6 +1560,26 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(chkTransferDelete, javax.swing.GroupLayout.Alignment.TRAILING)))
         );
 
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Milling"));
+
+        chkUsage.setText("Stock Usage");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chkUsage)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(chkUsage))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1564,7 +1589,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panelMac, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1600,7 +1627,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(79, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1676,6 +1706,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkShowStockInfo;
     private javax.swing.JCheckBox chkTransferDelete;
     private javax.swing.JCheckBox chkTransferEdit;
+    private javax.swing.JCheckBox chkUsage;
     private javax.swing.JCheckBox chkWeight;
     private javax.swing.JCheckBox chkWeightPoint;
     private javax.swing.JLabel jLabel1;
@@ -1720,6 +1751,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;

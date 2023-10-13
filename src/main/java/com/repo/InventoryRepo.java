@@ -1672,7 +1672,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToMono(General.class)
@@ -1689,7 +1688,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class)
                 .onErrorResume((e) -> {
@@ -1705,7 +1703,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToMono(General.class)
@@ -1722,7 +1719,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToMono(General.class)
@@ -2099,13 +2095,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId, String vouDate) {
+    public Mono<List<Pattern>> getPattern(String stockCode, String vouDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getPattern")
                 .queryParam("stockCode", stockCode)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
-                .queryParam("vouDate", vouDate == null ? "" : vouDate)
+                .queryParam("vouDate", vouDate == null ? "-" : vouDate)
                 .build())
                 .retrieve()
                 .bodyToFlux(Pattern.class)

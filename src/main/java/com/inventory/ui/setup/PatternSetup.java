@@ -249,7 +249,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             String stockCode = s.getKey().getStockCode();
             lblStockName.setText(s.getStockName());
             chkEx.setSelected(s.isExplode());
-            inventoryRepo.getPattern(stockCode, Global.deptId, null).subscribe((t) -> {
+            inventoryRepo.getPattern(stockCode, null).subscribe((t) -> {
                 lblRec.setText("Records : " + t.size());
                 patternTableModel.setListPattern(t);
                 patternTableModel.setStockCode(stockCode);

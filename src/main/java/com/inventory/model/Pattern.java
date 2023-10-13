@@ -7,7 +7,6 @@ package com.inventory.model;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-
 /**
  *
  * @author Lenovo
@@ -17,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class Pattern {
 
     private PatternKey key;
+    private Integer deptId;
     private String userCode;
     private String stockName;
     private String groupName;
@@ -28,7 +28,6 @@ public class Pattern {
     private String unitCode;
     private String locCode;
     private String locName;
-    private Integer deptId;
     private String priceTypeCode;
     private String priceTypeName;
     private double amount;
