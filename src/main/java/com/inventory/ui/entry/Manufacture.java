@@ -478,11 +478,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 int status = JOptionPane.showConfirmDialog(this, "Are you sure to generate pattern.?");
                 if (status == JOptionPane.OK_OPTION) {
                     processHisDetailTableModel.clear();
-                    generatePattern(stockCode, Global.deptId);
+                    generatePattern(stockCode);
 
                 }
             } else {
-                generatePattern(stockCode, Global.deptId);
+                generatePattern(stockCode);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select stock.");
@@ -490,9 +490,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         }
     }
 
-    private void generatePattern(String code, Integer deptId) {
+    private void generatePattern(String code) {
         LocalDateTime vouDate = Util1.convertToLocalDateTime(txtStartDate.getDate());
-        inventoryRepo.getPattern(code, deptId, Util1.toDateStr(vouDate, "yyyy-MM-dd")).subscribe((t) -> {
+        inventoryRepo.getPattern(code, Util1.toDateStr(vouDate, "yyyy-MM-dd")).subscribe((t) -> {
             if (!t.isEmpty()) {
                 String input = JOptionPane.showInputDialog("Enter Qty.");
                 double qty = Util1.getDouble(input);
@@ -503,9 +503,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                         ProcessHisDetail his = new ProcessHisDetail();
                         ProcessHisDetailKey key = new ProcessHisDetailKey();
                         key.setCompCode(p.getKey().getCompCode());
-                        key.setDeptId(p.getKey().getDeptId());
                         key.setLocCode(p.getLocCode());
                         key.setStockCode(stockCode);
+                        key.setDeptId(p.getDeptId());
                         his.setKey(key);
                         his.setStockName(p.getStockName());
                         his.setStockUsrCode(p.getUserCode());

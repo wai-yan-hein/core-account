@@ -1,0 +1,194 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ */
+package com.inventory.ui.entry.dialog;
+
+import com.common.Global;
+import com.common.ProUtil;
+import com.common.TableCellRender;
+import com.inventory.ui.common.StockBalanceTableModel;
+import com.inventory.ui.common.StockBalanceWeightTableModel;
+import com.repo.InventoryRepo;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ *
+ * @author Lenovo
+ */
+@Component
+@Slf4j
+public class StockBalanceDialog extends javax.swing.JDialog {
+
+    private StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
+    private StockBalanceWeightTableModel stockBalanceWeightTableModel = new StockBalanceWeightTableModel();
+    @Autowired
+    private InventoryRepo inventoryRepo;
+    private boolean firstTime = true;
+
+    /**
+     * Creates new form StockBalanceDialog
+     *
+     * @param frame
+     */
+    public StockBalanceDialog() {
+        super(Global.parentForm, true);
+        initComponents();
+        setFocusableWindowState(false); // The dialog won't receive focus
+        setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    }
+
+    private void setLocationDialog() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        // Set the dialog size
+        int dialogWidth = getWidth() * 2;
+        int dialogHeight = getHeight();
+
+        // Calculate the location for the top right corner
+        int dialogX = screenSize.width - dialogWidth;
+        int dialogY = screenSize.height - dialogHeight;
+
+        setLocation(dialogX, dialogY);
+    }
+
+    private void initMain(boolean weight) {
+        if (weight) {
+            tblStock.setModel(stockBalanceWeightTableModel);
+            stockBalanceWeightTableModel.setProgress(progress);
+            stockBalanceWeightTableModel.setInventoryRepo(inventoryRepo);
+            stockBalanceWeightTableModel.setChkSummary(chkSummary);
+            tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
+            tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//qty
+            tblStock.getColumnModel().getColumn(2).setPreferredWidth(200);//qty
+        } else {
+            tblStock.setModel(stockBalanceTableModel);
+            stockBalanceTableModel.setProgress(progress);
+            stockBalanceTableModel.setInventoryRepo(inventoryRepo);
+            stockBalanceTableModel.setChkSummary(chkSummary);
+            tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
+            tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//Cost Price
+
+        }
+        tblStock.getTableHeader().setFont(Global.tblHeaderFont);
+        tblStock.setDefaultRenderer(Object.class, new TableCellRender());
+        tblStock.setDefaultRenderer(Double.class, new TableCellRender());
+        tblStock.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+
+    public void calStock(String stockCode, JFrame frame) {
+        if (ProUtil.isCalStock()) {
+            if (firstTime) {
+                setLocationDialog();
+                firstTime = false;
+            }
+            boolean weight = ProUtil.isUseWeight();
+            initMain(weight);
+            progress.setIndeterminate(true);
+            if (weight) {
+                inventoryRepo.getStockBalanceByWeight(stockCode, chkSummary.isSelected()).doOnSuccess((t) -> {
+                    if (t != null) {
+                        stockBalanceWeightTableModel.setListStockBalance(t);
+                    }
+                }).doOnError((e) -> {
+                    log.error("calStock : " + e.getMessage());
+                    progress.setIndeterminate(false);
+                }).doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    setVisible(true);
+                }).subscribe();
+            } else {
+                inventoryRepo.getStockBalance(stockCode, chkSummary.isSelected()).doOnSuccess((t) -> {
+                    if (t != null) {
+                        stockBalanceTableModel.setListStockBalance(t);
+                    }
+                }).doOnError((e) -> {
+                    log.error("calStock : " + e.getMessage());
+                    progress.setIndeterminate(false);
+                }).doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    setVisible(true);
+                }).subscribe();
+            }
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        progress = new javax.swing.JProgressBar();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblStock = new javax.swing.JTable();
+        chkSummary = new javax.swing.JCheckBox();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Stock Balance Dialog");
+        setFocusable(false);
+        setFont(Global.textFont);
+        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
+
+        tblStock.setFont(Global.textFont);
+        tblStock.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblStock.setRowHeight(Global.tblRowHeight);
+        jScrollPane2.setViewportView(tblStock);
+
+        chkSummary.setText("Summary");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                    .addComponent(chkSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkSummary)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    /**
+     * @param args the command line arguments
+     */
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkSummary;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JProgressBar progress;
+    private javax.swing.JTable tblStock;
+    // End of variables declaration//GEN-END:variables
+}

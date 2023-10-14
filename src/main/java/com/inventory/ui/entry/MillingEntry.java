@@ -37,6 +37,7 @@ import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.ui.entry.dialog.MillingUsageDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -105,6 +106,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private SelectionObserver observer;
     private MillingHis milling = new MillingHis();
     private JProgressBar progress;
+    private MillingUsageDialog usageDialog;
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
@@ -446,6 +448,13 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 DateLockUtil.showMessage(this);
                 txtSaleDate.requestFocus();
                 return;
+            }
+            if (ProUtil.isMillingStockUsage()) {
+                usageDialog();
+                if (!usageDialog.isConfirm()) {
+                    return;
+                }
+                milling.setListUsage(usageDialog.getListUsage());
             }
             milling.setListRaw(milingRawTableModel.getListDetail());
             milling.setListRawDel(milingRawTableModel.getDelList());
@@ -880,6 +889,17 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         traderAutoCompleter.setTrader(t, row);
     }
 
+    private void usageDialog() {
+        if (usageDialog == null) {
+            usageDialog = new MillingUsageDialog(Global.parentForm);
+            usageDialog.setInventoryRepo(inventoryRepo);
+            usageDialog.setMilingOutTableModel(milingOutTableModel);
+            usageDialog.initMain();
+            usageDialog.setLocationRelativeTo(null);
+        }
+        usageDialog.search(txtVouNo.getText());
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -947,6 +967,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtEffQty = new javax.swing.JFormattedTextField();
         jLabel23 = new javax.swing.JLabel();
         txtQtyLoss = new javax.swing.JFormattedTextField();
+        jButton1 = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblExpense = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -1337,37 +1358,48 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         txtQtyLoss.setEditable(false);
 
+        jButton1.setFont(Global.lableFont);
+        jButton1.setText("Usage");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(txtOutputWeight, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtOutputAmt, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtOutputQty)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(txtWtLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(txtEffWt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtEffQty)
-                            .addComponent(txtQtyLoss))))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtOutputWeight, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtOutputAmt, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtOutputQty)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(txtWtLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(txtEffWt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtEffQty)
+                                    .addComponent(txtQtyLoss)))))
+                    .addComponent(jButton1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -1397,7 +1429,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     .addComponent(jLabel20)
                     .addComponent(jLabel22)
                     .addComponent(txtEffQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(103, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 74, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
 
         tblExpense.setFont(Global.textFont);
@@ -1571,6 +1605,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         // TODO add your handling code here:
     }//GEN-LAST:event_txtLocationActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        usageDialog();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -1675,6 +1714,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addExpense;
     private javax.swing.JComboBox<VouStatus> cboProcessType;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

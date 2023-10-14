@@ -51,7 +51,6 @@ public class PatternTableModel extends AbstractTableModel {
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
 
     public JLabel getLblRecord() {
         return lblRecord;
@@ -259,6 +258,7 @@ public class PatternTableModel extends AbstractTableModel {
 
     private void save(Pattern p, int row) {
         if (isValidEntry(p)) {
+            p.setDeptId(Global.deptId);
             inventoryRepo.savePattern(p).subscribe((t) -> {
                 addNewRow();
                 table.setRowSelectionInterval(row + 1, row + 1);
@@ -327,7 +327,6 @@ public class PatternTableModel extends AbstractTableModel {
             Pattern p = new Pattern();
             PatternKey key = new PatternKey();
             key.setCompCode(Global.compCode);
-            key.setDeptId(Global.deptId);
             p.setKey(key);
             Pattern obj = aboveObject();
             if (obj != null) {

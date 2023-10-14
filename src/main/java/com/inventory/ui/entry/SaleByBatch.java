@@ -14,7 +14,6 @@ import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.BatchCellEditor;
 import com.inventory.editor.LocationAutoCompleter;
@@ -31,10 +30,10 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByBatchTableModel;
-import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.ui.entry.dialog.StockBalanceDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -67,7 +66,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -80,11 +78,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleByBatchTableModel saleTableModel = new SaleByBatchTableModel();
-    private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     private SaleHistoryDialog dialog;
-
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -101,6 +95,11 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
     private double balance = 0;
+    private StockBalanceDialog stockBalanceDialog;
+
+    public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
+        this.stockBalanceDialog = stockBalanceDialog;
+    }
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -178,7 +177,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     public void initMain() {
         initCombo();
-        initStockBalanceTable();
         initSaleTable();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
@@ -194,7 +192,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         saleTableModel.setObserver(this);
         saleTableModel.setVouDate(txtSaleDate);
         saleTableModel.setInventoryRepo(inventoryRepo);
-        saleTableModel.setSbTableModel(stockBalanceTableModel);
+        saleTableModel.setDialog(stockBalanceDialog);
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//batch
@@ -292,22 +290,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         txtTax.setFormatterFactory(Util1.getDecimalFormat());
     }
 
-    private void initStockBalanceTable() {
-        if (ProUtil.isCalStock()) {
-            tblStockBalance.setModel(stockBalanceTableModel);
-            stockBalanceTableModel.setProgress(sbProgress);
-            stockBalanceTableModel.setInventoryRepo(inventoryRepo);
-            stockBalanceTableModel.setChkSummary(chkSummary);
-            tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
-            tblStockBalance.getColumnModel().getColumn(1).setPreferredWidth(140);//Cost Price
-            tblStockBalance.getTableHeader().setFont(Global.tblHeaderFont);
-            tblStockBalance.setDefaultRenderer(Object.class, new TableCellRender());
-            tblStockBalance.setDefaultRenderer(Float.class, new TableCellRender());
-            tblStockBalance.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        }
-        sbPanel.setVisible(ProUtil.isCalStock());
-    }
-
     private void assignDefaultValue() {
         if (currAutoCompleter != null) {
             userRepo.getDefaultCurrency().subscribe((t) -> {
@@ -342,7 +324,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         saleTableModel.removeListDetail();
         saleTableModel.clearDelList();
         saleTableModel.setChange(false);
-        stockBalanceTableModel.clearList();
         initTextBoxValue();
         assignDefaultValue();
         saleHis = new SaleHis();
@@ -859,11 +840,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         txtGrandTotal = new javax.swing.JFormattedTextField();
         jSeparator2 = new javax.swing.JSeparator();
         chkPaid = new javax.swing.JCheckBox();
-        sbPanel = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        tblStockBalance = new javax.swing.JTable();
-        sbProgress = new javax.swing.JProgressBar();
-        chkSummary = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1409,47 +1385,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
         jScrollPane3.setViewportView(jPanel3);
 
-        sbPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Stock Balance", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
-
-        tblStockBalance.setFont(Global.textFont);
-        tblStockBalance.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        tblStockBalance.setRowHeight(Global.tblRowHeight);
-        jScrollPane2.setViewportView(tblStockBalance);
-
-        chkSummary.setText("Summary");
-
-        javax.swing.GroupLayout sbPanelLayout = new javax.swing.GroupLayout(sbPanel);
-        sbPanel.setLayout(sbPanelLayout);
-        sbPanelLayout.setHorizontalGroup(
-            sbPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(sbPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(sbPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(sbProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                    .addGroup(sbPanelLayout.createSequentialGroup()
-                        .addComponent(chkSummary)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        sbPanelLayout.setVerticalGroup(
-            sbPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sbPanelLayout.createSequentialGroup()
-                .addComponent(sbProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkSummary)
-                .addContainerGap())
-        );
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1459,9 +1394,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(sbPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(339, 339, 339)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -1474,7 +1407,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1756,7 +1688,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
-    private javax.swing.JCheckBox chkSummary;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
@@ -1779,17 +1710,13 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
-    private javax.swing.JPanel sbPanel;
-    private javax.swing.JProgressBar sbProgress;
     private javax.swing.JTable tblSale;
-    private javax.swing.JTable tblStockBalance;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private com.toedter.calendar.JDateChooser txtDueDate;

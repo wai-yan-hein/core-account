@@ -64,6 +64,7 @@ public class ProUtil {
     public static final String TRANSFER_EDIT = "transfer.voucher.edit";
     public static final String TRANSFER_DELETE = "transfer.voucher.delete";
     public static final String DEPARTMENT_LOCK = "department.lock";
+    public static final String MILLING_STOCK_USAGE = "milling.stock.usage";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
@@ -139,6 +140,10 @@ public class ProUtil {
 
     public static boolean isDisableDep() {
         return Util1.getBoolean(Global.hmRoleProperty.get("disable.department"));
+    }
+
+    public static boolean isMillingStockUsage() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(MILLING_STOCK_USAGE));
     }
 
     public static boolean isPrint() {

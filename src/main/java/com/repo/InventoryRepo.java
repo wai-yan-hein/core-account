@@ -1672,7 +1672,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToMono(General.class)
@@ -1689,7 +1688,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class)
                 .onErrorResume((e) -> {
@@ -1705,7 +1703,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToMono(General.class)
@@ -1722,7 +1719,6 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToMono(General.class)
@@ -2099,13 +2095,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId, String vouDate) {
+    public Mono<List<Pattern>> getPattern(String stockCode, String vouDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getPattern")
                 .queryParam("stockCode", stockCode)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
-                .queryParam("vouDate", vouDate == null ? "" : vouDate)
+                .queryParam("vouDate", vouDate == null ? "-" : vouDate)
                 .build())
                 .retrieve()
                 .bodyToFlux(Pattern.class)
@@ -3001,6 +2996,26 @@ public class InventoryRepo {
     public Mono<List<VStockBalance>> getStockBalance(String stockCode, boolean summary) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getStockBalance")
+                .queryParam("stockCode", stockCode)
+                .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
+                .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
+                .queryParam("calRI", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")))
+                .queryParam("calRO", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnout.stock")))
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .queryParam("macId", Global.macId)
+                .queryParam("summary", summary)
+                .build())
+                .retrieve().bodyToFlux(VStockBalance.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.error(e);
+                });
+    }
+    public Mono<List<VStockBalance>> getStockBalanceByWeight(String stockCode, boolean summary) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getStockBalanceByWeight")
                 .queryParam("stockCode", stockCode)
                 .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
                 .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
