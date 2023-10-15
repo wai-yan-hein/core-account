@@ -6,6 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.LandingHisGrade;
 import com.inventory.model.LandingHisGradeKey;
@@ -31,6 +32,11 @@ public class LandingGradeTableModel extends AbstractTableModel {
     private final String[] columnNames = {"Stock Name", "Match", "%", "Choose"};
     private JTable table;
     private InventoryRepo inventoryRepo;
+    private SelectionObserver observer;
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -107,7 +113,28 @@ public class LandingGradeTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
+        LandingHisGrade b = listDetail.get(row);
+        switch (column) {
+            case 3 -> {
+                if (value instanceof Boolean t) {
+                    if (t) {
+                        setChoose(false);
+                        b.setChoose(t);
+                        observer.selected("CAL_PURCHASE", "CAL_PURCHASE");
+                    }
+                }
+            }
+        }
 
+    }
+
+    private void setChoose(boolean status) {
+        if (listDetail != null) {
+            listDetail.forEach((t) -> {
+                t.setChoose(status);
+            });
+            setListGrade(listDetail);
+        }
     }
 
     public void setGrade(LandingHisGrade t, int row) {
@@ -196,18 +223,10 @@ public class LandingGradeTableModel extends AbstractTableModel {
                 });
                 list.sort(Comparator.comparingDouble(LandingHisGrade::getMatchCount).reversed());
                 if (!list.isEmpty()) {
-                    double a = list.get(0).getMatchCount();
-                    double b = 0;
-                    if (list.size() > 1) {
-                        b = list.stream().skip(0).mapToDouble((t) -> t.getMatchCount()).sum();
-                    }
-                    if (a > b) {
-                        list.get(0).setChoose(true);
-                    } else {
-                        list.get(1).setChoose(true);
-                    }
+                    list.get(0).setChoose(true);
                 }
                 setListGrade(list);
+                observer.selected("CAL_PURCHASE", "CAL_PURCHASE");
             }).block();
         }
 

@@ -103,6 +103,8 @@ public class Stock {
     private String formulaCode;
     @Column(name = "pur_amt")
     private double purAmt;
+    @Column(name = "pur_qty")
+    private Double purQty;
     @Column(name = "sale_amt")
     private double saleAmt;
     private transient String relName;

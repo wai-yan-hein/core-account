@@ -28,8 +28,10 @@ public class LandingHisGrade {
     private double matchCount;
     @Column(name = "match_percent")
     private double matchPercent;
-    @Transient
-    private String stockName;
     @Column(name = "choose")
     private boolean choose;
+    @Transient
+    private String stockName;
+    @Transient
+    private String userCode;
 }

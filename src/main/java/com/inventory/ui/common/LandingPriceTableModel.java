@@ -168,7 +168,7 @@ public class LandingPriceTableModel extends AbstractTableModel {
                         }
                     }
                     //price
-                    case 3 -> {
+                    case 4 -> {
                         record.setPrice(Util1.getDouble(value));
                         setSelection(row, 4);
                     }

@@ -335,6 +335,19 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+     public Mono<LandingHisGrade> getLandingChooseGrade(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/landing/getLandingChooseGrade")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(LandingHisGrade.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<Category>> getUpdateCategory(String updatedDate) {
         return inventoryApi.get()

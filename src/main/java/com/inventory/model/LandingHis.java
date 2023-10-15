@@ -51,44 +51,22 @@ public class LandingHis {
     private String locCode;
     @Column(name = "stock_code")
     private String stockCode;
-    @Column(name = "gross_qty")
-    private double grossQty;
-    @Column(name = "qty")
-    private double qty;
-    @Column(name = "unit")
-    private String unit;
-    @Column(name = "weight")
-    private double weight;
-    @Column(name = "weight_unit")
-    private String weightUnit;
-    @Column(name = "total_weight")
-    private double totalWeight;
+    @Column(name = "pur_amount")
+    private double purAmt;
+    @Column(name = "pur_price")
+    private double purPrice;
     @Column(name = "price")
     private double price;
     @Column(name = "amount")
     private double amount;
     @Column(name = "criteria_amt")
     private double criteriaAmt;
-    @Column(name = "pur_amount")
-    private double purAmt;
-    @Column(name = "pur_price")
-    private double purPrice;
     @Column(name = "cargo")
     private String cargo;
-    @Column(name = "vou_paid")
-    private double vouPaid;
-    @Column(name = "vou_balance")
-    private double vouBalance;
-    @Column(name = "vou_discount")
-    private double vouDiscount;
-    @Column(name = "grand_total")
-    private double grandTotal;
-    @Column(name = "purchase")
-    private boolean purchase;
     @Column(name = "cur_code")
     private String curCode;
-    @Column(name = "over_payment")
-    private double overPayment;
+    @Column(name = "gross_qty")
+    private double grossQty;
     @Transient
     private List<LandingHisPrice> listPrice;
     @Transient
@@ -96,17 +74,19 @@ public class LandingHis {
     @Transient
     private List<LandingHisQty> listQty;
     @Transient
-    private List<LandingHisQtyKey> listDelQty;
-    @Transient
     private List<LandingHisGrade> listGrade;
     @Transient
+    private List<LandingHisQtyKey> listDelQty;
+    @Transient
     private String traderName;
+    @Transient
+    private String locName;
+    @Transient
+    private String stockName;
     @Transient
     private String traderUserCode;
     @Transient
     private ZonedDateTime vouDateTime;
-    @Transient
-    private String stockName;
 
     public LandingHis() {
     }
