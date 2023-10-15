@@ -23,6 +23,7 @@ import com.inventory.model.GRNKey;
 import com.inventory.model.General;
 import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
+import com.inventory.model.Job;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.LandingHisPrice;
 import com.inventory.model.LandingHis;
@@ -1183,7 +1184,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<LabourGroup>> getLabourGroup() {
         if (localDatabase) {
 //            return h2Repo.getOrderStatus();
@@ -1194,6 +1195,23 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(LabourGroup.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<Job>> getJob() {
+        if (localDatabase) {
+//            return h2Repo.getOrderStatus();
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getJob")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Job.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -1425,12 +1443,30 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+
     public Mono<LabourGroup> saveLabourGroup(LabourGroup vou) {
         return inventoryApi.post()
                 .uri("/setup/saveLabourGroup")
                 .body(Mono.just(vou), LabourGroup.class)
                 .retrieve()
                 .bodyToMono(LabourGroup.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+//                        h2Repo.save(t);
+                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Job> saveJob(Job job) {
+        return inventoryApi.post()
+                .uri("/setup/saveJob")
+                .body(Mono.just(job), Job.class)
+                .retrieve()
+                .bodyToMono(Job.class)
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
 //                        h2Repo.save(t);
@@ -3047,6 +3083,7 @@ public class InventoryRepo {
                     return Mono.error(e);
                 });
     }
+
     public Mono<List<VStockBalance>> getStockBalanceByWeight(String stockCode, boolean summary) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getStockBalanceByWeight")
@@ -3515,7 +3552,8 @@ public class InventoryRepo {
                 .bodyToFlux(ReorderLevel.class)
                 .collectList();
     }
-   public Mono<VLanding> getLandingReport(String vouNo) {
+
+    public Mono<VLanding> getLandingReport(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getLandingReport")
                 .queryParam("vouNo", vouNo)

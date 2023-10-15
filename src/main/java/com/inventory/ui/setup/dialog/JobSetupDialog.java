@@ -8,12 +8,16 @@ package com.inventory.ui.setup.dialog;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.inventory.model.LabourGroup;
-import com.inventory.model.LabourGroupKey;
+import com.common.Util1;
+import com.inventory.model.Job;
+import com.inventory.model.JobKey;
 import com.inventory.model.MessageType;
-import com.inventory.ui.setup.dialog.common.LabourGroupTableModel;
+import com.inventory.ui.setup.dialog.common.JobTableModel;
 import com.repo.InventoryRepo;
+import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -34,23 +38,23 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyListener {
+public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private int selectRow = - 1;
-    private LabourGroup ord = new LabourGroup();
-    private final LabourGroupTableModel labourGroupTableModel = new LabourGroupTableModel();
+    private Job ord = new Job();
+    private final JobTableModel jobTableModel = new JobTableModel();
     private InventoryRepo inventoryRepo;
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<LabourGroup> listVou = new ArrayList<>();
+    private List<Job> listVou = new ArrayList<>();
 
-    public List<LabourGroup> getListVou() {
+    public List<Job> getListVou() {
         return listVou;
     }
 
-    public void setListVou(List<LabourGroup> listVou) {
-        labourGroupTableModel.setListVou(listVou);
+    public void setListVou(List<Job> listVou) {
+        jobTableModel.setListVou(listVou);
         this.listVou = listVou;
     }
 
@@ -61,19 +65,43 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     /**
      * Creates new form ItemTypeSetupDialog
      */
-    public LabourGroupSetupDialog() {
+    public JobSetupDialog() {
         super(Global.parentForm, false);
         initComponents();
         initKeyListener();
+        initDateListner();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
+        txtStartDate.setDate(Util1.getTodayDate());
+        txtEndDate.setDate(Util1.getTodayDate());
         searchCategory();
         txtUserCode.requestFocus();
     }
+
+    private void initDateListner() {
+        txtStartDate.getDateEditor().getUiComponent().setName("txtSaleDate");
+        txtStartDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtStartDate.getDateEditor().getUiComponent().addFocusListener(fa);
+
+        txtEndDate.getDateEditor().getUiComponent().setName("txtSaleDate");
+        txtEndDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtEndDate.getDateEditor().getUiComponent().addFocusListener(fa);
+    }
+
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     private void initKeyListener() {
         txtUserCode.addKeyListener(this);
@@ -84,11 +112,11 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     }
 
     private void searchCategory() {
-        labourGroupTableModel.setListVou(listVou);
+        jobTableModel.setListVou(listVou);
     }
 
     private void initTable() {
-        tblVou.setModel(labourGroupTableModel);
+        tblVou.setModel(jobTableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
         tblVou.setRowSorter(sorter);
         tblVou.getTableHeader().setFont(Global.lableFont);
@@ -99,19 +127,18 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(labourGroupTableModel.getOrderStatus(selectRow));
+                    setJob(jobTableModel.getJob(selectRow));
                 }
             }
         });
     }
 
-    private void setCategory(LabourGroup cat) {
+    private void setJob(Job cat) {
         ord = cat;
         ord.setKey(cat.getKey());
-        txtName.setText(ord.getLabourName());
-        txtUserCode.setText(ord.getUserCode());
-        spinnerOrderBy.setValue(ord.getMemberCount());
-        chkActive.setSelected(ord.isActive());
+        txtName.setText(ord.getJobName());
+        txtUserCode.setText(ord.getKey().getJobNo());
+        chkFinished.setSelected(ord.isFinished());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -122,14 +149,14 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            inventoryRepo.saveLabourGroup(ord).doOnSuccess((t) -> {
+            inventoryRepo.saveJob(ord).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listVou.set(selectRow, t);
                 } else {
                     listVou.add(t);
                 }
                 clear();
-                sendMessage(t.getLabourName());
+                sendMessage(t.getJobName());
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
@@ -148,16 +175,15 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     private void clear() {
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
-        txtUserCode.setText(null);
+        txtUserCode.setText("");
         txtFilter.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
-        ord = new LabourGroup();
-        labourGroupTableModel.refresh();
+        ord = new Job();
+        jobTableModel.refresh();
         tblVou.requestFocus();
-        txtUserCode.requestFocus();
-        spinnerOrderBy.setValue(0);
+        txtName.requestFocus();
     }
 
     private boolean isValidEntry() {
@@ -168,8 +194,8 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             txtName.requestFocus();
         } else {
             if (lblStatus.getText().equals("NEW")) {
-                LabourGroupKey key = new LabourGroupKey();
-                key.setCode(null);
+                JobKey key = new JobKey();
+                key.setJobNo(null);
                 key.setCompCode(Global.compCode);
                 ord.setKey(key);
                 ord.setCreatedBy(Global.loginUser.getUserCode());
@@ -177,10 +203,10 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             } else {
                 ord.setUpdatedBy(Global.loginUser.getUserCode());
             }
-            ord.setMemberCount((Integer) spinnerOrderBy.getValue());
-            ord.setUserCode(txtUserCode.getText());
-            ord.setLabourName(txtName.getText());
-            ord.setActive(chkActive.isSelected());
+            ord.setStartDate(txtStartDate.getDate());
+            ord.setEndDate(txtEndDate.getDate());
+            ord.setJobName(txtName.getText());
+            ord.setFinished(chkFinished.isSelected());
         }
         return status;
     }
@@ -206,13 +232,15 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
-        jLabel4 = new javax.swing.JLabel();
-        spinnerOrderBy = new javax.swing.JSpinner();
-        chkActive = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        txtStartDate = new com.toedter.calendar.JDateChooser();
+        txtEndDate = new com.toedter.calendar.JDateChooser();
+        jLabel5 = new javax.swing.JLabel();
+        chkFinished = new javax.swing.JCheckBox();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Labour Group Setup");
+        setTitle("Job Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         tblVou.setFont(Global.textFont);
@@ -240,7 +268,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Labour Name");
+        jLabel2.setText("Job Name");
 
         txtName.setFont(Global.textFont);
         txtName.setName("txtName"); // NOI18N
@@ -279,9 +307,10 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         lblStatus.setText("NEW");
 
         jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("User Code");
+        jLabel3.setText("Job No");
 
         txtUserCode.setFont(Global.textFont);
+        txtUserCode.setEnabled(false);
         txtUserCode.setName("txtUserCode"); // NOI18N
         txtUserCode.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -294,40 +323,71 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             }
         });
 
-        jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Member Count");
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Start Date");
 
-        chkActive.setFont(Global.lableFont);
-        chkActive.setSelected(true);
-        chkActive.setText("Active");
+        txtStartDate.setDateFormatString("dd/MM/yyyy");
+        txtStartDate.setFont(Global.textFont);
+        txtStartDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtStartDateFocusGained(evt);
+            }
+        });
+        txtStartDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtStartDatePropertyChange(evt);
+            }
+        });
+
+        txtEndDate.setDateFormatString("dd/MM/yyyy");
+        txtEndDate.setFont(Global.textFont);
+        txtEndDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtEndDateFocusGained(evt);
+            }
+        });
+        txtEndDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtEndDatePropertyChange(evt);
+            }
+        });
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("End Date");
+
+        chkFinished.setFont(Global.lableFont);
+        chkFinished.setSelected(true);
+        chkFinished.setText("Finished");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnClear))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(12, 12, 12)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(chkFinished, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtName)
                             .addComponent(txtUserCode)
-                            .addComponent(spinnerOrderBy))))
+                            .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 
@@ -345,11 +405,19 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(spinnerOrderBy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkActive)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkFinished)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -357,7 +425,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(205, Short.MAX_VALUE))
+                .addGap(205, 205, 205))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -370,7 +438,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
                             .addComponent(txtFilter))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -432,6 +500,22 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUserCodeActionPerformed
 
+    private void txtStartDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStartDateFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtStartDateFocusGained
+
+    private void txtStartDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtStartDatePropertyChange
+
+    }//GEN-LAST:event_txtStartDatePropertyChange
+
+    private void txtEndDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtEndDateFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEndDateFocusGained
+
+    private void txtEndDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtEndDatePropertyChange
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEndDatePropertyChange
+
     /**
      * @param args the command line arguments
      */
@@ -439,19 +523,21 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
-    private javax.swing.JCheckBox chkActive;
+    private javax.swing.JCheckBox chkFinished;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
-    private javax.swing.JSpinner spinnerOrderBy;
     private javax.swing.JTable tblVou;
+    private com.toedter.calendar.JDateChooser txtEndDate;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private com.toedter.calendar.JDateChooser txtStartDate;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 
