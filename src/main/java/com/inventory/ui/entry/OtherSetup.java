@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 
 import com.repo.AccountRepo;
 import com.common.Global;
+import com.inventory.ui.setup.dialog.LabourGroupSetupDialog;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
 import com.inventory.ui.setup.dialog.OrderStatusSetupDialog;
@@ -34,6 +35,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private SaleManSetupDialog smDialog;
     private VouStatusSetupDialog vsDialog;
     private OrderStatusSetupDialog osDialog;
+    private LabourGroupSetupDialog lgDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -128,6 +130,42 @@ public class OtherSetup extends javax.swing.JPanel {
 
     }
 
+    private void labourGroupSetup() {
+        if (lgDialog == null) {
+            lgDialog = new LabourGroupSetupDialog();
+            lgDialog.setIconImage(icon);
+            lgDialog.setInventoryRepo(inventoryRepo);
+            lgDialog.initMain();
+            lgDialog.setSize(Global.width / 2, Global.height / 2);
+            lgDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
+            if (t != null) {
+                lgDialog.setListVou(t);
+            }
+        }).doOnTerminate(() -> {
+            lgDialog.setVisible(true);
+        }).subscribe();
+
+    }
+
+    private void jobSetup() {
+        if (osDialog == null) {
+            osDialog = new OrderStatusSetupDialog();
+            osDialog.setIconImage(icon);
+            osDialog.setInventoryRepo(inventoryRepo);
+            osDialog.initMain();
+            osDialog.setSize(Global.width / 2, Global.height / 2);
+            osDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getOrderStatus().doOnSuccess((t) -> {
+            osDialog.setListVou(t);
+        }).doOnTerminate(() -> {
+            osDialog.setVisible(true);
+        }).subscribe();
+
+    }
+
     private void relationSetup() {
         if (relationSetupDialog == null) {
             relationSetupDialog = new RelationSetupDialog(Global.parentForm);
@@ -160,6 +198,8 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton4 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
+        jButton9 = new javax.swing.JButton();
+        jButton10 = new javax.swing.JButton();
 
         jButton5.setFont(Global.lableFont);
         jButton5.setText("Voucher Status");
@@ -202,7 +242,7 @@ public class OtherSetup extends javax.swing.JPanel {
         });
 
         jButton7.setFont(Global.lableFont);
-        jButton7.setText("Order Status");
+        jButton7.setText("Labour Group");
         jButton7.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton7ActionPerformed(evt);
@@ -214,6 +254,22 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton8ActionPerformed(evt);
+            }
+        });
+
+        jButton9.setFont(Global.lableFont);
+        jButton9.setText("Job Setup");
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+
+        jButton10.setFont(Global.lableFont);
+        jButton10.setText("Order Status");
+        jButton10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton10ActionPerformed(evt);
             }
         });
 
@@ -232,13 +288,16 @@ public class OtherSetup extends javax.swing.JPanel {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btnLocation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(jButton4))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addComponent(jButton10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnLocation, btnRegion, jButton4, jButton5, jButton6});
@@ -256,9 +315,12 @@ public class OtherSetup extends javax.swing.JPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(85, 85, 85))
         );
 
@@ -306,22 +368,32 @@ public class OtherSetup extends javax.swing.JPanel {
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        orderStatusSetup();        // TODO add your handling code here:
+        labourGroupSetup();        // TODO add your handling code here:
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton8ActionPerformed
 
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton9ActionPerformed
+
+    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton10ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLocation;
     private javax.swing.JButton btnRegion;
+    private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
+    private javax.swing.JButton jButton9;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }
