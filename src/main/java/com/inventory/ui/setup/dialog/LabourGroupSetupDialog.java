@@ -112,7 +112,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     private void setCategory(LabourGroup cat) {
         ord = cat;
         ord.setKey(cat.getKey());
-        txtName.setText(ord.getName());
+        txtName.setText(ord.getLabourName());
         txtUserCode.setText(ord.getUserCode());
         spinnerOrderBy.setValue(ord.getMemberCount());
         chkActive.setSelected(ord.isActive());
@@ -133,7 +133,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                     listVou.add(t);
                 }
                 clear();
-                sendMessage(t.getName());
+                sendMessage(t.getLabourName());
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
@@ -176,16 +176,14 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                 key.setCode(null);
                 key.setCompCode(Global.compCode);
                 ord.setKey(key);
-                ord.setDeptId(Global.deptId);
                 ord.setCreatedBy(Global.loginUser.getUserCode());
                 ord.setCreatedDate(LocalDateTime.now());
-                ord.setMacId(Global.macId);
             } else {
                 ord.setUpdatedBy(Global.loginUser.getUserCode());
             }
             ord.setMemberCount((Integer) spinnerOrderBy.getValue());
             ord.setUserCode(txtUserCode.getText());
-            ord.setName(txtName.getText());
+            ord.setLabourName(txtName.getText());
             ord.setActive(chkActive.isSelected());
         }
         return status;
@@ -246,7 +244,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Description");
+        jLabel2.setText("Labour Name");
 
         txtName.setFont(Global.textFont);
         txtName.setName("txtName"); // NOI18N

@@ -59,7 +59,7 @@ public class LabourGroupTableModel extends AbstractTableModel {
             case 0 ->
                 category.getUserCode();
             case 1 ->
-                category.getName();
+                category.getLabourName();
             default ->
                 null;
         };

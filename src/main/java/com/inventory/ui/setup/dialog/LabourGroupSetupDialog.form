@@ -179,7 +179,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Description"/>
+            <Property name="text" type="java.lang.String" value="Labour Name"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtName">

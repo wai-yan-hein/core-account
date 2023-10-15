@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 @Table(name = "labour_group")
 public class LabourGroup {
 
-    @EmbeddedId
+   @EmbeddedId
     private LabourGroupKey key;
-    @Column(name = "name")
-    private String name;
+    @Column(name = "labour_name")
+    private String labourName;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
     @Column(name = "updated_by")
@@ -27,17 +27,13 @@ public class LabourGroup {
     private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "mac_id")
-    private Integer macId;
     @Column(name = "user_code")
     private String userCode;
-    @Column(name = "intg_upd_status")
-    private String intgUpdStatus;
-    @Column(name = "dept_id")
-    private Integer deptId;
     @Column(name = "active")
     private boolean active;
-    @Column(name = "member_count")
+    @Column(name = "deleted")
+    private boolean deleted;
+    @Column(name="member_count")
     private Integer memberCount;
 
     public LabourGroup() {
@@ -46,11 +42,11 @@ public class LabourGroup {
     public LabourGroup(String code, String name) {
         this.key = new LabourGroupKey();
         this.key.setCode(code);
-        this.name = name;
+        this.labourName = name;
     }
 
     @Override
     public String toString() {
-        return name;
+        return labourName;
     }
 }
