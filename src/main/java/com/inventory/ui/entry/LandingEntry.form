@@ -23,12 +23,11 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jPanel2" max="32767" attributes="0"/>
-                  <Component id="jPanel5" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="jScrollPane1" pref="837" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" pref="877" max="32767" attributes="0"/>
                           <Component id="jPanel4" max="32767" attributes="0"/>
-                          <Component id="jScrollPane3" alignment="1" pref="837" max="32767" attributes="0"/>
+                          <Component id="jScrollPane3" alignment="1" pref="877" max="32767" attributes="0"/>
                           <Component id="jPanel6" alignment="1" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -36,6 +35,11 @@
                           <Component id="jPanel3" max="32767" attributes="0"/>
                           <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
                       </Group>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jPanel5" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="lblStatus" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -47,8 +51,11 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jPanel5" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="jPanel5" max="32767" attributes="0"/>
+                  <Component id="lblStatus" max="32767" attributes="0"/>
+              </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
@@ -85,33 +92,43 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="jLabel5" max="32767" attributes="0"/>
-                      <Component id="jLabel7" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel6" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel8" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel20" max="32767" attributes="0"/>
+                      <Component id="jLabel7" alignment="0" pref="81" max="32767" attributes="0"/>
+                      <Component id="jLabel6" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel19" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtGrade" pref="217" max="32767" attributes="0"/>
-                      <Component id="txtOriginalAmt" max="32767" attributes="0"/>
-                      <Component id="txtPurPrice" alignment="1" max="32767" attributes="0"/>
-                      <Component id="txtCriteriaAmt" max="32767" attributes="0"/>
-                      <Component id="txtPurAmt" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtCriteriaAmt" alignment="1" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="txtAmt" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel18" min="-2" pref="42" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Component id="txtPrice" max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="txtPurAmt" pref="84" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Component id="txtPurPrice" pref="84" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtOriginalAmt" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel19" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtAmt" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtPrice" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -122,19 +139,8 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtPurAmt" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtPurPrice" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtGrade" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                          <Component id="jLabel20" min="-2" pref="19" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -142,19 +148,6 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JLabel" name="jLabel5">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Original Amt :"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtOriginalAmt">
-          <Properties>
-            <Property name="editable" type="boolean" value="false"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel6">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -166,6 +159,9 @@
         <Component class="javax.swing.JFormattedTextField" name="txtCriteriaAmt">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Color.red" type="code"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel7">
@@ -186,7 +182,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Purchase Price :"/>
+            <Property name="text" type="java.lang.String" value="Pur Price :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JFormattedTextField" name="txtPurPrice">
@@ -195,22 +191,47 @@
             <Property name="horizontalAlignment" type="int" value="4"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel20">
+        <Component class="javax.swing.JLabel" name="jLabel19">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Grade :"/>
+            <Property name="text" type="java.lang.String" value="Amount :"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtGrade">
+        <Component class="javax.swing.JFormattedTextField" name="txtAmt">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
+            <Property name="horizontalAlignment" type="int" value="4"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
+              <Connection code="Global.amtFont" type="code"/>
             </Property>
-            <Property name="name" type="java.lang.String" value="txtCargo" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="txtAmt" noResource="true"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtAmtActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel18">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Price"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JFormattedTextField" name="txtPrice">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="horizontalAlignment" type="int" value="4"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.amtFont" type="code"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="txtPrice" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtPriceActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -243,22 +264,22 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jLabel1" min="-2" pref="46" max="-2" attributes="0"/>
-                      <Component id="jLabel13" min="-2" pref="46" max="-2" attributes="0"/>
+                      <Component id="jLabel13" min="-2" pref="60" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Group type="102" attributes="0">
                           <Component id="txtLocation" linkSize="1" min="-2" pref="88" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jLabel17" min="-2" pref="46" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabel17" min="-2" pref="60" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="txtCargo" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
                           <Component id="txtVouDate" linkSize="1" min="-2" pref="180" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jLabel14" min="-2" pref="46" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabel14" min="-2" pref="59" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="txtRemark" linkSize="1" min="-2" pref="88" max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -266,9 +287,7 @@
                   <Component id="jLabel23" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="txtCurrency" min="-2" pref="88" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
-                  <Component id="chkPurchase" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace pref="314" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -284,40 +303,34 @@
                               <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Component id="txtVouDate" alignment="1" max="32767" attributes="0"/>
-                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                              <Component id="txtRemark" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="chkPurchase" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
                               <Component id="jLabel14" max="32767" attributes="0"/>
                           </Group>
                       </Group>
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="jLabel23" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
-                              <Component id="txtCurrency" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="1" pref="1" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jLabel23" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                          <Component id="txtCurrency" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtRemark" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <EmptySpace min="0" pref="6" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="7" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtLocation" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel2" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
                               <Component id="txtTrader" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="txtCargo" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                                  <Component id="jLabel17" min="-2" pref="19" max="-2" attributes="0"/>
-                              </Group>
                           </Group>
                       </Group>
                       <Group type="102" attributes="0">
-                          <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                           <Component id="jLabel13" max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="1" attributes="0">
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="jLabel17" min="-2" pref="19" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -426,17 +439,6 @@
             <Property name="name" type="java.lang.String" value="txtCargo" noResource="true"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="chkPurchase">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Purchase"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkPurchaseActionPerformed"/>
-          </Events>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel23">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -469,7 +471,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="lblCriteria" pref="715" max="32767" attributes="0"/>
+                  <Component id="lblCriteria" pref="755" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabel12" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -534,54 +536,13 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="jLabel4" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jLabel9" max="32767" attributes="0"/>
-                      <Component id="jLabel11" max="32767" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Component id="txtGQty" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jLabel22" min="-2" pref="20" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="txtQty" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Component id="txtWeight" max="32767" attributes="0"/>
-                      <Component id="txtStock" max="32767" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jLabel10" min="-2" pref="44" max="-2" attributes="0"/>
-                              <Component id="jLabel15" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="cboQtyUnit" max="32767" attributes="0"/>
-                              <Component id="cboWUnit" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="jLabel19" max="32767" attributes="0"/>
-                              <Component id="jLabel18" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="txtPrice" pref="205" max="32767" attributes="0"/>
-                              <Component id="txtAmt" alignment="0" max="32767" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <Group type="102" attributes="0">
-                          <Component id="jLabel16" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="txtWtTotal" max="32767" attributes="0"/>
-                      </Group>
-                  </Group>
-                  <EmptySpace pref="512" max="32767" attributes="0"/>
-                  <Component id="lblStatus" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel4" min="-2" pref="50" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="txtStock" min="-2" pref="182" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="txtGrossQty" pref="270" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -589,45 +550,16 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jLabel4" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="txtStock" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtWtTotal" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtGrossQty" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtPrice" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtGQty" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel10" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="cboQtyUnit" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtQty" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel22" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtAmt" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel19" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblStatus" alignment="3" max="32767" attributes="0"/>
-                      </Group>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtWeight" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel11" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel15" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="cboWUnit" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                  </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -652,20 +584,7 @@
             <Property name="text" type="java.lang.String" value="Stock"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtGQty">
-          <Properties>
-            <Property name="editable" type="boolean" value="false"/>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.amtFont" type="code"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="txtGQty" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtGQtyActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel9">
+        <Component class="javax.swing.JLabel" name="jLabel5">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
@@ -673,156 +592,12 @@
             <Property name="text" type="java.lang.String" value="Gross Qty"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel10">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Unit"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JComboBox" name="cboQtyUnit">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
-            </Property>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;StockUnit&gt;"/>
-          </AuxValues>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel11">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Weight"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtWeight">
-          <Properties>
-            <Property name="editable" type="boolean" value="false"/>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.amtFont" type="code"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="txtWeight" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtWeightActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel15">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="W-Unit"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JComboBox" name="cboWUnit">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
-            </Property>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;StockUnit&gt;"/>
-          </AuxValues>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel16">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Weight Total "/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtWtTotal">
+        <Component class="javax.swing.JFormattedTextField" name="txtGrossQty">
           <Properties>
             <Property name="horizontalAlignment" type="int" value="4"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.amtFont" type="code"/>
             </Property>
-            <Property name="name" type="java.lang.String" value="txtWtTotal" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtWtTotalActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel18">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Price"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtPrice">
-          <Properties>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.amtFont" type="code"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="txtPrice" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtPriceActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel19">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Amount"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtAmt">
-          <Properties>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.amtFont" type="code"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="txtAmt" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtAmtActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblStatus">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.menuFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="NEW"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtQty">
-          <Properties>
-            <Property name="editable" type="boolean" value="false"/>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.amtFont" type="code"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="txtQty" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtQtyActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel22">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Qty"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -904,7 +679,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="lblCriteria1" pref="715" max="32767" attributes="0"/>
+                  <Component id="lblCriteria1" pref="755" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabel21" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -955,5 +730,13 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JLabel" name="lblStatus">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.menuFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="NEW"/>
+      </Properties>
+    </Component>
   </SubComponents>
 </Form>

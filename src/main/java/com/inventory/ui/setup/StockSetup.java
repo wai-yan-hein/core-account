@@ -270,6 +270,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkCal.setSelected(stock.isCalculate());
         txtSaleAmt.setText(Util1.getString(stock.getSaleAmt()));
         txtPurAmt.setText(Util1.getString(stock.getPurAmt()));
+        txtPurQty.setText(Util1.getString(stock.getPurQty()));
         lblStatus.setText("EDIT");
     }
 
@@ -454,6 +455,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stock.setExplode(chkEx.isSelected());
             stock.setPurAmt(Util1.getDouble(txtPurAmt.getText()));
             stock.setSaleAmt(Util1.getDouble(txtSaleAmt.getText()));
+            stock.setPurQty(Util1.getDouble(txtPurQty.getText()));
             if (cboDept.getSelectedItem() instanceof DepartmentUser dep) {
                 stock.setDeptId(dep.getKey().getDeptId());
             }
@@ -528,6 +530,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSalePriceD.setText(null);
         txtSaleAmt.setText(null);
         txtPurAmt.setText(null);
+        txtPurQty.setText(null);
         lblStatus.setText("NEW");
         txtUserCode.setEnabled(true);
         txtUserCode.requestFocus();
@@ -723,6 +726,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtPurPrice = new javax.swing.JTextField();
         txtPurAmt = new javax.swing.JTextField();
         jLabel24 = new javax.swing.JLabel();
+        jLabel31 = new javax.swing.JLabel();
+        txtPurQty = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtStockCode = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
@@ -1160,7 +1165,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         });
 
         jLabel13.setFont(Global.lableFont);
-        jLabel13.setText("Purchase Price");
+        jLabel13.setText("Pur Price");
 
         txtPurPrice.setFont(Global.textFont);
         txtPurPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -1187,7 +1192,24 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
         jLabel24.setFont(Global.lableFont);
         jLabel24.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel24.setText("Purchase Amt");
+        jLabel24.setText("Pur Amt");
+
+        jLabel31.setFont(Global.lableFont);
+        jLabel31.setText("Pur Qty");
+
+        txtPurQty.setFont(Global.textFont);
+        txtPurQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPurQty.setName("txtSalePrice"); // NOI18N
+        txtPurQty.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtPurQtyFocusGained(evt);
+            }
+        });
+        txtPurQty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPurQtyActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -1205,19 +1227,22 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtWeightUnit, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
+                            .addComponent(txtPurUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel13)
+                                .addComponent(txtPurPrice)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel31)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtPurPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                                .addComponent(txtPurQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtPurAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)))))
+                            .addComponent(txtPurAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1229,7 +1254,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addComponent(txtPurUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnUnit)
                     .addComponent(txtPurPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel13))
+                    .addComponent(jLabel13)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtPurQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel31)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1785,6 +1813,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPurAmtFocusGained
 
+    private void txtPurQtyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPurQtyFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPurQtyFocusGained
+
+    private void txtPurQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPurQtyActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPurQtyActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
@@ -1824,6 +1860,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1849,6 +1886,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JTextField txtGroup1;
     private javax.swing.JTextField txtPurAmt;
     private javax.swing.JTextField txtPurPrice;
+    private javax.swing.JTextField txtPurQty;
     private javax.swing.JTextField txtPurUnit;
     private javax.swing.JTextField txtRelation;
     private javax.swing.JTextField txtSaleAmt;

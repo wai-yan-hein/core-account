@@ -161,11 +161,11 @@ public class LandingQtyTableModel extends AbstractTableModel {
                         }
                     }
                     //qty
-                    case 3 -> {
+                    case 4 -> {
                         record.setQty(Util1.getDouble(value));
                         setSelection(row, 4);
                     }
-                    case 4 -> {
+                    case 5 -> {
                         if (value instanceof StockUnit u) {
                             record.setUnit(u.getKey().getUnitCode());
                         }
@@ -186,7 +186,7 @@ public class LandingQtyTableModel extends AbstractTableModel {
         double percent = l.getPercent();
         double qty = l.getQty();
         if (percentAllow > 0 && percent > 0) {
-            if (percent <= percentAllow) {
+            if (percent >= percentAllow) {
                 double diff = percentAllow - percent;
                 l.setTotalQty(diff * qty);
             }else{

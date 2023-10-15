@@ -31,9 +31,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class PurchaseWeightTableModel extends AbstractTableModel {
+public class PurchaseRiceTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Qty", "Price", "Amount"};
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;

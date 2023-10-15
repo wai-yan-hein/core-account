@@ -43,7 +43,7 @@ import com.inventory.ui.entry.OrderEntry;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
-import com.inventory.ui.entry.PurchaseByWeight;
+import com.inventory.ui.entry.PurchaseDynamic;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.PaymentEntry;
 import com.inventory.ui.entry.PurchaseExport;
@@ -135,8 +135,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private RFID rfid;
     @Autowired
     private Purchase purchase;
-    @Autowired
-    private PurchaseByWeight purchaseByWeight;
     @Autowired
     private PurchaseExport purchaseExport;
     @Autowired
@@ -465,12 +463,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchase.initMain();
                 return purchase;
             }
-            case "Purchase By Weight" -> {
-                purchaseByWeight.setName(menuName);
-                purchaseByWeight.setObserver(this);
-                purchaseByWeight.setProgress(progress);
-                purchaseByWeight.initMain();
-                return purchaseByWeight;
+            case "Purchase By Weight","Purchase Rice" -> {
+                int type = menuName.equals("Purchase Rice")?PurchaseDynamic.RICE:PurchaseDynamic.WEIGHT;
+                PurchaseDynamic p = new PurchaseDynamic(type);
+                p.setName(menuName);
+                p.setUserRepo(userRepo);
+                p.setInventoryRepo(inventoryRepo);
+                p.setAccountRepo(accounRepo);
+                p.setObserver(this);
+                p.setProgress(progress);
+                p.initMain();
+                return p;
             }
             case "Purchase Export" -> {
                 purchaseExport.setName(menuName);

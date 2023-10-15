@@ -17,8 +17,6 @@ import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.ExpenseEditor;
 import com.inventory.editor.LocationAutoCompleter;
@@ -45,6 +43,10 @@ import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.model.LandingHis;
+import com.inventory.model.PurDetailKey;
+import com.inventory.ui.common.PurchaseRiceTableModel;
+import com.inventory.ui.entry.dialog.LandingHistoryDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -58,7 +60,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,28 +80,25 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author wai yan
  */
-@Component
 @Slf4j
-public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
+public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
+    public static final int WEIGHT = 1;
+    public static final int RICE = 2;
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseWeightTableModel purTableModel = new PurchaseWeightTableModel();
+    private final PurchaseRiceTableModel purchaseRiceTableModel = new PurchaseRiceTableModel();
     private PurchaseHistoryDialog dialog;
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    @Autowired
+    private LandingHistoryDialog landingDialog;
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private AccountRepo accountRepo;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -113,6 +111,19 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
+    private int type;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -133,7 +144,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     /**
      * Creates new form Purchase
      */
-    public PurchaseByWeight() {
+    public PurchaseDynamic(int type) {
+        this.type = type;
         initComponents();
         lblStatus.setForeground(Color.GREEN);
         initKeyListener();
@@ -159,7 +171,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         @Override
         public void actionPerformed(ActionEvent e) {
             int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
-            PurHisDetail pd = purTableModel.getObject(row);
+            PurHisDetail pd = getObject(row);
             inventoryRepo.getStockUnit().subscribe((t) -> {
                 if (pd.getStockCode() != null) {
                     PurchaseAvgPriceDialog d = new PurchaseAvgPriceDialog(Global.parentForm);
@@ -178,11 +190,28 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     });
                     d.setVisible(true);
                     if (d.isConfirm()) {
-                        purTableModel.setValueAt(pd, row, 0);
+                        switch (type) {
+                            case WEIGHT ->
+                                purTableModel.setValueAt(pd, row, 0);
+                            case RICE ->
+                                purchaseRiceTableModel.setValueAt(pd, row, 0);
+
+                        }
                     }
                 }
             });
         }
+    }
+
+    private PurHisDetail getObject(int row) {
+        return switch (type) {
+            case WEIGHT ->
+                purTableModel.getObject(row);
+            case RICE ->
+                purchaseRiceTableModel.getObject(row);
+            default ->
+                null;
+        };
     }
 
     private class DeleteAction extends AbstractAction {
@@ -195,10 +224,19 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
     public void initMain() {
         initCombo();
-        initPurTable();
         initPanelExpesne();
+        initModel();
         assignDefaultValue();
         txtCus.requestFocus();
+    }
+
+    private void initModel() {
+        switch (type) {
+            case WEIGHT ->
+                initWeightTable();
+            case RICE ->
+                initRiceTable();
+        }
     }
 
     private void initPanelExpesne() {
@@ -275,7 +313,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         }
     };
 
-    private void initPurTable() {
+    private void initWeightTable() {
         tblPur.setModel(purTableModel);
         purTableModel.setLblRec(lblRec);
         purTableModel.setInventoryRepo(inventoryRepo);
@@ -313,6 +351,50 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//std weight
         tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
+        tblPur.setDefaultRenderer(String.class, new DecimalFormatRender());
+        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
+        tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+
+    private void initRiceTable() {
+        tblPur.setModel(purchaseRiceTableModel);
+        purchaseRiceTableModel.setLblRec(lblRec);
+        purchaseRiceTableModel.setInventoryRepo(inventoryRepo);
+        purchaseRiceTableModel.setVouDate(txtPurDate);
+        purchaseRiceTableModel.setParent(tblPur);
+        purchaseRiceTableModel.setPurchase(this);
+        purchaseRiceTableModel.setObserver(this);
+        purchaseRiceTableModel.addNewRow();
+        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
+        tblPur.setCellSelectionEnabled(true);
+        tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        tblPur.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
+        tblPur.getColumnModel().getColumn(2).setPreferredWidth(50);//Location
+        tblPur.getColumnModel().getColumn(3).setPreferredWidth(30);//weight
+        tblPur.getColumnModel().getColumn(4).setPreferredWidth(30);//unit
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(30);//qty
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(30);//unit
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(50);//total weight
+        tblPur.getColumnModel().getColumn(8).setPreferredWidth(50);//price
+        tblPur.getColumnModel().getColumn(9).setPreferredWidth(70);//amount
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.subscribe((t) -> {
+            tblPur.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
+        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//weight
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblPur.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));//unit
+        });
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());// qty
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblPur.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+        });
+        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(String.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -408,11 +490,24 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         btnBatch.setText("Batch");
     }
 
+    private void clearDetail() {
+        switch (type) {
+            case WEIGHT -> {
+                purTableModel.clear();
+                purTableModel.addNewRow();
+                purTableModel.clearDelList();
+            }
+            case RICE -> {
+                purchaseRiceTableModel.clear();
+                purchaseRiceTableModel.addNewRow();
+                purchaseRiceTableModel.clearDelList();
+            }
+        }
+    }
+
     private void clear() {
         disableForm(true);
-        purTableModel.clear();
-        purTableModel.addNewRow();
-        purTableModel.clearDelList();
+        clearDetail();
         initTextBoxValue();
         assignDefaultValue();
         txtComPercent.setValue(Util1.getFloat(ProUtil.getProperty("purchase.commission")));
@@ -424,8 +519,41 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         txtCus.requestFocus();
     }
 
+    private boolean isValidDetail() {
+        return switch (type) {
+            case WEIGHT ->
+                purTableModel.isValidEntry();
+            case RICE ->
+                purchaseRiceTableModel.isValidEntry();
+            default ->
+                false;
+        };
+    }
+
+    private List<PurHisDetail> getListDetail() {
+        return switch (type) {
+            case WEIGHT ->
+                purTableModel.getListDetail();
+            case RICE ->
+                purchaseRiceTableModel.getListDetail();
+            default ->
+                null;
+        };
+    }
+
+    private List<PurDetailKey> getListDel() {
+        return switch (type) {
+            case WEIGHT ->
+                purTableModel.getDelList();
+            case RICE ->
+                purchaseRiceTableModel.getDelList();
+            default ->
+                null;
+        };
+    }
+
     public void savePur(boolean print) {
-        if (isValidEntry() && purTableModel.isValidEntry()) {
+        if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtPurDate.getDate())) {
                 DateLockUtil.showMessage(this);
                 txtPurDate.requestFocus();
@@ -433,9 +561,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             }
             progress.setIndeterminate(true);
             observer.selected("save", false);
-            ph.setListPD(purTableModel.getListDetail());
+            ph.setListPD(getListDetail());
             ph.setListExpense(expenseTableModel.getExpenseList());
-            ph.setListDel(purTableModel.getDelList());
+            ph.setListDel(getListDel());
             inventoryRepo.save(ph).subscribe((t) -> {
                 clear();
                 progress.setIndeterminate(false);
@@ -564,9 +692,18 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Purchase Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
-                purTableModel.delete(row);
+                deleteDetail(row);
                 calculateTotalAmount(false);
             }
+        }
+    }
+
+    private void deleteDetail(int row) {
+        switch (type) {
+            case WEIGHT ->
+                purTableModel.delete(row);
+            case RICE ->
+                purchaseRiceTableModel.delete(row);
         }
     }
 
@@ -583,7 +720,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         calExpense();
         float totalVouBalance;
         float totalAmount = 0.0f;
-        listDetail = purTableModel.getListDetail();
+        listDetail = getListDetail();
         totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
         txtVouTotal.setValue(totalAmount);
 
@@ -650,6 +787,32 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         dialog.setVisible(true);
     }
 
+    public void historyLanding() {
+        if (landingDialog == null) {
+            landingDialog = new LandingHistoryDialog(Global.parentForm);
+            landingDialog.setInventoryRepo(inventoryRepo);
+            landingDialog.setUserRepo(userRepo);
+            landingDialog.setObserver(this);
+            landingDialog.initMain();
+            landingDialog.setSize(Global.width - 20, Global.height - 20);
+            landingDialog.setLocationRelativeTo(null);
+        }
+        landingDialog.search();
+    }
+
+    private void setListDetail(List<PurHisDetail> list) {
+        switch (type) {
+            case WEIGHT -> {
+                purTableModel.setListDetail(list);
+                purTableModel.addNewRow();
+            }
+            case RICE -> {
+                purchaseRiceTableModel.setListDetail(list);
+                purchaseRiceTableModel.addNewRow();
+            }
+        }
+    }
+
     public void setVoucher(PurHis pur, boolean local) {
         if (pur != null) {
             progress.setIndeterminate(true);
@@ -668,8 +831,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             ph.setVouLock(!deptId.equals(Global.deptId));
             inventoryRepo.getPurDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
-                        purTableModel.setListDetail(t);
-                        purTableModel.addNewRow();
+                        setListDetail(t);
                         if (ph.isVouLock()) {
                             lblStatus.setText("Voucher is locked.");
                             lblStatus.setForeground(Color.RED);
@@ -764,7 +926,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void setAllLocation() {
-        List<PurHisDetail> listPurDetail = purTableModel.getListDetail();
+        List<PurHisDetail> listPurDetail = getListDetail();
         Location l = locationAutoCompleter.getLocation();
         if (listPurDetail != null) {
             listPurDetail.forEach(sd -> {
@@ -773,7 +935,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
             });
         }
-        purTableModel.setListDetail(listPurDetail);
+        setListDetail(listPurDetail);
     }
 
     private void printVoucher(PurHis p) {
@@ -816,11 +978,11 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                             param.put("SUBREPORT_DIR", "report/");
                             String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                             ObjectMapper mapper = new ObjectMapper();
-                            JsonNode n1 = mapper.readTree(gson.toJson(list));
+                            JsonNode n1 = mapper.readTree(Util1.gson.toJson(list));
                             JsonDataSource d1 = new JsonDataSource(n1, null) {
                             };
                             ObjectMapper m2 = new ObjectMapper();
-                            JsonNode n2 = m2.readTree(gson.toJson(listEx));
+                            JsonNode n2 = m2.readTree(Util1.gson.toJson(listEx));
                             JsonDataSource d2 = new JsonDataSource(n2, null) {
                             };
                             param.put("p_sub_data", d2);
@@ -861,11 +1023,11 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void setVoucherDetail(GRN g) {
-        purTableModel.clear();
+        clearDetail();
         Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
-        trader.subscribe((t) -> {
+        trader.doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
+        }).subscribe();
         txtRemark.setText(g.getRemark());
         String vouNo = g.getKey().getVouNo();
         Integer deptId = g.getDeptId();
@@ -883,17 +1045,26 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 pd.setUnitCode(t.getUnit());
                 pd.setLocCode(t.getLocCode());
                 pd.setLocName(t.getLocName());
-                purTableModel.addPurchase(pd);
+                addPurchase(pd);
             });
         }, (e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         }, () -> {
-            purTableModel.addNewRow();
+            addNewRow();
             calculateTotalAmount(false);
             txtBatchNo.setText(g.getBatchNo());
             txtBatchNo.setEnabled(false);
         });
+    }
+
+    private void addNewRow() {
+        switch (type) {
+            case WEIGHT ->
+                purTableModel.addNewRow();
+            case RICE ->
+                purchaseRiceTableModel.addNewRow();
+        }
     }
 
     private void expenseDialog() {
@@ -925,6 +1096,36 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 grnDialog.setLocationRelativeTo(null);
             }
             grnDialog.searchGRNDetail(txtBatchNo.getText());
+        }
+    }
+
+    private void setLandingVoucher(LandingHis his) {
+        String vouNo = his.getKey().getVouNo();
+        inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
+            txtRemark.setText(l.getRemark());
+            inventoryRepo.findLocation(l.getLocCode()).doOnSuccess((t) -> {
+                locationAutoCompleter.setLocation(t);
+            }).subscribe();
+            inventoryRepo.findTrader(l.getTraderCode()).doOnSuccess((t) -> {
+                traderAutoCompleter.setTrader(t);
+            }).subscribe();
+            inventoryRepo.getLandingChooseGrade(vouNo).doOnSuccess((g) -> {
+                PurHisDetail detail = new PurHisDetail();
+                detail.setUserCode(g.getUserCode());
+                detail.setStockCode(g.getStockCode());
+                detail.setStockName(g.getStockName());
+                detail.setPrice(l.getPurPrice());
+                addPurchase(detail);
+            }).subscribe();
+        }).subscribe();
+    }
+
+    private void addPurchase(PurHisDetail p) {
+        switch (type) {
+            case WEIGHT ->
+                purTableModel.addPurchase(p);
+            case RICE ->
+                purchaseRiceTableModel.addPurchase(p);
         }
     }
 
@@ -976,6 +1177,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         jButton1 = new javax.swing.JButton();
         expProgress = new javax.swing.JProgressBar();
         btnBatch = new javax.swing.JButton();
+        btnLanding = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -1124,7 +1326,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelPurLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -1138,7 +1340,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                    .addComponent(txtRemark)
                     .addComponent(txtLocation)
                     .addComponent(txtCurrency))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1148,7 +1350,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtReference)
                     .addComponent(txtBatchNo))
                 .addContainerGap())
@@ -1257,7 +1459,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addContainerGap()
                 .addComponent(expProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1266,11 +1468,23 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addContainerGap())
         );
 
+        btnBatch.setBackground(Global.selectionColor);
         btnBatch.setFont(Global.lableFont);
+        btnBatch.setForeground(new java.awt.Color(255, 255, 255));
         btnBatch.setText("Batch");
         btnBatch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnBatchActionPerformed(evt);
+            }
+        });
+
+        btnLanding.setBackground(Global.selectionColor);
+        btnLanding.setFont(Global.lableFont);
+        btnLanding.setForeground(new java.awt.Color(255, 255, 255));
+        btnLanding.setText("Landing");
+        btnLanding.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLandingActionPerformed(evt);
             }
         });
 
@@ -1283,11 +1497,16 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnBatch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnBatch)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnLanding)
+                        .addGap(613, 613, 613))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1297,12 +1516,13 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblRec)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(lblRec)
+                                .addComponent(btnBatch)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(btnBatch))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(btnLanding)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -1542,7 +1762,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
 
         tblPur.setFont(Global.textFont);
@@ -1593,7 +1813,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addGap(6, 6, 6)
                 .addComponent(panelPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1705,6 +1925,11 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         // TODO add your handling code here:
         batchDialog();
     }//GEN-LAST:event_btnBatchActionPerformed
+
+    private void btnLandingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLandingActionPerformed
+        // TODO add your handling code here:
+        historyLanding();
+    }//GEN-LAST:event_btnLandingActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -1755,6 +1980,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     setVoucherDetail(g);
                 }
             }
+            case "LANDING-HISTORY" ->
+                setLandingVoucher((LandingHis) selectObj);
         }
     }
 
@@ -1900,6 +2127,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatch;
+    private javax.swing.JButton btnLanding;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JProgressBar expProgress;
     private javax.swing.JButton jButton1;

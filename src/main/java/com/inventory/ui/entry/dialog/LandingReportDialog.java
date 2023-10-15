@@ -7,12 +7,17 @@ package com.inventory.ui.entry.dialog;
 import com.common.Global;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
+import javax.swing.JRadioButton;
 
 /**
  *
  * @author Lenovo
  */
 public class LandingReportDialog extends javax.swing.JDialog {
+
+    public JRadioButton getCboLanding() {
+        return cboLanding;
+    }
 
     /**
      * Creates new form LandingReportDialog

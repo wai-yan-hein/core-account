@@ -526,6 +526,14 @@ public class Util1 {
         return value;
     }
 
+    public static double getDoubleOne(Object number) {
+        double value = 1.0;
+        if (Util1.getDouble(number) > 0) {
+            value = Double.parseDouble(number.toString());
+        }
+        return value;
+    }
+
     public static Long getLong(Object number) {
         long value = 0;
         if (number != null) {
@@ -1182,7 +1190,7 @@ public class Util1 {
         }
         return null;
     }
-    
+
     public static LocalDateTime getOldLocalDateTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return LocalDateTime.parse(LocalDateTime.now().toString(), formatter);
