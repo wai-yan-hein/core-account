@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 
 import com.repo.AccountRepo;
 import com.common.Global;
+import com.inventory.ui.setup.dialog.JobSetupDialog;
 import com.inventory.ui.setup.dialog.LabourGroupSetupDialog;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
@@ -36,6 +37,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private VouStatusSetupDialog vsDialog;
     private OrderStatusSetupDialog osDialog;
     private LabourGroupSetupDialog lgDialog;
+    private JobSetupDialog jDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -150,18 +152,20 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void jobSetup() {
-        if (osDialog == null) {
-            osDialog = new OrderStatusSetupDialog();
-            osDialog.setIconImage(icon);
-            osDialog.setInventoryRepo(inventoryRepo);
-            osDialog.initMain();
-            osDialog.setSize(Global.width / 2, Global.height / 2);
-            osDialog.setLocationRelativeTo(null);
+        if (jDialog == null) {
+            jDialog = new JobSetupDialog();
+            jDialog.setIconImage(icon);
+            jDialog.setInventoryRepo(inventoryRepo);
+            jDialog.initMain();
+            jDialog.setSize(Global.width / 2, Global.height / 2);
+            jDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getOrderStatus().doOnSuccess((t) -> {
-            osDialog.setListVou(t);
+        inventoryRepo.getJob().doOnSuccess((t) -> {
+            if (t != null) {
+                jDialog.setListVou(t);
+            }
         }).doOnTerminate(() -> {
-            osDialog.setVisible(true);
+            jDialog.setVisible(true);
         }).subscribe();
 
     }
@@ -376,11 +380,11 @@ public class OtherSetup extends javax.swing.JPanel {
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-        // TODO add your handling code here:
+        jobSetup();        // TODO add your handling code here:
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
-        // TODO add your handling code here:
+        orderStatusSetup();        // TODO add your handling code here:
     }//GEN-LAST:event_jButton10ActionPerformed
 
 
