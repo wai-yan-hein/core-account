@@ -143,6 +143,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     /**
      * Creates new form Purchase
+     *
+     * @param type
      */
     public PurchaseDynamic(int type) {
         this.type = type;
@@ -392,8 +394,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         inventoryRepo.getStockUnit().subscribe((t) -> {
             tblPur.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
         });
-        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//total weight
+        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//
         tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(String.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
@@ -494,12 +496,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         switch (type) {
             case WEIGHT -> {
                 purTableModel.clear();
-                purTableModel.addNewRow();
                 purTableModel.clearDelList();
             }
             case RICE -> {
                 purchaseRiceTableModel.clear();
-                purchaseRiceTableModel.addNewRow();
                 purchaseRiceTableModel.clearDelList();
             }
         }
@@ -1100,6 +1100,14 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private void setLandingVoucher(LandingHis his) {
+        List<PurHisDetail> list = getListDetail();
+        if (list.size() > 1) {
+            int yn = JOptionPane.showConfirmDialog(this, "Are you sure replace?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (yn == JOptionPane.NO_OPTION) {
+                return;
+            }
+        }
+        clearDetail();
         String vouNo = his.getKey().getVouNo();
         inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
             txtRemark.setText(l.getRemark());
@@ -1110,12 +1118,23 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 traderAutoCompleter.setTrader(t);
             }).subscribe();
             inventoryRepo.getLandingChooseGrade(vouNo).doOnSuccess((g) -> {
-                PurHisDetail detail = new PurHisDetail();
-                detail.setUserCode(g.getUserCode());
-                detail.setStockCode(g.getStockCode());
-                detail.setStockName(g.getStockName());
-                detail.setPrice(l.getPurPrice());
-                addPurchase(detail);
+                String stockCode = g.getStockCode();
+                inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
+                    PurHisDetail detail = new PurHisDetail();
+                    detail.setUserCode(s.getUserCode());
+                    detail.setStockCode(s.getKey().getStockCode());
+                    detail.setStockName(s.getStockName());
+                    detail.setPrice(l.getPurPrice());
+                    detail.setWeight(s.getWeight());
+                    detail.setWeightUnit(s.getWeightUnit());
+                    detail.setQty(1);
+                    detail.setUnitCode(s.getPurUnitCode());
+                    addPurchase(detail);
+                    addNewRow();
+                    tblPur.setRowSelectionInterval(0, 0);
+                    tblPur.setColumnSelectionInterval(7, 7);
+                    tblPur.requestFocus();
+                }).subscribe();
             }).subscribe();
         }).subscribe();
     }

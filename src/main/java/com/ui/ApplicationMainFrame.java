@@ -77,7 +77,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.SaleByBatch;
-import com.inventory.ui.entry.SaleByWeight;
+import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
@@ -436,9 +436,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleByBatch.initMain();
                 return saleByBatch;
             }
-            case "Sale By Weight", "Sale Export" -> {
-                int type = menuName.equals("Sale Export") ? SaleByWeight.EXPORT : SaleByWeight.WEIGHT;
-                SaleByWeight s = new SaleByWeight(type);
+            case "Sale By Weight", "Sale Export", "Sale Rice" -> {
+                int type = getSaleType(menuName);
+                SaleDynamic s = new SaleDynamic(type);
                 s.setUserRepo(userRepo);
                 s.setInventoryRepo(inventoryRepo);
                 s.setAccountRepo(accounRepo);
@@ -463,8 +463,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchase.initMain();
                 return purchase;
             }
-            case "Purchase By Weight","Purchase Rice" -> {
-                int type = menuName.equals("Purchase Rice")?PurchaseDynamic.RICE:PurchaseDynamic.WEIGHT;
+            case "Purchase By Weight", "Purchase Rice" -> {
+                int type = menuName.equals("Purchase Rice") ? PurchaseDynamic.RICE : PurchaseDynamic.WEIGHT;
                 PurchaseDynamic p = new PurchaseDynamic(type);
                 p.setName(menuName);
                 p.setUserRepo(userRepo);
@@ -851,6 +851,19 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
         enableToolBar(false);
         return null;
+    }
+
+    private int getSaleType(String menuName) {
+        return switch (menuName) {
+            case "Sale By Weight" ->
+                SaleDynamic.WEIGHT;
+            case "Sale Export" ->
+                SaleDynamic.EXPORT;
+            case "Sale Rice" ->
+                SaleDynamic.RICE;
+            default ->
+                0;
+        };
     }
 
     private void companyUserRoleAssign() {

@@ -713,7 +713,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     }
 
-    private void viewReport(byte[] t, String reportName, boolean print) throws JRException {
+    private void viewReport(List<VSale> list, String reportName, boolean print) throws JRException {
         if (reportName != null) {
             String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
             Map<String, Object> param = new HashMap<>();
@@ -725,7 +725,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             param.put("p_balance", balance);
             param.put("p_prv_balance", prvBal);
             String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-            ByteArrayInputStream stream = new ByteArrayInputStream(t);
+            ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(list));
             JsonDataSource ds = new JsonDataSource(stream);
             JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
             log.info(ProUtil.getFontPath());

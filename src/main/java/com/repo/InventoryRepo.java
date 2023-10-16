@@ -111,6 +111,7 @@ import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
 import com.inventory.model.VStockIO;
 import com.inventory.model.VTransfer;
+import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossDetail;
@@ -337,7 +338,8 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-     public Mono<LandingHisGrade> getLandingChooseGrade(String vouNo) {
+
+    public Mono<LandingHisGrade> getLandingChooseGrade(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/landing/getLandingChooseGrade")
                 .queryParam("vouNo", vouNo)
@@ -1214,7 +1216,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<Job>> getJob() {
         if (localDatabase) {
 //            return h2Repo.getOrderStatus();
@@ -3209,7 +3211,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<byte[]> getSaleReport(String vouNo) {
+    public Mono<List<VSale>> getSaleReport(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getSaleReport")
                 .queryParam("vouNo", vouNo)
@@ -3217,8 +3219,8 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray)
+                .bodyToFlux(VSale.class)
+                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -3421,6 +3423,28 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(SaleExpense.class)
+                .collectList();
+    }
+
+    public Mono<List<VouDiscount>> getVoucherDiscount(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/sale/getVoucherDiscount")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VouDiscount.class)
+                .collectList();
+    }
+
+    public Mono<List<VouDiscount>> searchDiscountDescription(String str) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/sale/searchDiscountDescription")
+                .queryParam("str", str)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VouDiscount.class)
                 .collectList();
     }
 

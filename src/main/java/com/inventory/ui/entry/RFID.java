@@ -484,7 +484,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 param.put("p_comp_phone", Global.companyPhone);
                 param.put("p_logo_path", logoPath);
                 String reportPath = ProUtil.getReportPath() + "RFIDVoucher.jasper";
-                ByteArrayInputStream stream = new ByteArrayInputStream(t);
+                ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(t));
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
                 JasperReportUtil.print(jp);

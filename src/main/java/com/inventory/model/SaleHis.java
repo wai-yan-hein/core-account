@@ -112,6 +112,10 @@ public class SaleHis {
     private transient boolean local = false;
     private transient List<SaleExpense> listExpense;
     private transient List<SaleExpenseKey> listDelExpense;
+    @Transient
+    private List<VouDiscount> listVouDiscount;
+    @Transient
+    private List<VouDiscountKey> listDelVouDiscount;
 
     public SaleHis() {
     }

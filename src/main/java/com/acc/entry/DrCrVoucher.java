@@ -19,7 +19,6 @@ import com.acc.editor.RefAutoCompleter;
 import com.acc.model.DeleteObj;
 import com.acc.model.TmpOpening;
 import com.common.DateLockUtil;
-import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -251,7 +250,6 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 });
             }
         });
-
     }
 
     public void openVoucherDialog(String type, List<Gl> listVGl) {
@@ -265,7 +263,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         }
         dialog.setVouType(type);
         dialog.setListVGl(listVGl);
-        dialog.setSize(Global.width - 200, Global.height - 200);
+        dialog.setSize(Global.width - 20, Global.height - 20);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
@@ -274,7 +272,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             Gl gl = voucherTableModel.getVGl(row);
-            if(gl.isTranLock()){
+            if (gl.isTranLock()) {
                 DateLockUtil.showMessage(this);
                 return;
             }
@@ -815,8 +813,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     @Override
-    public void keyReleased(KeyEvent e
-    ) {
+    public void keyReleased(KeyEvent e) {
     }
 
     @Override

@@ -166,7 +166,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
     }
-    
 
     /**
      * Creates new form SaleEntry1
@@ -446,8 +445,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat());
         txtTax.setFormatterFactory(Util1.getDecimalFormat());
     }
-
-   
 
     private void assignDefaultValue() {
         userRepo.getDefaultCurrency().doOnSuccess((t) -> {
@@ -920,7 +917,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (local) {
             List<VSale> list = h2Repo.getSaleReport(vouNo);
             if (!list.isEmpty()) {
-                viewReport(Util1.listToByteArray(list), sh, reportName);
+                viewReport(list, sh, reportName);
             }
         } else {
             if (!Util1.isNullOrEmpty(grnVouNo)) {
@@ -978,11 +975,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         return param;
     }
 
-    private void viewReport(byte[] t, SaleHis sh, String reportName) {
+    private void viewReport(List<VSale> list, SaleHis sh, String reportName) {
         if (reportName != null) {
             try {
                 String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-                ByteArrayInputStream stream = new ByteArrayInputStream(t);
+                ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(list));
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, getDefaultParam(sh), ds);
                 if (chkVou.isSelected()) {

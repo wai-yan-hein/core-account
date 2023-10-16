@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.common;
 
-import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -18,10 +17,8 @@ import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.dialog.StockBalanceDialog;
-import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -33,18 +30,20 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class SaleExportTableModel extends AbstractTableModel {
+public class SaleRiceTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Qty", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Qty", "Price", "Amount"};
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<SaleDetailKey> deleteList = new ArrayList();
-    private StockBalanceDialog dialog;
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
     private JLabel lblRecord;
     private SaleDynamic sale;
+    private StockBalanceDialog dialog;
+
+    public void setDialog(StockBalanceDialog dialog) {
+        this.dialog = dialog;
+    }
 
     public SaleDynamic getSale() {
         return sale;
@@ -54,23 +53,10 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.sale = sale;
     }
 
-    public void setDialog(StockBalanceDialog dialog) {
-        this.dialog = dialog;
-    }
-
-   
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
     public void setLblRecord(JLabel lblRecord) {
         this.lblRecord = lblRecord;
     }
 
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
     public void setParent(JTable parent) {
         this.parent = parent;
     }
@@ -105,7 +91,7 @@ public class SaleExportTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3, 5 ->
+            case 0, 1, 2, 4, 6 ->
                 String.class;
             default ->
                 Double.class;
@@ -114,12 +100,12 @@ public class SaleExportTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        switch (column) {
-            case 2, 8, 10 -> {
-                return false;
-            }
-        }
-        return true;
+        return switch (column) {
+            case 7, 9 ->
+                false;
+            default ->
+                true;
+        };
     }
 
     @Override
@@ -144,33 +130,30 @@ public class SaleExportTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-                    return sd.getRelName();
-                }
-                case 3 -> {
                     //loc
                     return sd.getLocName();
                 }
-                case 4 -> {
+                case 3 -> {
                     return sd.getWeight();
                 }
-                case 5 -> {
+                case 4 -> {
                     return sd.getWeightUnit();
                 }
-                case 6 -> {
+                case 5 -> {
                     //qty
                     return sd.getQty();
                 }
-                case 7 -> {
+                case 6 -> {
                     return sd.getUnitCode();
                 }
-                case 8 -> {
+                case 7 -> {
                     return Util1.getDouble(sd.getTotalWeight()) == 0 ? null : sd.getTotalWeight();
                 }
-                case 9 -> {
+                case 8 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 10 -> {
+                case 9 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -193,7 +176,7 @@ public class SaleExportTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(),Global.parentForm);
+                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -205,11 +188,12 @@ public class SaleExportTableModel extends AbstractTableModel {
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(4, 4);
+                            setSelection(row, 5);
                             addNewRow();
+                            observer.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
-                    case 3 -> {
+                    case 2 -> {
                         //Loc
                         if (value instanceof Location l) {
                             sd.setLocCode(l.getKey().getLocCode());
@@ -217,23 +201,23 @@ public class SaleExportTableModel extends AbstractTableModel {
 
                         }
                     }
-                    case 4 -> {
+                    case 3 -> {
                         sd.setWeight(Util1.getDouble(value));
                     }
-                    case 5 -> {
+                    case 4 -> {
                         if (value instanceof StockUnit u) {
                             sd.setWeightUnit(u.getKey().getUnitCode());
                         }
                     }
-                    case 6 -> {
+                    case 5 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setQty(Util1.getDouble(value));
                                 if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(7, 7);
+                                    setSelection(row, 6);
                                 } else {
-                                    parent.setColumnSelectionInterval(9, 9);
+                                    setSelection(row, 7);
                                 }
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -244,57 +228,52 @@ public class SaleExportTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 7 -> {
+                    case 6 -> {
                         //Unit
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
+                    case 7 -> {
+                        sd.setStdWeight(Util1.getDouble(value));
+                    }
 
-                    case 9 -> {
+                    case 8 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getDouble(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                setSelection(row + 1, 0);
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     }
-                    case 10 -> {
+                    case 9 -> {
                         //amt
                         sd.setAmount(Util1.getDouble(value));
 
-                    }
-
-                }
-                if (column != 9) {
-                    if (Util1.getFloat(sd.getPrice()) == 0) {
-                        if (ProUtil.isSaleLastPrice()) {
-                            if (sd.getStockCode() != null && sd.getUnitCode() != null) {
-                                inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
-                                    sd.setPrice(Util1.getDouble(t.getAmount()));
-                                });
-                            }
-                        }
                     }
                 }
                 assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
+                observer.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(SaleHisDetail sd) {
@@ -361,7 +340,6 @@ public class SaleExportTableModel extends AbstractTableModel {
         if (s.getQty() != null && s.getWeight() != null) {
             s.setTotalWeight(Util1.getDouble(s.getQty()) * Util1.getDouble(s.getWeight()));
         }
-        observer.selected("SALE-TOTAL", "SALE-TOTAL");
     }
 
     private void showMessageBox(String text) {
@@ -436,5 +414,4 @@ public class SaleExportTableModel extends AbstractTableModel {
             listDetail.clear();
         }
     }
-
 }

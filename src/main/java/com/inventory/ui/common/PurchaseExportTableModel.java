@@ -365,7 +365,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
             double amount = Math.round((qty * wt * price) / stdWt);
             pur.setAmount(amount);
         }
-        if (pur.getQty() != null && pur.getWeight() != null) {
+        if (pur.getQty() > 0 && pur.getWeight() > 0) {
             pur.setTotalWeight(Util1.getDouble(pur.getQty()) * Util1.getDouble(pur.getWeight()));
         }
     }
@@ -392,11 +392,11 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
                     focusTable(i);
                     return false;
-                } else if (sdh.getStdWeight() == null) {
+                } else if (sdh.getStdWeight() == 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Std Weight");
                     focusTable(i);
                     return false;
-                } else if (sdh.getWeight() == null) {
+                } else if (sdh.getWeight() == 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Weight");
                     focusTable(i);
                     return false;
