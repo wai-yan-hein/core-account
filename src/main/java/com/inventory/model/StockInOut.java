@@ -54,6 +54,10 @@ public class StockInOut implements Serializable {
     private String intgUpdStatus;
     @Column(name = "vou_lock")
     private boolean vouLock;
+    @Column(name = "labour_group_code")
+    private String labourGroupCode;
+    @Column(name = "job_code")
+    private String jobCode;
     @Transient
     private String status = "STATUS";
     @Transient

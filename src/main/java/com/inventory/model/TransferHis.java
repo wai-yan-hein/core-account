@@ -56,6 +56,10 @@ public class TransferHis {
     private boolean vouLock;
     @Column(name = "trader_code")
     private String traderCode;
+    @Column(name = "labour_group_code")
+    private String labourGroupCode;
+    @Column(name = "job_code")
+    private String jobCode;
     @Transient
     private List<TransferHisDetail> listTD;
     @Transient

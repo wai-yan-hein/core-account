@@ -24,7 +24,9 @@ import com.inventory.model.General;
 import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
 import com.inventory.model.Job;
+import com.inventory.model.JobKey;
 import com.inventory.model.LabourGroup;
+import com.inventory.model.LabourGroupKey;
 import com.inventory.model.LandingHisPrice;
 import com.inventory.model.LandingHis;
 import com.inventory.model.LandingHisGrade;
@@ -773,6 +775,42 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockBrandKey.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Job> findJob(String jobCode) {
+        JobKey key = new JobKey();
+        key.setCompCode(Global.compCode);
+        key.setJobNo(jobCode);
+        if (localDatabase) {
+//            return h2Repo.find(key);
+        }
+        return inventoryApi.post()
+                .uri("/setup/findJob")
+                .body(Mono.just(key), JobKey.class)
+                .retrieve()
+                .bodyToMono(Job.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<LabourGroup> findLabourGroup(String code) {
+        LabourGroupKey key = new LabourGroupKey();
+        key.setCompCode(Global.compCode);
+        key.setCode(code);
+        if (localDatabase) {
+//            return h2Repo.find(key);
+        }
+        return inventoryApi.post()
+                .uri("/setup/findLabourGroup")
+                .body(Mono.just(key), LabourGroupKey.class)
+                .retrieve()
+                .bodyToMono(LabourGroup.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
