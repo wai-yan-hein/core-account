@@ -8,11 +8,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-
 @Data
 @Entity
 @Table(name = "job")
 public class Job {
+
     @EmbeddedId
     private JobKey key;
     @Column(name = "job_name")
@@ -33,4 +33,10 @@ public class Job {
     private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
+
+    @Override
+    public String toString() {
+        return jobName;
+    }
+
 }
