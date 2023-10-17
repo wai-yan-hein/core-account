@@ -178,24 +178,24 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                         return record.getWeightUnit();
                     }
                     case 6 -> {
-                        return record.getQty();
+                        return Util1.toNull(record.getQty());
                     }
                     case 7 -> {
                         return record.getUnitCode();
                     }
                     case 8 -> {
                         //std weight
-                        return record.getStdWeight();
+                        return Util1.toNull(record.getStdWeight());
                     }
                     //total
                     case 9 -> {
-                        return record.getTotalWeight();
+                        return Util1.toNull(record.getTotalWeight());
                     }
                     case 10 -> {
-                        return record.getPrice();
+                        return Util1.toNull(record.getPrice());
                     }
                     case 11 -> {
-                        return record.getAmount();
+                        return Util1.toNull(record.getAmount());
                     }
                 }
             }
@@ -270,7 +270,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                                 record.setTotalWeight(Util1.getTotalWeight(wt, str));
                             } else {
                                 record.setQty(Util1.getDouble(value));
-                                if (record.getQty() != null && record.getWeight() != null) {
+                                if (record.getQty() > 0 && record.getWeight() > 0) {
                                     record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                                 }
                             }
@@ -425,11 +425,11 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
                     focusTable(i);
                     return false;
-                } else if (sdh.getStdWeight() == null) {
+                } else if (sdh.getStdWeight() > 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Std Weight");
                     focusTable(i);
                     return false;
-                } else if (sdh.getWeight() == null) {
+                } else if (sdh.getWeight() > 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Weight");
                     focusTable(i);
                     return false;

@@ -8,6 +8,7 @@ import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Transient;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  *
@@ -91,5 +92,8 @@ public class VSale {
     private Integer vouCount;
     private Double totalQty;
     private boolean local;
+    private String saleUnitName;
+    private String weightUnitName;
     private ZonedDateTime vouDateTime;
+    List<VouDiscount> listDiscount;
 }

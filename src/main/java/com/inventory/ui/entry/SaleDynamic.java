@@ -15,6 +15,9 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.CarNoAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -35,21 +38,22 @@ import com.inventory.model.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByWeightTableModel;
 import com.inventory.ui.common.SaleExportTableModel;
-import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.common.StockInfoPanel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.ui.common.SaleRiceTableModel;
 import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.VouDiscountDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -62,6 +66,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
@@ -83,13 +89,15 @@ import reactor.core.publisher.Mono;
  * @author wai yan
  */
 @Slf4j
-public class SaleByWeight extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
+public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     public static final int WEIGHT = 1;
     public static final int EXPORT = 2;
+    public static final int RICE = 3;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleByWeightTableModel saleTableModel = new SaleByWeightTableModel();
     private final SaleExportTableModel saleExportTableModel = new SaleExportTableModel();
+    private final SaleRiceTableModel saleRiceTableModel = new SaleRiceTableModel();
     private SaleHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
@@ -110,11 +118,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private int type;
     private TransferHistoryDialog transferHistoryDialog;
     private StockBalanceDialog stockBalanceDialog;
+    private VouDiscountDialog vouDiscountDialog;
 
     public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
     }
-    
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -145,7 +153,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
      *
      * @param type
      */
-    public SaleByWeight(int type) {
+    public SaleDynamic(int type) {
         this.type = type;
         initComponents();
         initButtonGroup();
@@ -206,24 +214,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     public void initMain() {
         initCombo();
-        initStockInfo();
         initTable();
         initModel();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
-    }
-
-    private void initStockInfo() {
-        if (Util1.getBoolean(ProUtil.getProperty(ProUtil.SALE_STOCKINFO_SHOW))) {
-            stockInfoPanel.setUserRepo(userRepo);
-            stockInfoPanel.setInventoryRepo(inventoryRepo);
-            panelStockInfo.setLayout(new BorderLayout());
-            panelStockInfo.add(stockInfoPanel, BorderLayout.NORTH);
-        } else {
-            panelStockInfo.setVisible(false);
-        }
-
     }
 
     private void setStockInfo() {
@@ -242,6 +237,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             case EXPORT -> {
                 return saleExportTableModel.getSale(row);
             }
+            case RICE -> {
+                return saleRiceTableModel.getSale(row);
+            }
         }
         return null;
     }
@@ -253,6 +251,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             }
             case EXPORT -> {
                 initExport();
+            }
+            case RICE -> {
+                initRice();
             }
         }
     }
@@ -297,6 +298,44 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         });
         tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
         tblSale.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
+    }
+
+    private void initRice() {
+        tblSale.setModel(saleRiceTableModel);
+        saleRiceTableModel.setLblRecord(lblRec);
+        saleRiceTableModel.setParent(tblSale);
+        saleRiceTableModel.setSale(this);
+        saleRiceTableModel.addNewRow();
+        saleRiceTableModel.setObserver(this);
+        saleRiceTableModel.setDialog(stockBalanceDialog);
+        tblSale.getTableHeader().setFont(Global.tblHeaderFont);
+        tblSale.setCellSelectionEnabled(true);
+        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//Location
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(50);//weight
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(30);//unit
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(50);//qty
+        tblSale.getColumnModel().getColumn(6).setPreferredWidth(30);//unit
+        tblSale.getColumnModel().getColumn(7).setPreferredWidth(50);//total
+        tblSale.getColumnModel().getColumn(8).setPreferredWidth(50);//price
+        tblSale.getColumnModel().getColumn(9).setPreferredWidth(60);//amt
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
+        tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//weight
+        monoUnit.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));//unit
+        });
+        tblSale.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
+        monoUnit.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));//unit
+        });
+        tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
+        tblSale.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//
     }
 
     private void initExport() {
@@ -461,6 +500,10 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 saleExportTableModel.removeListDetail();
                 saleExportTableModel.clearDelList();
             }
+            case RICE -> {
+                saleRiceTableModel.removeListDetail();
+                saleRiceTableModel.clearDelList();
+            }
         }
 
     }
@@ -468,6 +511,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private void clear() {
         disableForm(true);
         clearList();
+        clearDiscount();
         initTextBoxValue();
         assignDefaultValue();
         saleHis = new SaleHis();
@@ -481,6 +525,12 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         projectAutoCompleter.setProject(null);
     }
 
+    private void clearDiscount() {
+        if (vouDiscountDialog != null) {
+            vouDiscountDialog.clear();
+        }
+    }
+
     private boolean isValidDetail() {
         switch (type) {
             case WEIGHT -> {
@@ -488,6 +538,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             }
             case EXPORT -> {
                 return saleExportTableModel.isValidEntry();
+            }
+            case RICE -> {
+                return saleRiceTableModel.isValidEntry();
             }
         }
         return false;
@@ -584,6 +637,10 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             saleHis.setCarNo(txtCarNo.getText());
             Project p = projectAutoCompleter.getProject();
             saleHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
+            if (vouDiscountDialog != null) {
+                saleHis.setListVouDiscount(vouDiscountDialog.getListDetail());
+                saleHis.setListDelVouDiscount(vouDiscountDialog.getListDel());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
@@ -657,6 +714,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 saleTableModel.delete(row);
             case EXPORT ->
                 saleExportTableModel.delete(row);
+            case RICE -> {
+                saleRiceTableModel.delete(row);
+            }
 
         }
     }
@@ -668,6 +728,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             }
             case EXPORT -> {
                 return saleExportTableModel.getListDetail();
+            }
+            case RICE -> {
+                return saleRiceTableModel.getListDetail();
             }
             default ->
                 throw new AssertionError();
@@ -681,6 +744,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             }
             case EXPORT -> {
                 return saleExportTableModel.getDelList();
+            }
+            case RICE -> {
+                return saleRiceTableModel.getDelList();
             }
         }
         return null;
@@ -833,6 +899,10 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 saleExportTableModel.setListDetail(list);
                 saleExportTableModel.addNewRow();
             }
+            case RICE -> {
+                saleRiceTableModel.setListDetail(list);
+                saleRiceTableModel.addNewRow();
+            }
         }
     }
 
@@ -874,13 +944,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
-            try {
-                if (t != null) {
-                    viewReport(t, reportName, print);
-                }
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage());
+            if (t != null) {
+                viewReport(t, reportName, print);
             }
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -888,30 +953,42 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     }
 
-    private void viewReport(byte[] t, String reportName, boolean print) throws JRException {
-        if (reportName != null) {
-            String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-            Map<String, Object> param = new HashMap<>();
-            param.put("p_print_date", Util1.getTodayDateTime());
-            param.put("p_comp_name", Global.companyName);
-            param.put("p_comp_address", Global.companyAddress);
-            param.put("p_comp_phone", Global.companyPhone);
-            param.put("p_logo_path", logoPath);
-            param.put("p_balance", balance);
-            param.put("p_prv_balance", prvBal);
-            String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-            ByteArrayInputStream stream = new ByteArrayInputStream(t);
-            JsonDataSource ds = new JsonDataSource(stream);
-            JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-            log.info(ProUtil.getFontPath());
-            if (print) {
-                JasperReportUtil.print(jp);
+    private void viewReport(List<VSale> list, String reportName, boolean print) {
+        try {
+            if (reportName != null) {
+                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                Map<String, Object> param = new HashMap<>();
+                param.put("p_print_date", Util1.getTodayDateTime());
+                param.put("p_comp_name", Global.companyName);
+                param.put("p_comp_address", Global.companyAddress);
+                param.put("p_comp_phone", Global.companyPhone);
+                param.put("p_logo_path", logoPath);
+                param.put("p_balance", balance);
+                param.put("p_prv_balance", prvBal);
+                param.put("p_sub_report_dir", "report/");
+                if (!list.isEmpty()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode n1 = mapper.readTree(Util1.gson.toJson(list.get(0).getListDiscount()));
+                    JsonDataSource d1 = new JsonDataSource(n1, null) {
+                    };
+                    param.put("p_sub_data", d1);
+                }
+                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+                ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(list));
+                JsonDataSource ds = new JsonDataSource(stream);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+                log.info(ProUtil.getFontPath());
+                if (print) {
+                    JasperReportUtil.print(jp);
+                } else {
+                    JasperViewer.viewReport(jp, false);
+                }
             } else {
-                JasperViewer.viewReport(jp, false);
+                JOptionPane.showMessageDialog(this, "Select Report Type");
+                chkVou.requestFocus();
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Select Report Type");
-            chkVou.requestFocus();
+        } catch (HeadlessException | JRException | JsonProcessingException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
 
@@ -959,7 +1036,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     private void setTransferVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
-        saleTableModel.clear();
+        clearList();
         Integer deptId = s.getDeptId();
         inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
@@ -1002,6 +1079,18 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             transferHistoryDialog.setLocationRelativeTo(null);
         }
         transferHistoryDialog.search();
+    }
+
+    private void discountDialog() {
+        if (vouDiscountDialog == null) {
+            vouDiscountDialog = new VouDiscountDialog(Global.parentForm);
+            vouDiscountDialog.setLocationRelativeTo(null);
+            vouDiscountDialog.setObserver(this);
+            vouDiscountDialog.setInventoryRepo(inventoryRepo);
+            vouDiscountDialog.initMain();
+        }
+        String vouNo = txtVouNo.getText();
+        vouDiscountDialog.search(vouNo);
     }
 
     /**
@@ -1067,7 +1156,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         txtGrandTotal = new javax.swing.JFormattedTextField();
         jSeparator2 = new javax.swing.JSeparator();
         chkPaid = new javax.swing.JCheckBox();
-        panelStockInfo = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1664,18 +1753,13 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
         jScrollPane3.setViewportView(jPanel3);
 
-        panelStockInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        javax.swing.GroupLayout panelStockInfoLayout = new javax.swing.GroupLayout(panelStockInfo);
-        panelStockInfo.setLayout(panelStockInfoLayout);
-        panelStockInfoLayout.setHorizontalGroup(
-            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 579, Short.MAX_VALUE)
-        );
-        panelStockInfoLayout.setVerticalGroup(
-            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
+        jButton1.setFont(Global.lableFont);
+        jButton1.setText("Discount");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -1686,8 +1770,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panelStockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(512, 512, 512)
+                        .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1699,10 +1783,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 .addGap(4, 4, 4)
                 .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton1))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1844,6 +1929,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         trasnferDialog();
     }//GEN-LAST:event_btnBatch1ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        discountDialog();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -1887,6 +1977,12 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             case "Select" -> {
                 calculateTotalAmount(false);
             }
+            case "CAL_DISCOUNT" -> {
+                double discount = vouDiscountDialog.getTotal();
+                txtVouDiscount.setValue(discount);
+                calculateTotalAmount(false);
+            }
+
         }
     }
 
@@ -2010,6 +2106,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -2037,7 +2134,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
-    private javax.swing.JPanel panelStockInfo;
     private javax.swing.JTable tblSale;
     private javax.swing.JTextField txtCarNo;
     private javax.swing.JTextField txtCurrency;

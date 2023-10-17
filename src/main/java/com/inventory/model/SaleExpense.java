@@ -25,7 +25,7 @@ public class SaleExpense {
     @EmbeddedId
     private SaleExpenseKey key;
     @Column(name = "amount")
-    private Float amount;
+    private double amount;
     @Transient
     private String expenseName;
 

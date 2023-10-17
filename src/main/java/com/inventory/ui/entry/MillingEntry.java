@@ -53,13 +53,9 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -70,10 +66,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JsonDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -823,57 +815,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         observer.selected("delete", status);
         observer.selected("print", status);
 
-    }
-
-    private void printVoucher(String vouNo, String reportName, boolean local) { //todo
-        inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
-            viewReport(t, reportName);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-    }
-
-    private void viewReport(byte[] t, String reportName) {
-        if (reportName != null) {
-            try {
-                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-                Map<String, Object> param = new HashMap<>();
-                param.put("p_print_date", Util1.getTodayDateTime());
-                param.put("p_comp_name", Global.companyName);
-                param.put("p_comp_address", Global.companyAddress);
-                param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", logoPath);
-                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-                ByteArrayInputStream stream = new ByteArrayInputStream(t);
-                JsonDataSource ds = new JsonDataSource(stream);
-                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                log.info(ProUtil.getFontPath());
-//                if (chkVou.isSelected()) {
-//                    JasperReportUtil.print(jp);
-//                } else {
-//                    JasperViewer.viewReport(jp, false);
-//                }
-            } catch (JRException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Select Report Type");
-//            chkVou.requestFocus();
-        }
-    }
-
-    private String getReportName() {
-        String name = null;
-//        if (chkVou.isSelected()) {
-//            name = ProUtil.getProperty("report.sale.voucher");
-//        }
-//        if (chkA4.isSelected()) {
-//            name = ProUtil.getProperty("report.sale.A4");
-//        }
-//        if (chkA5.isSelected()) {
-//            name = ProUtil.getProperty("report.sale.A5");
-//        }
-        return name;
     }
 
     private void focusTable() {
