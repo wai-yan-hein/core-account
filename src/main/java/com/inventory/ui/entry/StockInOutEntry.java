@@ -176,7 +176,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             cboLabourGroup.setSelectedIndex(0);
         });
 
-        inventoryRepo.getJob().subscribe((t) -> {
+        inventoryRepo.getJob(false).subscribe((t) -> {
             jobComboBoxModel.setData(t);
             cboJob.setModel(jobComboBoxModel);
             cboJob.setSelectedIndex(0);

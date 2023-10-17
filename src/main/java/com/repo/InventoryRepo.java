@@ -864,6 +864,17 @@ public class InventoryRepo {
                 .bodyToFlux(StockInOutDetail.class)
                 .collectList();
     }
+    
+    public Mono<List<StockInOutDetail>> getStockIODetailByJob(String jobNo, boolean local) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/stockio/getStockIODetailByJob")
+                .queryParam("jobId", jobNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockInOutDetail.class)
+                .collectList();
+    }
 
     public Mono<StockUnit> findUnit(String unitCode) {
         StockUnitKey key = new StockUnitKey();
@@ -1254,7 +1265,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Job>> getJob() {
+    public Mono<List<Job>> getJob(boolean isFinished) {
         if (localDatabase) {
 //            return h2Repo.getOrderStatus();
         }
