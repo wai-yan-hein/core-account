@@ -12,9 +12,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter1;
 import com.inventory.editor.StockCriteriaEditor;
@@ -261,7 +258,6 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void assignDefaultValue() {
-        lblCriteria.setForeground(Color.BLUE);
         txtVouDate.setDate(Util1.getTodayDate());
         txtVouDate.setDateFormatString(Global.dateFormat);
     }
@@ -998,7 +994,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        lblCriteria.setFont(Global.lableFont);
+        lblCriteria.setFont(Global.menuFont);
         lblCriteria.setText("Criteria Price");
 
         lblRC.setFont(Global.lableFont);
@@ -1120,7 +1116,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        lblCriteria1.setFont(Global.lableFont);
+        lblCriteria1.setFont(Global.menuFont);
         lblCriteria1.setText("Criteria Qty");
 
         lblRC1.setFont(Global.lableFont);

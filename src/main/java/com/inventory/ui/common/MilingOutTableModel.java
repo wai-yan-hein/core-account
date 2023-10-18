@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MilingOutTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Stock Name", "Weight", "WT-Unit", "Qty", "Unit",
-        "Price", "Amount", "Total Wt", "Eff Wt", "Eff Qty"};
+        "Price", "Amount", "Total Wt", "Eff Wt", "Eff Qty", "Calculate"};
     private JTable parent;
     private List<MillingOutDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -117,6 +117,8 @@ public class MilingOutTableModel extends AbstractTableModel {
         return switch (column) {
             case 0, 1, 3, 5 ->
                 String.class;
+            case 11 ->
+                Boolean.class;
             default ->
                 Double.class;
         };
@@ -178,6 +180,9 @@ public class MilingOutTableModel extends AbstractTableModel {
                 case 10 -> {
                     //qty %
                     return Util1.toNull(sd.getPercentQty());
+                }
+                case 11 -> {
+                    return row == 0;
                 }
                 default -> {
                     return null;
@@ -265,6 +270,14 @@ public class MilingOutTableModel extends AbstractTableModel {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
                     }
+                    case 11 -> {
+                        if (value instanceof Boolean t) {
+                            sd.setCalculate(t);
+                            if (t) {
+                                swapRow(0, row);
+                            }
+                        }
+                    }
                 }
                 calculateAmount(sd);
                 calWeight(sd);
@@ -278,6 +291,18 @@ public class MilingOutTableModel extends AbstractTableModel {
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void swapRow(int row1, int row2) {
+        if (row2 > row1) {
+            MillingOutDetail m1 = listDetail.get(row1);
+            MillingOutDetail m2 = listDetail.get(row2);
+            if (!Util1.isNullOrEmpty(m2.getStockCode())) {
+                listDetail.set(row2, m1);
+                listDetail.set(row1, m2);
+                fireTableDataChanged();
+            }
         }
     }
 

@@ -65,6 +65,11 @@ public class ProUtil {
     public static final String TRANSFER_DELETE = "transfer.voucher.delete";
     public static final String DEPARTMENT_LOCK = "department.lock";
     public static final String MILLING_STOCK_USAGE = "milling.stock.usage";
+    public static final String DRCR_REPORT = "drcr.report";
+
+    public static String getDrCrReport() {
+        return Global.hmRoleProperty.get(DRCR_REPORT);
+    }
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

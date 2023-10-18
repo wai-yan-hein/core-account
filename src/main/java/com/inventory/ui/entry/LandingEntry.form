@@ -498,7 +498,7 @@
         <Component class="javax.swing.JLabel" name="lblCriteria">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
+              <Connection code="Global.menuFont" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Criteria Price"/>
           </Properties>
@@ -706,7 +706,7 @@
         <Component class="javax.swing.JLabel" name="lblCriteria1">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
+              <Connection code="Global.menuFont" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Criteria Qty"/>
           </Properties>

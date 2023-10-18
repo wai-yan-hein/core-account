@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "landing_detail_criteria")
+@Table(name = "landing_his_price")
 public class LandingHisPrice {
 
     @EmbeddedId
