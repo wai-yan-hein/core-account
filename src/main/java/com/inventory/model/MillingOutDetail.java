@@ -69,4 +69,6 @@ public class MillingOutDetail {
     private Stock stock;
     @Transient
     private String qtyStr;
+    @Transient
+    private boolean calculate;
 }

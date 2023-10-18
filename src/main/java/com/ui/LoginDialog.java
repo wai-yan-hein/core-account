@@ -171,8 +171,9 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         info.setOsArch(osArch);
         userRepo.saveMachine(info).doOnSuccess((t) -> {
             log.info("machine info update.");
+        }).doOnError((e) -> {
+            log.error("saveMachine : " + e.getMessage());
         }).subscribe();
-
     }
 
     private Mono<AuthenticationResponse> register(String serialNo) {

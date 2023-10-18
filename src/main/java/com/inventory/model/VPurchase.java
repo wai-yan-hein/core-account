@@ -27,6 +27,7 @@ public class VPurchase {
     private Double total;
     private Double paid;
     private String vouDate;
+    private ZonedDateTime vouDateTime;
     private String remark;
     private String sessionId;
     private String updatedBy;
@@ -47,11 +48,12 @@ public class VPurchase {
     private Double stdWt;
     private Double avgPrice;
     private String purUnit;
+    private String purUnitName;
     private Double avgWt;
     private Double purPrice;
     private Double purAmount;
     private String locationCode;
-    private int uniqueId;
+    private Integer uniqueId;
     private String createdName;
     private String updatedName;
     private String curName;
@@ -68,13 +70,17 @@ public class VPurchase {
     private String groupName;
     private Double weight;
     private String weightUnit;
+    private String weightUnitName;
     private Double totalQty;
     private String batchNo;
     private String projectNo;
-    private boolean local;
-    private ZonedDateTime vouDateTime;
     private String address;
     private String labourGroupName;
+    private String landVouNo;
+    private String phoneNo;
+    private String regionName;
     private List<LandingHisPrice> listPrice;
+    private boolean local;
+    
 
 }

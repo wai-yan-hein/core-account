@@ -19,6 +19,7 @@ import com.acc.editor.RefAutoCompleter;
 import com.acc.model.DeleteObj;
 import com.acc.model.TmpOpening;
 import com.common.DateLockUtil;
+import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -311,10 +312,11 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void printVoucher(Gl gl) {
         progress.setIndeterminate(true);
         String glVouNo = gl.getGlVouNo();
-        accountRepo.getVoucher(glVouNo).subscribe((list) -> {
+        accountRepo.getVoucher(glVouNo).doOnSuccess((list) -> {
             try {
                 String rpName = gl.getTranSource().equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher";
-                String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
+                String reportName = Util1.isNull(ProUtil.getDrCrReport(), "DrCrVoucherA5");
+                String rpPath = Global.accountRP + reportName + ".jasper";
                 Map<String, Object> p = new HashMap();
                 p.put("p_report_name", rpName);
                 p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
@@ -336,10 +338,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 log.error("printVoucher : " + ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }, (e) -> {
+        }).doOnError((e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
 
     }
 
