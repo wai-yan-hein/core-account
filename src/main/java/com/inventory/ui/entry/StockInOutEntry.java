@@ -267,8 +267,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private void initTable() {
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
-        tblStock.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblStock.setDefaultRenderer(Double.class, new DecimalFormatRender());
+        tblStock.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
+        tblStock.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblStock.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblStock.setCellSelectionEnabled(true);
@@ -385,6 +385,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtInQty.setValue(0.0);
         txtOutQty.setValue(0.0);
         vouStatusAutoCompleter.setVoucher(null);
+        jobComboBoxModel.setSelectedItem(null);
+        labourGroupComboBoxModel.setSelectedItem(null);
+        cboJob.repaint();
+        cboLabourGroup.repaint();
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
@@ -517,10 +521,18 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
                 if (cboLabourGroup.getSelectedItem() instanceof LabourGroup lg) {
-                    io.setLabourGroupCode(lg.getKey().getCode());
+                    if (lg.getKey() != null) {
+                        io.setLabourGroupCode(lg.getKey().getCode());
+                    } else {
+                        io.setLabourGroupCode(null);
+                    }
                 }
                 if (cboJob.getSelectedItem() instanceof Job job) {
-                    io.setJobCode(job.getKey().getJobNo());
+                    if (job.getKey() != null) {
+                        io.setJobCode(job.getKey().getJobNo());
+                    } else {
+                        io.setJobCode(null);
+                    }
                 }
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
@@ -539,6 +551,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             io.setVouLock(!Global.deptId.equals(io.getDeptId()));
             inventoryRepo.findVouStatus(io.getVouStatusCode()).doOnSuccess((t) -> {
                 vouStatusAutoCompleter.setVoucher(t);
+            }).subscribe();
+            inventoryRepo.findJob(io.getJobCode()).doOnSuccess((t) -> {
+                jobComboBoxModel.setSelectedItem(t);
+                cboJob.repaint();
+            }).subscribe();
+            inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
+                labourGroupComboBoxModel.setSelectedItem(t);
+                cboLabourGroup.repaint();
             }).subscribe();
             String vouNo = io.getKey().getVouNo();
             txtVou.setText(vouNo);
@@ -646,7 +666,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         observer.selected("print", true);
         observer.selected("history", true);
         observer.selected("delete", true);
-        observer.selected("refresh", false);
+        observer.selected("refresh", true);
     }
 
     /**
@@ -1034,6 +1054,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void refresh() {
+        initCombo();
     }
 
     @Override

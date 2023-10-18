@@ -59,6 +59,10 @@ public class PurHisDetail implements Serializable {
     @Column(name = "m_percent")
     private String mPercent;
     @Transient
+    private double purQty;
+    @Transient
+    private String landVouNo;
+    @Transient
     private String userCode;
     @Transient
     private String stockName;
@@ -72,4 +76,5 @@ public class PurHisDetail implements Serializable {
     private String relName;
     @Transient
     private String locName;
+    
 }
