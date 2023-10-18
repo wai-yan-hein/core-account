@@ -43,6 +43,8 @@ import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.model.LabourGroup;
+import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.inventory.ui.common.SaleRiceTableModel;
 import com.inventory.ui.entry.dialog.StockBalanceDialog;
 import com.inventory.ui.entry.dialog.VouDiscountDialog;
@@ -66,8 +68,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
@@ -119,6 +119,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private TransferHistoryDialog transferHistoryDialog;
     private StockBalanceDialog stockBalanceDialog;
     private VouDiscountDialog vouDiscountDialog;
+    private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
 
     public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
@@ -412,6 +413,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
+        inventoryRepo.getLabourGroup().subscribe((t) -> {
+            t.add(new LabourGroup());
+            labourGroupComboBoxModel.setData(t);
+            cboLabourGroup.setModel(labourGroupComboBoxModel);
+            cboLabourGroup.setSelectedItem(null);
+        });
     }
 
     private void initKeyListener() {
@@ -505,7 +512,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleRiceTableModel.clearDelList();
             }
         }
-
     }
 
     private void clear() {
@@ -523,6 +529,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtCus.requestFocus();
         carNoAutoCompleter.setAutoText(null);
         projectAutoCompleter.setProject(null);
+        labourGroupComboBoxModel.setSelectedItem(null);
+        cboLabourGroup.repaint();
     }
 
     private void clearDiscount() {
@@ -640,6 +648,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             if (vouDiscountDialog != null) {
                 saleHis.setListVouDiscount(vouDiscountDialog.getListDetail());
                 saleHis.setListDelVouDiscount(vouDiscountDialog.getListDel());
+            }
+            if (labourGroupComboBoxModel.getSelectedItem() instanceof LabourGroup lg) {
+                if (lg.getKey() != null) {
+                    saleHis.setLabourGroupCode(lg.getKey().getCode());
+                } else {
+                    saleHis.setLabourGroupCode(null);
+                }
             }
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
@@ -829,15 +844,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             inventoryRepo.findSaleMan(saleHis.getSaleManCode()).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
-            if (sh.getProjectNo() != null) {
-                userRepo.find(new ProjectKey(sh.getProjectNo(), Global.compCode)).subscribe(t -> {
-                    projectAutoCompleter.setProject(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
-            } else {
-                projectAutoCompleter.setProject(null);
-            }
+            userRepo.find(new ProjectKey(sh.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+                projectAutoCompleter.setProject(t);
+            }).subscribe();
+            inventoryRepo.findLabourGroup(saleHis.getLabourGroupCode()).doOnSuccess((t) -> {
+                labourGroupComboBoxModel.setSelectedItem(t);
+                cboLabourGroup.repaint();
+            }).subscribe();
             String vouNo = sh.getKey().getVouNo();
             sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
             inventoryRepo.getSaleDetail(vouNo, saleHis.getDeptId(), saleHis.isLocal()).subscribe((t) -> {
@@ -1127,6 +1140,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoLabel = new javax.swing.JLabel();
         carNoLabel1 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        cboLabourGroup = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -1331,6 +1346,16 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
         });
 
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Labour Group");
+
+        cboLabourGroup.setFont(Global.textFont);
+        cboLabourGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboLabourGroupActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1375,9 +1400,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE))
                             .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addComponent(carNoLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(12, 12, 12)
-                                .addComponent(txtProjectNo))))
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(carNoLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel11))
+                                .addGap(3, 3, 3)
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cboLabourGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtProjectNo)))))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
@@ -1417,9 +1446,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                         .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel21)
                         .addComponent(jLabel2))
-                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel9)))
+                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(cboLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
                 .addContainerGap())
@@ -1934,6 +1967,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         discountDialog();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void cboLabourGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLabourGroupActionPerformed
+        //        searchStock();
+    }//GEN-LAST:event_cboLabourGroupActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -2102,11 +2139,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JButton btnBatch1;
     private javax.swing.JLabel carNoLabel;
     private javax.swing.JLabel carNoLabel1;
+    private javax.swing.JComboBox<LabourGroup> cboLabourGroup;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;

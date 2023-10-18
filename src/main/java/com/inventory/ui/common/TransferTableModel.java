@@ -175,11 +175,7 @@ public class TransferTableModel extends AbstractTableModel {
                             io.setUnitCode(s.getPurUnitCode());
                             io.setWeight(s.getWeight());
                             io.setWeightUnit(s.getWeightUnit());
-                            if (ProUtil.isUseWeight()) {
-                                setColumnSelection(5);
-                            } else {
-                                setColumnSelection(3);
-                            }
+                            setColumnSelection(3);
                         }
                         addNewRow();
                     }

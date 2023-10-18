@@ -7,6 +7,7 @@ package com.inventory.model;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  *
@@ -73,4 +74,7 @@ public class VPurchase {
     private boolean local;
     private ZonedDateTime vouDateTime;
     private String address;
+    private String labourGroupName;
+    private List<LandingHisPrice> listPrice;
+
 }

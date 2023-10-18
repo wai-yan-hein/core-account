@@ -11,6 +11,8 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
+import com.inventory.model.LandingHis;
+import com.inventory.model.LandingHisQty;
 import com.inventory.model.Location;
 import com.inventory.model.PurDetailKey;
 import com.inventory.model.PurHisDetail;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,11 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private JLabel lblRec;
     private PurchaseDynamic purchase;
+    private JProgressBar progress;
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
 
     public PurchaseDynamic getPurchase() {
         return purchase;
@@ -214,7 +222,9 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                             record.setWeightUnit(s.getWeightUnit());
                             record.setWeight(Util1.getDouble(s.getWeight()));
                             record.setStdWeight(Util1.getDouble(s.getWeight()));
+                            record.setPurQty(s.getPurQty());
                             addNewRow();
+                            setSelection(row, 5);
                         }
                     }
                 }
@@ -247,21 +257,9 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                 case 5 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            if (ProUtil.isUseWeightPoint()) {
-                                String str = String.valueOf(value);
-                                double wt = Util1.getDouble(record.getWeight());
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                            } else {
-                                record.setQty(Util1.getDouble(value));
-                                if (record.getQty() > 0 && record.getWeight() > 0) {
-                                    record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
-                                }
-                            }
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setRowSelectionInterval(row, column);
+                        record.setQty(Util1.getDouble(value));
+                        if (record.getWeight() > 0) {
+                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
                         parent.setRowSelectionInterval(row, row);
                     } else {
@@ -285,6 +283,7 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                         double qty = ttlWt / weight;
                         record.setQty(qty);
                         record.setTotalWeight(ttlWt);
+                        calWeightLoss(record);
                     }
                 }
                 case 8 -> {
@@ -322,6 +321,54 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
         }
     }
 
+    private void calWeightLoss(PurHisDetail pd) {
+        String vouNo = pd.getLandVouNo();
+        if (!Util1.isNullOrEmpty(vouNo)) {
+            progress.setIndeterminate(true);
+            double purQty = pd.getQty();
+            double stockQty = pd.getPurQty();
+            inventoryRepo.getLandingHisQty(vouNo).doOnSuccess((t) -> {
+                if (t != null) {
+                    if (!t.isEmpty()) {
+                        LandingHisQty obj = t.get(0);
+                        double percent = obj.getPercent();
+                        double percentAllow = obj.getPercentAllow();
+                        if (percent >= percentAllow) {
+                            double qty = obj.getQty();
+                            double diff = percent - percentAllow;
+                            double lossQty = diff * qty * purQty / stockQty;
+                            PurHisDetail loss = new PurHisDetail();
+                            loss.setStockCode(pd.getStockCode());
+                            loss.setUserCode(pd.getUserCode());
+                            loss.setStockName(pd.getStockName());
+                            loss.setLocCode(pd.getLocCode());
+                            loss.setLocName(pd.getLocName());
+                            loss.setWeight(pd.getWeight());
+                            loss.setWeightUnit(pd.getWeightUnit());
+                            loss.setQty(lossQty);
+                            loss.setUnitCode(pd.getUnitCode());
+                            loss.setPrice(pd.getPrice());
+                            loss.setTotalWeight(loss.getQty() * loss.getWeight());
+                            loss.setAmount(pd.getPrice() * lossQty);
+                            listDetail.set(1, loss);
+                            fireTableRowsUpdated(1, 1);
+                            addNewRow();
+                            observer.selected("CAL-TOTAL", "CAL-TOTAL");
+                            progress.setIndeterminate(false);
+                        }
+                    }
+                }
+            }).doOnError((e) -> {
+                progress.setIndeterminate(false);
+            }).subscribe();
+        }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
+    }
+
     private void assignLocation(PurHisDetail sd) {
         if (sd.getLocCode() == null) {
             LocationAutoCompleter completer = purchase.getLocationAutoCompleter();
@@ -350,14 +397,13 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = false;
         if (listDetail.size() >= 1) {
             PurHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
-                status = true;
+                return true;
             }
         }
-        return status;
+        return false;
     }
 
     public List<PurHisDetail> getListDetail() {
@@ -388,7 +434,7 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
         for (int i = 0; i < listDetail.size(); i++) {
             PurHisDetail sdh = listDetail.get(i);
             if (sdh.getStockCode() != null) {
-                if (Util1.getDouble(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) == 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     focusTable(i);

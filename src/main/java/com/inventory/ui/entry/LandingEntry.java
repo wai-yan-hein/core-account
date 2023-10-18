@@ -494,18 +494,14 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                         param.put("p_region", t.getRegionName());
                         param.put("p_trader_phone_no", t.getTraderPhoneNo());
                         param.put("p_remark", t.getRemark());
+                        param.put("p_wet", t.getWetPercent());
                         param.put("p_sub_report_dir", "report/");
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode n1 = mapper.readTree(Util1.gson.toJson(t.getListQty()));
-                        JsonDataSource d1 = new JsonDataSource(n1, null) {
-                        };
-                        param.put("p_sub_qty_data", d1);
                         String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                         ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(t.getListPrice()));
                         JsonDataSource ds = new JsonDataSource(jsonDataStream);
                         JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
                         JasperViewer.viewReport(js, false);
-                    } catch (JRException | JsonProcessingException ex) {
+                    } catch (JRException ex) {
                         JOptionPane.showMessageDialog(this, ex.getMessage(), "Landing Report", JOptionPane.ERROR_MESSAGE);
                     }
                 }

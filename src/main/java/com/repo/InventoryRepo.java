@@ -1784,11 +1784,6 @@ public class InventoryRepo {
     }
 
     public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit) {
-        if (localDatabase) {
-            General general = new General();
-            general.setAmount(0.0F);
-            return Mono.justOrEmpty(general);
-        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getPurchaseRecentPrice")
                 .queryParam("stockCode", stockCode)

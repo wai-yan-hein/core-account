@@ -86,6 +86,7 @@ public final class StockFormulaCompleter implements KeyListener, FocusListener {
         table.setRowHeight(Global.tblRowHeight);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setDefaultRenderer(Boolean.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);

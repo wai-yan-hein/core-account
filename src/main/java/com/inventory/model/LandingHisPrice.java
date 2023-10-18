@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Data
@@ -23,6 +24,8 @@ public class LandingHisPrice {
     private double amount;
     @Column(name = "percent_allow")
     private double percentAllow;
-    private transient String criteriaUserCode;
-    private transient String criteriaName;
+    @Transient
+    private String criteriaUserCode;
+    @Transient
+    private String criteriaName;
 }

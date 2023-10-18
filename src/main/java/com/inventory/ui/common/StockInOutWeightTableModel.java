@@ -32,7 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockInOutWeightTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Stock Code", "Stock Name", "Location", "Weight", "Weight Unit", "In-Qty", "In-Unit", "Out-Qty", "Out-Unit", "Cost Price", "Amount", "Total Weight"};
+    private String[] columnNames = {"Stock Code", "Stock Name", "Location", "Weight",
+        "Weight Unit", "In-Qty",
+        "In-Unit", "Out-Qty", "Out-Unit", "Cost Price", "Amount", "Total Weight"};
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
     private List<StockInOutKey> deleteList = new ArrayList();
