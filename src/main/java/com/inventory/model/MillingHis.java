@@ -88,6 +88,8 @@ public class MillingHis {
     private double percentWeight;
     @Column(name = "percent_qty")
     private double percentQty;
+    @Column(name = "job_no")
+    private String jobNo;
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
