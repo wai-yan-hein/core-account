@@ -160,7 +160,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             cboLabourGroup.setSelectedItem(null);
         });
 
-        inventoryRepo.getJob().subscribe((t) -> {
+        inventoryRepo.getJob(false).subscribe((t) -> {
             jobComboBoxModel.setData(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");

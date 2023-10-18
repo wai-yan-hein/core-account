@@ -160,7 +160,7 @@ public class OtherSetup extends javax.swing.JPanel {
             jDialog.setSize(Global.width / 2, Global.height / 2);
             jDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getJob().doOnSuccess((t) -> {
+        inventoryRepo.getJob(false).doOnSuccess((t) -> {
             if (t != null) {
                 jDialog.setListVou(t);
             }
