@@ -683,22 +683,17 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         ReportFilter filter = getFilter();
         Mono<List<Gl>> monoGl = accountRepo.searchGl(filter);
         Mono<Tuple2<TmpOpening, List<Gl>>> monoZip = monoOp.zipWith(monoGl);
-        monoZip.hasElement().subscribe((element) -> {
-            if (element) {
-                monoZip.subscribe((t) -> {
-                    TmpOpening op = t.getT1();
-                    opening = op == null ? 0 : op.getOpening();
-                    List<Gl> list = t.getT2();
-                    checkDateLock(list);
-                    setData(list, filter.getFromDate());
-                    calDebitCredit();
-                    requestFoucsTable();
-                    decorator.refreshButton(filter.getFromDate());
-                    enableToolBar(true);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    enableToolBar(true);
-                });
+        monoZip.doOnSuccess((t) -> {
+            if (t != null) {
+                TmpOpening op = t.getT1();
+                opening = op == null ? 0 : op.getOpening();
+                List<Gl> list = t.getT2();
+                checkDateLock(list);
+                setData(list, filter.getFromDate());
+                calDebitCredit();
+                requestFoucsTable();
+                decorator.refreshButton(filter.getFromDate());
+                enableToolBar(true);
             } else {
                 setData(new ArrayList<>(), filter.getFromDate());
                 calDebitCredit();
@@ -706,7 +701,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 decorator.refreshButton(filter.getFromDate());
                 enableToolBar(true);
             }
-        });
+        }).doOnError((e) -> {
+            log.error("searchCash: " + e.getMessage());
+            enableToolBar(true);
+        }).subscribe();
     }
 
     private void checkDateLock(List<Gl> list) {

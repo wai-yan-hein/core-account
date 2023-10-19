@@ -12,6 +12,7 @@ import com.inventory.model.StockFormulaKey;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
@@ -108,6 +109,10 @@ public class StockFormulaTableModel extends AbstractTableModel {
     }
 
     private boolean isValidEntry(StockFormula f) {
+        if (Util1.isNullOrEmpty(f.getFormulaName())) {
+            JOptionPane.showMessageDialog(table, "Name can't empty.");
+            return false;
+        }
         if (f.getKey().getFormulaCode() != null) {
             f.setUpdatedBy(Global.loginUser.getUserCode());
         }
@@ -184,5 +189,10 @@ public class StockFormulaTableModel extends AbstractTableModel {
             }
         }
         return status;
+    }
+
+    public void delete(int row) {
+        listDetail.remove(row);
+        fireTableRowsDeleted(row, row);
     }
 }

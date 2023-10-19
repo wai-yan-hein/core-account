@@ -194,6 +194,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                                 io.setLocName(l.getLocName());
                             });
                             setSelection(row, 3);
+                            addNewRow();
                         }
                     }
                     case 2 -> {
@@ -381,14 +382,13 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = false;
         if (listStock.size() >= 1) {
             StockInOutDetail get = listStock.get(listStock.size() - 1);
             if (get.getStockCode() == null) {
-                status = true;
+                return true;
             }
         }
-        return status;
+        return false;
     }
 
     public void clear() {

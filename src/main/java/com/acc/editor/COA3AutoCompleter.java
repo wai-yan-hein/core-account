@@ -119,7 +119,7 @@ public final class COA3AutoCompleter implements KeyListener {
 
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
-        popup.setPopupSize(600, 200);
+        popup.setPopupSize(600, 300);
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {

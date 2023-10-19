@@ -4,6 +4,7 @@
  */
 package com.h2.service;
 
+import com.inventory.model.RelationKey;
 import com.inventory.model.UnitRelation;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
 public interface RelationService {
 
     UnitRelation save(UnitRelation stock);
+
+    UnitRelation findByKey(RelationKey key);
 
     List<UnitRelation> findAll(String compCode);
 

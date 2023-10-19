@@ -139,7 +139,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     }
 
     private void sendMessage(String mes) {
-        inventoryRepo.sendDownloadMessage(MessageType.ORDER_STATUS, mes)
+        inventoryRepo.sendDownloadMessage(MessageType.LABOUR_GROUP, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();

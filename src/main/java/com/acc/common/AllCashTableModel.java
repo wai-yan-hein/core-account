@@ -322,6 +322,7 @@ public class AllCashTableModel extends AbstractTableModel {
             }).doOnTerminate(() -> {
                 addNewRow();
                 setSelection(row + 1, 0);
+                progress.setIndeterminate(false);
                 observer.selected("CAL-TOTAL", "-");
             }).subscribe();
         }
@@ -439,7 +440,6 @@ public class AllCashTableModel extends AbstractTableModel {
             listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
         }
-        progress.setIndeterminate(false);
     }
 
     public boolean hasEmptyRow() {

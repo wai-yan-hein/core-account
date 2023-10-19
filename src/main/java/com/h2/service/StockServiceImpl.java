@@ -55,4 +55,14 @@ public class StockServiceImpl implements StockService {
         return dao.find(key);
     }
 
+    @Override
+    public List<Stock> search(String stockCode, String stockType, String cat, String brand, String compCode, Integer deptId, boolean orderFavorite) {
+        return dao.search(stockCode, stockType, cat, brand, compCode, deptId, orderFavorite);
+    }
+
+    @Override
+    public List<Stock> findActiveStock(String compCode) {
+        return dao.findActiveStock(compCode);
+    }
+
 }

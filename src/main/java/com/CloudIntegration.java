@@ -26,6 +26,7 @@ import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.GlService;
+import com.h2.service.LabourGroupService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
@@ -53,6 +54,7 @@ import com.h2.service.TransferHisService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.h2.service.WeightLossService;
+import com.inventory.model.LabourGroup;
 import com.inventory.model.OrderHis;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.PurHis;
@@ -172,6 +174,8 @@ public class CloudIntegration {
     private StockFormulaService stockFormulaService;
     @Autowired
     private StockCriteriaService stockCriteriaService;
+    @Autowired
+    private LabourGroupService labourGroupService;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
@@ -624,6 +628,7 @@ public class CloudIntegration {
         downloadStock();
         downloadStockFormula();
         downloadStockCriteria();
+        downloadLabourGroup();
     }
 
     public void downloadPriceOption() {
@@ -794,6 +799,20 @@ public class CloudIntegration {
                 stockCriteriaService.save(s);
             });
             observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+
+    public void downloadLabourGroup() {
+        String maxDate = labourGroupService.getMaxDate();
+        inventoryRepo.getUpdateLabourGroup(maxDate).subscribe((t) -> {
+            log.info("labour group = " + t.size());
+            observer.selected("download", "downloadLabourGroup list : " + t.size());
+            t.forEach((s) -> {
+                labourGroupService.save(s);
+            });
+            observer.selected("download", "downloadLabourGroup done.");
         }, (e) -> {
             observer.selected("download", e.getMessage());
         });

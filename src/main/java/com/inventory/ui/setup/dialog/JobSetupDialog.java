@@ -144,6 +144,7 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
+        chkFinished.setEnabled(true);
 
     }
 
@@ -181,6 +182,8 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
         txtFilter.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
+        chkFinished.setSelected(false);
+        chkFinished.setEnabled(false);
         lblStatus.setForeground(Color.green);
         ord = new Job();
         jobTableModel.refresh();
@@ -358,8 +361,8 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
         jLabel5.setText("End Date");
 
         chkFinished.setFont(Global.lableFont);
-        chkFinished.setSelected(true);
         chkFinished.setText("Finished");
+        chkFinished.setEnabled(false);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -383,13 +386,11 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
                             .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(chkFinished, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtName)
                             .addComponent(txtUserCode)
                             .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkFinished, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 

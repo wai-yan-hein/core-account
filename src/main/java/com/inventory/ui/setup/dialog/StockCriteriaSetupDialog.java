@@ -134,7 +134,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
     }
 
     private void sendMessage(String mes) {
-        inventoryRepo.sendDownloadMessage(MessageType.CATEGORY, mes)
+        inventoryRepo.sendDownloadMessage(MessageType.CRITERIA, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();

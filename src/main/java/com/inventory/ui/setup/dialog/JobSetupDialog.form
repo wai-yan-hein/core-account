@@ -127,14 +127,11 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Component id="chkFinished" min="-2" pref="85" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                              </Group>
                               <Component id="txtName" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtUserCode" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtStartDate" max="32767" attributes="0"/>
                               <Component id="txtEndDate" max="32767" attributes="0"/>
+                              <Component id="chkFinished" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -317,8 +314,8 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="Finished"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>

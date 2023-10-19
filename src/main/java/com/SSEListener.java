@@ -5,6 +5,7 @@
 package com;
 
 import com.common.SelectionObserver;
+import com.inventory.model.Message;
 import com.inventory.model.MessageType;
 import com.repo.AccountRepo;
 import com.repo.InventoryRepo;
@@ -75,6 +76,12 @@ public class SSEListener {
                             integration.downloadOrderStatus();
                         case MessageType.PRICE_OPTION ->
                             integration.downloadPriceOption();
+                        case MessageType.LABOUR_GROUP ->
+                            integration.downloadLabourGroup();
+//                        case MessageType.FORMULA ->
+//                            //integration.downloa();
+                        case MessageType.CRITERIA ->
+                            integration.downloadStockCriteria();
                     }
                     showMessage(t.getMessage());
                 }
@@ -143,10 +150,10 @@ public class SSEListener {
                             integration.downloadRoleProperty();
                         case MessageType.SYSTEM_PROPERTY ->
                             integration.downloadSystemProperty();
-                        case MessageType.DATE_LOCK ->{
+                        case MessageType.DATE_LOCK -> {
                             integration.downloadDateLock();
                         }
-                            
+
                     }
                     showMessage(t.getMessage());
                 }

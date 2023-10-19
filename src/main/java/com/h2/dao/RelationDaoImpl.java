@@ -37,4 +37,9 @@ public class RelationDaoImpl extends AbstractDao<RelationKey, UnitRelation> impl
         return findHSQL(hsql);
     }
 
+    @Override
+    public UnitRelation findByKey(RelationKey key) {
+        return getByKey(key);
+    }
+
 }

@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.h2.dao.RelationDao;
+import com.inventory.model.RelationKey;
 import com.inventory.model.UnitRelation;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,11 @@ public class RelationServiceImpl implements RelationService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public UnitRelation findByKey(RelationKey key) {
+        return dao.findByKey(key);
     }
 
 }

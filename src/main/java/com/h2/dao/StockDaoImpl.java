@@ -129,4 +129,33 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
         return getByKey(key);
     }
 
+    @Override
+    public List<Stock> search(String stockCode, String stockType, String cat, String brand, String compCode, Integer deptId, boolean orderFavorite) {
+        String hsql = "select o from Stock o where o.active = true and o.deleted = false and o.key.compCode ='" + compCode + "' and (o.deptId =" + deptId + " or 0=" + deptId + ")\n";
+        if (!stockCode.equals("-")) {
+            hsql += " and o.key.stockCode ='" + stockCode + "'\n";
+        }
+        if (!stockType.equals("-")) {
+            hsql += " and o.typeCode ='" + stockType + "'\n";
+        }
+        if (!cat.equals("-")) {
+            hsql += " and o.catCode ='" + cat + "'\n";
+        }
+        if (!brand.equals("-")) {
+            hsql += " and o.brandCode ='" + brand + "'\n";
+        }
+        if (orderFavorite) {
+            hsql += " order by o.favorite desc,o.userCode";
+        } else {
+            hsql += " order by o.userCode";
+        }
+        return findHSQL(hsql);
+    }
+
+    @Override
+    public List<Stock> findActiveStock(String compCode) {
+        String hsql = "select o from Stock o where o.active = true and o.key.compCode = '" + compCode + "'";
+        return findHSQL(hsql);
+    }
+
 }

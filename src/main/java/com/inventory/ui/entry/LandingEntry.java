@@ -75,6 +75,11 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private LandingHis landing = new LandingHis();
     private LandingHistoryDialog dialog;
 
+    public StockAutoCompleter1 getStockAutoCompleter() {
+        return stockAutoCompleter;
+    }
+    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -240,6 +245,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private void initTableGrade() {
         landingGradeTableModel.setObserver(this);
         landingGradeTableModel.setInventoryRepo(inventoryRepo);
+        landingGradeTableModel.setLanding(this);
         tblGrade.setModel(landingGradeTableModel);
         tblGrade.getTableHeader().setFont(Global.tblHeaderFont);
         tblGrade.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

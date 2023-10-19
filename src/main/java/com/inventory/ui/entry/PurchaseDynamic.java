@@ -403,8 +403,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//total weight
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//
         tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
-        tblPur.setDefaultRenderer(String.class, new DecimalFormatRender());
-        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
+        tblPur.setDefaultRenderer(String.class, new DecimalFormatRender(2));
+        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

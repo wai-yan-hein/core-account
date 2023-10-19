@@ -170,19 +170,23 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             vouStatusAutoCompleter.setListVouStatus(t);
         }).subscribe();
 
-        inventoryRepo.getLabourGroup().subscribe((t) -> {
-            t.add(new LabourGroup());
-            labourGroupComboBoxModel.setData(t);
-            cboLabourGroup.setModel(labourGroupComboBoxModel);
-            cboLabourGroup.setSelectedItem(null);
-        });
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
+            if (t != null) {
+                t.add(new LabourGroup());
+                labourGroupComboBoxModel.setData(t);
+                cboLabourGroup.setModel(labourGroupComboBoxModel);
+                cboLabourGroup.setSelectedItem(null);
+            }
+        }).subscribe();
 
-        inventoryRepo.getJob(false).subscribe((t) -> {
-            t.add(new Job());
-            jobComboBoxModel.setData(t);
-            cboJob.setModel(jobComboBoxModel);
-            cboJob.setSelectedItem(null);
-        });
+        inventoryRepo.getJob(false).doOnSuccess((t) -> {
+            if (t != null) {
+                t.add(new Job());
+                jobComboBoxModel.setData(t);
+                cboJob.setModel(jobComboBoxModel);
+                cboJob.setSelectedItem(null);
+            }
+        }).subscribe();
     }
 
     private void initModel() {

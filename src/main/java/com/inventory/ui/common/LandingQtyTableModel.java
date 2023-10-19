@@ -161,6 +161,11 @@ public class LandingQtyTableModel extends AbstractTableModel {
                         }
                     }
                     //qty
+                    case 3 -> {
+                        record.setPercentAllow(Util1.getDouble(value));
+                        setSelection(row, 4);
+                    }
+                    //qty
                     case 4 -> {
                         record.setQty(Util1.getDouble(value));
                         setSelection(row, 4);
@@ -189,7 +194,7 @@ public class LandingQtyTableModel extends AbstractTableModel {
             if (percent >= percentAllow) {
                 double diff = percentAllow - percent;
                 l.setTotalQty(diff * qty);
-            }else{
+            } else {
                 l.setTotalQty(0);
             }
         } else {

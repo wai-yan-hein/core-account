@@ -13,6 +13,8 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockCriteriaEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.GradeDetail;
+import com.inventory.model.Message;
+import com.inventory.model.MessageType;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
 import com.inventory.ui.common.GradeDetailTableModel;
@@ -30,11 +32,13 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class StockFormulaSetup extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private StockCriteriaSetupDialog scDialog;
@@ -78,9 +82,11 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPrice.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblPrice.getActionMap().put(solve, new DeleteAction("Formula"));
+        tblPrice.getActionMap().put(solve, new DeleteAction("Price"));
         tblGrade.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblGrade.getActionMap().put(solve, new DeleteAction("Grade"));
+        tblFormula.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblFormula.getActionMap().put(solve, new DeleteAction("Formula"));
     }
 
     private class DeleteAction extends AbstractAction {
@@ -94,15 +100,17 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         @Override
         public void actionPerformed(ActionEvent e) {
             switch (option) {
-                case "Formula" ->
-                    deleteTranFormula();
+                case "Price" ->
+                    deleteTranPrice();
                 case "Grade" ->
                     deleteTranGrade();
+                case "Formula" ->
+                    deleteFormula();
             }
         }
     }
 
-    private void deleteTranFormula() {
+    private void deleteTranPrice() {
         int row = tblPrice.convertRowIndexToModel(tblPrice.getSelectedRow());
         if (row >= 0) {
             if (tblPrice.getCellEditor() != null) {
@@ -144,6 +152,35 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         }
     }
 
+    private void deleteFormula() {
+        int row = tblFormula.convertRowIndexToModel(tblFormula.getSelectedRow());
+        if (row >= 0) {
+            if (tblFormula.getCellEditor() != null) {
+                tblFormula.getCellEditor().stopCellEditing();
+            }
+            int yes_no = JOptionPane.showConfirmDialog(this,
+                    "Are you sure to delete?", "Formula delete.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (yes_no == 0) {
+                StockFormula d = stockFormulaTableModel.getObject(row);
+                if (d != null) {
+                    inventoryRepo.delete(d.getKey()).doOnSuccess((t) -> {
+                        if (t) {
+                            stockFormulaTableModel.delete(row);
+                            sendMessage(MessageType.FORMULA, "delete.");
+                        }
+                    }).subscribe();
+                }
+            }
+        }
+    }
+
+    private void sendMessage(String mesType, String mes) {
+        inventoryRepo.sendDownloadMessage(mesType, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
+    }
+
     private void stockCriteriaDialog() {
         if (scDialog == null) {
             scDialog = new StockCriteriaSetupDialog(Global.parentForm);
@@ -155,24 +192,24 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     }
 
     private void initTableFormula() {
-        stockFormulaTableModel.setTable(tblStock);
+        stockFormulaTableModel.setTable(tblFormula);
         stockFormulaTableModel.setInventoryRepo(inventoryRepo);
-        tblStock.setCellSelectionEnabled(true);
-        tblStock.setModel(stockFormulaTableModel);
-        tblStock.getTableHeader().setFont(Global.tblHeaderFont);
-        tblStock.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblStock.setFont(Global.textFont);
-        tblStock.setRowHeight(Global.tblRowHeight);
-        tblStock.setShowGrid(true);
-        tblStock.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        tblFormula.setCellSelectionEnabled(true);
+        tblFormula.setModel(stockFormulaTableModel);
+        tblFormula.getTableHeader().setFont(Global.tblHeaderFont);
+        tblFormula.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblFormula.setFont(Global.textFont);
+        tblFormula.setRowHeight(Global.tblRowHeight);
+        tblFormula.setShowGrid(true);
+        tblFormula.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblStock.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);
-        tblStock.getColumnModel().getColumn(2).setPreferredWidth(10);
-        tblStock.getSelectionModel().addListSelectionListener((e) -> {
+        tblFormula.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblFormula.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblFormula.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblFormula.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tblFormula.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tblFormula.getColumnModel().getColumn(2).setPreferredWidth(10);
+        tblFormula.getSelectionModel().addListSelectionListener((e) -> {
             if (e.getValueIsAdjusting()) {
                 searchFormulaPrice();
                 searchFormulaQty();
@@ -279,7 +316,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     }
 
     private void searchFormulaPrice() {
-        int row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+        int row = tblFormula.convertRowIndexToModel(tblFormula.getSelectedRow());
         if (row >= 0) {
             StockFormula f = stockFormulaTableModel.getObject(row);
             String formulaCode = f.getKey().getFormulaCode();
@@ -298,7 +335,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     }
 
     private void searchFormulaQty() {
-        int row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+        int row = tblFormula.convertRowIndexToModel(tblFormula.getSelectedRow());
         if (row >= 0) {
             StockFormula f = stockFormulaTableModel.getObject(row);
             String formulaCode = f.getKey().getFormulaCode();
@@ -386,7 +423,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblStock = new javax.swing.JTable();
+        tblFormula = new javax.swing.JTable();
         jScrollPane4 = new javax.swing.JScrollPane();
         tblQty = new javax.swing.JTable();
         jPanel6 = new javax.swing.JPanel();
@@ -507,7 +544,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 .addContainerGap())
         );
 
-        tblStock.setModel(new javax.swing.table.DefaultTableModel(
+        tblFormula.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -518,7 +555,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(tblStock);
+        jScrollPane1.setViewportView(tblFormula);
 
         tblQty.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -625,10 +662,10 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JTable tblFormula;
     private javax.swing.JTable tblGrade;
     private javax.swing.JTable tblPrice;
     private javax.swing.JTable tblQty;
-    private javax.swing.JTable tblStock;
     // End of variables declaration//GEN-END:variables
 
     @Override

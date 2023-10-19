@@ -4,6 +4,7 @@
  */
 package com.h2.dao;
 
+import com.inventory.model.RelationKey;
 import com.inventory.model.UnitRelation;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
 public interface RelationDao {
 
     UnitRelation save(UnitRelation stock);
+
+    UnitRelation findByKey(RelationKey key);
 
     String getMaxDate();
 

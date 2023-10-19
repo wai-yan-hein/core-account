@@ -5,12 +5,13 @@
  */
 package com.inventory.ui.common;
 
-import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.StockAutoCompleter1;
 import com.inventory.model.LandingHisGrade;
-import com.inventory.model.LandingHisGradeKey;
 import com.inventory.model.LandingHisPrice;
+import com.inventory.model.Stock;
+import com.inventory.ui.entry.LandingEntry;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,6 +34,11 @@ public class LandingGradeTableModel extends AbstractTableModel {
     private JTable table;
     private InventoryRepo inventoryRepo;
     private SelectionObserver observer;
+    private LandingEntry landing;
+
+    public void setLanding(LandingEntry landing) {
+        this.landing = landing;
+    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -184,50 +190,73 @@ public class LandingGradeTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    private Stock getLandingStock() {
+        StockAutoCompleter1 completer = landing.getStockAutoCompleter();
+        if (completer != null) {
+            return completer.getStock();
+        }
+        return null;
+    }
+
     public void checkGrade(String formulaCode, List<LandingHisPrice> listCriteria) {
         Map<String, Integer> match = new HashMap<>();
         Map<String, String> hmStock = new HashMap<>();
         clear();
         if (listCriteria != null) {
-            inventoryRepo.getCriteriaByFormula(formulaCode).doOnSuccess((listGrade) -> {
-                listCriteria.forEach((c) -> {
-                    log.info("matching : " + c.getCriteriaCode());
-                    double percent = c.getPercent();
-                    String c1 = c.getCriteriaCode();
-                    listGrade.forEach((g) -> {
-                        double minPercent = g.getMinPercent();
-                        double maxPercent = g.getMaxPercent();
-                        String c2 = g.getKey().getCriteriaCode();
-                        String stockCode = g.getGradeStockCode();
-                        if (c1.equals(c2)) {
-                            if (percent >= minPercent && percent <= maxPercent) {
-                                match.put(stockCode, match.getOrDefault(stockCode, 0) + 1);
-                                log.info("match found : " + c1 + " : " + stockCode);
+            inventoryRepo.getStockFormulaGrade(formulaCode).doOnSuccess((listGrade) -> {
+                if (!listGrade.isEmpty()) {
+                    listCriteria.forEach((c) -> {
+                        log.info("matching : " + c.getCriteriaCode());
+                        double percent = c.getPercent();
+                        String c1 = c.getCriteriaCode();
+                        listGrade.forEach((g) -> {
+                            double minPercent = g.getMinPercent();
+                            double maxPercent = g.getMaxPercent();
+                            String c2 = g.getKey().getCriteriaCode();
+                            String stockCode = g.getGradeStockCode();
+                            if (c1.equals(c2)) {
+                                if (percent >= minPercent && percent <= maxPercent) {
+                                    match.put(stockCode, match.getOrDefault(stockCode, 0) + 1);
+                                    log.info("match found : " + c1 + " : " + stockCode);
+                                }
                             }
-                        }
-                        hmStock.put(stockCode, g.getStockName());
+                            hmStock.put(stockCode, g.getStockName());
+                        });
                     });
-                });
+                }
                 List<LandingHisGrade> list = new ArrayList<>();
-                match.forEach((t, u) -> {
-                    LandingHisGrade g = new LandingHisGrade();
-                    g.setStockCode(t);
-                    g.setStockName(hmStock.get(t));
-                    g.setMatchCount(u);
-                    double count = Util1.getDouble(u);
-                    double size = listCriteria.size();
-                    double percent = count / size;
-                    g.setMatchPercent(percent * 100);
-                    g.setChoose(false);
-                    list.add(g);
-                });
+                if (!match.isEmpty()) {
+                    match.forEach((t, u) -> {
+                        LandingHisGrade g = new LandingHisGrade();
+                        g.setStockCode(t);
+                        g.setStockName(hmStock.get(t));
+                        g.setMatchCount(u);
+                        double count = Util1.getDouble(u);
+                        double size = listCriteria.size();
+                        double percent = count / size;
+                        g.setMatchPercent(percent * 100);
+                        g.setChoose(false);
+                        list.add(g);
+                    });
+                } else {
+                    Stock s = getLandingStock();
+                    if (s != null) {
+                        LandingHisGrade g = new LandingHisGrade();
+                        g.setStockCode(s.getKey().getStockCode());
+                        g.setStockName(s.getStockName());
+                        g.setMatchCount(100);
+                        g.setMatchPercent(100);
+                        g.setChoose(false);
+                        list.add(g);
+                    }
+                }
                 list.sort(Comparator.comparingDouble(LandingHisGrade::getMatchCount).reversed());
                 if (!list.isEmpty()) {
                     list.get(0).setChoose(true);
                 }
                 setListGrade(list);
                 observer.selected("CAL_PURCHASE", "CAL_PURCHASE");
-            }).block();
+            }).subscribe();
         }
 
     }
