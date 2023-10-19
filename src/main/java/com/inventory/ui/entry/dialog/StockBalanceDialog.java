@@ -65,16 +65,15 @@ public class StockBalanceDialog extends javax.swing.JDialog {
             stockBalanceWeightTableModel.setProgress(progress);
             stockBalanceWeightTableModel.setInventoryRepo(inventoryRepo);
             stockBalanceWeightTableModel.setChkSummary(chkSummary);
-            tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
-            tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//qty
-            tblStock.getColumnModel().getColumn(2).setPreferredWidth(200);//qty
+            tblStock.getColumnModel().getColumn(0).setPreferredWidth(200);//Unit
+            tblStock.getColumnModel().getColumn(1).setPreferredWidth(80);//qty
+            tblStock.getColumnModel().getColumn(2).setPreferredWidth(80);//qty
         } else {
             tblStock.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(progress);
             stockBalanceTableModel.setInventoryRepo(inventoryRepo);
             stockBalanceTableModel.setChkSummary(chkSummary);
-            tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
-            tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//Cost Price
+            tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//
 
         }
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
@@ -89,6 +88,7 @@ public class StockBalanceDialog extends javax.swing.JDialog {
                 setLocationDialog();
                 firstTime = false;
             }
+            setLocationRelativeTo(frame);
             boolean weight = ProUtil.isUseWeight();
             initMain(weight);
             progress.setIndeterminate(true);
@@ -161,7 +161,7 @@ public class StockBalanceDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
                     .addComponent(chkSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())

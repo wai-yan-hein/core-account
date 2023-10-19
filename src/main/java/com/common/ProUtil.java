@@ -66,6 +66,7 @@ public class ProUtil {
     public static final String DEPARTMENT_LOCK = "department.lock";
     public static final String MILLING_STOCK_USAGE = "milling.stock.usage";
     public static final String DRCR_REPORT = "drcr.report";
+    public static final String ROUND_POINT = "round.point";
 
     public static String getDrCrReport() {
         return Global.hmRoleProperty.get(DRCR_REPORT);

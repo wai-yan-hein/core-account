@@ -501,6 +501,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtRemark.setText(null);
         txtReference.setText(null);
         txtBatchNo.setText(null);
+        txtWeight.setValue(0);
+        txtQty.setValue(0);
         btnBatch.setText("Batch");
     }
 
@@ -524,7 +526,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         assignDefaultValue();
         labourGroupComboBoxModel.setSelectedItem(null);
         cboLabourGroup.repaint();
-        txtComPercent.setValue(Util1.getFloat(ProUtil.getProperty("purchase.commission")));
+        txtComPercent.setValue(Util1.getDouble(ProUtil.getProperty("purchase.commission")));
         ph = new PurHis();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
@@ -611,7 +613,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     "No Location.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtLocation.requestFocus();
-        } else if (Util1.getFloat(txtVouTotal.getValue()) <= 0) {
+        } else if (Util1.getDouble(txtVouTotal.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Amount.",
                     "No Pur Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
@@ -733,55 +735,57 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private void calExpense() {
-        float ttlExp = 0.0f;
+        double ttlExp = 0.0f;
         List<PurExpense> list = expenseTableModel.getListDetail();
         for (PurExpense p : list) {
-            ttlExp += Util1.getFloat(p.getAmount());
+            ttlExp += Util1.getDouble(p.getAmount());
         }
         txtExpense.setValue(ttlExp);
     }
 
     private void calculateTotalAmount(boolean partial) {
         calExpense();
-        float totalVouBalance;
-        float totalAmount = 0.0f;
+        double totalVouBalance;
         listDetail = getListDetail();
-        totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
-        txtVouTotal.setValue(totalAmount);
+        double qty = listDetail.stream().mapToDouble((t) -> t.getQty()).sum();
+        double weight = listDetail.stream().mapToDouble((t) -> t.getTotalWeight()).sum();
+        txtWeight.setValue(weight);
+        txtQty.setValue(qty);
+        double totalAmount = listDetail.stream().mapToDouble((t) -> t.getAmount()).sum();
+        txtVouTotal.setValue(Util1.round(totalAmount));
 
         //cal discAmt
-        float discp = Util1.getFloat(txtVouDiscP.getValue());
+        double discp = Util1.getDouble(txtVouDiscP.getValue());
         if (discp > 0) {
-            float discountAmt = (totalAmount * (discp / 100));
-            txtVouDiscount.setValue(Util1.getFloat(discountAmt));
+            double discountAmt = (totalAmount * (discp / 100));
+            txtVouDiscount.setValue(Util1.getDouble(discountAmt));
         }
         //cal Commission
-        float comp = Util1.getFloat(txtComPercent.getValue());
+        double comp = Util1.getDouble(txtComPercent.getValue());
         if (comp > 0) {
-            float amt = (totalAmount * (comp / 100));
+            double amt = (totalAmount * (comp / 100));
             txtComAmt.setValue(amt);
         }
 
         //calculate taxAmt
-        float taxp = Util1.getFloat(txtVouTaxP.getValue());
-        float taxAmt = Util1.getFloat(txtTax.getValue());
+        double taxp = Util1.getDouble(txtVouTaxP.getValue());
+        double taxAmt = Util1.getDouble(txtTax.getValue());
         if (taxp > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-            float totalTax = (afterDiscountAmt * taxp) / 100;
-            txtTax.setValue(Util1.getFloat(totalTax));
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            double totalTax = (afterDiscountAmt * taxp) / 100;
+            txtTax.setValue(Util1.getDouble(totalTax));
         } else if (taxAmt > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
             taxp = (taxAmt / afterDiscountAmt) * 100;
-            txtVouTaxP.setValue(Util1.getFloat(taxp));
+            txtVouTaxP.setValue(Util1.getDouble(taxp));
         }
-        float ttlExp = Util1.getFloat(txtExpense.getValue());
-        txtGrandTotal.setValue(totalAmount
-                + Util1.getFloat(txtTax.getValue())
-                - Util1.getFloat(txtVouDiscount.getValue())
-                - ttlExp);
-        float grandTotal = Util1.getFloat(txtGrandTotal.getValue());
-
-        float paid = Util1.getFloat(txtVouPaid.getText());
+        double ttlExp = Util1.getDouble(txtExpense.getValue());
+        double grandTotal = totalAmount
+                + Util1.getDouble(txtTax.getValue())
+                - Util1.getDouble(txtVouDiscount.getValue())
+                - ttlExp;
+        txtGrandTotal.setValue(Util1.round(grandTotal));
+        double paid = Util1.getDouble(txtVouPaid.getText());
         if (!partial) {
             if (paid == 0 || paid != grandTotal) {
                 if (chkPaid.isSelected()) {
@@ -792,9 +796,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
 
-        paid = Util1.getFloat(txtVouPaid.getText());
+        paid = Util1.getDouble(txtVouPaid.getText());
         totalVouBalance = grandTotal - paid;
-        txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
+        txtVouBalance.setValue(Util1.round(totalVouBalance));
     }
 
     public void historyPur() {
@@ -887,20 +891,20 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                         txtDueDate.setDate(ph.getDueDate());
                         txtRemark.setText(ph.getRemark());
                         txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
-                        txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
-                        txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
-                        txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
-                        txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
-                        txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
-                        txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
-                        txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                        chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
+                        txtVouTotal.setValue(Util1.getDouble(ph.getVouTotal()));
+                        txtVouDiscP.setValue(Util1.getDouble(ph.getDiscP()));
+                        txtVouDiscount.setValue(Util1.getDouble(ph.getDiscount()));
+                        txtVouTaxP.setValue(Util1.getDouble(ph.getTaxP()));
+                        txtTax.setValue(Util1.getDouble(ph.getTaxAmt()));
+                        txtVouPaid.setValue(Util1.getDouble(ph.getPaid()));
+                        txtVouBalance.setValue(Util1.getDouble(ph.getBalance()));
+                        txtGrandTotal.setValue(Util1.getDouble(txtGrandTotal.getValue()));
+                        chkPaid.setSelected(Util1.getDouble(ph.getPaid()) > 0);
                         txtReference.setText(ph.getReference());
                         txtBatchNo.setText(ph.getBatchNo());
-                        txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
-                        txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
-                        txtExpense.setValue(Util1.getFloat(ph.getExpense()));
+                        txtComPercent.setValue(Util1.getDouble(ph.getCommP()));
+                        txtComAmt.setValue(Util1.getDouble(ph.getCommAmt()));
+                        txtExpense.setValue(Util1.getDouble(ph.getExpense()));
                         focusTable();
                         progress.setIndeterminate(false);
                     }, (e) -> {
@@ -971,6 +975,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         String vouNo = ph.getKey().getVouNo();
         inventoryRepo.getPurchaseReport(vouNo).doOnSuccess((t) -> {
             try {
+
                 String reportName = "PurchaseLandingVoucherA5";
                 String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                 Map<String, Object> param = new HashMap<>();
@@ -986,6 +991,15 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 JsonDataSource d1 = new JsonDataSource(n1, null) {
                 };
                 param.put("p_sub_data", d1);
+                if (t.size() >= 2) {
+                    VPurchase p1 = t.get(0);
+                    VPurchase p2 = t.get(1);
+                    double ttlQty = p1.getQty() + p2.getQty();
+                    param.put("p_total_qty", ttlQty);
+                } else if (t.size() == 1) {
+                    VPurchase p1 = t.get(0);
+                    param.put("p_total_qty", p1.getQty());
+                }
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(t));
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint main = JasperFillManager.fillReport(reportPath, param, ds);
@@ -1010,7 +1024,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         p1.zipWith(p2).subscribe((t) -> {
             List<VPurchase> list = t.getT1();
             List<PurExpense> listEx = t.getT2();
-            listEx.removeIf((ex) -> Util1.getFloat(ex.getAmount()) == 0);
+            listEx.removeIf((ex) -> Util1.getDouble(ex.getAmount()) == 0);
             if (list != null) {
                 String key = "report.purchase.voucher";
                 String reportName = ProUtil.getProperty(key);
@@ -1028,7 +1042,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                             param.put("p_vou_no", vouNo);
                             param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
                             param.put("p_vou_total", p.getVouTotal());
-                            param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
+                            param.put("p_exp", Util1.getDouble(p.getExpense()) * -1);
                             param.put("p_vou_paid", p.getPaid());
                             param.put("p_vou_balance", p.getBalance());
                             param.put("p_batch_no", p.getBatchNo());
@@ -1260,6 +1274,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         expProgress = new javax.swing.JProgressBar();
         btnBatch = new javax.swing.JButton();
         btnLanding = new javax.swing.JButton();
+        txtQty = new javax.swing.JFormattedTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        txtWeight = new javax.swing.JFormattedTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -1418,7 +1436,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelPurLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -1432,7 +1450,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                     .addComponent(txtLocation)
                     .addComponent(txtCurrency))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1443,12 +1461,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtReference, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
                     .addComponent(txtBatchNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel11)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cboLabourGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cboLabourGroup, 0, 166, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1587,6 +1605,18 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         });
 
+        txtQty.setEditable(false);
+        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtQty.setFont(Global.lableFont);
+
+        jLabel3.setText("Qty");
+
+        jLabel12.setText("Weight");
+
+        txtWeight.setEditable(false);
+        txtWeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtWeight.setFont(Global.lableFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1598,20 +1628,34 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(btnBatch)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(btnLanding)
-                        .addGap(613, 613, 613))))
+                    .addComponent(btnBatch)
+                    .addComponent(btnLanding))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel12))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel3)))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2185,7 +2229,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
             case "txtVouDiscount" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouDiscount.getValue()) >= 0) {
+                    if (Util1.getDouble(txtVouDiscount.getValue()) >= 0) {
                         txtVouDiscP.setValue(0);
                     }
                     calculateTotalAmount(false);
@@ -2194,7 +2238,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
             case "txtVouDiscP" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouDiscP.getValue()) <= 0) {
+                    if (Util1.getDouble(txtVouDiscP.getValue()) <= 0) {
                         txtVouDiscount.setValue(0);
                     }
                     calculateTotalAmount(false);
@@ -2203,7 +2247,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
             case "txtComPercent" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtComPercent.getValue()) <= 0) {
+                    if (Util1.getDouble(txtComPercent.getValue()) <= 0) {
                         txtComAmt.setValue(0);
                     }
                     calculateTotalAmount(false);
@@ -2212,7 +2256,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
             case "txtComAmt" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtComAmt.getValue()) >= 0) {
+                    if (Util1.getDouble(txtComAmt.getValue()) >= 0) {
                         txtComPercent.setValue(0);
                     }
                     calculateTotalAmount(false);
@@ -2238,6 +2282,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -2250,6 +2295,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -2278,6 +2324,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JFormattedTextField txtGrandTotal;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtPurDate;
+    private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JFormattedTextField txtTax;
@@ -2288,6 +2335,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JFormattedTextField txtVouPaid;
     private javax.swing.JFormattedTextField txtVouTaxP;
     private javax.swing.JFormattedTextField txtVouTotal;
+    private javax.swing.JFormattedTextField txtWeight;
     // End of variables declaration//GEN-END:variables
 
     @Override

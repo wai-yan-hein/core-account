@@ -120,10 +120,18 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     public void initMain() {
+        assignDefault();
         initTable();
         initModel();
         initCombo();
         clear();
+    }
+
+    private void assignDefault() {
+        if (type == IO) {
+            txtWeight.setVisible(false);
+            lblWeight.setVisible(false);
+        }
     }
 
     private void actionMapping() {
@@ -161,6 +169,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtInQty.setFormatterFactory(Util1.getDecimalFormat());
         txtOutQty.setFormatterFactory(Util1.getDecimalFormat());
         txtCost.setFormatterFactory(Util1.getDecimalFormat());
+        txtWeight.setFormatterFactory(Util1.getDecimalFormat());
+
     }
 
     private void initCombo() {
@@ -402,20 +412,23 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void calTotalAmt() {
-        float ttlInQty = 0.0f;
-        float ttlOutQty = 0.0f;
-        float ttlPrice = 0.0f;
+        double ttlInQty = 0.0;
+        double ttlOutQty = 0.0;
+        double ttlPrice = 0.0;
+        double ttlWt = 0.0;
         List<StockInOutDetail> listIO = getListDetail();
         if (!listIO.isEmpty()) {
             for (StockInOutDetail s : listIO) {
                 ttlInQty += Util1.getDouble(s.getInQty());
                 ttlOutQty += Util1.getDouble(s.getOutQty());
                 ttlPrice += Util1.getDouble(s.getCostPrice()) * (Util1.getDouble(s.getInQty()) + Util1.getDouble(s.getOutQty()));
+                ttlWt += Util1.getDouble(s.getTotalWeight());
             }
         }
         txtInQty.setValue(ttlInQty);
         txtOutQty.setValue(ttlOutQty);
         txtCost.setValue(ttlPrice);
+        txtWeight.setValue(ttlWt);
 
     }
 
@@ -709,6 +722,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtCost = new javax.swing.JFormattedTextField();
         lblRec = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        lblWeight = new javax.swing.JLabel();
+        txtWeight = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -901,6 +916,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Total In Qty");
 
+        lblWeight.setFont(Global.lableFont);
+        lblWeight.setText("Total Weight");
+
+        txtWeight.setEditable(false);
+        txtWeight.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtWeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtWeight.setFont(Global.amtFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -912,18 +935,22 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addComponent(lblRec, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
                 .addComponent(txtInQty, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtOutQty, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtCost, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblWeight)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -939,7 +966,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addComponent(txtCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel8)
                         .addComponent(lblRec)
-                        .addComponent(jButton1))
+                        .addComponent(jButton1)
+                        .addComponent(lblWeight)
+                        .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblStatus))
                 .addContainerGap())
         );
@@ -1011,6 +1040,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JLabel lblWeight;
     private javax.swing.JTable tblStock;
     private javax.swing.JFormattedTextField txtCost;
     private com.toedter.calendar.JDateChooser txtDate;
@@ -1020,6 +1050,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JTextField txtRemark;
     private javax.swing.JFormattedTextField txtVou;
     private javax.swing.JTextField txtVouType;
+    private javax.swing.JFormattedTextField txtWeight;
     // End of variables declaration//GEN-END:variables
 
     @Override

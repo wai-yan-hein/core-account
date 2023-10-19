@@ -286,12 +286,12 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     obj.setGlVouNo(glVouNo);
                     obj.setCompCode(Global.compCode);
                     obj.setModifyBy(Global.loginUser.getUserCode());
-                    accountRepo.deleteVoucher(obj).subscribe((t) -> {
+                    accountRepo.deleteVoucher(obj).doOnSuccess((t) -> {
                         if (t) {
                             voucherTableModel.remove(selectRow);
                             focusOnTable();
                         }
-                    });
+                    }).subscribe();
 
                 }
             }
