@@ -10,7 +10,7 @@ public interface StockFormulaQtyDao {
 
     boolean delete(StockFormulaQtyKey key);
 
-    List<StockFormulaQty> getFormulaDetail(String code, String compCode);
+    List<StockFormulaQty> getStockFormulaQty(String formulaCode, String compCode);
 
     String getMaxDate();
 }

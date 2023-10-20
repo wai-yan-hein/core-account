@@ -21,7 +21,7 @@ public class LabourGroupDaoImpl extends AbstractDao<LabourGroupKey, LabourGroup>
 
     @Override
     public List<LabourGroup> findAll(String compCode) {
-        String hsql = "select o from LabourGroup o where o.key.compCode = '" + compCode + "'";
+        String hsql = "select o from LabourGroup o where o.key.compCode = '" + compCode + "' and o.deleted =false";
         return findHSQL(hsql);
     }
 

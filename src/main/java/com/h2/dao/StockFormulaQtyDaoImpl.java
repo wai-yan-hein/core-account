@@ -6,6 +6,7 @@ import com.inventory.model.StockFormulaQtyKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,8 @@ public class StockFormulaQtyDaoImpl extends AbstractDao<StockFormulaQtyKey, Stoc
     }
 
     @Override
-    public List<StockFormulaQty> getFormulaDetail(String code, String compCode) {
-        String sql = """
+    public List<StockFormulaQty> getStockFormulaQty(String code, String compCode) {
+         String sql = """
                 select s.*,sc.criteria_name,sc.user_code
                 from stock_formula_qty s
                 join stock_criteria sc on s.criteria_code = sc.criteria_code
@@ -57,8 +58,8 @@ public class StockFormulaQtyDaoImpl extends AbstractDao<StockFormulaQtyKey, Stoc
                 d.setPercentAllow(rs.getDouble("percent_allow"));
                 list.add(d);
             }
-        } catch (Exception e) {
-            log.error("getFormulaDetail : " + e.getMessage());
+        } catch (SQLException e) {
+            log.error("getStockFormulaQty : "+e.getMessage());
         }
         return list;
     }

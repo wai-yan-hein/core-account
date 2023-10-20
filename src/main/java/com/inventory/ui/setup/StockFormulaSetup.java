@@ -124,6 +124,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                     inventoryRepo.delete(d.getKey()).doOnSuccess((t) -> {
                         if (t) {
                             stockFormulaPriceTableModel.delete(row);
+                            sendMessage(MessageType.FORMULA_PRICE, "delete.");
                         }
                     }).subscribe();
                 }
@@ -145,6 +146,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                     inventoryRepo.delete(d.getKey()).doOnSuccess((t) -> {
                         if (t) {
                             gradeDetailTableModel.delete(row);
+                            sendMessage(MessageType.GRADE_DETAIL, "delete.");
                         }
                     }).subscribe();
                 }

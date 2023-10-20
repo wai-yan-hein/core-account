@@ -13,7 +13,6 @@ import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
-import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockUnit;
@@ -192,9 +191,8 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                             io.setWeight(s.getWeight());
                             io.setWeightUnit(s.getWeightUnit());
                             assignDefaultLocation(io, row);
-                            genPattern(s, io);
-                            setSelection(row, 3);
-                            addNewRow();
+                            genPattern(s, io, row);
+
                         }
                     }
                     case 2 -> {
@@ -308,13 +306,13 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
 
     }
 
-    private void genPattern(Stock s, StockInOutDetail iod) {
+    private void genPattern(Stock s, StockInOutDetail iod, int row) {
         boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
         if (!disable) {
             String stockCode = s.getKey().getStockCode();
             boolean explode = s.isExplode();
             String date = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
-            inventoryRepo.getPattern(stockCode, date).subscribe((t) -> {
+            inventoryRepo.getPattern(stockCode, date).doOnSuccess((t) -> {
                 if (!t.isEmpty()) {
                     String input = JOptionPane.showInputDialog("Enter Qty.");
                     if (Util1.isPositive(input)) {
@@ -352,13 +350,11 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                         iod.setCostPrice(totalPrice);
                     }
                 }
-                observer.selected("CAL-TOTAL", "CAL-TOTAL");
-            }, (e) -> {
-                JOptionPane.showMessageDialog(parent, e.getMessage());
-            }, () -> {
                 addNewRow();
-            });
+                observer.selected("CAL-TOTAL", "CAL-TOTAL");
+            }).subscribe();
         } else {
+            setSelection(row, 3);
             addNewRow();
         }
     }

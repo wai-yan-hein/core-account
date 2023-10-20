@@ -114,6 +114,7 @@ import com.h2.service.TransferHisDetailService;
 import com.h2.service.TransferHisService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.General;
+import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.OPHis;
@@ -141,6 +142,7 @@ import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaKey;
 import com.inventory.model.StockFormulaPrice;
 import com.inventory.model.StockFormulaPriceKey;
+import com.inventory.model.StockFormulaQty;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -362,10 +364,6 @@ public class H2Repo {
 
     public Mono<List<StockFormula>> getStockFormula(String compCode) {
         return Mono.justOrEmpty(stockFormulaService.getFormula(compCode));
-    }
-
-    public Mono<List<StockFormulaPrice>> getStockFormulaDetail(String formulaCode) {
-        return Mono.justOrEmpty(stockFormulaService.getFormulaDetail(formulaCode, Global.compCode));
     }
 
     public Mono<StockFormula> findStockFormula(StockFormulaKey key) {
@@ -1005,5 +1003,25 @@ public class H2Repo {
 
     public Mono<List<LabourGroup>> getLabourGroup() {
         return Mono.just(labourGroupService.findAll(Global.compCode));
+    }
+
+    public Mono<List<StockFormulaPrice>> getStockFormulaPrice(String formulaCode) {
+        return Mono.just(stockFormulaService.getStockFormulaPrice(formulaCode, Global.compCode));
+    }
+
+    public Mono<List<StockFormulaQty>> getStockFormulaQty(String formulaCode) {
+        return Mono.just(stockFormulaService.getStockFormulaQty(formulaCode, Global.compCode));
+    }
+
+    public Mono<List<GradeDetail>> getGradeDetail(String formulaCode, String criteriaCode) {
+        return Mono.just(stockFormulaService.getGradeDetail(formulaCode, criteriaCode, Global.compCode));
+    }
+
+    public StockFormulaQty save(StockFormulaQty t) {
+        return stockFormulaService.save(t);
+    }
+
+    public GradeDetail save(GradeDetail t) {
+        return stockFormulaService.save(t);
     }
 }

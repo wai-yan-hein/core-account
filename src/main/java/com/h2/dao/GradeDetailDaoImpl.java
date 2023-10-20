@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class GradeDetailDaoImpl extends AbstractDao<GradeDetailKey, GradeDetail>
     }
 
     @Override
-    public List<GradeDetail> getCriteriaByFormula(String formulaCode, String compCode) {
+    public List<GradeDetail> getStockFormulaGrade(String formulaCode, String compCode) {
         List<GradeDetail> list = new ArrayList<>();
         String sql = """
                 select g.*,s.stock_name
@@ -70,7 +71,8 @@ public class GradeDetailDaoImpl extends AbstractDao<GradeDetailKey, GradeDetail>
                 on g.grade_stock_code = s.stock_code
                 and g.comp_code = s.comp_code
                 where g.formula_code =?
-                and g.comp_code =?""";
+                and g.comp_code =?
+                order by g.uniqueId""";
         try {
             ResultSet rs = getResult(sql, formulaCode, compCode);
             while (rs.next()) {
@@ -87,8 +89,8 @@ public class GradeDetailDaoImpl extends AbstractDao<GradeDetailKey, GradeDetail>
                 d.setStockName(rs.getString("stock_name"));
                 list.add(d);
             }
-        } catch (Exception e) {
-            log.error("getCriteriaByFormula : " + e.getMessage());
+        } catch (SQLException e) {
+            log.error("getStockFormulaGrade : " + e.getMessage());
         }
         return list;
     }

@@ -3,7 +3,6 @@ package com.h2.service;
 import com.common.Util1;
 import com.h2.dao.GradeDetailDao;
 import com.h2.dao.StockFormulaDao;
-import com.h2.dao.StockFormulaDetailDao;
 import com.h2.dao.StockFormulaQtyDao;
 import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import com.h2.dao.StockFormulaPriceDao;
 
 @Service
 @Transactional
@@ -25,7 +25,7 @@ import java.util.List;
 public class StockFormulaServiceImpl implements StockFormulaService {
 
     private final StockFormulaDao formulaDao;
-    private final StockFormulaDetailDao formulaDetailDao;
+    private final StockFormulaPriceDao formulaPriceDao;
     private final GradeDetailDao gradeDetailDao;
     private final StockFormulaQtyDao formulaQtyDao;
     @Autowired
@@ -60,7 +60,7 @@ public class StockFormulaServiceImpl implements StockFormulaService {
 
     @Override
     public StockFormulaPrice save(StockFormulaPrice s) {
-        return formulaDetailDao.save(s);
+        return formulaPriceDao.save(s);
     }
 
     @Override
@@ -75,17 +75,12 @@ public class StockFormulaServiceImpl implements StockFormulaService {
 
     @Override
     public boolean delete(StockFormulaPriceKey key) {
-        return formulaDetailDao.delete(key);
+        return formulaPriceDao.delete(key);
     }
 
     @Override
     public boolean delete(GradeDetailKey key) {
         return gradeDetailDao.delete(key);
-    }
-
-    @Override
-    public List<StockFormulaPrice> getFormulaDetail(String code, String compCode) {
-        return formulaDetailDao.getFormulaDetail(code, compCode);
     }
 
     @Override
@@ -95,7 +90,7 @@ public class StockFormulaServiceImpl implements StockFormulaService {
 
     @Override
     public String getMaxDateSFPrice() {
-        return formulaDetailDao.getMaxDate();
+        return formulaPriceDao.getMaxDate();
     }
 
     @Override
@@ -107,8 +102,24 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     public String getMaxDateGD() {
         return gradeDetailDao.getMaxDate();
     }
+
     @Override
     public StockFormula find(StockFormulaKey key) {
         return formulaDao.find(key);
+    }
+
+    @Override
+    public List<StockFormulaPrice> getStockFormulaPrice(String formulaCode, String compCode) {
+        return formulaPriceDao.getStockFormulaPrice(formulaCode, compCode);
+    }
+
+    @Override
+    public List<StockFormulaQty> getStockFormulaQty(String formulaCode, String compCode) {
+        return formulaQtyDao.getStockFormulaQty(formulaCode, compCode);
+    }
+
+    @Override
+    public List<GradeDetail> getGradeDetail(String formulaCode, String criteriaCode, String compCode) {
+        return gradeDetailDao.getGradeDetail(formulaCode, criteriaCode, compCode);
     }
 }
