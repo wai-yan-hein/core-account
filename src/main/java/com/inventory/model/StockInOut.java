@@ -58,6 +58,14 @@ public class StockInOut implements Serializable {
     private String labourGroupCode;
     @Column(name = "job_code")
     private String jobCode;
+    @Column(name = "received_name")
+    private String receivedName;
+    @Column(name = "received_phone")
+    private String receivedPhoneNo;
+    @Column(name = "car_no")
+    private String carNo;
+    @Column(name = "trader_code")
+    private String traderCode;
     @Transient
     private String status = "STATUS";
     @Transient

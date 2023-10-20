@@ -361,7 +361,7 @@ public class AllCashTableModel extends AbstractTableModel {
             JOptionPane.showMessageDialog(parent, "Invalid Account.");
             status = false;
         } else if (!Util1.isDateBetween(gl.getGlDate())) {
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date.",
+            JOptionPane.showMessageDialog(Global.parentForm, "Date must be between financial period.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             parent.setColumnSelectionInterval(0, 0);
             parent.setRowSelectionInterval(row, row);

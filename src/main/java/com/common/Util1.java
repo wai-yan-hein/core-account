@@ -515,12 +515,9 @@ public class Util1 {
         return Math.round(number / 100) * 100;
     }
 
-    public static int roundUp(double number) {
-        if (number >= 0) {
-            return (int) Math.ceil(number);
-        } else {
-            return (int) Math.ceil(number*-1)*-1;
-        }
+    public static double roundUp(double number) {
+        DecimalFormat f = new DecimalFormat("0");
+        return Double.parseDouble(f.format(number));
     }
 
     public static String getString(Object obj) {
