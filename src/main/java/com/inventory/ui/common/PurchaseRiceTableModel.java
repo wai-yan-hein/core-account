@@ -345,11 +345,13 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                             loss.setLocName(pd.getLocName());
                             loss.setWeight(pd.getWeight());
                             loss.setWeightUnit(pd.getWeightUnit());
-                            loss.setQty(lossQty);
+                            int roundQty = Util1.roundUp(lossQty);
+                            loss.setQty(roundQty);
                             loss.setUnitCode(pd.getUnitCode());
                             loss.setPrice(pd.getPrice());
-                            loss.setTotalWeight(loss.getQty() * loss.getWeight());
-                            loss.setAmount(pd.getPrice() * lossQty);
+                            loss.setTotalWeight(roundQty * loss.getWeight());
+                            double amt =pd.getPrice() * roundQty;
+                            loss.setAmount(Util1.round(amt));
                             listDetail.set(1, loss);
                             fireTableRowsUpdated(1, 1);
                             addNewRow();

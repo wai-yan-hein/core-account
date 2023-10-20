@@ -52,6 +52,7 @@ public class ReportFilter {
     private boolean calPur;
     private boolean calRI;
     private boolean calRO;
+    private boolean calMill;
     private String status;
     private String invGroup;
     private String coaCode;
@@ -88,6 +89,7 @@ public class ReportFilter {
     private String glVouNo;
     private boolean local;
     private boolean orderFavorite;
+
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;

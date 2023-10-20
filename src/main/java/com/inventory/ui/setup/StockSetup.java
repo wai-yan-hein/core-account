@@ -412,11 +412,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     "Department.", JOptionPane.ERROR_MESSAGE);
             status = false;
             cboDept.requestFocus();
-        } else if (ProUtil.isUseWeight() && wlUnitCompleter.getStockUnit() == null) {
-            JOptionPane.showMessageDialog(this, "Weight Unit can not be blank.",
-                    "Weight Unit.", JOptionPane.ERROR_MESSAGE);
-            status = false;
-            txtWeightUnit.requestFocus();
         } else {
             stock.setUserCode(txtUserCode.getText().trim());
             stock.setTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
@@ -476,6 +471,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void saveStock() {
         if (isValidEntry()) {
+            if (ProUtil.isUseWeight() && wlUnitCompleter.getStockUnit() == null) {
+                int yn = JOptionPane.showConfirmDialog(this, "Weight Unit can not be blank.",
+                        "Weight Unit.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yn == JOptionPane.NO_OPTION) {
+                    txtWeightUnit.requestFocus();
+                    return;
+                }
+            }
             observer.selected("save", false);
             progress.setIndeterminate(true);
             inventoryRepo.saveStock(stock).doOnSuccess((t) -> {

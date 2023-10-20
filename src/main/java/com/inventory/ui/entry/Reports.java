@@ -323,6 +323,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calculate.purchase.stock")));
                     filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calculate.returin.stock")));
                     filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calculate.retunout.stock")));
+                    filter.setCalMill(Util1.getBoolean(ProUtil.isDisableMill()));
                     filter.setCreditAmt(Util1.getFloat(ProUtil.getProperty(ProUtil.C_CREDIT_AMT)));
                     String batchNo = batchAutoCompeter.getBatch().getBatchNo();
                     filter.setBatchNo(batchNo.equals("All") ? "-" : batchNo);

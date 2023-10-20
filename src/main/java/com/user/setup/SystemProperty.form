@@ -27,6 +27,10 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jPanel1" max="32767" attributes="0"/>
                           <Component id="jPanel9" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -80,6 +84,8 @@
                       <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel9" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -411,12 +417,14 @@
                               <Component id="jLabel8" max="32767" attributes="0"/>
                               <Component id="jLabel1" max="32767" attributes="0"/>
                               <Component id="jLabel21" max="32767" attributes="0"/>
+                              <Component id="jLabel35" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtPrinter" max="32767" attributes="0"/>
                               <Component id="txtLogoName" max="32767" attributes="0"/>
                               <Component id="txtPages" max="32767" attributes="0"/>
+                              <Component id="txtRound" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <Component id="chkDisableSale" max="32767" attributes="0"/>
@@ -441,6 +449,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="chkDepLock" min="-2" max="-2" attributes="0"/>
                       </Group>
+                      <Component id="chkDisableMill" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -469,6 +478,8 @@
                   <Component id="chkDisableRI" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDisableRO" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDisableMill" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="chkDisableStockIO" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -482,6 +493,11 @@
                   <Component id="chkDepOption" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkMulti" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel35" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtRound" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -609,6 +625,23 @@
         <Component class="javax.swing.JCheckBox" name="chkDepLock">
           <Properties>
             <Property name="text" type="java.lang.String" value="Department Lock"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel35">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Round"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtRound">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableMill">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Milling"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -1650,5 +1683,13 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="jButton1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Report"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

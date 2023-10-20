@@ -66,6 +66,9 @@ public class ProUtil {
     public static final String DEPARTMENT_LOCK = "department.lock";
     public static final String MILLING_STOCK_USAGE = "milling.stock.usage";
     public static final String DRCR_REPORT = "drcr.report";
+    public static final String ROUND_POINT = "round.point";
+    public static final String DISABLE_MILL = "disable.calculate.milling.stock";
+    public static final String STOCK_IO_A5 ="stockio.report.A5";
 
     public static String getDrCrReport() {
         return Global.hmRoleProperty.get(DRCR_REPORT);
@@ -109,6 +112,10 @@ public class ProUtil {
 
     public static String getProperty(String key) {
         return Global.hmRoleProperty.get(key);
+    }
+
+    public static boolean isDisableMill() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_MILL));
     }
 
     public static boolean isPriceOption() {

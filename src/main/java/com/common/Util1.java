@@ -493,6 +493,36 @@ public class Util1 {
         }
     }
 
+    public static double round(double number) {
+        int value = Util1.getInteger(Global.hmRoleProperty.get("round.point"));
+        return switch (value) {
+            case 1 ->
+                Math.round(number / 10) * 10;
+            case 2 ->
+                Math.round(number / 100) * 100;
+            case 3 ->
+                Math.round(number / 1000) * 1000;
+            default ->
+                number;
+        };
+    }
+
+    public static double round1(double number) {
+        return Math.round(number / 10) * 10;
+    }
+
+    public static double round2(double number) {
+        return Math.round(number / 100) * 100;
+    }
+
+    public static int roundUp(double number) {
+        if (number >= 0) {
+            return (int) Math.ceil(number);
+        } else {
+            return (int) Math.ceil(number*-1)*-1;
+        }
+    }
+
     public static String getString(Object obj) {
         return obj == null ? null : obj.toString().strip();
     }

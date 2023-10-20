@@ -34,7 +34,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="progress" alignment="0" pref="319" max="32767" attributes="0"/>
+                  <Component id="progress" alignment="0" pref="407" max="32767" attributes="0"/>
                   <Component id="chkSummary" max="32767" attributes="0"/>
                   <Component id="jScrollPane2" alignment="0" pref="0" max="32767" attributes="0"/>
               </Group>
