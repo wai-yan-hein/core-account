@@ -8,9 +8,9 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.StockCriteria;
 import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
+import com.inventory.model.MessageType;
 import com.inventory.model.Stock;
 import com.repo.InventoryRepo;
 import java.awt.HeadlessException;
@@ -212,9 +212,17 @@ public class GradeDetailTableModel extends AbstractTableModel {
                 if (t != null) {
                     listDetail.set(row, t);
                     addNewRow();
+                    sendMessage(t.getStockName());
                 }
             }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.GRADE_DETAIL, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private boolean isValidEntry(GradeDetail sf) {
