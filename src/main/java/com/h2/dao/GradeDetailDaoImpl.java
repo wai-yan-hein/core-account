@@ -1,11 +1,13 @@
 package com.h2.dao;
 
+import com.common.Util1;
 import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,5 +91,12 @@ public class GradeDetailDaoImpl extends AbstractDao<GradeDetailKey, GradeDetail>
             log.error("getCriteriaByFormula : " + e.getMessage());
         }
         return list;
+    }
+    
+    @Override
+    public String getMaxDate() {
+        String jpql = "select max(o.updatedDate) from GradeDetail o";
+        LocalDateTime date = getDate(jpql);
+        return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 }

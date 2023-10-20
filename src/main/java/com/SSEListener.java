@@ -5,7 +5,6 @@
 package com;
 
 import com.common.SelectionObserver;
-import com.inventory.model.Message;
 import com.inventory.model.MessageType;
 import com.repo.AccountRepo;
 import com.repo.InventoryRepo;
@@ -78,8 +77,14 @@ public class SSEListener {
                             integration.downloadPriceOption();
                         case MessageType.LABOUR_GROUP ->
                             integration.downloadLabourGroup();
-//                        case MessageType.FORMULA ->
-//                            //integration.downloa();
+                        case MessageType.FORMULA ->
+                            integration.downloadStockFormula();
+                        case MessageType.FORMULA_PRICE ->
+                            integration.downloadStockFormulaPrice();
+                        case MessageType.FORMULA_QTY ->
+                            integration.downloadStockFormulaQty();
+                        case MessageType.GRADE_DETAIL ->
+                            integration.downloadGradeDetail();
                         case MessageType.CRITERIA ->
                             integration.downloadStockCriteria();
                     }

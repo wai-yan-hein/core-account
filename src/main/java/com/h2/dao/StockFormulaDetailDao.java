@@ -11,4 +11,6 @@ public interface StockFormulaDetailDao {
     boolean delete(StockFormulaPriceKey key);
 
     List<StockFormulaPrice> getFormulaDetail(String code, String compCode);
+
+    String getMaxDate();
 }

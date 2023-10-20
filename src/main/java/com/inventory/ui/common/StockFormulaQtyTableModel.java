@@ -8,6 +8,7 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormulaQty;
 import com.inventory.model.StockFormulaQtyKey;
@@ -227,9 +228,17 @@ public class StockFormulaQtyTableModel extends AbstractTableModel {
             inventoryRepo.saveStockFormulaQty(sf).doOnSuccess((t) -> {
                 if (t != null) {
                     listDetail.set(row, t);
+                    sendMessage(t.getCriteriaName());
                 }
             }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.FORMULA_QTY, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private boolean isValidEntry(StockFormulaQty sf) {

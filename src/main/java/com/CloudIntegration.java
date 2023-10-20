@@ -54,7 +54,6 @@ import com.h2.service.TransferHisService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.h2.service.WeightLossService;
-import com.inventory.model.LabourGroup;
 import com.inventory.model.OrderHis;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.PurHis;
@@ -627,6 +626,9 @@ public class CloudIntegration {
         downloadCategory();
         downloadStock();
         downloadStockFormula();
+        downloadStockFormulaPrice();
+        downloadStockFormulaQty();
+        downloadGradeDetail();
         downloadStockCriteria();
         downloadLabourGroup();
     }
@@ -781,6 +783,48 @@ public class CloudIntegration {
         inventoryRepo.getUpdateStockFormula(maxDate).subscribe((t) -> {
             log.info("stock formula = " + t.size());
             observer.selected("download", "downloadStock formula list : " + t.size());
+            t.forEach((s) -> {
+                stockFormulaService.save(s);
+            });
+            observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+
+    public void downloadStockFormulaPrice() {
+        String maxDate = stockFormulaService.getMaxDateSFPrice();
+        inventoryRepo.getUpdateStockFormulaPrice(maxDate).subscribe((t) -> {
+            log.info("stock formula price = " + t.size());
+            observer.selected("download", "downloadStock formula price list : " + t.size());
+            t.forEach((s) -> {
+                stockFormulaService.save(s);
+            });
+            observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+
+    public void downloadStockFormulaQty() {
+        String maxDate = stockFormulaService.getMaxDateSFQty();
+        inventoryRepo.getUpdateStockFormulaQty(maxDate).subscribe((t) -> {
+            log.info("stock formula qty = " + t.size());
+            observer.selected("download", "downloadStock formula qty list : " + t.size());
+            t.forEach((s) -> {
+                stockFormulaService.save(s);
+            });
+            observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+    
+    public void downloadGradeDetail() {
+        String maxDate = stockFormulaService.getMaxDateGD();
+        inventoryRepo.getUpdateGradeDetail(maxDate).subscribe((t) -> {
+            log.info("stock formula gd = " + t.size());
+            observer.selected("download", "downloadStock formula gd list : " + t.size());
             t.forEach((s) -> {
                 stockFormulaService.save(s);
             });

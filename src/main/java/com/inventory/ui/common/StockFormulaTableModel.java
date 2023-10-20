@@ -7,6 +7,7 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaKey;
 import com.repo.InventoryRepo;
@@ -103,9 +104,17 @@ public class StockFormulaTableModel extends AbstractTableModel {
                 if (t != null) {
                     listDetail.set(row, t);
                     addNewRow();
+                    sendMessage(t.getFormulaName());
                 }
             }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.FORMULA, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private boolean isValidEntry(StockFormula f) {
@@ -127,7 +136,8 @@ public class StockFormulaTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return columnIndex == 2 ? Boolean.class : String.class;
+        return columnIndex == 2 ? Boolean.class
+                : String.class;
     }
 
     @Override
