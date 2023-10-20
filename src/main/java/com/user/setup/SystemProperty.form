@@ -449,6 +449,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="chkDepLock" min="-2" max="-2" attributes="0"/>
                       </Group>
+                      <Component id="chkDisableMill" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -477,6 +478,8 @@
                   <Component id="chkDisableRI" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDisableRO" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDisableMill" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="chkDisableStockIO" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -634,6 +637,11 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableMill">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Milling"/>
           </Properties>
         </Component>
       </SubComponents>

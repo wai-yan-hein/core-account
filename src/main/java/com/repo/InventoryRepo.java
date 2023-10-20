@@ -3183,6 +3183,7 @@ public class InventoryRepo {
                 .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
                 .queryParam("calRI", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")))
                 .queryParam("calRO", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnout.stock")))
+                .queryParam("calMill", ProUtil.isDisableMill())
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .queryParam("macId", Global.macId)

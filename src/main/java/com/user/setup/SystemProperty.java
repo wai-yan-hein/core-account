@@ -187,6 +187,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferDelete.setName(ProUtil.TRANSFER_DELETE);
         chkDepLock.setName(ProUtil.DEPARTMENT_LOCK);
         chkUsage.setName(ProUtil.MILLING_STOCK_USAGE);
+        chkDisableMill.setName(ProUtil.DISABLE_MILL);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -288,6 +289,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferDelete.addActionListener(action);
         chkDepLock.addActionListener(action);
         chkUsage.addActionListener(action);
+        chkDisableMill.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -359,6 +361,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferDelete.setSelected(Util1.getBoolean(hmProperty.get(chkTransferDelete.getName())));
         chkDepLock.setSelected(Util1.getBoolean(hmProperty.get(chkDepLock.getName())));
         chkUsage.setSelected(Util1.getBoolean(hmProperty.get(chkUsage.getName())));
+        chkDisableMill.setSelected(Util1.getBoolean(hmProperty.get(chkDisableMill.getName())));
+
     }
 
     private void initTextBox() {
@@ -528,7 +532,17 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     saveSysProp(key, value);
             }
         }
+    }
 
+    private void save1(String key, String value) {
+        switch (properyType) {
+            case "Role" ->
+                saveRoleProp(key, value);
+            case "Machine" ->
+                saveMacProp(key, value);
+            default ->
+                saveSysProp(key, value);
+        }
     }
 
     private void saveSysProp(String key, String value) {
@@ -593,7 +607,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     }
 
     private void reportNameDialog() {
-        if(reportNameDialog == null){
+        if (reportNameDialog == null) {
             reportNameDialog = new ReportNameDialog(Global.parentForm);
             reportNameDialog.setObserver(this);
             reportNameDialog.setLocationRelativeTo(null);
@@ -662,6 +676,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDepLock = new javax.swing.JCheckBox();
         jLabel35 = new javax.swing.JLabel();
         txtRound = new javax.swing.JTextField();
+        chkDisableMill = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -958,6 +973,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtRound.setFont(Global.textFont);
 
+        chkDisableMill.setText("Disable Calculate Stock in Milling");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -997,7 +1014,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(chkDepFilter)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkDepLock)))
+                        .addComponent(chkDepLock))
+                    .addComponent(chkDisableMill, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -1021,6 +1039,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(chkDisableRI)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkDisableRO)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkDisableMill)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkDisableStockIO)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1765,6 +1785,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkDepOption;
     private javax.swing.JCheckBox chkDisableAll;
     private javax.swing.JCheckBox chkDisableDep;
+    private javax.swing.JCheckBox chkDisableMill;
     private javax.swing.JCheckBox chkDisablePur;
     private javax.swing.JCheckBox chkDisableRI;
     private javax.swing.JCheckBox chkDisableRO;
@@ -1900,6 +1921,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             String key = "printer.name";
             String value = printerAutoCompleter.getText();
             save(key, value);
+        } else if (source.equals("save")) {
+            SysProperty p = (SysProperty) selectObj;
+            save1(p.getKey().getPropKey(), p.getPropValue());
         } else if (source.equals("TRADER")) {
             String type = selectObj.toString();
             String key;

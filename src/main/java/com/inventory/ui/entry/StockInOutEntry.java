@@ -368,7 +368,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         inventoryRepo.getStockInOutVoucher(vouNo).subscribe((t) -> {
             try {
                 if (t != null) {
-                    String reportName = "StockInOutVoucher";
+                    String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.STOCK_IO_A5), "StockInOutVoucher");
                     String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());

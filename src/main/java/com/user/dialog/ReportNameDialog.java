@@ -6,7 +6,12 @@ package com.user.dialog;
 
 import com.common.Global;
 import com.common.SelectionObserver;
+import com.common.Util1;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 /**
  *
@@ -19,7 +24,19 @@ public class ReportNameDialog extends javax.swing.JDialog {
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
+    private final ActionListener action = (ActionEvent e) -> {
+        if (e.getSource() instanceof JCheckBox chk) {
+            String key = chk.getName();
+            String value = Util1.getString(chk.isSelected());
+            observer.selected("save", "save");
+        }
+        if (e.getSource() instanceof JTextField txt) {
+            String key = txt.getName();
+            String value = txt.getText();
+            observer.selected("save", "save");
+        }
+    };
 
     /**
      * Creates new form ReportNameDialog
