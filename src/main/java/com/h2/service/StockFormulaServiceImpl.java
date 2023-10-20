@@ -4,11 +4,13 @@ import com.common.Util1;
 import com.h2.dao.GradeDetailDao;
 import com.h2.dao.StockFormulaDao;
 import com.h2.dao.StockFormulaDetailDao;
+import com.h2.dao.StockFormulaQtyDao;
 import com.inventory.model.GradeDetailKey;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
 import com.inventory.model.StockFormulaPriceKey;
 import com.inventory.model.StockFormulaKey;
+import com.inventory.model.StockFormulaQty;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     private final StockFormulaDao formulaDao;
     private final StockFormulaDetailDao formulaDetailDao;
     private final GradeDetailDao gradeDetailDao;
+    private final StockFormulaQtyDao formulaQtyDao;
     @Autowired
     private SeqService seqService;
 
@@ -60,6 +63,11 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     }
 
     @Override
+    public StockFormulaQty save(StockFormulaQty s) {
+        return formulaQtyDao.save(s);
+    }
+
+    @Override
     public boolean delete(StockFormulaPriceKey key) {
         return formulaDetailDao.delete(key);
     }
@@ -77,6 +85,16 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     @Override
     public String getMaxDate() {
         return formulaDao.getMaxDate();
+    }
+
+    @Override
+    public String getMaxDateSFPrice() {
+        return formulaDetailDao.getMaxDate();
+    }
+
+    @Override
+    public String getMaxDateSFQty() {
+        return formulaQtyDao.getMaxDate();
     }
 
     @Override

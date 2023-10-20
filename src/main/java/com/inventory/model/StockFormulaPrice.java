@@ -5,11 +5,13 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.Data;
+
 @Data
 @Entity
-@Table(name = "stock_formula_detail")
-public class StockFormulaPrice implements Serializable{
+@Table(name = "stock_formula_price")
+public class StockFormulaPrice implements Serializable {
 
     @EmbeddedId
     private StockFormulaPriceKey key;
@@ -21,6 +23,8 @@ public class StockFormulaPrice implements Serializable{
     private double price;
     @Column(name = "percent_allow")
     private double percentAllow;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     private transient String criteriaName;
     private transient String userCode;
 }

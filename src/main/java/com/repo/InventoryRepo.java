@@ -1135,6 +1135,34 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    
+    public Mono<List<StockFormulaPrice>> getUpdateStockFormulaPrice(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateStockFormulaPrice")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockFormulaPrice.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<StockFormulaQty>> getUpdateStockFormulaQty(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateStockFormulaQty")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockFormulaQty.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<StockCriteria>> getUpdateStockCriteria(String updatedDate) {
         return inventoryApi.get()
