@@ -1,5 +1,6 @@
 package com.h2.service;
 
+import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
@@ -23,6 +24,8 @@ public interface StockFormulaService {
     StockFormulaPrice save(StockFormulaPrice s);
 
     StockFormulaQty save(StockFormulaQty s);
+    
+    GradeDetail save(GradeDetail s);
 
     boolean delete(StockFormulaPriceKey key);
 
@@ -33,4 +36,6 @@ public interface StockFormulaService {
     String getMaxDateSFPrice();
 
     String getMaxDateSFQty();
+    
+    String getMaxDateGD();
 }

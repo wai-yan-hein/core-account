@@ -5,6 +5,7 @@ import com.h2.dao.GradeDetailDao;
 import com.h2.dao.StockFormulaDao;
 import com.h2.dao.StockFormulaDetailDao;
 import com.h2.dao.StockFormulaQtyDao;
+import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
@@ -68,6 +69,11 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     }
 
     @Override
+    public GradeDetail save(GradeDetail s) {
+        return gradeDetailDao.save(s);
+    }
+
+    @Override
     public boolean delete(StockFormulaPriceKey key) {
         return formulaDetailDao.delete(key);
     }
@@ -97,6 +103,10 @@ public class StockFormulaServiceImpl implements StockFormulaService {
         return formulaQtyDao.getMaxDate();
     }
 
+    @Override
+    public String getMaxDateGD() {
+        return gradeDetailDao.getMaxDate();
+    }
     @Override
     public StockFormula find(StockFormulaKey key) {
         return formulaDao.find(key);

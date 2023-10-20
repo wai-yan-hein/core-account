@@ -1,6 +1,7 @@
 package com.inventory.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
@@ -16,6 +17,8 @@ public class GradeDetail {
     private double maxPercent;
     @Column(name = "grade_stock_code")
     private String gradeStockCode;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Transient
     private String stockName;
 }

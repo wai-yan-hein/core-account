@@ -1163,6 +1163,20 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    
+    public Mono<List<GradeDetail>> getUpdateGradeDetail(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateGradeDetail")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(GradeDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<StockCriteria>> getUpdateStockCriteria(String updatedDate) {
         return inventoryApi.get()

@@ -628,6 +628,7 @@ public class CloudIntegration {
         downloadStockFormula();
         downloadStockFormulaPrice();
         downloadStockFormulaQty();
+        downloadGradeDetail();
         downloadStockCriteria();
         downloadLabourGroup();
     }
@@ -810,6 +811,20 @@ public class CloudIntegration {
         inventoryRepo.getUpdateStockFormulaQty(maxDate).subscribe((t) -> {
             log.info("stock formula qty = " + t.size());
             observer.selected("download", "downloadStock formula qty list : " + t.size());
+            t.forEach((s) -> {
+                stockFormulaService.save(s);
+            });
+            observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+    
+    public void downloadGradeDetail() {
+        String maxDate = stockFormulaService.getMaxDateGD();
+        inventoryRepo.getUpdateGradeDetail(maxDate).subscribe((t) -> {
+            log.info("stock formula gd = " + t.size());
+            observer.selected("download", "downloadStock formula gd list : " + t.size());
             t.forEach((s) -> {
                 stockFormulaService.save(s);
             });

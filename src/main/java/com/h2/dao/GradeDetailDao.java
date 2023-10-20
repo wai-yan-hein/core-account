@@ -14,4 +14,5 @@ public interface GradeDetailDao {
 
     List<GradeDetail> getCriteriaByFormula(String formulaCode, String compCode);
 
+    String getMaxDate();
 }
