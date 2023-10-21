@@ -7,13 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 @Slf4j
-public class StockFormulaDetailDaoImpl extends AbstractDao<StockFormulaPriceKey, StockFormulaPrice> implements StockFormulaDetailDao {
+public class StockFormulaPriceDaoImpl extends AbstractDao<StockFormulaPriceKey, StockFormulaPrice> implements StockFormulaPriceDao {
 
     @Override
     public StockFormulaPrice save(StockFormulaPrice s) {
@@ -28,14 +29,15 @@ public class StockFormulaDetailDaoImpl extends AbstractDao<StockFormulaPriceKey,
     }
 
     @Override
-    public List<StockFormulaPrice> getFormulaDetail(String code, String compCode) {
-        String sql = """
+    public List<StockFormulaPrice> getStockFormulaPrice(String code, String compCode) {
+         String sql = """
                 select s.*,sc.criteria_name,sc.user_code
-                from stock_formula_detail s
+                from stock_formula_price s
                 join stock_criteria sc on s.criteria_code = sc.criteria_code
                 and s.comp_code = s.comp_code
                 where s.comp_code =?
                 and s.formula_code = ?
+                order by s.unique_id
                 """;
         ResultSet rs = getResult(sql, compCode, code);
         List<StockFormulaPrice> list = new ArrayList<>();
@@ -53,10 +55,11 @@ public class StockFormulaDetailDaoImpl extends AbstractDao<StockFormulaPriceKey,
                 d.setCriteriaName(rs.getString("criteria_name"));
                 d.setPercent(rs.getDouble("percent"));
                 d.setPrice(rs.getDouble("price"));
+                d.setPercentAllow(rs.getDouble("percent_allow"));
                 list.add(d);
             }
-        } catch (Exception e) {
-            log.error("getFormulaDetail : " + e.getMessage());
+        } catch (SQLException e) {
+            log.error("getStockFormulaPrice : "+e.getMessage());
         }
         return list;
     }

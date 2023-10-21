@@ -486,6 +486,7 @@ public class Util1 {
         }
         String str = number.toString().trim().replace(",", "");
         try {
+            str = convertMyanmarToArabic(str);
             return Double.valueOf(str); // Convert string to double
         } catch (NumberFormatException e) {
             log.error("getDouble : " + e.getMessage());
@@ -515,12 +516,9 @@ public class Util1 {
         return Math.round(number / 100) * 100;
     }
 
-    public static int roundUp(double number) {
-        if (number >= 0) {
-            return (int) Math.ceil(number);
-        } else {
-            return (int) Math.ceil(number*-1)*-1;
-        }
+    public static double roundUp(double number) {
+        DecimalFormat f = new DecimalFormat("0");
+        return Double.parseDouble(f.format(number));
     }
 
     public static String getString(Object obj) {
@@ -1225,4 +1223,18 @@ public class Util1 {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return LocalDateTime.parse(LocalDateTime.now().toString(), formatter);
     }
+
+    public static String convertMyanmarToArabic(String text) {
+        String myanmarNumerals = "၀၁၂၃၄၅၆၇၈၉"; // Corresponding Myanmar numerals
+        String arabicNumerals = "0123456789"; // Corresponding Arabic numerals
+
+        for (int i = 0; i < myanmarNumerals.length(); i++) {
+            char myanmarNumeral = myanmarNumerals.charAt(i);
+            char arabicNumeral = arabicNumerals.charAt(i);
+            return text.replace(myanmarNumeral, arabicNumeral);
+        }
+
+        return text;
+    }
+
 }

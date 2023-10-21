@@ -11,7 +11,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.model.LandingHis;
 import com.inventory.model.LandingHisQty;
 import com.inventory.model.Location;
 import com.inventory.model.PurDetailKey;
@@ -217,12 +216,16 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0);
+                            record.setQty(0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeightUnit(s.getWeightUnit());
                             record.setWeight(Util1.getDouble(s.getWeight()));
                             record.setStdWeight(Util1.getDouble(s.getWeight()));
                             record.setPurQty(s.getPurQty());
+                            double price = record.getPrice();
+                            if (price == 0) {
+                                record.setPrice(s.getPurPrice());
+                            }
                             addNewRow();
                             setSelection(row, 5);
                         }
@@ -281,7 +284,7 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                     if (ttlWt > 0) {
                         double weight = Util1.getDouble(record.getWeight());
                         double qty = ttlWt / weight;
-                        record.setQty(qty);
+                        record.setQty(Util1.roundUp(qty));
                         record.setTotalWeight(ttlWt);
                         calWeightLoss(record);
                     }
@@ -345,12 +348,12 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                             loss.setLocName(pd.getLocName());
                             loss.setWeight(pd.getWeight());
                             loss.setWeightUnit(pd.getWeightUnit());
-                            int roundQty = Util1.roundUp(lossQty);
+                            double roundQty = Util1.roundUp(lossQty);
                             loss.setQty(roundQty);
                             loss.setUnitCode(pd.getUnitCode());
                             loss.setPrice(pd.getPrice());
                             loss.setTotalWeight(roundQty * loss.getWeight());
-                            double amt =pd.getPrice() * roundQty;
+                            double amt = pd.getPrice() * roundQty;
                             loss.setAmount(Util1.round(amt));
                             listDetail.set(1, loss);
                             fireTableRowsUpdated(1, 1);

@@ -31,7 +31,7 @@ public class StockCriteriaDaoImpl extends AbstractDao<StockCriteriaKey, StockCri
 
     @Override
     public List<StockCriteria> findAll(String compCode, boolean active) {
-        String hsql = "select o from StockCriteria o where o.key.compCode = '" + compCode + "'";
+        String hsql = "select o from StockCriteria o where o.key.compCode = '" + compCode + "' and o.deleted =false";
         if (active) {
             hsql += " and active = " + active;
         }

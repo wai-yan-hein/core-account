@@ -38,6 +38,7 @@ import com.inventory.model.Job;
 import com.inventory.model.LabourGroup;
 import com.inventory.ui.common.JobComboBoxModel;
 import com.inventory.ui.common.LabourGroupComboBoxModel;
+import com.inventory.ui.entry.dialog.StockIOMoreDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -85,6 +86,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private int type;
     private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
     private final JobComboBoxModel jobComboBoxModel = new JobComboBoxModel();
+    private StockIOMoreDialog moreDialog;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -677,6 +679,17 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 }).subscribe();
     }
 
+    private void moreDialog() {
+        if (moreDialog == null) {
+            moreDialog = new StockIOMoreDialog(Global.parentForm);
+            moreDialog.setLocationRelativeTo(null);
+            moreDialog.setInventoryRepo(inventoryRepo);
+            moreDialog.initMain();
+        }
+        moreDialog.setData(io);
+        moreDialog.setVisible(true);
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -712,6 +725,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         cboLabourGroup = new javax.swing.JComboBox<>();
         cboJob = new javax.swing.JComboBox<>();
         jLabel10 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -807,6 +821,16 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Labour Group");
 
+        jButton2.setBackground(Global.selectionColor);
+        jButton2.setFont(Global.lableFont);
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
+        jButton2.setText("More");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -839,9 +863,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtVouType)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtRemark)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtRemark))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton2)))
                 .addGap(18, 18, 18))
         );
 
@@ -873,7 +902,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                             .addComponent(cboJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
                             .addComponent(jLabel4)
-                            .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton2))))
                 .addContainerGap())
         );
 
@@ -991,7 +1021,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -1020,11 +1050,17 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         // TODO add your handling code here:
     }//GEN-LAST:event_cboJobActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        moreDialog();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<Job> cboJob;
     private javax.swing.JComboBox<LabourGroup> cboLabourGroup;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;

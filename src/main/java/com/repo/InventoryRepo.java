@@ -264,6 +264,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<StockFormulaPrice>> getStockFormulaPrice(String formulaCode) {
+        if (localDatabase) {
+            return h2Repo.getStockFormulaPrice(formulaCode);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getStockFormulaPrice")
                 .queryParam("compCode", Global.compCode)
@@ -279,6 +282,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<StockFormulaQty>> getStockFormulaQty(String formulaCode) {
+        if (localDatabase) {
+            return h2Repo.getStockFormulaQty(formulaCode);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getStockFormulaQty")
                 .queryParam("compCode", Global.compCode)
@@ -294,6 +300,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<GradeDetail>> getGradeDetail(String formulaCode, String criteriaCode) {
+        if (localDatabase) {
+            return h2Repo.getGradeDetail(formulaCode, criteriaCode);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getGradeDetail")
                 .queryParam("compCode", Global.compCode)
@@ -1718,6 +1727,11 @@ public class InventoryRepo {
                 .body(Mono.just(s), StockFormulaPrice.class)
                 .retrieve()
                 .bodyToMono(StockFormulaPrice.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1730,6 +1744,11 @@ public class InventoryRepo {
                 .body(Mono.just(s), StockFormulaQty.class)
                 .retrieve()
                 .bodyToMono(StockFormulaQty.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1742,6 +1761,11 @@ public class InventoryRepo {
                 .body(Mono.just(s), GradeDetail.class)
                 .retrieve()
                 .bodyToMono(GradeDetail.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();

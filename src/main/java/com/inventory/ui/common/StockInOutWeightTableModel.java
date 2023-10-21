@@ -11,6 +11,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
+import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockInOutKey;
@@ -189,12 +190,9 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                             io.setOutUnitCode(s.getPurUnitCode());
                             io.setWeight(s.getWeight());
                             io.setWeightUnit(s.getWeightUnit());
-                            inventoryRepo.getDefaultLocation().subscribe((l) -> {
-                                io.setLocCode(l.getKey().getLocCode());
-                                io.setLocName(l.getLocName());
-                            });
-                            setSelection(row, 3);
-                            addNewRow();
+                            assignDefaultLocation(io, row);
+                            genPattern(s, io, row);
+
                         }
                     }
                     case 2 -> {
@@ -291,6 +289,73 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
             parent.requestFocus();
         } catch (HeadlessException e) {
             log.error("setValueAt :" + e.getMessage());
+        }
+    }
+
+    private void assignDefaultLocation(StockInOutDetail io, int row) {
+        if (row > 1) {
+            StockInOutDetail up = listStock.get(row - 1);
+            io.setLocCode(up.getLocCode());
+            io.setLocName(up.getLocName());
+        } else {
+            inventoryRepo.getDefaultLocation().subscribe((l) -> {
+                io.setLocCode(l.getKey().getLocCode());
+                io.setLocName(l.getLocName());
+            });
+        }
+
+    }
+
+    private void genPattern(Stock s, StockInOutDetail iod, int row) {
+        boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
+        if (!disable) {
+            String stockCode = s.getKey().getStockCode();
+            boolean explode = s.isExplode();
+            String date = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
+            inventoryRepo.getPattern(stockCode, date).doOnSuccess((t) -> {
+                if (!t.isEmpty()) {
+                    String input = JOptionPane.showInputDialog("Enter Qty.");
+                    if (Util1.isPositive(input)) {
+                        double totalPrice = 0.0f;
+                        double qty = Util1.getFloat(input);
+                        for (Pattern p : t) {
+                            StockInOutDetail io = new StockInOutDetail();
+                            io.setUserCode(p.getUserCode());
+                            if (explode) {
+                                io.setInQty(qty * p.getQty());
+                                io.setInUnitCode(p.getUnitCode());
+                            } else {
+                                io.setOutQty(qty * p.getQty());
+                                io.setOutUnitCode(p.getUnitCode());
+                            }
+                            double pPrice = Util1.getFloat(p.getPrice());
+                            io.setCostPrice(pPrice);
+                            io.setStockCode(p.getKey().getStockCode());
+                            io.setLocCode(p.getLocCode());
+                            io.setLocName(p.getLocName());
+                            io.setStockName(p.getStockName());
+                            addStockIO(io);
+                            totalPrice += Util1.getFloat(p.getAmount());
+                        }
+                        if (explode) {
+                            iod.setOutQty(qty);
+                            iod.setOutUnitCode(s.getPurUnitCode());
+                            iod.setInUnitCode(null);
+                        } else {
+                            iod.setInQty(qty);
+                            iod.setInUnitCode(s.getPurUnitCode());
+                            iod.setOutUnitCode(null);
+                        }
+                        setRecord(listStock.size());
+                        iod.setCostPrice(totalPrice);
+                    }
+                }
+                addNewRow();
+                observer.selected("CAL-TOTAL", "CAL-TOTAL");
+            }).subscribe();
+        } else {
+            setSelection(row, 3);
+            addNewRow();
         }
     }
 

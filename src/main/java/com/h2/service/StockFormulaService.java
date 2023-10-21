@@ -24,18 +24,23 @@ public interface StockFormulaService {
     StockFormulaPrice save(StockFormulaPrice s);
 
     StockFormulaQty save(StockFormulaQty s);
-    
+
     GradeDetail save(GradeDetail s);
 
     boolean delete(StockFormulaPriceKey key);
-
-    List<StockFormulaPrice> getFormulaDetail(String code, String compCode);
 
     String getMaxDate();
 
     String getMaxDateSFPrice();
 
     String getMaxDateSFQty();
-    
+
     String getMaxDateGD();
+
+    List<StockFormulaPrice> getStockFormulaPrice(String formulaCode, String compCode);
+
+    List<StockFormulaQty> getStockFormulaQty(String formulaCode, String compCode);
+
+    List<GradeDetail> getGradeDetail(String formulaCode, String criteriaCode, String compCode);
+
 }

@@ -12,7 +12,7 @@ public interface GradeDetailDao {
 
     List<GradeDetail> getGradeDetail(String formulaCode, String criteriaCode, String compCode);
 
-    List<GradeDetail> getCriteriaByFormula(String formulaCode, String compCode);
+    List<GradeDetail> getStockFormulaGrade(String formulaCode, String compCode);
 
     String getMaxDate();
 }
