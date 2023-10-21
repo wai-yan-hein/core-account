@@ -238,7 +238,12 @@ public class Util1 {
     public static Date convertToDate(LocalDateTime localDateTime) {
         if (localDateTime != null) {
             ZoneId zoneId = ZoneId.systemDefault();
-            return Date.from(localDateTime.atZone(zoneId).toInstant());
+            ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+
+            // Set the time to midnight (00:00:00)
+            zonedDateTime = zonedDateTime.with(LocalTime.MIDNIGHT);
+
+            return Date.from(zonedDateTime.toInstant());
         }
         return null;
     }

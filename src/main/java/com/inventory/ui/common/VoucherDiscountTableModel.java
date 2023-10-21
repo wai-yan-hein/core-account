@@ -129,6 +129,7 @@ public class VoucherDiscountTableModel extends AbstractTableModel {
 
                 }
                 calAmount(b);
+                addNewRow();
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
             }

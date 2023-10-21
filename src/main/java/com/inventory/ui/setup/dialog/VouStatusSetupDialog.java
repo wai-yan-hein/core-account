@@ -198,6 +198,8 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
         chkActive = new javax.swing.JCheckBox();
+        jLabel4 = new javax.swing.JLabel();
+        txtReport = new javax.swing.JTextField();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -287,6 +289,22 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         chkActive.setSelected(true);
         chkActive.setText("Active");
 
+        jLabel4.setFont(Global.lableFont);
+        jLabel4.setText("Report");
+
+        txtReport.setFont(Global.textFont);
+        txtReport.setName("txtName"); // NOI18N
+        txtReport.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtReportFocusGained(evt);
+            }
+        });
+        txtReport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtReportActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -304,14 +322,16 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(12, 12, 12)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtName)
-                            .addComponent(txtUserCode))))
+                            .addComponent(txtUserCode)
+                            .addComponent(txtReport))))
                 .addContainerGap())
         );
 
@@ -329,6 +349,10 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkActive)
                 .addGap(3, 3, 3)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -337,7 +361,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(242, Short.MAX_VALUE))
+                .addContainerGap(214, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -417,6 +441,14 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUserCodeActionPerformed
 
+    private void txtReportFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtReportFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtReportFocusGained
+
+    private void txtReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtReportActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtReportActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -427,6 +459,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
@@ -435,6 +468,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTable tblVou;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtReport;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 

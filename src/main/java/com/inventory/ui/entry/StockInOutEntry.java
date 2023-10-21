@@ -350,27 +350,32 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             progress.setIndeterminate(true);
             io.setListSH(getListDetail());
             io.setListDel(getListDelete());
-            inventoryRepo.save(io)
-                    .subscribe((t) -> {
-                        clear();
-                        focusOnTable();
-                        if (print) {
-                            printVoucher(t.getKey().getVouNo());
-                        }
-                    }, (e) -> {
-                        observer.selected("save", true);
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        progress.setIndeterminate(false);
-                    });
-
+            inventoryRepo.save(io).doOnSuccess((t) -> {
+                String customReport = null;
+                if (vouStatusAutoCompleter.getVouStatus() != null) {
+                    customReport = vouStatusAutoCompleter.getVouStatus().getReportName();
+                }
+                clear();
+                focusOnTable();
+                if (print) {
+                    printVoucher(t.getKey().getVouNo(), customReport);
+                }
+            }).doOnError((e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            }).subscribe();
         }
     }
 
-    private void printVoucher(String vouNo) {
-        inventoryRepo.getStockInOutVoucher(vouNo).subscribe((t) -> {
+    private void printVoucher(String vouNo, String customReport) {
+        inventoryRepo.getStockInOutVoucher(vouNo).doOnSuccess((t) -> {
             try {
                 if (t != null) {
                     String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.STOCK_IO_A5), "StockInOutVoucher");
+                    if (!Util1.isNullOrEmpty(customReport)) {
+                        reportName = customReport;
+                    }
                     String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());
@@ -387,9 +392,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             } catch (JRException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
-        }, (e) -> {
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
     }
 
     private void clear() {

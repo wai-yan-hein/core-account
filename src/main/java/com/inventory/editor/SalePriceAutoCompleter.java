@@ -11,6 +11,7 @@ import com.common.Util1;
 import com.inventory.model.PriceOption;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SalePriceTableModel;
+import com.inventory.ui.common.SaleRiceTableModel;
 import com.inventory.ui.common.SaleTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -321,34 +322,41 @@ public final class SalePriceAutoCompleter implements KeyListener {
         if (!containKey(e)) {
             int row = parent.convertRowIndexToModel(parent.getSelectedRow());
             if (row >= 0) {
-                if (parent.getModel() instanceof SaleTableModel model) {
-                    String stockCode = model.getSale(row).getStockCode();
-                    if (stockCode != null) {
-                        inventoryRepo.findStock(stockCode).subscribe((s) -> {
-                            inventoryRepo.getPriceOption("Sale").subscribe((option) -> {
-                                option.forEach((op) -> {
-                                    switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
-                                        case "A" ->
-                                            op.setPrice(s.getSalePriceA());
-                                        case "B" ->
-                                            op.setPrice(s.getSalePriceB());
-                                        case "C" ->
-                                            op.setPrice(s.getSalePriceC());
-                                        case "D" ->
-                                            op.setPrice(s.getSalePriceD());
-                                        case "E" ->
-                                            op.setPrice(s.getSalePriceE());
-                                        case "N" ->
-                                            op.setPrice(s.getSalePriceN());
-                                    }
-                                });
-                                priceTableModel.setListPrice(option);
-                            });
-
-                        });
-                    }
+                TableModel model = parent.getModel();
+                if (model instanceof SaleTableModel s1) {
+                    String stockCode = s1.getSale(row).getStockCode();
+                    setListPrice(stockCode);
+                } else if (model instanceof SaleRiceTableModel s2) {
+                    String stockCode = s2.getSale(row).getStockCode();
+                    setListPrice(stockCode);
                 }
             }
+        }
+    }
+
+    private void setListPrice(String stockCode) {
+        if (stockCode != null) {
+            inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
+                inventoryRepo.getPriceOption("Sale").subscribe((option) -> {
+                    option.forEach((op) -> {
+                        switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
+                            case "A" ->
+                                op.setPrice(s.getSalePriceA());
+                            case "B" ->
+                                op.setPrice(s.getSalePriceB());
+                            case "C" ->
+                                op.setPrice(s.getSalePriceC());
+                            case "D" ->
+                                op.setPrice(s.getSalePriceD());
+                            case "E" ->
+                                op.setPrice(s.getSalePriceE());
+                            case "N" ->
+                                op.setPrice(s.getSalePriceN());
+                        }
+                    });
+                    priceTableModel.setListPrice(option);
+                });
+            }).subscribe();
         }
     }
 

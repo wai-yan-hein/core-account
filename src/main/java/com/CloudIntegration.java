@@ -767,6 +767,7 @@ public class CloudIntegration {
 
     public void downloadStock() {
         String maxDate = stockService.getMaxDate();
+        log.info("downloadStockTime :  " + maxDate);
         inventoryRepo.getUpdateStock(maxDate).subscribe((t) -> {
             observer.selected("download", "downloadStock list : " + t.size());
             t.forEach((s) -> {
@@ -819,7 +820,7 @@ public class CloudIntegration {
             observer.selected("download", e.getMessage());
         });
     }
-    
+
     public void downloadGradeDetail() {
         String maxDate = stockFormulaService.getMaxDateGD();
         inventoryRepo.getUpdateGradeDetail(maxDate).subscribe((t) -> {

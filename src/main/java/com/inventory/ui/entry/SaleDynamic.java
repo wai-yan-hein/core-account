@@ -5,6 +5,8 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.common.COAComboBoxModel;
+import com.acc.model.ChartOfAccount;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
@@ -22,6 +24,7 @@ import com.inventory.editor.CarNoAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.SaleManAutoCompleter;
+import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
@@ -119,7 +122,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private TransferHistoryDialog transferHistoryDialog;
     private StockBalanceDialog stockBalanceDialog;
     private VouDiscountDialog vouDiscountDialog;
-    private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
+    private COAComboBoxModel coaComboModel = new COAComboBoxModel();
 
     public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
@@ -335,8 +338,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         monoUnit.subscribe((t) -> {
             tblSale.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));//unit
         });
-        tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
         tblSale.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//
+        tblSale.getColumnModel().getColumn(8).setCellEditor(new SalePriceCellEditor(inventoryRepo));//price
     }
 
     private void initExport() {
@@ -413,11 +416,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
-        inventoryRepo.getLabourGroup().subscribe((t) -> {
-            t.add(new LabourGroup());
-            labourGroupComboBoxModel.setData(t);
-            cboLabourGroup.setModel(labourGroupComboBoxModel);
-            cboLabourGroup.setSelectedItem(null);
+        accountRepo.getCOAByHead(ProUtil.getProperty(ProUtil.INCOME)).subscribe((t) -> {
+            coaComboModel.setData(t);
+            cboAccount.setModel(coaComboModel);
         });
     }
 
@@ -529,8 +530,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtCus.requestFocus();
         carNoAutoCompleter.setAutoText(null);
         projectAutoCompleter.setProject(null);
-        labourGroupComboBoxModel.setSelectedItem(null);
-        cboLabourGroup.repaint();
+        coaComboModel.setSelectedItem(null);
+        cboAccount.repaint();
     }
 
     private void clearDiscount() {
@@ -649,11 +650,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleHis.setListVouDiscount(vouDiscountDialog.getListDetail());
                 saleHis.setListDelVouDiscount(vouDiscountDialog.getListDel());
             }
-            if (labourGroupComboBoxModel.getSelectedItem() instanceof LabourGroup lg) {
-                if (lg.getKey() != null) {
-                    saleHis.setLabourGroupCode(lg.getKey().getCode());
+            if (coaComboModel.getSelectedItem() instanceof ChartOfAccount c) {
+                if (c.getKey() != null) {
+                    saleHis.setAccount(c.getKey().getCoaCode());
                 } else {
-                    saleHis.setLabourGroupCode(null);
+                    saleHis.setAccount(null);
                 }
             }
             if (lblStatus.getText().equals("NEW")) {
@@ -847,9 +848,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             userRepo.find(new ProjectKey(sh.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
                 projectAutoCompleter.setProject(t);
             }).subscribe();
-            inventoryRepo.findLabourGroup(saleHis.getLabourGroupCode()).doOnSuccess((t) -> {
-                labourGroupComboBoxModel.setSelectedItem(t);
-                cboLabourGroup.repaint();
+            accountRepo.findCOA(saleHis.getAccount()).doOnSuccess((t) -> {
+                coaComboModel.setSelectedItem(t);
+                cboAccount.repaint();
             }).subscribe();
             String vouNo = sh.getKey().getVouNo();
             sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
@@ -1140,8 +1141,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoLabel = new javax.swing.JLabel();
         carNoLabel1 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
-        jLabel11 = new javax.swing.JLabel();
-        cboLabourGroup = new javax.swing.JComboBox<>();
+        jLabel12 = new javax.swing.JLabel();
+        cboAccount = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -1346,15 +1347,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
         });
 
-        jLabel11.setFont(Global.lableFont);
-        jLabel11.setText("Labour Group");
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Account");
 
-        cboLabourGroup.setFont(Global.textFont);
-        cboLabourGroup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboLabourGroupActionPerformed(evt);
-            }
-        });
+        cboAccount.setFont(Global.textFont);
 
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
@@ -1371,7 +1367,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCus)
-                            .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                            .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
                             .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1380,7 +1376,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                             .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE)
+                            .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                             .addComponent(txtSaleman)
                             .addComponent(txtLocation))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1390,23 +1386,23 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                             .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                            .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
                             .addComponent(txtCurrency)
                             .addComponent(txtReference))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelSaleLayout.createSequentialGroup()
                                 .addComponent(carNoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE))
+                                .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE))
                             .addGroup(panelSaleLayout.createSequentialGroup()
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(carNoLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
+                                .addGap(12, 12, 12)
                                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(carNoLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel11))
-                                .addGap(3, 3, 3)
-                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(cboLabourGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(txtProjectNo)))))
+                                    .addComponent(txtProjectNo)
+                                    .addComponent(cboAccount, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
@@ -1446,13 +1442,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                         .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel21)
                         .addComponent(jLabel2))
-                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(cboLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel9))))
+                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel9)
+                        .addComponent(jLabel12)
+                        .addComponent(cboAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
                 .addContainerGap())
@@ -1967,10 +1961,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         discountDialog();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void cboLabourGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLabourGroupActionPerformed
-        //        searchStock();
-    }//GEN-LAST:event_cboLabourGroupActionPerformed
-
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -2139,13 +2129,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JButton btnBatch1;
     private javax.swing.JLabel carNoLabel;
     private javax.swing.JLabel carNoLabel1;
-    private javax.swing.JComboBox<LabourGroup> cboLabourGroup;
+    private javax.swing.JComboBox<ChartOfAccount> cboAccount;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;

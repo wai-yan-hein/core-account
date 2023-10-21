@@ -780,11 +780,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             txtVouTaxP.setValue(Util1.getDouble(taxp));
         }
         double ttlExp = Util1.getDouble(txtExpense.getValue());
-        double grandTotal = totalAmount
+        double grandTotal = Util1.round(totalAmount
                 + Util1.getDouble(txtTax.getValue())
                 - Util1.getDouble(txtVouDiscount.getValue())
-                - ttlExp;
-        txtGrandTotal.setValue(Util1.round(grandTotal));
+                - ttlExp);
+        txtGrandTotal.setValue(grandTotal);
         double paid = Util1.getDouble(txtVouPaid.getText());
         if (!partial) {
             if (paid == 0 || paid != grandTotal) {

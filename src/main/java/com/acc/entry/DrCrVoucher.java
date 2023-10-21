@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
+import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -98,6 +99,11 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         initDateFormat();
     }
 
+    private void initDisable() {
+        btnDr.setEnabled(ProUtil.isDisableDrVoucher());
+        btnCr.setEnabled(ProUtil.isDisableCrVoucher());
+    }
+
     private void initDateFormat() {
         txtDr.setFormatterFactory(Util1.getDecimalFormat());
         txtCr.setFormatterFactory(Util1.getDecimalFormat());
@@ -117,7 +123,6 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 txt.selectAll();
             }
         }
-
     };
 
     private void initFocusListener() {
@@ -158,6 +163,9 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         dateAutoCompleter.setObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, null, true, true);
         departmentAutoCompleter.setObserver(this);
+        accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
         accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
@@ -168,6 +176,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void initMain() {
+        initDisable();
         initCombo();
         initTable();
         search();
@@ -367,7 +376,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         tblVoucher = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnDr = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         txtDesp = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
@@ -375,7 +384,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtRef = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        btnCr = new javax.swing.JButton();
         txtDate = new javax.swing.JTextField();
         txtDept = new javax.swing.JTextField();
         txtVouNo = new javax.swing.JTextField();
@@ -423,11 +432,13 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Dep :");
 
-        jButton1.setFont(Global.lableFont);
-        jButton1.setText("Payment / Debit");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnDr.setBackground(Color.green);
+        btnDr.setFont(Global.lableFont);
+        btnDr.setForeground(Color.white);
+        btnDr.setText("Payment / Debit");
+        btnDr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnDrActionPerformed(evt);
             }
         });
 
@@ -452,11 +463,13 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         txtRef.setFont(Global.textFont);
         txtRef.setName("txtRef"); // NOI18N
 
-        jButton2.setFont(Global.lableFont);
-        jButton2.setText("Receipt / Credit");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnCr.setBackground(Color.red);
+        btnCr.setFont(Global.lableFont);
+        btnCr.setForeground(Color.red);
+        btnCr.setText("Receipt / Credit");
+        btnCr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnCrActionPerformed(evt);
             }
         });
 
@@ -490,31 +503,31 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, 66, Short.MAX_VALUE)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDept, javax.swing.GroupLayout.PREFERRED_SIZE, 66, Short.MAX_VALUE)
+                .addComponent(txtDept, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 66, Short.MAX_VALUE)
+                .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, 66, Short.MAX_VALUE)
+                .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRef, javax.swing.GroupLayout.PREFERRED_SIZE, 66, Short.MAX_VALUE)
+                .addComponent(txtRef, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, 68, Short.MAX_VALUE)
+                .addComponent(txtRefNo, javax.swing.GroupLayout.DEFAULT_SIZE, 68, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addComponent(btnDr)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
+                .addComponent(btnCr)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -533,8 +546,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtRefNo)
-                        .addComponent(jButton1)
-                        .addComponent(jButton2))
+                        .addComponent(btnDr)
+                        .addComponent(btnCr))
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtDept, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -650,15 +663,15 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnCrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrActionPerformed
         // TODO add your handling code here:
         openVoucherDialog("CR", null);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnCrActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnDrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDrActionPerformed
         // TODO add your handling code here:
         openVoucherDialog("DR", null);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnDrActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
@@ -680,8 +693,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnCr;
+    private javax.swing.JButton btnDr;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

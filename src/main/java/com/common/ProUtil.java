@@ -68,7 +68,18 @@ public class ProUtil {
     public static final String DRCR_REPORT = "drcr.report";
     public static final String ROUND_POINT = "round.point";
     public static final String DISABLE_MILL = "disable.calculate.milling.stock";
-    public static final String STOCK_IO_A5 ="stockio.report.A5";
+    public static final String STOCK_IO_A5 = "stockio.report.A5";
+    public static final String SALE_PRICE_OPTION = "sale.price.option";
+    public static final String DISABLE_DR_VOUCHER = "disable.dr.voucher";
+    public static final String DISABLE_CR_VOUCHER = "disable.cr.voucher";
+
+    public static boolean isDisableDrVoucher() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_DR_VOUCHER));
+    }
+
+    public static boolean isDisableCrVoucher() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_CR_VOUCHER));
+    }
 
     public static String getDrCrReport() {
         return Global.hmRoleProperty.get(DRCR_REPORT);
@@ -119,7 +130,7 @@ public class ProUtil {
     }
 
     public static boolean isPriceOption() {
-        return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.option"));
+        return Util1.getBoolean(Global.hmRoleProperty.get(SALE_PRICE_OPTION));
     }
 
     public static boolean isPricePopup() {

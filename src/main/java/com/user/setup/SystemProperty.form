@@ -122,7 +122,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtCustomer" pref="134" max="32767" attributes="0"/>
+                              <Component id="txtCustomer" pref="83" max="32767" attributes="0"/>
                               <Component id="txtSupplier" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
                               <Component id="txtDep" max="32767" attributes="0"/>
@@ -687,7 +687,7 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="chkPriceChange" pref="102" max="32767" attributes="0"/>
+                              <Component id="chkPriceChange" max="32767" attributes="0"/>
                               <Component id="chkPricePopup" max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -1163,7 +1163,7 @@
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtCreditor" alignment="0" pref="99" max="32767" attributes="0"/>
+                                      <Component id="txtCreditor" alignment="0" max="32767" attributes="0"/>
                                       <Component id="txtDebtor" alignment="0" pref="0" max="32767" attributes="0"/>
                                       <Component id="txtCus" alignment="0" pref="0" max="32767" attributes="0"/>
                                       <Component id="txtSup" alignment="0" pref="0" max="32767" attributes="0"/>
@@ -1192,8 +1192,17 @@
                               </Group>
                           </Group>
                       </Group>
-                      <Component id="chkDisableAll" alignment="1" max="32767" attributes="0"/>
-                      <Component id="chkDisableDep" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="chkDisableAll" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkDisableDep" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="chkDisableDrVoucher" max="32767" attributes="0"/>
+                              <Component id="chkDisableCrVoucher" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -1259,13 +1268,24 @@
                       <Component id="jLabel28" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtConversionAcc" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jSeparator6" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisableAll" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisableDep" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jSeparator6" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="chkDisableAll" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="chkDisableDep" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkDisableCrVoucher" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Group type="102" attributes="0">
+                          <EmptySpace min="15" pref="15" max="-2" attributes="0"/>
+                          <Component id="chkDisableDrVoucher" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace pref="21" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -1419,6 +1439,22 @@
               <Connection code="Global.textFont" type="code"/>
             </Property>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableDrVoucher">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Debit Voucher"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkDisableDrVoucherActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableCrVoucher">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Credit Voucher"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkDisableCrVoucherActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

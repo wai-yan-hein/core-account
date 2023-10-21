@@ -43,6 +43,8 @@ public class VouStatus {
     private String intgUpdStatus;
     @Column(name = "dept_id")
     private Integer deptId;
+    @Column(name = "report_name")
+    private String reportName;
 
     public VouStatus() {
     }
