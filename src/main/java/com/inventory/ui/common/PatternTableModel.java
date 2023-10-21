@@ -11,6 +11,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
+import com.inventory.model.MessageType;
 import com.inventory.model.Pattern;
 import com.inventory.model.PatternKey;
 import com.inventory.model.PriceOption;
@@ -188,7 +189,7 @@ public class PatternTableModel extends AbstractTableModel {
                     }
                     case 3 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
-                            p.setQty(Util1.getFloat(value));
+                            p.setQty(Util1.getDouble(value));
                             if (p.getUnitCode() == null) {
                                 table.setColumnSelectionInterval(4, 4);
                             }
@@ -205,7 +206,7 @@ public class PatternTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
-                            p.setPrice(Util1.getFloat(value));
+                            p.setPrice(Util1.getDouble(value));
                         } else {
                             JOptionPane.showMessageDialog(panel, String.format("Invalid %s", value));
                         }
@@ -234,8 +235,8 @@ public class PatternTableModel extends AbstractTableModel {
     }
 
     private void calAmt(Pattern p) {
-        float qty = Util1.getFloat(p.getQty());
-        float price = Util1.getFloat(p.getPrice());
+        Double qty = Util1.getDouble(p.getQty());
+        Double price = Util1.getDouble(p.getPrice());
         p.setAmount(qty * price);
     }
 
@@ -264,9 +265,17 @@ public class PatternTableModel extends AbstractTableModel {
                 table.setRowSelectionInterval(row + 1, row + 1);
                 table.setColumnSelectionInterval(0, 0);
                 observer.selected("CAL_PRICE", "-");
+                sendMessage(t.getStockName());
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.PATTERN, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     @Override

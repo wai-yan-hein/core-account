@@ -29,6 +29,7 @@ import com.h2.service.DepartmentUserService;
 import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.GlService;
+import com.h2.service.JobService;
 import com.h2.service.LabourGroupService;
 import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
@@ -96,6 +97,7 @@ import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
+import com.h2.service.PatternService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
@@ -115,6 +117,7 @@ import com.h2.service.TransferHisService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.General;
 import com.inventory.model.GradeDetailKey;
+import com.inventory.model.Job;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
@@ -122,6 +125,7 @@ import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.OrderStatus;
 import com.inventory.model.OrderStatusKey;
+import com.inventory.model.Pattern;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
 import com.inventory.model.ProcessHisKey;
@@ -286,6 +290,10 @@ public class H2Repo {
     private StockCriteriaService stockCriteriaService;
     @Autowired
     private LabourGroupService labourGroupService;
+    @Autowired
+    private JobService jobService;
+    @Autowired
+    private PatternService patternService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -402,6 +410,14 @@ public class H2Repo {
 
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
+    }
+
+    public Mono<Job> save(Job sh) {
+        return Mono.justOrEmpty(jobService.save(sh));
+    }
+
+    public Mono<Pattern> save(Pattern sh) {
+        return Mono.justOrEmpty(patternService.save(sh));
     }
 
     public Mono<OrderHis> save(OrderHis oh) {

@@ -87,6 +87,10 @@ public class SSEListener {
                             integration.downloadGradeDetail();
                         case MessageType.CRITERIA ->
                             integration.downloadStockCriteria();
+                        case MessageType.JOB ->
+                            integration.downloadJob();
+                        case MessageType.PATTERN ->
+                            integration.downloadPattern();
                     }
                     showMessage(t.getMessage());
                 }

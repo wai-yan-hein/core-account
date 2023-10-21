@@ -26,12 +26,14 @@ import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.GlService;
+import com.h2.service.JobService;
 import com.h2.service.LabourGroupService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
+import com.h2.service.PatternService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisService;
@@ -175,6 +177,10 @@ public class CloudIntegration {
     private StockCriteriaService stockCriteriaService;
     @Autowired
     private LabourGroupService labourGroupService;
+    @Autowired
+    private JobService jobService;
+    @Autowired
+    private PatternService patternService;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
@@ -631,6 +637,8 @@ public class CloudIntegration {
         downloadGradeDetail();
         downloadStockCriteria();
         downloadLabourGroup();
+        downloadJob();
+        downloadPattern();
     }
 
     public void downloadPriceOption() {
@@ -819,7 +827,7 @@ public class CloudIntegration {
             observer.selected("download", e.getMessage());
         });
     }
-    
+
     public void downloadGradeDetail() {
         String maxDate = stockFormulaService.getMaxDateGD();
         inventoryRepo.getUpdateGradeDetail(maxDate).subscribe((t) -> {
@@ -843,6 +851,34 @@ public class CloudIntegration {
                 stockCriteriaService.save(s);
             });
             observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+
+    public void downloadJob() {
+        String maxDate = jobService.getMaxDate();
+        inventoryRepo.getUpdateJob(maxDate).subscribe((t) -> {
+            log.info("job = " + t.size());
+            observer.selected("download", "job list : " + t.size());
+            t.forEach((s) -> {
+                jobService.save(s);
+            });
+            observer.selected("download", "dwonloadJob done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+
+    public void downloadPattern() {
+        String maxDate = patternService.getMaxDate();
+        inventoryRepo.getUpdatePattern(maxDate).subscribe((t) -> {
+            log.info("pattern = " + t.size());
+            observer.selected("download", "pattern list : " + t.size());
+            t.forEach((s) -> {
+                patternService.save(s);
+            });
+            observer.selected("download", "downloadPattern done.");
         }, (e) -> {
             observer.selected("download", e.getMessage());
         });

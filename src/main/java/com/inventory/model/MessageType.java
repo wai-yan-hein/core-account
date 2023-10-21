@@ -32,6 +32,8 @@ public class MessageType {
     public static final String FORMULA_QTY = "FORMULA_QTY";
     public static final String GRADE_DETAIL = "GRADE_DETAIL";
     public static final String CRITERIA = "CRITERIA";
+    public static final String JOB = "JOB";
+    public static final String PATTERN = "PATTERN";
     //account
     public static final String DEPARTMENT_ACC = "DEPARTMENT_ACC";
     public static final String TRADER_ACC = "TRADER_ACC";

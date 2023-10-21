@@ -6,6 +6,7 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
 
 /**
  *
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PatternKey {
+public class PatternKey implements Serializable {
 
     private String stockCode;
     private String compCode;

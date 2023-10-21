@@ -200,6 +200,34 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<Pattern>> getUpdatePattern(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdatePattern")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(Pattern.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<Job>> getUpdateJob(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateJob")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(Job.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Category>> getCategory() {
         if (localDatabase) {
             return h2Repo.getCategory();
@@ -1135,7 +1163,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<StockFormulaPrice>> getUpdateStockFormulaPrice(String updatedDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUpdateStockFormulaPrice")
@@ -1149,7 +1177,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<StockFormulaQty>> getUpdateStockFormulaQty(String updatedDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUpdateStockFormulaQty")
@@ -1163,7 +1191,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<GradeDetail>> getUpdateGradeDetail(String updatedDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUpdateGradeDetail")
@@ -1607,7 +1635,7 @@ public class InventoryRepo {
                 .bodyToMono(Job.class)
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
-//                        h2Repo.save(t);
+                        h2Repo.save(t);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -1639,6 +1667,11 @@ public class InventoryRepo {
                 .body(Mono.just(pattern), Pattern.class)
                 .retrieve()
                 .bodyToMono(Pattern.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -2540,7 +2573,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(GRNKey key) {
         return inventoryApi.post()
-                .uri("/grn/delete-grn")
+                .uri("/grn/deleteGRN")
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
