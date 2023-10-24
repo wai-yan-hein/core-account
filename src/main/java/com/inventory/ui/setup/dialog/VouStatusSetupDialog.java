@@ -87,7 +87,6 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         tblVou.addKeyListener(this);
     }
 
-
     private void initTable() {
         tblVou.setModel(vouTableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
@@ -111,6 +110,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         vou.setKey(cat.getKey());
         txtName.setText(vou.getDescription());
         txtUserCode.setText(vou.getUserCode());
+        txtReport.setText(vou.getReportName());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -121,18 +121,18 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            inventoryRepo.saveVouStatus(vou).subscribe((t) -> {
+            inventoryRepo.saveVouStatus(vou).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listVou.set(selectRow, t);
                 } else {
                     listVou.add(t);
                 }
                 clear();
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
 
         }
     }
@@ -143,6 +143,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
+        txtReport.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         vou = new VouStatus();
@@ -172,6 +173,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             }
             vou.setUserCode(txtUserCode.getText());
             vou.setDescription(txtName.getText());
+            vou.setReportName(txtReport.getText());
         }
         return status;
     }

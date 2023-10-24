@@ -834,6 +834,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private void usageDialog() {
         if (usageDialog == null) {
             usageDialog = new MillingUsageDialog(Global.parentForm);
+            usageDialog.setSize(Global.width - 200, Global.height - 200);
             usageDialog.setInventoryRepo(inventoryRepo);
             usageDialog.setMilingOutTableModel(milingOutTableModel);
             usageDialog.initMain();

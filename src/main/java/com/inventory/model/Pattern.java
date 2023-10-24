@@ -24,9 +24,9 @@ public class Pattern implements java.io.Serializable {
     @Column(name = "dept_id")
     private Integer deptId;
     @Column(name = "qty")
-    private Double qty;
+    private double qty;
     @Column(name = "price")
-    private Double price;
+    private double price;
     @Column(name = "unit")
     private String unitCode;
     @Column(name = "loc_code")
@@ -54,6 +54,6 @@ public class Pattern implements java.io.Serializable {
     @Transient
     private String locName;
     @Transient
-    private Double amount;
+    private double amount;
 
 }

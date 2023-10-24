@@ -549,17 +549,17 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     }
                 }
             }
-            inventoryRepo.save(saleHis).subscribe((t) -> {
+            inventoryRepo.save(saleHis).doOnSuccess((t) -> {
                 progress.setIndeterminate(false);
                 if (print) {
                     printVoucher(t);
                 }
                 clear();
-            }, (e) -> {
+            }).doOnError((e) -> {
                 observeMain();
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
-            });
+            }).subscribe();
         }
     }
 
@@ -945,11 +945,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }).subscribe();
 
             } else {
-                inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
+                inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
                     viewReport(t, sh, reportName);
-                }, (e) -> {
+                }).doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                }).subscribe();
             }
         }
     }

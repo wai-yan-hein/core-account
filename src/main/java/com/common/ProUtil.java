@@ -72,6 +72,9 @@ public class ProUtil {
     public static final String SALE_PRICE_OPTION = "sale.price.option";
     public static final String DISABLE_DR_VOUCHER = "disable.dr.voucher";
     public static final String DISABLE_CR_VOUCHER = "disable.cr.voucher";
+    public static final String STOCK_IO_VOUCHER = "stockio.voucher";
+    public static final String TRANSFER_VOUCHER = "transfer.voucher";
+    public static final String PURCHASE_VOUCHER ="report.purchase.voucher";
 
     public static boolean isDisableDrVoucher() {
         return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_DR_VOUCHER));

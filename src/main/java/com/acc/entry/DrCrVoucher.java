@@ -100,8 +100,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void initDisable() {
-        btnDr.setEnabled(ProUtil.isDisableDrVoucher());
-        btnCr.setEnabled(ProUtil.isDisableCrVoucher());
+        btnDr.setEnabled(!ProUtil.isDisableDrVoucher());
+        btnCr.setEnabled(!ProUtil.isDisableCrVoucher());
     }
 
     private void initDateFormat() {
@@ -465,7 +465,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
         btnCr.setBackground(Color.red);
         btnCr.setFont(Global.lableFont);
-        btnCr.setForeground(Color.red);
+        btnCr.setForeground(Color.white);
         btnCr.setText("Receipt / Credit");
         btnCr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

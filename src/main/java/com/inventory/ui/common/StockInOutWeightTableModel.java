@@ -315,7 +315,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
             inventoryRepo.getPattern(stockCode, date).doOnSuccess((t) -> {
                 if (!t.isEmpty()) {
                     String input = JOptionPane.showInputDialog("Enter Qty.");
-                    if (Util1.isPositive(input)) {
+                    if (Util1.getDouble(input) > 0) {
                         double totalPrice = 0.0f;
                         double qty = Util1.getFloat(input);
                         for (Pattern p : t) {
@@ -351,11 +351,21 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                     }
                 }
                 addNewRow();
+                focusOnTable();
                 observer.selected("CAL-TOTAL", "CAL-TOTAL");
             }).subscribe();
         } else {
             setSelection(row, 3);
             addNewRow();
+        }
+    }
+
+    private void focusOnTable() {
+        int rc = parent.getRowCount();
+        if (rc > 1) {
+            parent.setRowSelectionInterval(rc - 1, rc - 1);
+            parent.setColumnSelectionInterval(0, 0);
+            parent.requestFocus();
         }
     }
 

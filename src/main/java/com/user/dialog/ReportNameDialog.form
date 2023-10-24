@@ -28,11 +28,13 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="txtTranA5" max="32767" attributes="0"/>
-                  <Component id="txtIOA5" pref="353" max="32767" attributes="0"/>
+                  <Component id="txtTranVoucher" max="32767" attributes="0"/>
+                  <Component id="txtIOVoucher" pref="371" max="32767" attributes="0"/>
+                  <Component id="txtPurVou" pref="371" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -44,14 +46,19 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtTranA5" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtTranVoucher" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtIOA5" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtIOVoucher" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="381" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtPurVou" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace pref="353" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -62,10 +69,10 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Global.lableFont" type="code"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Transfer Voucher A5"/>
+        <Property name="text" type="java.lang.String" value="Transfer Voucher"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtTranA5">
+    <Component class="javax.swing.JTextField" name="txtTranVoucher">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Global.textFont" type="code"/>
@@ -77,10 +84,25 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Global.lableFont" type="code"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Stock I/O Voucher A5"/>
+        <Property name="text" type="java.lang.String" value="Stock I/O Voucher"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtIOA5">
+    <Component class="javax.swing.JTextField" name="txtIOVoucher">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.textFont" type="code"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Purchase Voucher"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtPurVou">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Global.textFont" type="code"/>

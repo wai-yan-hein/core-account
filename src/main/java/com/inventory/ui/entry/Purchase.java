@@ -872,16 +872,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         String vouNo = p.getKey().getVouNo();
         Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo);
         Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
-        p1.zipWith(p2).hasElement().subscribe((t) -> {
-            log.info("" + t);
-        });
-        p1.zipWith(p2).subscribe((t) -> {
+        p1.zipWith(p2).doOnSuccess((t) -> {
             List<VPurchase> list = t.getT1();
             List<PurExpense> listEx = t.getT2();
             listEx.removeIf((ex) -> Util1.getDouble(ex.getAmount()) == 0);
             if (list != null) {
-                String key = "report.purchase.voucher";
-                String reportName = ProUtil.getProperty(key);
+                String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.PURCHASE_VOUCHER), "PurchaseVoucher");
                 if (reportName != null) {
                     try {
                         String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
@@ -915,14 +911,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     } catch (JsonProcessingException | JRException e) {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     }
-                } else {
-                    JOptionPane.showMessageDialog(this, "define report in " + key);
                 }
             }
-        }, (e) -> {
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-        });
+        }).subscribe();
     }
 
     private void focusTable() {

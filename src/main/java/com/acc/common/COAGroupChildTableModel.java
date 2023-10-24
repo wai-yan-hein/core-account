@@ -203,6 +203,10 @@ public class COAGroupChildTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         if (edit) {
+            ChartOfAccount c = listCOA.get(row);
+            if (c.isMarked()) {
+                return false;
+            }
             return switch (column) {
                 case 0, 1 ->
                     false;

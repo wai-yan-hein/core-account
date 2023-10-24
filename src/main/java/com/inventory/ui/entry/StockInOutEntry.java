@@ -352,13 +352,15 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             io.setListDel(getListDelete());
             inventoryRepo.save(io).doOnSuccess((t) -> {
                 String customReport = null;
+                String title = null;
                 if (vouStatusAutoCompleter.getVouStatus() != null) {
                     customReport = vouStatusAutoCompleter.getVouStatus().getReportName();
+                    title = vouStatusAutoCompleter.getVouStatus().getDescription();
                 }
                 clear();
                 focusOnTable();
                 if (print) {
-                    printVoucher(t.getKey().getVouNo(), customReport);
+                    printVoucher(t.getKey().getVouNo(), customReport,title);
                 }
             }).doOnError((e) -> {
                 observer.selected("save", true);
@@ -368,11 +370,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         }
     }
 
-    private void printVoucher(String vouNo, String customReport) {
+    private void printVoucher(String vouNo, String customReport,String title) {
         inventoryRepo.getStockInOutVoucher(vouNo).doOnSuccess((t) -> {
             try {
                 if (t != null) {
-                    String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.STOCK_IO_A5), "StockInOutVoucher");
+                    String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.STOCK_IO_VOUCHER), "StockInOutVoucher");
                     if (!Util1.isNullOrEmpty(customReport)) {
                         reportName = customReport;
                     }
@@ -383,6 +385,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
                     param.put("p_logo_path", logoPath);
+                    param.put("p_report_name", title);
                     String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                     ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(t));
                     JsonDataSource ds = new JsonDataSource(jsonDataStream);
