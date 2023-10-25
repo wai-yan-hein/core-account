@@ -8,7 +8,7 @@ import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.MillingOutDetail;
 import com.inventory.model.MillingUsage;
-import com.inventory.ui.common.MilingOutTableModel;
+import com.inventory.ui.common.MillingOutTableModel;
 import com.inventory.ui.entry.dialog.common.MillingUsageTableModel;
 import com.repo.InventoryRepo;
 import java.awt.event.KeyEvent;
@@ -26,7 +26,7 @@ public class MillingUsageDialog extends javax.swing.JDialog {
 
     private MillingUsageTableModel millingUsageTableModel = new MillingUsageTableModel();
     private InventoryRepo inventoryRepo;
-    private MilingOutTableModel millingOutTableModel;
+    private MillingOutTableModel millingOutTableModel;
     private boolean confirm = false;
 
     public boolean isConfirm() {
@@ -41,7 +41,7 @@ public class MillingUsageDialog extends javax.swing.JDialog {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public void setMilingOutTableModel(MilingOutTableModel millingOutTableModel) {
+    public void setMilingOutTableModel(MillingOutTableModel millingOutTableModel) {
         this.millingOutTableModel = millingOutTableModel;
     }
 
@@ -78,40 +78,13 @@ public class MillingUsageDialog extends javax.swing.JDialog {
         tblUsage.getColumnModel().getColumn(3).setPreferredWidth(40);
     }
 
-    public void search(String vouNo) {
-        if (Util1.isNullOrEmpty(vouNo)) {
-            List<MillingOutDetail> list = millingOutTableModel.getListDetail();
-            if (list != null) {
-                millingUsageTableModel.clear();
-                list.forEach((t) -> {
-                    String stockCode = t.getStockCode();
-                    if (!Util1.isNullOrEmpty(stockCode)) {
-                        double qty = t.getQty();
-                        inventoryRepo.getPattern(stockCode, null).doOnSuccess((listPattern) -> {
-                            if (listPattern != null) {
-                                listPattern.forEach((p) -> {
-                                    MillingUsage u = new MillingUsage();
-                                    u.setUserCode(u.getUserCode());
-                                    u.setStockCode(p.getKey().getStockCode());
-                                    u.setStockName(p.getStockName());
-                                    u.setQty(qty * p.getQty());
-                                    u.setUnit(p.getUnitCode());
-                                    u.setLocCode(p.getLocCode());
-                                    u.setLocName(p.getLocName());
-                                    millingUsageTableModel.addObject(u);
-                                });
-                            }
-                        }).doOnTerminate(() -> {
-                            setVisible(true);
-                        }).subscribe();
-                    }
-                });
-            }
-        }
-    }
-
     public List<MillingUsage> getListUsage() {
         return millingUsageTableModel.getListDetail();
+    }
+
+    public void setListUsage(List<MillingUsage> listDetail) {
+        millingUsageTableModel.setListDetail(listDetail);
+        lblRecord.setText(String.valueOf(listDetail.size()));
     }
 
     /**
@@ -127,6 +100,8 @@ public class MillingUsageDialog extends javax.swing.JDialog {
         tblUsage = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        lblRecord = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Milling Usage Stock Dialog");
@@ -162,6 +137,12 @@ public class MillingUsageDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Record :");
+
+        lblRecord.setFont(Global.lableFont);
+        lblRecord.setText("0");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -170,8 +151,11 @@ public class MillingUsageDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1000, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)))
@@ -185,7 +169,10 @@ public class MillingUsageDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(lblRecord)))
                 .addContainerGap())
         );
 
@@ -211,7 +198,9 @@ public class MillingUsageDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblRecord;
     private javax.swing.JTable tblUsage;
     // End of variables declaration//GEN-END:variables
 }

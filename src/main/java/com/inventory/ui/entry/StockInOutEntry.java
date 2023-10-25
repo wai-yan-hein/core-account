@@ -360,7 +360,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 clear();
                 focusOnTable();
                 if (print) {
-                    printVoucher(t.getKey().getVouNo(), customReport,title);
+                    printVoucher(t.getKey().getVouNo(), customReport, title);
                 }
             }).doOnError((e) -> {
                 observer.selected("save", true);
@@ -370,7 +370,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         }
     }
 
-    private void printVoucher(String vouNo, String customReport,String title) {
+    private void printVoucher(String vouNo, String customReport, String title) {
         inventoryRepo.getStockInOutVoucher(vouNo).doOnSuccess((t) -> {
             try {
                 if (t != null) {
@@ -582,6 +582,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             inventoryRepo.findJob(io.getJobCode()).doOnSuccess((t) -> {
                 jobComboBoxModel.setSelectedItem(t);
                 cboJob.repaint();
+                if (t.isFinished()) {
+                    lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
+                    lblStatus.setForeground(Color.red);
+                    disableForm(false);
+                }
             }).subscribe();
             inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
                 labourGroupComboBoxModel.setSelectedItem(t);
@@ -638,6 +643,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtDesp.setEnabled(status);
         tblStock.setEnabled(status);
         txtVouType.setEnabled(status);
+        cboJob.setEnabled(status);
+        cboLabourGroup.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);

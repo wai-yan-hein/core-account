@@ -27,10 +27,9 @@ import com.inventory.model.MillingOutDetail;
 import com.inventory.model.MillingRawDetail;
 import com.inventory.model.Trader;
 import com.inventory.model.VouStatus;
-import com.inventory.ui.common.MilingExpenseTableModel;
-import com.inventory.ui.common.MilingRawTableModel;
+import com.inventory.ui.common.MillingExpenseTableModel;
 import com.repo.InventoryRepo;
-import com.inventory.ui.common.MilingOutTableModel;
+import com.inventory.ui.common.MillingOutTableModel;
 import com.inventory.ui.common.ProcessTypeComboBoxModel;
 import com.inventory.ui.entry.dialog.MillingHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
@@ -38,6 +37,8 @@ import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.Job;
+import com.inventory.model.MillingUsage;
+import com.inventory.ui.common.MillingRawTableModel;
 import com.inventory.ui.entry.dialog.JobSearchDialog;
 import com.inventory.ui.entry.dialog.MillingUsageDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -82,9 +83,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private List<MillingRawDetail> listDetail = new ArrayList();
     private List<MillingOutDetail> listOutDetail = new ArrayList();
     private List<MillingExpense> listExpense = new ArrayList<>();
-    private final MilingOutTableModel milingOutTableModel = new MilingOutTableModel();
-    private final MilingRawTableModel milingRawTableModel = new MilingRawTableModel();
-    private final MilingExpenseTableModel milingExpenseTableModel = new MilingExpenseTableModel();
+    private final MillingOutTableModel millingOutTableModel = new MillingOutTableModel();
+    private final MillingRawTableModel millingRawTableModel = new MillingRawTableModel();
+    private final MillingExpenseTableModel milingExpenseTableModel = new MillingExpenseTableModel();
     private MillingHistoryDialog dialog;
     private ProcessTypeComboBoxModel vouStatusTableModel = new ProcessTypeComboBoxModel();
     @Autowired
@@ -234,16 +235,17 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         initOutputTable();
         initExpenseTable();
         assignDefaultValue();
+        usageDialog();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
 
     private void initRawTable() {
-        tblRaw.setModel(milingRawTableModel);
-        milingRawTableModel.setParent(tblRaw);
-        milingRawTableModel.addNewRow();
-        milingRawTableModel.setObserver(this);
-        milingRawTableModel.setVouDate(txtSaleDate);
+        tblRaw.setModel(millingRawTableModel);
+        millingRawTableModel.setParent(tblRaw);
+        millingRawTableModel.addNewRow();
+        millingRawTableModel.setObserver(this);
+        millingRawTableModel.setVouDate(txtSaleDate);
         tblRaw.getTableHeader().setFont(Global.tblHeaderFont);
         tblRaw.setCellSelectionEnabled(true);
         tblRaw.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
@@ -299,12 +301,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void initOutputTable() {
         // tbl Output
-        tblOutput.setModel(milingOutTableModel);
-        milingOutTableModel.setParent(tblOutput);
-        milingOutTableModel.addNewRow();
-        milingOutTableModel.setObserver(this);
-        milingOutTableModel.setVouDate(txtSaleDate);
-        milingOutTableModel.setInventoryRepo(inventoryRepo);
+        tblOutput.setModel(millingOutTableModel);
+        millingOutTableModel.setParent(tblOutput);
+        millingOutTableModel.addNewRow();
+        millingOutTableModel.setObserver(this);
+        millingOutTableModel.setVouDate(txtSaleDate);
+        millingOutTableModel.setInventoryRepo(inventoryRepo);
         tblOutput.getTableHeader().setFont(Global.tblHeaderFont);
         tblOutput.setCellSelectionEnabled(true);
         tblOutput.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
@@ -387,10 +389,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private void clear() {
         disableForm(true);
         assignDefaultValue();
-        milingOutTableModel.removeListDetail();
-        milingOutTableModel.clearDelList();
-        milingRawTableModel.removeListDetail();
-        milingRawTableModel.clearDelList();
+        millingOutTableModel.removeListDetail();
+        millingOutTableModel.clearDelList();
+        millingRawTableModel.removeListDetail();
+        millingRawTableModel.clearDelList();
         milingExpenseTableModel.removeListDetail();
         milingExpenseTableModel.setChange(false);
         milling = new MillingHis();
@@ -418,24 +420,18 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     public void saveSale(boolean print) {
-        if (isValidEntry() && milingRawTableModel.isValidEntry()
-                && milingOutTableModel.isValidEntry() && milingExpenseTableModel.isValidEntry()) {
+        if (isValidEntry() && millingRawTableModel.isValidEntry()
+                && millingOutTableModel.isValidEntry() && milingExpenseTableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtSaleDate.getDate())) {
                 DateLockUtil.showMessage(this);
                 txtSaleDate.requestFocus();
                 return;
             }
-            if (ProUtil.isMillingStockUsage()) {
-                usageDialog();
-                if (!usageDialog.isConfirm()) {
-                    return;
-                }
-                milling.setListUsage(usageDialog.getListUsage());
-            }
-            milling.setListRaw(milingRawTableModel.getListDetail());
-            milling.setListRawDel(milingRawTableModel.getDelList());
-            milling.setListOutput(milingOutTableModel.getListDetail());
-            milling.setListOutputDel(milingOutTableModel.getDelList());
+            milling.setListUsage(usageDialog.getListUsage());
+            milling.setListRaw(millingRawTableModel.getListDetail());
+            milling.setListRawDel(millingRawTableModel.getDelList());
+            milling.setListOutput(millingOutTableModel.getListDetail());
+            milling.setListOutputDel(millingOutTableModel.getDelList());
             milling.setListExpense(milingExpenseTableModel.getListDetail());
             milling.setListExpenseDel(milingExpenseTableModel.getDelList());
             observer.selected("save", false);
@@ -480,11 +476,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtCus.requestFocus();
-        } else if (Util1.getDouble(txtOutputAmt.getValue()) <= 0) {
-            JOptionPane.showMessageDialog(this, "Invalid Output Amount.",
-                    "Validation.", JOptionPane.ERROR_MESSAGE);
-            status = false;
-            txtOutputAmt.requestFocus();
         } else if ((VouStatus) cboProcessType.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "You must choose process type.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
@@ -583,7 +574,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
-                milingRawTableModel.delete(row);
+                millingRawTableModel.delete(row);
                 calculateMilling(false);
             }
         }
@@ -598,7 +589,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
-                milingOutTableModel.delete(row);
+                millingOutTableModel.delete(row);
                 calculateMilling(false);
             }
         }
@@ -621,7 +612,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void calculateMilling(boolean firstRow) {
         //cal raw
-        listDetail = milingRawTableModel.getListDetail();
+        listDetail = millingRawTableModel.getListDetail();
         double loadQty = listDetail.stream().mapToDouble((t) -> t.getQty()).sum();
         double loadWt = listDetail.stream().mapToDouble((t) -> t.getTotalWeight()).sum();
         double loadAmt = listDetail.stream().mapToDouble((t) -> t.getAmount()).sum();
@@ -636,7 +627,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         double costAmt = loadAmt + expAmt;
         txtLoadCost.setValue(costAmt);
 
-        listOutDetail = milingOutTableModel.getListDetail();
+        listOutDetail = millingOutTableModel.getListDetail();
         IntStream.range(0, listOutDetail.size())
                 .forEach(i -> {
                     MillingOutDetail t = listOutDetail.get(i);
@@ -648,7 +639,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     if (qty > 0) {
                         t.setPercentQty((qty / loadQty) * 100);
                     }
-                    milingOutTableModel.setObject(i, t);
+                    millingOutTableModel.setObject(i, t);
                 });
         // calculate price
         if (!firstRow) {
@@ -663,7 +654,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 if (qty > 0) {
                     mod.setAmount(amt);
                     mod.setPrice(amt / qty);
-                    milingOutTableModel.setObject(0, mod);
+                    millingOutTableModel.setObject(0, mod);
                 }
             }
 
@@ -701,24 +692,31 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         dialog.search();
     }
 
-    public void searchRawDetail(String vouNo, Integer deptId, boolean isLocal) {
-        inventoryRepo.getRawDetail(vouNo, deptId, milling.isLocal()).subscribe((l) -> {
-            milingRawTableModel.setListDetail(l);
-            milingRawTableModel.addNewRow();
+    private void searchRawDetail(String vouNo, Integer deptId) {
+        inventoryRepo.getRawDetail(vouNo, deptId).subscribe((l) -> {
+            millingRawTableModel.setListDetail(l);
+            millingRawTableModel.addNewRow();
         });
     }
 
-    public void searchExpenseDetail(String vouNo, Integer deptId, boolean isLocal) {
-        inventoryRepo.getExpenseDetail(vouNo, deptId, milling.isLocal()).subscribe((e) -> {
+    private void searchExpenseDetail(String vouNo, Integer deptId) {
+        inventoryRepo.getExpenseDetail(vouNo, deptId).subscribe((e) -> {
             milingExpenseTableModel.setListDetail(e);
             milingExpenseTableModel.addNewRow();
         });
     }
 
-    public void searchOutputDetail(String vouNo, Integer deptId, boolean isLocal) {
-        inventoryRepo.getOutputDetail(vouNo, deptId, milling.isLocal()).subscribe((t) -> {
-            milingOutTableModel.setListDetail(t);
-            milingOutTableModel.addNewRow();
+    private void searchOutputDetail(String vouNo, Integer deptId) {
+        inventoryRepo.getOutputDetail(vouNo, deptId).subscribe((t) -> {
+            millingOutTableModel.setListDetail(t);
+            millingOutTableModel.addNewRow();
+            progress.setIndeterminate(false);
+        });
+    }
+
+    private void searchUsageDetail(String vouNo) {
+        inventoryRepo.getUsageDetail(vouNo).subscribe((t) -> {
+            usageDialog.setListUsage(t);
             progress.setIndeterminate(false);
         });
     }
@@ -732,6 +730,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
             inventoryRepo.findLocation(milling.getLocCode()).doOnSuccess((t) -> {
                 locationAutoCompleter.setLocation(t);
+            }).subscribe();
+            inventoryRepo.findJob(milling.getJobNo()).doOnSuccess((t) -> {
+                if (t != null) {
+                    txtJob.setText(t.getJobName());
+                }
             }).subscribe();
             userRepo.findCurrency(milling.getCurCode()).doOnSuccess((t) -> {
                 currAutoCompleter.setCurrency(t);
@@ -785,9 +788,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
             //detail
             String vouNo = sh.getKey().getVouNo();
-            searchRawDetail(vouNo, sh.getDeptId(), milling.isLocal());
-            searchExpenseDetail(vouNo, sh.getDeptId(), milling.isLocal());
-            searchOutputDetail(vouNo, sh.getDeptId(), milling.isLocal());
+            searchRawDetail(vouNo, sh.getDeptId());
+            searchExpenseDetail(vouNo, sh.getDeptId());
+            searchOutputDetail(vouNo, sh.getDeptId());
+            searchUsageDetail(vouNo);
             focusTable();
 
         }
@@ -836,11 +840,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             usageDialog = new MillingUsageDialog(Global.parentForm);
             usageDialog.setSize(Global.width - 200, Global.height - 200);
             usageDialog.setInventoryRepo(inventoryRepo);
-            usageDialog.setMilingOutTableModel(milingOutTableModel);
+            usageDialog.setMilingOutTableModel(millingOutTableModel);
             usageDialog.initMain();
             usageDialog.setLocationRelativeTo(null);
         }
-        usageDialog.search(txtVouNo.getText());
     }
 
     private void observeMain() {
@@ -1147,10 +1150,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelSaleLayout.createSequentialGroup()
                                 .addGap(10, 10, 10)
-                                .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel24)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 141, Short.MAX_VALUE))
+                                .addGap(0, 175, Short.MAX_VALUE))
                             .addGroup(panelSaleLayout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(addExpense1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))))
@@ -1591,7 +1594,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        usageDialog();
+        usageDialog.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void addExpense1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addExpense1ActionPerformed
@@ -1636,7 +1639,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     inventoryRepo.findJob(v.getKey().getJobNo()).subscribe((t) -> {
                         milling.setJobNo(t.getKey().getJobNo());
                         txtJob.setText(t.getJobName());
-                        setVoucherDetail(t, false);
+                        setMillingDetail(t);
                     });
                 }
             }
@@ -1645,20 +1648,19 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         }
     }
 
-    private void setVoucherDetail(Job oh, boolean local) {
-        milingRawTableModel.clear();
-        milingOutTableModel.clear();
+    private void setMillingDetail(Job oh) {
+        millingRawTableModel.clear();
+        millingOutTableModel.clear();
         if (oh != null) {
             progress.setIndeterminate(true);
             String jobNo = oh.getKey().getJobNo();
-            inventoryRepo.getStockIODetailByJob(jobNo, local).doOnSuccess((list) -> {
+            inventoryRepo.getStockIODetailByJob(jobNo).doOnSuccess((list) -> {
                 list.forEach((od) -> {
                     if (od.getInQty() > 0) {
                         MillingOutDetail sd = new MillingOutDetail();
                         sd.setStockCode(od.getStockCode());
                         sd.setUserCode(od.getUserCode());
                         sd.setStockName(od.getStockName());
-//                    sd.setTraderName(od.getTraderName());
                         sd.setRelName(od.getRelName());
                         sd.setWeight(od.getWeight());
                         sd.setWeightUnit(od.getWeightUnit());
@@ -1669,13 +1671,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         sd.setPrice(Util1.getDouble(od.getCostPrice()));
                         sd.setLocCode(od.getLocCode());
                         sd.setLocName(od.getLocName());
-                        milingOutTableModel.addObject(sd);
+                        millingOutTableModel.addObject(sd);
                     } else if (od.getOutQty() > 0) {
                         MillingRawDetail sd = new MillingRawDetail();
                         sd.setStockCode(od.getStockCode());
                         sd.setUserCode(od.getUserCode());
                         sd.setStockName(od.getStockName());
-//                    sd.setTraderName(od.getTraderName());
                         sd.setRelName(od.getRelName());
                         sd.setWeight(od.getWeight());
                         sd.setWeightUnit(od.getWeightUnit());
@@ -1686,40 +1687,46 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         sd.setPrice(Util1.getDouble(od.getCostPrice()));
                         sd.setLocCode(od.getLocCode());
                         sd.setLocName(od.getLocName());
-                        milingRawTableModel.addSale(sd);
+                        millingRawTableModel.addSale(sd);
                     }
-
                 });
-
-                milingRawTableModel.addNewRow();
-                milingOutTableModel.addNewRow();
+                millingRawTableModel.addNewRow();
+                millingOutTableModel.addNewRow();
+                setMillingUsage();
                 calculateMilling(false);
                 focusTable();
                 progress.setIndeterminate(false);
             }).subscribe();
-//            inventoryRepo.findLocation(oh.get()).doOnSuccess((t) -> {
-//                locationAutoCompleter.setLocation(t);
-//            }).subscribe();
-//            inventoryRepo.findTrader(oh.getTraderCode()).doOnSuccess((t) -> {
-//                traderAutoCompleter.setTrader(t);
-//            }).subscribe();
-//            userRepo.findCurrency(oh.getCurCode()).doOnSuccess((t) -> {
-//                currAutoCompleter.setCurrency(t);
-//            }).subscribe();
-//            inventoryRepo.findSaleMan(oh.getSaleManCode()).doOnSuccess((t) -> {
-//                saleManCompleter.setSaleMan(t);
-//            }).subscribe();
-//            userRepo.find(new ProjectKey(oh.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
-//                projectAutoCompleter.setProject(t1);
-//            }).subscribe();
-//            txtDueDate.setDate(Util1.convertToDate(oh.getCreditTerm()));
-//            txtRemark.setText(oh.getRemark());
-//            txtReference.setText(oh.getReference());
-//            txtSaleDate.setDate(Util1.convertToDate(oh.getVouDate()));
-//            txtVouTotal.setValue(Util1.getDouble(oh.getVouTotal()));
-//            txtOrderNo.setText(oh.getKey().getVouNo());
         }
+    }
 
+    public void setMillingUsage() {
+        List<MillingOutDetail> list = millingOutTableModel.getListDetail();
+        if (list != null) {
+            List<MillingUsage> listUsage = new ArrayList<>();
+            list.forEach((t) -> {
+                String stockCode = t.getStockCode();
+                if (!Util1.isNullOrEmpty(stockCode)) {
+                    double qty = t.getQty();
+                    inventoryRepo.getPattern(stockCode, null).doOnSuccess((listPattern) -> {
+                        if (listPattern != null) {
+                            listPattern.forEach((p) -> {
+                                MillingUsage u = new MillingUsage();
+                                u.setUserCode(u.getUserCode());
+                                u.setStockCode(p.getKey().getStockCode());
+                                u.setStockName(p.getStockName());
+                                u.setQty(qty * p.getQty());
+                                u.setUnit(p.getUnitCode());
+                                u.setLocCode(p.getLocCode());
+                                u.setLocName(p.getLocName());
+                                listUsage.add(u);
+                            });
+                        }
+                    }).subscribe();
+                }
+            });
+            usageDialog.setListUsage(listUsage);
+        }
     }
 
     @Override

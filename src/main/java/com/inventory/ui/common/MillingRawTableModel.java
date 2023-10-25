@@ -8,8 +8,9 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.MillingOutDetail;
-import com.inventory.model.MillingOutDetailKey;
+import com.inventory.model.Location;
+import com.inventory.model.MillingRawDetail;
+import com.inventory.model.MillingRawDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.repo.InventoryRepo;
@@ -28,26 +29,16 @@ import lombok.extern.slf4j.Slf4j;
  * @author Athu Sint
  */
 @Slf4j
-public class MilingOutTableModel extends AbstractTableModel {
+public class MillingRawTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Stock Name", "Weight", "WT-Unit", "Qty", "Unit",
-        "Price", "Amount", "Total Wt", "Eff Wt", "Eff Qty", "Calculate"};
+    private String[] columnNames = {"Code", "Stock Name", "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount", "Total Weight"};
     private JTable parent;
-    private List<MillingOutDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
-    private final List<MillingOutDetailKey> deleteList = new ArrayList();
-    private InventoryRepo inventoryRepo;
+    private List<MillingRawDetail> listDetail = new ArrayList();
+    private SelectionObserver observer;
+    private final List<MillingRawDetailKey> deleteList = new ArrayList();
     private JLabel lblStockName;
     private JButton btnProgress;
     private JDateChooser vouDate;
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     public JDateChooser getVouDate() {
         return vouDate;
@@ -81,12 +72,8 @@ public class MilingOutTableModel extends AbstractTableModel {
         this.parent = parent;
     }
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
-    }
-
-    public void setObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     @Override
@@ -117,8 +104,6 @@ public class MilingOutTableModel extends AbstractTableModel {
         return switch (column) {
             case 0, 1, 3, 5 ->
                 String.class;
-            case 11 ->
-                Boolean.class;
             default ->
                 Double.class;
         };
@@ -126,10 +111,8 @@ public class MilingOutTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        //"Code", "Stock Name", "Weight", "Weight Unit", "Qty", "Unit",
-        //"Price", "Amount", "Total Weight", "Amt %", "Qty %", "Weight %"
         switch (column) {
-            case 7, 8, 9, 10 -> {
+            case 7, 8 -> {
                 return false;
             }
         }
@@ -139,15 +122,23 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-
-            MillingOutDetail sd = listDetail.get(row);
+            MillingRawDetail sd = listDetail.get(row);
             switch (column) {
                 case 0 -> {
                     //code
                     return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
                 }
                 case 1 -> {
-                    return sd.getStockName();
+                    String stockName = null;
+                    if (sd.getStockCode() != null) {
+                        stockName = sd.getStockName();
+                        if (ProUtil.isStockNameWithCategory()) {
+                            if (sd.getCatName() != null) {
+                                stockName = String.format("%s (%s)", stockName, sd.getCatName());
+                            }
+                        }
+                    }
+                    return stockName;
                 }
                 case 2 -> {
                     return Util1.toNull(sd.getWeight());
@@ -167,22 +158,11 @@ public class MilingOutTableModel extends AbstractTableModel {
                     return Util1.toNull(sd.getPrice());
                 }
                 case 7 -> {
-                    //amt
+                    //amount
                     return Util1.toNull(sd.getAmount());
                 }
                 case 8 -> {
                     return Util1.toNull(sd.getTotalWeight());
-                }
-                case 9 -> {
-                    //amount %
-                    return Util1.toNull(sd.getPercent());
-                }
-                case 10 -> {
-                    //qty %
-                    return Util1.toNull(sd.getPercentQty());
-                }
-                case 11 -> {
-                    return row == 0;
                 }
                 default -> {
                     return null;
@@ -197,28 +177,29 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            MillingOutDetail sd = listDetail.get(row);
+            MillingRawDetail sd = listDetail.get(row);
             if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
+                            //stockBalanceTableModel.calStockBalance(s.getKey().getStockCode());
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0f);
+                            sd.setQty(1.0);
                             sd.setWeight(s.getWeight());
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
-                            sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
+                            sd.setPrice(Util1.getDouble(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             setSelection(row, 3);
                             addNewRow();
                         }
                     }
                     case 2 -> {
-                        sd.setWeight(Util1.getFloat(value));
+                        sd.setWeight(Util1.getDouble(value));
                     }
                     case 3 -> {
                         if (value instanceof StockUnit u) {
@@ -228,9 +209,9 @@ public class MilingOutTableModel extends AbstractTableModel {
                     case 4 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
+                            if (Util1.isPositive(Util1.getDouble(value))) {
                                 sd.setQty(Util1.getDouble(value));
-                                sd.setQtyStr(String.valueOf(value));
+                                sd.setQtyStr(value.toString());
                                 if (sd.getUnitCode() == null) {
                                     setSelection(row, 5);
                                 } else {
@@ -238,11 +219,11 @@ public class MilingOutTableModel extends AbstractTableModel {
                                 }
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     }
                     case 5 -> {
@@ -254,8 +235,8 @@ public class MilingOutTableModel extends AbstractTableModel {
                     case 6 -> {
                         //price
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getFloat(value));
+                            if (Util1.isPositive(Util1.getDouble(value))) {
+                                sd.setPrice(Util1.getDouble(value));
                                 setSelection(row + 1, 0);
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -268,45 +249,23 @@ public class MilingOutTableModel extends AbstractTableModel {
                     }
                     case 7 -> {
                         //amt
-                        sd.setAmount(Util1.getFloat(value));
+                        sd.setAmount(Util1.getDouble(value));
+
                     }
-                    case 11 -> {
-                        if (value instanceof Boolean t) {
-                            sd.setCalculate(t);
-                            if (t) {
-                                swapRow(0, row);
-                            }
-                        }
-                    }
+
                 }
                 calculateAmount(sd);
                 calWeight(sd);
                 fireTableRowsUpdated(row, row);
-                if (row != 0) {
-                    selectionObserver.selected("SALE-TOTAL-OUT", "SALE-TOTAL-OUT");
-                } else {
-                    selectionObserver.selected("SALE-TOTAL-SKIP", "SALE-TOTAL-SKIP");
-                }
-                parent.requestFocus();
+                observer.selected("SALE-TOTAL", "SALE-TOTAL");
+                parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
 
-    private void swapRow(int row1, int row2) {
-        if (row2 > row1) {
-            MillingOutDetail m1 = listDetail.get(row1);
-            MillingOutDetail m2 = listDetail.get(row2);
-            if (!Util1.isNullOrEmpty(m2.getStockCode())) {
-                listDetail.set(row2, m1);
-                listDetail.set(row1, m2);
-                fireTableDataChanged();
-            }
-        }
-    }
-
-    private void calWeight(MillingOutDetail sd) {
+    private void calWeight(MillingRawDetail sd) {
         if (ProUtil.isUseWeightPoint()) {
             String str = sd.getQtyStr();
             double wt = Util1.getDouble(sd.getWeight());
@@ -325,7 +284,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                MillingOutDetail pd = new MillingOutDetail();
+                MillingRawDetail pd = new MillingRawDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -335,7 +294,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            MillingOutDetail get = listDetail.get(listDetail.size() - 1);
+            MillingRawDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -343,11 +302,11 @@ public class MilingOutTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<MillingOutDetail> getListDetail() {
+    public List<MillingRawDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<MillingOutDetail> listDetail) {
+    public void setListDetail(List<MillingRawDetail> listDetail) {
         this.listDetail = listDetail;
         addNewRow();
         fireTableDataChanged();
@@ -358,10 +317,9 @@ public class MilingOutTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calculateAmount(MillingOutDetail s) {
+    private void calculateAmount(MillingRawDetail s) {
         double price = Util1.getDouble(s.getPrice());
         double wt = Util1.getDouble(s.getWeight());
-        double qty = Util1.getDouble(s.getQty());
         double ttlWt = Util1.getDouble(s.getTotalWeight());
         if (s.getStockCode() != null) {
             double amount = (ttlWt * price) / wt;
@@ -375,16 +333,10 @@ public class MilingOutTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (MillingOutDetail sdh : listDetail) {
+        for (MillingRawDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
-                            "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    status = false;
-                    parent.requestFocus();
-                    break;
-                } else if (sdh.getUnitCode() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid  Unit.");
+                if (sdh.getUnitCode() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
                     status = false;
                     parent.requestFocus();
                     break;
@@ -394,7 +346,7 @@ public class MilingOutTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<MillingOutDetailKey> getDelList() {
+    public List<MillingRawDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -405,7 +357,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        MillingOutDetail sdh = listDetail.get(row);
+        MillingRawDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
@@ -420,17 +372,10 @@ public class MilingOutTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(MillingOutDetail sd) {
+    public void addSale(MillingRawDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
-        }
-    }
-
-    public void setObject(int row, MillingOutDetail mod) {
-        if (!listDetail.isEmpty()) {
-            listDetail.set(row, mod);
-            fireTableRowsUpdated(row, row);
         }
     }
 

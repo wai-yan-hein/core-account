@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class MilingExpenseTableModel extends AbstractTableModel {
+public class MillingExpenseTableModel extends AbstractTableModel {
 
     private List<MillingExpense> listDetail = new ArrayList<>();
     private final List<MillingExpenseKey> deleteList = new ArrayList();
@@ -36,7 +36,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         this.parent = parent;
     }
 
-    public MilingExpenseTableModel() {
+    public MillingExpenseTableModel() {
     }
 
     public boolean isChange() {
