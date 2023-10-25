@@ -700,7 +700,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void searchExpenseDetail(String vouNo, Integer deptId) {
-        inventoryRepo.getExpenseDetail(vouNo, deptId).subscribe((e) -> {
+        inventoryRepo.getMillingExpense(vouNo).subscribe((e) -> {
             milingExpenseTableModel.setListDetail(e);
             milingExpenseTableModel.addNewRow();
         });
