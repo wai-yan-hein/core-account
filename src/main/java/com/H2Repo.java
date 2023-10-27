@@ -1040,4 +1040,8 @@ public class H2Repo {
     public GradeDetail save(GradeDetail t) {
         return stockFormulaService.save(t);
     }
+
+    public Mono<List<Job>> getJob(boolean finished) {
+        return Mono.just(jobService.findAll(Global.compCode, finished));
+    }
 }

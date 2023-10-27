@@ -6,9 +6,7 @@ import com.inventory.model.JobKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -25,8 +23,8 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
     @Override
     public List<Job> findAll(String compCode, Boolean isFinished) {
         String hsql = "select o from Job o where o.key.compCode = '" + compCode + "' and o.deleted =false";
-        if (!isFinished) {
-            hsql += " and o.finished = false";
+        if (isFinished) {
+            hsql += " and o.finished = true";
         }
         return findHSQL(hsql);
     }

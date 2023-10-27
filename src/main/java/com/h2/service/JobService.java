@@ -2,8 +2,6 @@ package com.h2.service;
 
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 public interface JobService {

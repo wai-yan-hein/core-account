@@ -170,7 +170,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         //qty
-                        return record.getQty();
+                        return Util1.toNull(record.getQty());
                     }
                     case 5 -> {
                         //unit
@@ -178,11 +178,11 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                     case 6 -> {
                         //price
-                        return record.getPrice();
+                        return Util1.toNull(record.getPrice());
                     }
                     case 7 -> {
                         //amount
-                        return record.getAmount();
+                        return Util1.toNull(record.getAmount());
                     }
                     default -> {
                         return new Object();
