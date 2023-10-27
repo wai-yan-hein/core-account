@@ -208,6 +208,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setOutQty(0);
                             io.setOutUnitCode(null);
                             if (io.getInUnitCode() != null) {
+                                addNewRow();
                                 parent.setRowSelectionInterval(row + 1, row + 1);
                                 parent.setColumnSelectionInterval(0, 0);
                             } else {
@@ -221,6 +222,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                         if (value instanceof StockUnit unit) {
                             io.setInUnitCode(unit.getKey().getUnitCode());
                             io.setOutUnitCode(null);
+                            addNewRow();
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
                         }
@@ -231,6 +233,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setInQty(0);
                             io.setInUnitCode(null);
                             if (io.getOutUnitCode() != null) {
+                                addNewRow();
                                 parent.setRowSelectionInterval(row + 1, row + 1);
                                 parent.setColumnSelectionInterval(0, 0);
                             } else {
@@ -242,6 +245,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                         if (value instanceof StockUnit unit) {
                             io.setOutUnitCode(unit.getKey().getUnitCode());
                             io.setInUnitCode(null);
+                            addNewRow();
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
                         }
