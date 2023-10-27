@@ -93,6 +93,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
 
     public void checkMachineRegister() {
         String serialNo = Util1.getBaseboardSerialNumber();
+        log.info("serialNo : " + serialNo);
         if (serialNo == null) {
             JOptionPane.showMessageDialog(this, "Something went wrong.");
             System.exit(0);

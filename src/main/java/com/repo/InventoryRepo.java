@@ -1380,6 +1380,7 @@ public class InventoryRepo {
 
     public Mono<List<Job>> getJob(boolean isFinished) {
         if (localDatabase) {
+
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getJob")

@@ -1031,7 +1031,7 @@ public class Util1 {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-        return null;
+        return getComputerName();
     }
 
     public static String cleanString(String str) {

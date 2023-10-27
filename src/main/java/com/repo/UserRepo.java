@@ -152,7 +152,7 @@ public class UserRepo {
                     if (localdatabase) {
                         h2Repo.save(t);
                     }
-                });
+                }).onErrorResume((t) -> Mono.empty());
     }
 
     public Mono<AuthenticationResponse> register(MachineInfo mac) {
@@ -894,35 +894,28 @@ public class UserRepo {
     }
 
     public Mono<AppUser> login(String userName, String password) {
+        if (localdatabase) {
+            return h2Repo.login(userName, password);
+        }
         return userApi.get().uri(builder -> builder.path("/user/login")
                 .queryParam("userName", userName)
                 .queryParam("password", password)
                 .build())
                 .retrieve()
-                .bodyToMono(AppUser.class)
-                .onErrorResume((e) -> {
-                    if (localdatabase) {
-                        return h2Repo.login(userName, password);
-                    }
-                    return Mono.empty();
-                });
+                .bodyToMono(AppUser.class);
     }
 
     public Mono<List<VRoleCompany>> getPrivilegeRoleCompany(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.getPrivilegeCompany(roleCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/getPrivilegeRoleCompany")
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
                 .bodyToFlux(VRoleCompany.class)
-                .collectList()
-                .onErrorResume((e) -> {
-                    if (localdatabase) {
-                        return h2Repo.getPrivilegeCompany(roleCode);
-                    }
-
-                    return Mono.error(e);
-                });
+                .collectList();
     }
 
     public Mono<List<VRoleMenu>> getPrivilegeRoleMenuTree(String roleCode) {
