@@ -40,6 +40,7 @@ import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.Job;
+import com.inventory.model.MessageType;
 import com.inventory.model.MillingUsage;
 import com.inventory.ui.common.MillingRawTableModel;
 import com.inventory.ui.entry.dialog.JobSearchDialog;
@@ -63,6 +64,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -412,7 +415,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         progress.setIndeterminate(false);
         txtRemark.setText(null);
         txtReference.setText(null);
-        txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
         txtLoadQty.setValue(null);
         txtLoadWeight.setValue(null);
@@ -448,7 +450,26 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             observer.selected("save", false);
             progress.setIndeterminate(true);
             inventoryRepo.save(milling).doOnSuccess((t) -> {
-                inventoryRepo.findJob(t.getJobNo()).doOnSuccess((s) -> {
+                updateJob(t.getJobNo());
+            }).doOnError((e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            }).doOnTerminate(() -> {
+                if (print) {
+                    printVoucher(milling);
+                } else {
+                    txtCus.requestFocus();
+                }
+                clear();
+            }).subscribe();
+        }
+    }
+
+    private void updateJob(String jobNo) {
+        if (!Util1.isNullOrEmpty(jobNo)) {
+            inventoryRepo.findJob(jobNo).doOnSuccess((s) -> {
+                if (s != null) {
                     s.setFinished(true);
                     s.setEndDate(Util1.convertToDate(milling.getVouDate()));
                     inventoryRepo.saveJob(s).doOnSuccess((a) -> {
@@ -457,23 +478,23 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         observer.selected("save", true);
                         JOptionPane.showMessageDialog(this, e.getMessage());
                         progress.setIndeterminate(false);
+                    }).doOnTerminate(() -> {
+                        sendMessage("Job No : " + jobNo + " : Finished.");
                     }).subscribe();
-                }).doOnError((e) -> {
-                    observer.selected("save", true);
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                }).subscribe();
+                }
             }).doOnError((e) -> {
                 observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
-            }).doOnTerminate(() -> {
-                if (print) {
-                    printVoucher(milling);
-                }
-                clear();
             }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.JOB, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void printVoucher(MillingHis his) {
@@ -481,7 +502,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         if (reportName != null) {
             try {
                 List<MillingRawDetail> listRaw = his.getListRaw();
+                listRaw.removeIf((t) -> t.getStockName() == null);
                 List<MillingOutDetail> listOutput = his.getListOutput();
+                listOutput.removeIf((t) -> t.getStockName() == null);
                 String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                 Map<String, Object> param = new HashMap<>();
                 param.put("p_print_date", Util1.getTodayDateTime());
@@ -491,11 +514,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 param.put("p_logo_path", logoPath);
                 param.put("p_vou_no", his.getKey().getVouNo());
                 param.put("p_vou_date", Util1.toDateStr(his.getVouDate(), Global.dateFormat));
+                param.put("p_job_no", milling.getJobNo());
                 if (!listRaw.isEmpty()) {
                     MillingRawDetail r = listRaw.get(0);
                     param.put("p_raw_name", r.getStockName());
                     param.put("p_raw_qty", r.getQty());
-                    param.put("p_raw_unit", r.getUnitCode());
+                    param.put("p_raw_unit_name", r.getUnitName());
                 }
                 String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                 ObjectMapper mapper = new ObjectMapper();

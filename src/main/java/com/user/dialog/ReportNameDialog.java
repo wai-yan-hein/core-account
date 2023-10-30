@@ -10,7 +10,6 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.user.model.PropertyKey;
 import com.user.model.SysProperty;
-import com.user.setup.SystemProperty;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -74,7 +73,7 @@ public class ReportNameDialog extends javax.swing.JDialog {
         txtPurVou.addActionListener(action);
     }
 
-    public void setDate(HashMap<String, String> hmProperty) {
+    public void setData(HashMap<String, String> hmProperty) {
         txtIOVoucher.setText(hmProperty.get(txtIOVoucher.getName()));
         txtTranVoucher.setText(hmProperty.get(txtTranVoucher.getName()));
         txtPurVou.setText(hmProperty.get(txtPurVou.getName()));

@@ -45,6 +45,8 @@ public class StockType {
     private String intgUpdStatus;
     @Column(name = "dept_id")
     private Integer deptId;
+    @Column(name = "finished_group")
+    private boolean finishedGroup;
 
     public StockType() {
     }

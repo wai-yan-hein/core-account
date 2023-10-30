@@ -357,7 +357,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 if (cboLabourGroup.getSelectedItem() instanceof LabourGroup lg) {
                     if (lg.getKey() != null) {
                         io.setLabourGroupCode(lg.getKey().getCode());
-                    }else{
+                    } else {
                         io.setLabourGroupCode(null);
                     }
                 }
@@ -453,7 +453,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         inventoryRepo.getTransferReport(vouNo).doOnSuccess((t) -> {
             try {
                 if (t != null) {
-                    String reportName = rdoA4.isSelected() ? "TransferVoucher" : "TransferVoucherA5";
+                    String a5 = ProUtil.getProperty(ProUtil.TRANSFER_VOUCHER);
+                    String reportName = rdoA4.isSelected() ? "TransferVoucher" : Util1.isNull(a5, "TransferVoucherA5");
                     String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());

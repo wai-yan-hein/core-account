@@ -31,7 +31,6 @@ import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.h2.dao.DateFilterRepo;
-import com.inventory.model.StockFormula;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -85,6 +84,7 @@ import com.inventory.ui.entry.dialog.StockBalanceDialog;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
+import com.ui.management.StockBalance;
 import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
 import com.user.dialog.ProgramDownloadDialog;
@@ -678,6 +678,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 g.setObserver(this);
                 g.initMain();
                 return g;
+            }
+            case "Stock Balance" -> {
+                StockBalance b = new StockBalance();
+                b.setInventoryRepo(inventoryRepo);
+                b.setProgress(progress);
+                b.setObserver(this);
+                b.initMain();
+                return b;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);

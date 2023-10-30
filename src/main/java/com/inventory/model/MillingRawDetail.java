@@ -46,6 +46,10 @@ public class MillingRawDetail {
     @Column(name = "tot_weight")
     private double totalWeight;
     @Transient
+    private String unitName;
+    @Transient
+    private String weightUnitName;
+    @Transient
     private double totalAmount;
     @Transient
     private String userCode;

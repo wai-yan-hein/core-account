@@ -27,6 +27,7 @@ import com.user.model.SysProperty;
 import com.inventory.model.Trader;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
+import com.user.dialog.PrintCountDialog;
 import com.user.dialog.ReportNameDialog;
 import com.user.editor.MacAutoCompleter;
 import com.user.editor.TextAutoCompleter;
@@ -91,6 +92,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private String roleCode;
     private Integer macId;
     private ReportNameDialog reportNameDialog;
+    private PrintCountDialog printCountDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -615,8 +617,18 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             reportNameDialog.setObserver(this);
             reportNameDialog.setLocationRelativeTo(null);
         }
-        reportNameDialog.setDate(hmProperty);
+        reportNameDialog.setData(hmProperty);
         reportNameDialog.setVisible(true);
+    }
+
+    private void printCountDialog() {
+        if (printCountDialog == null) {
+            printCountDialog = new PrintCountDialog(Global.parentForm);
+            printCountDialog.setObserver(this);
+            printCountDialog.setLocationRelativeTo(null);
+        }
+        printCountDialog.setData(hmProperty);
+        printCountDialog.setVisible(true);
     }
 
     /**
@@ -766,6 +778,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jLabel34 = new javax.swing.JLabel();
         txtDrCr = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1693,6 +1706,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             }
         });
 
+        jButton2.setText("Print Count");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1707,6 +1727,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jButton1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2)
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1753,7 +1775,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(jButton1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(403, 403, 403)
+                        .addComponent(jButton2)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1802,6 +1827,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         // TODO add your handling code here:
     }//GEN-LAST:event_chkDisableCrVoucherActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        printCountDialog();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAutoUpdate;
@@ -1849,6 +1879,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkWeight;
     private javax.swing.JCheckBox chkWeightPoint;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

@@ -4,13 +4,13 @@
  */
 package com.common;
 
-import com.inventory.model.ClosingBalance;
 import com.inventory.model.General;
 import com.inventory.model.Stock;
 import com.inventory.model.VOpening;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockIO;
+import com.ui.management.model.ClosingBalance;
 import cv.api.common.StockValue;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -164,7 +164,7 @@ public class ExcelExporter {
 
         int rowNum = 1;
         for (ClosingBalance d : data) {
-            Row row = sheet.createRow(rowNum++);
+            var row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(d.getStockUsrCode());
             row.createCell(1).setCellValue(d.getStockName());
             row.createCell(2).setCellValue(Util1.getDouble(d.getOpenQty()));
@@ -712,7 +712,7 @@ public class ExcelExporter {
 
         int rowNum = 1;
         for (VSale d : data) {
-            Row row = sheet.createRow(rowNum++);
+            var row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(d.getStockCode());
             row.createCell(1).setCellValue(d.getStockName());
             row.createCell(2).setCellValue(d.getRelName());

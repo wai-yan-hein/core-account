@@ -68,13 +68,25 @@ public class ProUtil {
     public static final String DRCR_REPORT = "drcr.report";
     public static final String ROUND_POINT = "round.point";
     public static final String DISABLE_MILL = "disable.calculate.milling.stock";
+    public static final String DISABLE_SALE = "disable.calculate.sale.stock";
+    public static final String DISABLE_PUR = "disable.calculate.purchase.stock";
+    public static final String DISABLE_RETIN = "disable.calculate.returnin.stock";
+    public static final String DISABLE_RETOUT = "disable.calculate.returnout.stock";
     public static final String STOCK_IO_A5 = "stockio.report.A5";
     public static final String SALE_PRICE_OPTION = "sale.price.option";
     public static final String DISABLE_DR_VOUCHER = "disable.dr.voucher";
     public static final String DISABLE_CR_VOUCHER = "disable.cr.voucher";
     public static final String STOCK_IO_VOUCHER = "stockio.voucher";
     public static final String TRANSFER_VOUCHER = "transfer.voucher";
-    public static final String PURCHASE_VOUCHER ="report.purchase.voucher";
+    public static final String PURCHASE_VOUCHER = "report.purchase.voucher";
+    public static final String SALE_PRINT_COUNT = "sale.print.count";
+    public static final String PURCHASE_PRINT_COUNT = "purchase.print.count";
+    public static final String RETURNIN_PRINT_COUNT = "returnin.print.count";
+    public static final String RETURNOUT_PRINT_COUNT = "returnout.print.count";
+    public static final String LANDING_PRINT_COUNT = "landing.print.count";
+    public static final String TRANSFER_PRINT_COUNT = "transfer.print.count";
+    public static final String STOCKIO_PRINT_COUNT = "stockio.print.count";
+    public static final String MILLING_PRINT_COUNT = "milling.print.count";
 
     public static boolean isDisableDrVoucher() {
         return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_DR_VOUCHER));
@@ -130,6 +142,22 @@ public class ProUtil {
 
     public static boolean isDisableMill() {
         return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_MILL));
+    }
+
+    public static boolean isDisableSale() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_SALE));
+    }
+
+    public static boolean isDisablePur() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_PUR));
+    }
+
+    public static boolean isDisableRetIn() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_RETIN));
+    }
+
+    public static boolean isDisableRetOut() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_RETOUT));
     }
 
     public static boolean isPriceOption() {

@@ -504,8 +504,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             int row = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
             int column = tblCash.getSelectedColumn();
             if (row > 0) {
-                Gl copy = allCashTableModel.getVGl(row - 1);
-                Gl cur = allCashTableModel.getVGl(row);
+                Gl copy = getGl(row - 1);
+                Gl cur = getGl(row);
                 switch (column) {
                     case 0 -> {
                         cur.setGlDate(copy.getGlDate());
@@ -523,23 +523,31 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     case 4 -> {
                         cur.setRefNo(copy.getRefNo());
                     }
+                    //batch no
                     case 5 -> {
+                        cur.setBatchNo(copy.getBatchNo());
+                    }
+                    //project
+                    case 6 -> {
+                        cur.setProjectNo(copy.getProjectNo());
+                    }
+                    case 7 -> {
                         cur.setTraderCode(copy.getTraderCode());
                         cur.setTraderName(copy.getTraderName());
                         cur.setAccCode(copy.getAccCode());
                         cur.setAccName(copy.getAccName());
                     }
-                    case 6 -> {
+                    case 8 -> {
                         cur.setAccCode(copy.getAccCode());
                         cur.setAccName(copy.getAccName());
                     }
-                    case 7 -> {
+                    case 9 -> {
                         cur.setCurCode(copy.getCurCode());
                     }
-                    case 8 -> {
+                    case 10 -> {
                         cur.setDrAmt(copy.getDrAmt());
                     }
-                    case 9 -> {
+                    case 11 -> {
                         cur.setCrAmt(copy.getCrAmt());
                     }
                 }

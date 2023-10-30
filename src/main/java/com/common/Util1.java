@@ -58,6 +58,11 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 /**
  * @author WSwe
@@ -1064,6 +1069,16 @@ public class Util1 {
             log.error("Failed to convert list to byte array: " + e.getMessage());
         }
         return null; // Handle the failure to convert to byte array
+    }
+
+    public static <T> List<T> byteArrayToList(byte[] byteArray, Type listType) {
+        try {
+            String jsonString = new String(byteArray);
+            return gson.fromJson(jsonString, listType);
+        } catch (JsonSyntaxException e) {
+            log.error("Failed to convert byte array to list: " + e.getMessage());
+            return null; // Handle the failure to convert the byte array back to a list
+        }
     }
 
     public static String cleanStr(String str) {

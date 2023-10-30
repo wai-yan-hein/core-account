@@ -50,6 +50,10 @@ public class MillingOutDetail {
     @Column(name = "tot_weight")
     private double totalWeight;
     @Transient
+    private String unitName;
+    @Transient
+    private String weightUnitName;
+    @Transient
     private String userCode;
     @Transient
     private String stockName;
