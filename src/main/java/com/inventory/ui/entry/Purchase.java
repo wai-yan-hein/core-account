@@ -635,17 +635,15 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtExpense.setValue(ttlExp);
     }
 
-    private void calQty(List<PurHisDetail> list) {
-        double ttlQty = 0;
-        for (PurHisDetail p : list) {
-            ttlQty += Util1.getDouble(p.getQty());
-        }
+    private void calQty() {
+        List<PurHisDetail> list = purTableModel.getListDetail();
+        double ttlQty = list.stream().mapToDouble((t) -> t.getQty()).sum();
         txtQty.setValue(ttlQty);
     }
 
     private void calculateTotalAmount(boolean partial) {
         List<PurHisDetail> list = purTableModel.getListDetail();
-        calQty(list);
+        calQty();
         calComission();
         double totalVouBalance;
         double ttl = list.stream().mapToDouble((obj) -> Util1.getDouble(obj.getAmount())).sum();
@@ -715,30 +713,29 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         dialog.search();
     }
 
-    public void setVoucher(PurHis pur, boolean local) {
+    public void setVoucher(PurHis pur) {
         purTableModel.clear();
         expenseTableModel.clear();
         progress.setIndeterminate(true);
         ph = pur;
         setCompeter(ph);
         searchVoucher(ph);
-        searchVoucherDetail(ph, local);
+        searchVoucherDetail(ph);
     }
 
-    private void searchVoucherDetail(PurHis ph, boolean local) {
+    private void searchVoucherDetail(PurHis ph) {
         String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.getPurDetail(vouNo, ph.getDeptId(), local)
-                .subscribe((t) -> {
-                    purTableModel.setListDetail(t);
-                    purTableModel.addNewRow();
-                    calQty(t);
-                    focusTable();
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                }, () -> {
-                });
+        inventoryRepo.getPurDetail(vouNo, ph.getDeptId()).doOnSuccess((t) -> {
+            purTableModel.setListDetail(t);
+            purTableModel.addNewRow();
+        }).doOnError((e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }).doOnTerminate(() -> {
+            calQty();
+            focusTable();
+            progress.setIndeterminate(false);
+        }).subscribe();
         searchExpense(vouNo);
     }
 
@@ -1927,12 +1924,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    boolean local = v.isLocal();
-                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(), local).subscribe((t) -> {
-                        setVoucher(t, local);
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+                    inventoryRepo.findPurchase(v.getVouNo()).doOnSuccess((t) -> {
+                        setVoucher(t);
+                    }).subscribe();
                 }
             }
         }

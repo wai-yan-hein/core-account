@@ -332,6 +332,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
+        accountRepo.sendDownloadMessage(MessageType.TRADER_ACC, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     public void clear() {

@@ -9,11 +9,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -71,6 +68,8 @@ public class RetInHis {
     private boolean vouLock;
     @Column(name = "project_no")
     private String projectNo;
+    @Column(name = "print_count")
+    private Integer printCount;
     @Transient
     private String status = "STATUS";
     @Transient

@@ -45,7 +45,6 @@ import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseDynamic;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.PaymentEntry;
-import com.inventory.ui.entry.PurchaseExport;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
@@ -135,8 +134,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private RFID rfid;
     @Autowired
     private Purchase purchase;
-    @Autowired
-    private PurchaseExport purchaseExport;
     @Autowired
     private ReturnIn retIn;
     @Autowired
@@ -463,8 +460,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchase.initMain();
                 return purchase;
             }
-            case "Purchase By Weight", "Purchase Rice" -> {
-                int type = menuName.equals("Purchase Rice") ? PurchaseDynamic.RICE : PurchaseDynamic.WEIGHT;
+            case "Purchase By Weight", "Purchase Rice", "Purchase Export" -> {
+                int type = getPurType(menuName);
                 PurchaseDynamic p = new PurchaseDynamic(type);
                 p.setName(menuName);
                 p.setUserRepo(userRepo);
@@ -474,13 +471,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 p.setProgress(progress);
                 p.initMain();
                 return p;
-            }
-            case "Purchase Export" -> {
-                purchaseExport.setName(menuName);
-                purchaseExport.setObserver(this);
-                purchaseExport.setProgress(progress);
-                purchaseExport.initMain();
-                return purchaseExport;
             }
             case "Return In" -> {
                 retIn.setName(menuName);
@@ -869,6 +859,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.EXPORT;
             case "Sale Rice" ->
                 SaleDynamic.RICE;
+            default ->
+                0;
+        };
+    }
+
+    private int getPurType(String menuName) {
+        //"Purchase By Weight", "Purchase Rice", "Purchase Export"
+        return switch (menuName) {
+            case "Purchase By Weight" ->
+                PurchaseDynamic.WEIGHT;
+            case "Purchase Rice" ->
+                PurchaseDynamic.RICE;
+            case "Purchase Export" ->
+                PurchaseDynamic.EXPORT;
             default ->
                 0;
         };

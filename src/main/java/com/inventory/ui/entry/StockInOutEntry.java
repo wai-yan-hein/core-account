@@ -579,19 +579,24 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             inventoryRepo.findVouStatus(io.getVouStatusCode()).doOnSuccess((t) -> {
                 vouStatusAutoCompleter.setVoucher(t);
             }).subscribe();
-            inventoryRepo.findJob(io.getJobCode()).doOnSuccess((t) -> {
-                jobComboBoxModel.setSelectedItem(t);
-                cboJob.repaint();
-                if (t.isFinished()) {
-                    lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
-                    lblStatus.setForeground(Color.red);
-                    disableForm(false);
-                }
-            }).subscribe();
             inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
                 labourGroupComboBoxModel.setSelectedItem(t);
                 cboLabourGroup.repaint();
             }).subscribe();
+            String jobNo = io.getJobCode();
+            if (!Util1.isNullOrEmpty(jobNo)) {
+                inventoryRepo.findJob(jobNo).doOnSuccess((t) -> {
+                    if (t != null) {
+                        jobComboBoxModel.setSelectedItem(t);
+                        cboJob.repaint();
+                        if (t.isFinished()) {
+                            lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
+                            lblStatus.setForeground(Color.red);
+                            disableForm(false);
+                        }
+                    }
+                }).subscribe();
+            }
             String vouNo = io.getKey().getVouNo();
             txtVou.setText(vouNo);
             txtDate.setDate(Util1.convertToDate(io.getVouDate()));
