@@ -359,9 +359,9 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                             fireTableRowsUpdated(1, 1);
                             addNewRow();
                             observer.selected("CAL-TOTAL", "CAL-TOTAL");
-                            progress.setIndeterminate(false);
                         }
                     }
+                    progress.setIndeterminate(false);
                 }
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
