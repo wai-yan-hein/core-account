@@ -362,8 +362,8 @@ public class PurchaseExportTableModel extends AbstractTableModel {
         double qty = Util1.getDouble(pur.getQty());
         double stdWt = Util1.getDouble(pur.getStdWeight());
         if (pur.getStockCode() != null) {
-//            double amount = Math.round((qty * wt * price) / stdWt);
-            double amount = Math.round(qty * price);
+            double amount = Math.round((qty * wt * price) / stdWt);
+//            double amount = Math.round(qty * price);
             pur.setAmount(amount);
         }
         if (pur.getQty() > 0 && pur.getWeight() > 0) {

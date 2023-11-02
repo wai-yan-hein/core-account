@@ -123,8 +123,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private AccountRepo accounRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private OpeningSetup openingSetup;
+//    @Autowired
+//    private OpeningSetup openingSetup;
     @Autowired
     private Sale sale;
     @Autowired
@@ -526,10 +526,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 setup.initMain();
                 return setup;
             }
-            case "Opening" -> {
+            case "Stock Opening", "Stock Opening Payable" -> {
+                int type = getOpeningType(menuName);
+                OpeningSetup openingSetup = new OpeningSetup(type);
+                openingSetup.setInventoryRepo(inventoryRepo);
+                openingSetup.setUserRepo(userRepo);
                 openingSetup.setName(menuName);
                 openingSetup.setObserver(this);
                 openingSetup.setProgress(progress);
+                openingSetup.setTaskExecutor(taskExecutor);
                 openingSetup.initMain();
                 return openingSetup;
             }
@@ -869,6 +874,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.EXPORT;
             case "Sale Rice" ->
                 SaleDynamic.RICE;
+            default ->
+                0;
+        };
+    }
+
+    private int getOpeningType(String menuName) {
+        return switch (menuName) {
+            case "Stock Opening" ->
+                OpeningSetup.STKOPENING;
+            case "Stock Opening Payable" ->
+                OpeningSetup.STKOPENINGPAYABLE;
             default ->
                 0;
         };
