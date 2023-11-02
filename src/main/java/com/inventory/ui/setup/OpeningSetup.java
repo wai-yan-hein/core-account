@@ -25,10 +25,14 @@ import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.editor.TraderAutoCompleter;
+import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileReader;
 import java.io.IOException;
@@ -40,30 +44,29 @@ import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class OpeningSetup extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
+    public static final int STKOPENING = 1;
+    public static final int STKOPENINGPAYABLE = 2;
+    private final int type;
     private final OpeningTableModel openingTableModel = new OpeningTableModel();
     private LocationAutoCompleter locationAutoCompleter;
     private CurrencyAutoCompleter currencyAAutoCompleter;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
     private OPHistoryDialog vouSearchDialog;
     private OPHis oPHis = new OPHis();
@@ -71,29 +74,36 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private SelectionObserver observer;
     private Mono<List<Location>> monoLoc;
     private final ExcelExporter exporter = new ExcelExporter();
-    @Autowired
     private TaskExecutor taskExecutor;
+    private TraderAutoCompleter traderAutoCompleter;
 
-    public JProgressBar getProgress() {
-        return progress;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
     /**
      * Creates new form OpeningSetup
+     *
+     * @param type
      */
-    public OpeningSetup() {
+    public OpeningSetup(int type) {
+        this.type = type;
         initComponents();
         initTextBoxFormat();
         actionMapping();
@@ -124,7 +134,26 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void initTextBoxFormat() {
         txtQty.setFormatterFactory(Util1.getDecimalFormat());
         txtAmount.setFormatterFactory(Util1.getDecimalFormat());
+        if (type == 1) {
+            jLabel9.setVisible(false);
+            txtCus.setVisible(false);
+        } else {
+            jLabel9.setVisible(true);
+            txtCus.setVisible(true);
+            txtCus.addFocusListener(fa);
+        }
     }
+
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     private void initCompleter() {
         monoLoc = inventoryRepo.getLocation();
@@ -142,6 +171,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
         }).subscribe();
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
+        traderAutoCompleter.setObserver(this);
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
     }
@@ -191,6 +222,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         oPHis = new OPHis();
         txtVouNo.setText(null);
         progress.setIndeterminate(false);
+        traderAutoCompleter.setTrader(null);
         disableForm(true);
         calculatAmount();
         observeMain();
@@ -224,6 +256,13 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             oPHis.setDetailList(openingTableModel.getListDetail());
             oPHis.setListDel(openingTableModel.getDelList());
+            if (txtCus.isVisible()) {
+
+                oPHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            } else {
+                oPHis.setTraderCode(null);
+            }
+            oPHis.setTranSource(type);
             inventoryRepo.save(oPHis).doOnSuccess((t) -> {
                 clear();
             }).doOnError((e) -> {
@@ -263,7 +302,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     public void historyOP() {
         try {
             if (vouSearchDialog == null) {
-                vouSearchDialog = new OPHistoryDialog(Global.parentForm);
+                vouSearchDialog = new OPHistoryDialog(Global.parentForm, type);
                 vouSearchDialog.setUserRepo(userRepo);
                 vouSearchDialog.setInventoryRepo(inventoryRepo);
                 vouSearchDialog.setObserver(this);
@@ -294,6 +333,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             String vouNo = op.getKey().getVouNo();
             String compCode = op.getKey().getCompCode();
             Integer deptId = op.getDeptId();
+            if (op.getTraderCode() != null) {
+                inventoryRepo.findTrader(op.getTraderCode()).doOnSuccess((t) -> {
+                    traderAutoCompleter.setTrader(t);
+                }).subscribe();
+            }
             inventoryRepo.findLocation(oPHis.getLocCode()).doOnSuccess((t) -> {
                 locationAutoCompleter.setLocation(t);
             }).subscribe();
@@ -529,6 +573,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         jLabel8 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        txtCus = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblOpening = new javax.swing.JTable();
         txtAmount = new javax.swing.JFormattedTextField();
@@ -581,6 +627,28 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         lblStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblStatus.setText("NEW");
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Customer");
+
+        txtCus.setFont(Global.textFont);
+        txtCus.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtCus.setName("txtCus"); // NOI18N
+        txtCus.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtCusFocusGained(evt);
+            }
+        });
+        txtCus.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtCusMouseExited(evt);
+            }
+        });
+        txtCus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCusActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -600,19 +668,26 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(txtOPDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 327, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 323, Short.MAX_VALUE)
                 .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCurrency, txtLocation, txtOPDate, txtRemark, txtVouNo});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtLocation, txtOPDate, txtRemark, txtVouNo});
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel8, jLabel9});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -630,11 +705,15 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                                 .addComponent(jLabel8)
                                 .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4)
-                            .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel9))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel4)
+                                .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel2)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
@@ -793,6 +872,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         exportTemplate();        // TODO add your handling code here:
     }//GEN-LAST:event_btnExportActionPerformed
 
+    private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
+        txtCus.selectAll();
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCusFocusGained
+
+    private void txtCusMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtCusMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCusMouseExited
+
+    private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed
+        //inventoryRepo.getCustomer().subscribe()
+    }//GEN-LAST:event_txtCusActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExport;
@@ -805,6 +897,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblMessage;
@@ -813,6 +906,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JTable tblOpening;
     private javax.swing.JFormattedTextField txtAmount;
     private javax.swing.JTextField txtCurrency;
+    private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtOPDate;
     private javax.swing.JFormattedTextField txtQty;

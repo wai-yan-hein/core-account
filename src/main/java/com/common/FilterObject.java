@@ -47,7 +47,8 @@ public class FilterObject {
     private String saleVouNo;
     private String tranOption;
     private String orderStatus;
-    
+    private int tranSource;
+
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
         this.deptId = deptId;

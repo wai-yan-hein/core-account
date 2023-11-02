@@ -59,6 +59,10 @@ public class OPHis {
     private Integer macId;
     @Column(name = "intg_upd_status")
     private String intgUpdStatus;
+    @Column(name = "trader_code")
+    private String traderCode;
+    @Column(name = "tran_source")
+    private int tranSource;
     @Transient
     private List<OPHisDetail> detailList;
     @Transient

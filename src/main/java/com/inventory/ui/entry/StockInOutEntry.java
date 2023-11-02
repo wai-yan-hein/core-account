@@ -658,7 +658,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public void historyOP() {
         try {
-            OPHistoryDialog d = new OPHistoryDialog(Global.parentForm);
+            OPHistoryDialog d = new OPHistoryDialog(Global.parentForm, 1);
             d.setUserRepo(userRepo);
             d.setInventoryRepo(inventoryRepo);
             d.setObserver(this);
