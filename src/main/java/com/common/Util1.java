@@ -1244,17 +1244,19 @@ public class Util1 {
         return LocalDateTime.parse(LocalDateTime.now().toString(), formatter);
     }
 
-    public static String convertMyanmarToArabic(String text) {
-        String myanmarNumerals = "၀၁၂၃၄၅၆၇၈၉"; // Corresponding Myanmar numerals
-        String arabicNumerals = "0123456789"; // Corresponding Arabic numerals
+    public static String convertMyanmarToArabic(String input) {
+        boolean containsBurmeseNumerals = input.matches(".*[၀-၉].*");
 
-        for (int i = 0; i < myanmarNumerals.length(); i++) {
-            char myanmarNumeral = myanmarNumerals.charAt(i);
-            char arabicNumeral = arabicNumerals.charAt(i);
-            return text.replace(myanmarNumeral, arabicNumeral);
+        // If the input contains Burmese numerals, replace them with Arabic numerals
+        if (containsBurmeseNumerals) {
+            String[] burmeseNumerals = {"၀", "၁", "၂", "၃", "၄", "၅", "၆", "၇", "၈", "၉"};
+            String[] arabicNumerals = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+            for (int i = 0; i < burmeseNumerals.length; i++) {
+                input = input.replace(burmeseNumerals[i], arabicNumerals[i]);
+            }
         }
 
-        return text;
+        return input;
     }
 
 }

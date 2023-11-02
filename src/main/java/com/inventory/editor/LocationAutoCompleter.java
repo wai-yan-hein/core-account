@@ -106,7 +106,6 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
             listLocation.forEach(t -> {
                 listOption.add(t.getKey().getLocCode());
             });
-
         }
     }
 

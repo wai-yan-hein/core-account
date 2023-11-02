@@ -34,11 +34,13 @@ import javax.swing.KeyStroke;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class TraderAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
@@ -169,22 +171,25 @@ public class TraderAutoCompleter implements KeyListener {
     }
 
     public void mouseSelect() {
-        if (table.getSelectedRow() != -1) {
-            trader = traderTableModel.getTrader(table.convertRowIndexToModel(
-                    table.getSelectedRow()));
-            textComp.setText(trader.getTraderName());
-            listOption = new ArrayList<>();
-        }
-        popup.setVisible(false);
-        if (editor != null) {
-            editor.stopCellEditing();
-        }
-        if (observer != null) {
-            if (trader != null) {
-                observer.selected("TRADER", trader.getType());
+        try {
+            if (table.getSelectedRow() != -1) {
+                trader = traderTableModel.getTrader(table.convertRowIndexToModel(
+                        table.getSelectedRow()));
+                textComp.setText(trader.getTraderName());
+                listOption = new ArrayList<>();
             }
+            popup.setVisible(false);
+            if (editor != null) {
+                editor.stopCellEditing();
+            }
+            if (observer != null) {
+                if (trader != null) {
+                    observer.selected("TRADER", trader.getType());
+                }
+            }
+        } catch (Exception e) {
+            log.error("mouseSelect : " + e.getMessage());
         }
-
     }
 
     private final Action acceptAction = new AbstractAction() {

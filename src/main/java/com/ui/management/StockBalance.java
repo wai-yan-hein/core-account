@@ -134,9 +134,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         inventoryRepo.getCategory().doOnSuccess((t) -> {
             categoryAutoCompleter.setListCategory(t);
         }).subscribe();
-        inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
-            locationAutoCompleter.setLocation(t);
-        }).subscribe();
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
         }).subscribe();
@@ -190,7 +187,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         txtClQty.setValue(clQty);
         txtClWt.setValue(clWt);
         lblRecord.setText(String.valueOf(list.size()));
-
     }
 
     private ReportFilter getFilter() {

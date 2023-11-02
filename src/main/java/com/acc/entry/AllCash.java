@@ -686,31 +686,22 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void searchCash() {
         enableToolBar(false);
         clearModel();
-        Mono<TmpOpening> monoOp = accountRepo.getOpening(getOPFilter());
         ReportFilter filter = getFilter();
-        Mono<List<Gl>> monoGl = accountRepo.searchGl(filter);
-        Mono<Tuple2<TmpOpening, List<Gl>>> monoZip = monoOp.zipWith(monoGl);
-        monoZip.doOnSuccess((t) -> {
-            if (t != null) {
-                TmpOpening op = t.getT1();
-                opening = op == null ? 0 : op.getOpening();
-                List<Gl> list = t.getT2();
-                checkDateLock(list);
-                setData(list, filter.getFromDate());
-                calDebitCredit();
-                requestFoucsTable();
-                decorator.refreshButton(filter.getFromDate());
-                enableToolBar(true);
-            } else {
-                setData(new ArrayList<>(), filter.getFromDate());
-                calDebitCredit();
-                requestFoucsTable();
-                decorator.refreshButton(filter.getFromDate());
-                enableToolBar(true);
-            }
+        accountRepo.searchGl(filter).doOnSuccess((list) -> {
+            checkDateLock(list);
+            setData(list, filter.getFromDate());
         }).doOnError((e) -> {
             log.error("searchCash: " + e.getMessage());
             enableToolBar(true);
+        }).doOnTerminate(() -> {
+            decorator.refreshButton(filter.getFromDate());
+            enableToolBar(true);
+            requestFoucsTable();
+            accountRepo.getOpening(getOPFilter()).doOnSuccess((t) -> {
+                opening = t.getOpening();
+            }).doOnTerminate(() -> {
+                calDebitCredit();
+            }).subscribe();
         }).subscribe();
     }
 

@@ -242,11 +242,11 @@ public class AllCashTableModel extends AbstractTableModel {
                             gl.setTraderName(t.getTraderName());
                             if (t.getAccount() != null) {
                                 gl.setAccCode(t.getAccount());
-                                accountRepo.findCOA(t.getAccount()).subscribe((c) -> {
+                                accountRepo.findCOA(t.getAccount()).doOnSuccess((c) -> {
                                     if (c != null) {
                                         gl.setAccName(c.getCoaNameEng());
                                     }
-                                });
+                                }).subscribe();
                                 if (ProUtil.isMultiCur()) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
@@ -266,8 +266,6 @@ public class AllCashTableModel extends AbstractTableModel {
                             if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
                                 gl.setAccCode(coa.getKey().getCoaCode());
                                 gl.setAccName(coa.getCoaNameEng());
-                                gl.setTraderCode(null);
-                                gl.setTraderName(null);
                                 if (Util1.isNull(gl.getCurCode())) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
