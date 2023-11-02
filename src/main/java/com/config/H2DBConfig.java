@@ -54,7 +54,6 @@ public class H2DBConfig {
     private Properties additionalJpaProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "update"); // Example JPA property
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         properties.setProperty("hibernate.connection.username", "root");
         properties.setProperty("hibernate.connection.password", "corevalue");
         properties.setProperty("hibernate.connection.url", "jdbc:h2:file:./data/database");

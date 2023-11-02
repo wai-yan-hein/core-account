@@ -40,7 +40,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -415,8 +414,8 @@ public final class DepartmentAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
+        String str = textComp.getText();
+        if (str.length() == 0) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(startsWithFilter);

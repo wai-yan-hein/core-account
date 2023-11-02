@@ -276,7 +276,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         ChartOfAccount coa = coaAutoCompleter.getCOA();
         filter.setCoaLv1(Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-");
         filter.setCoaLv2(Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-");
-        filter.setAcc(Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-");
+        filter.setCoaLv3(Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-");
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         if (chkCus.isSelected()) {
             filter.setTraderType("C");
@@ -293,16 +293,16 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             lblMessage.setText("");
         }
         openingTableModel.clear();
-        accountRepo.getOpeningBalance(filter).subscribe((t) -> {
+        accountRepo.getOpeningBalance(filter).doOnSuccess((t) -> {
             openingTableModel.setListOpening(t);
             openingTableModel.addNewRow();
             btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
             calTotalAmt();
             focusOnTable();
             progress.setIndeterminate(false);
-        }, (e) -> {
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
     }
 
     private void enableForm(boolean status) {

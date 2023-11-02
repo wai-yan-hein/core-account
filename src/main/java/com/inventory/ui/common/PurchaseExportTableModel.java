@@ -16,7 +16,7 @@ import com.inventory.model.PurDetailKey;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.PurchaseExport;
+import com.inventory.ui.entry.PurchaseDynamic;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +42,10 @@ public class PurchaseExportTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-    private PurchaseExport purchaseExport;
+    private PurchaseDynamic purchase;
 
-    public void setPurchaseExport(PurchaseExport purchaseExport) {
-        this.purchaseExport = purchaseExport;
+    public void setPurchase(PurchaseDynamic purchase) {
+        this.purchase = purchase;
     }
 
     public void setLblRec(JLabel lblRec) {
@@ -141,10 +141,10 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                         return record.getLocName();
                     }
                     case 3 -> {
-                        return record.getLength();
+                        return Util1.toNull(record.getLength());
                     }
                     case 4 -> {
-                        return record.getWidth();
+                        return Util1.toNull( record.getWidth());
                     }
                     case 5 -> {
                         return record.getMPercent();
@@ -157,7 +157,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                         return record.getWeightUnit();
                     }
                     case 8 -> {
-                        return record.getQty();
+                        return Util1.toNull( record.getQty());
                     }
                     case 9 -> {
                         return record.getUnitCode();
@@ -310,7 +310,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
 
     private void assignLocation(PurHisDetail sd) {
         if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = purchaseExport.getLocationAutoCompleter();
+            LocationAutoCompleter completer =purchase.getLocationAutoCompleter();
             if (completer != null) {
                 Location l = completer.getLocation();
                 if (l != null) {

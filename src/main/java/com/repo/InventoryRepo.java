@@ -2162,13 +2162,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<PurHis> findPurchase(String vouNo, Integer deptId, boolean local) {
+    public Mono<PurHis> findPurchase(String vouNo) {
         PurHisKey key = new PurHisKey();
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);
-        if (local) {
-            return h2Repo.findPurchase(key);
-        }
         return inventoryApi.post()
                 .uri("/pur/findPur")
                 .body(Mono.just(key), PurHisKey.class)
@@ -2793,10 +2790,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId, boolean local) {
-        if (local) {
-            return h2Repo.searchPurchaseDetail(vouNo, deptId);
-        }
+    public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/pur/getPurDetail")
                 .queryParam("vouNo", vouNo)

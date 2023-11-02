@@ -60,6 +60,8 @@ public class TransferHis {
     private String labourGroupCode;
     @Column(name = "job_code")
     private String jobCode;
+    @Column(name = "print_count")
+    private Integer printCount;
     @Transient
     private List<TransferHisDetail> listTD;
     @Transient

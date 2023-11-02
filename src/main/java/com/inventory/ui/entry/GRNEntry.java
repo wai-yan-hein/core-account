@@ -153,6 +153,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 
     private void assignDefaultValue() {
         txtDate.setDate(Util1.getTodayDate());
+        chkClose.setSelected(false);
         inventoryRepo.getDefaultLocation().subscribe((tt) -> {
             locationAutoCompleter.setLocation(tt);
         });
@@ -494,9 +495,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "GRN Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(grn.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(grn.getKey()).doOnSuccess((t) -> {
                         clear();
-                    });
+                    }).subscribe();
                 }
             }
             case "CLOSED" -> {
@@ -504,11 +505,12 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                         "Are you sure to open batch?", "GRN Voucher Batch Open.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     chkClose.setSelected(false);
-                    inventoryRepo.open(grn.getKey()).subscribe((t) -> {
+                    inventoryRepo.open(grn.getKey()).doOnSuccess((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
-                    });
+                        txtBatchNo.setEditable(false);
+                    }).subscribe();
                 }
             }
             case "DELETED" -> {
@@ -516,13 +518,14 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                         "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     grn.setDeleted(false);
-                    inventoryRepo.restore(grn.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(grn.getKey()).doOnSuccess((t) -> {
                         if (t) {
                             lblStatus.setText("EDIT");
                             lblStatus.setForeground(Color.blue);
                             disableForm(true);
+                            txtBatchNo.setEditable(false);
                         }
-                    });
+                    }).subscribe();
 
                 }
             }

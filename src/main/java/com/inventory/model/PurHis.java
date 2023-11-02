@@ -95,6 +95,8 @@ public class PurHis implements java.io.Serializable {
     private String labourGroupCode;
     @Column(name = "land_vou_no")
     private String landVouNo;
+    @Column(name = "print_count")
+    private Integer printCount;
     @Transient
     private String status = "STATUS";
     @Transient
