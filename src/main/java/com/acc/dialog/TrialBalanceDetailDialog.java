@@ -210,14 +210,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         log.info("search detail.");
         progress.setIndeterminate(true);
         list = new ArrayList<>();
-        Mono<TmpOpening> m1 = getOpening();
-        Mono<List<Gl>> m2 = accountRepo.searchGl(getFilter());
-        Mono<Tuple2<TmpOpening, List<Gl>>> zip = m1.zipWith(m2);
-        zip.doOnSuccess((t) -> {
+        accountRepo.searchGl(getFilter()).doOnSuccess((t) -> {
+            list = t;
             drAmtTableModel.clear();
             crAmtTableModel.clear();
-            TmpOpening op = t.getT1();
-            list = t.getT2();
             list.forEach((gl) -> {
                 double drAmt = Util1.getDouble(gl.getDrAmt());
                 double crAmt = Util1.getDouble(gl.getCrAmt());
@@ -228,28 +224,29 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                     crAmtTableModel.addVGl(gl);
                 }
             });
-            double opAmt = Util1.getDouble(op.getOpening());
-            double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
-            double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
-            double closingAmt = opAmt + drAmt - crAmt;
-            double netChange = drAmt - crAmt;
-            txtOpening.setValue(opAmt);
-            txtDrAmt.setValue(drAmt);
-            txtCrAmt.setValue(crAmt);
-            txtClosing.setValue(closingAmt);
-            txtNetChange.setValue(netChange);
-            txtDrCount.setValue(drAmtTableModel.getListVGl().size());
-            txtCrCount.setValue(crAmtTableModel.getListVGl().size());
-            drAmtTableModel.fireTableDataChanged();
-            crAmtTableModel.fireTableDataChanged();
-            progress.setIndeterminate(false);
-            log.info("process.");
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         }).doOnTerminate(() -> {
-            setVisible(true);
+            getOpening().doOnSuccess((t) -> {
+                double opAmt = Util1.getDouble(t.getOpening());
+                double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
+                double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
+                double closingAmt = opAmt + drAmt - crAmt;
+                double netChange = drAmt - crAmt;
+                txtOpening.setValue(opAmt);
+                txtDrAmt.setValue(drAmt);
+                txtCrAmt.setValue(crAmt);
+                txtClosing.setValue(closingAmt);
+                txtNetChange.setValue(netChange);
+                txtDrCount.setValue(drAmtTableModel.getListVGl().size());
+                txtCrCount.setValue(crAmtTableModel.getListVGl().size());
+                drAmtTableModel.fireTableDataChanged();
+                crAmtTableModel.fireTableDataChanged();
+                progress.setIndeterminate(false);
+            }).subscribe();
         }).subscribe();
+        setVisible(true);
     }
 
     private ReportFilter getFilter() {
