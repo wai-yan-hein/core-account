@@ -84,6 +84,7 @@ import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
 import com.ui.management.StockBalance;
+import com.ui.management.StockPayable;
 import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
 import com.user.dialog.ProgramDownloadDialog;
@@ -676,6 +677,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
             case "Stock Balance" -> {
                 StockBalance b = new StockBalance();
+                b.setInventoryRepo(inventoryRepo);
+                b.setProgress(progress);
+                b.setObserver(this);
+                b.initMain();
+                return b;
+            }
+            case "Stock Payable" -> {
+                StockPayable b = new StockPayable();
                 b.setInventoryRepo(inventoryRepo);
                 b.setProgress(progress);
                 b.setObserver(this);
