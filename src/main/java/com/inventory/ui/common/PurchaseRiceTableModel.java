@@ -330,42 +330,47 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
             progress.setIndeterminate(true);
             double purQty = pd.getQty();
             double stockQty = pd.getPurQty();
-            inventoryRepo.getLandingHisQty(vouNo).doOnSuccess((t) -> {
-                if (t != null) {
-                    if (!t.isEmpty()) {
-                        LandingHisQty obj = t.get(0);
-                        double percent = obj.getPercent();
-                        double percentAllow = obj.getPercentAllow();
-                        if (percent >= percentAllow) {
-                            double qty = obj.getQty();
-                            double diff = percent - percentAllow;
-                            double lossQty = diff * qty * purQty / stockQty;
-                            PurHisDetail loss = new PurHisDetail();
-                            loss.setStockCode(pd.getStockCode());
-                            loss.setUserCode(pd.getUserCode());
-                            loss.setStockName(pd.getStockName());
-                            loss.setLocCode(pd.getLocCode());
-                            loss.setLocName(pd.getLocName());
-                            loss.setWeight(pd.getWeight());
-                            loss.setWeightUnit(pd.getWeightUnit());
-                            double roundQty = Util1.roundUp(lossQty);
-                            loss.setQty(roundQty);
-                            loss.setUnitCode(pd.getUnitCode());
-                            loss.setPrice(pd.getPrice());
-                            loss.setTotalWeight(roundQty * loss.getWeight());
-                            double amt = pd.getPrice() * roundQty;
-                            loss.setAmount(Util1.round(amt));
-                            listDetail.set(1, loss);
-                            fireTableRowsUpdated(1, 1);
-                            addNewRow();
-                            observer.selected("CAL-TOTAL", "CAL-TOTAL");
-                            progress.setIndeterminate(false);
+            if (stockQty > 0) {
+                inventoryRepo.getLandingHisQty(vouNo).doOnSuccess((t) -> {
+                    if (t != null) {
+                        if (!t.isEmpty()) {
+                            LandingHisQty obj = t.get(0);
+                            double percent = obj.getPercent();
+                            double percentAllow = obj.getPercentAllow();
+                            if (percent >= percentAllow) {
+                                double qty = obj.getQty();
+                                double diff = percent - percentAllow;
+                                double lossQty = diff * qty * purQty / stockQty;
+                                PurHisDetail loss = new PurHisDetail();
+                                loss.setStockCode(pd.getStockCode());
+                                loss.setUserCode(pd.getUserCode());
+                                loss.setStockName(pd.getStockName());
+                                loss.setLocCode(pd.getLocCode());
+                                loss.setLocName(pd.getLocName());
+                                loss.setWeight(pd.getWeight());
+                                loss.setWeightUnit(pd.getWeightUnit());
+                                double roundQty = Util1.roundUp(lossQty);
+                                loss.setQty(roundQty);
+                                loss.setUnitCode(pd.getUnitCode());
+                                loss.setPrice(pd.getPrice());
+                                loss.setTotalWeight(roundQty * loss.getWeight());
+                                double amt = pd.getPrice() * roundQty;
+                                loss.setAmount(Util1.round(amt));
+                                listDetail.set(1, loss);
+                                fireTableRowsUpdated(1, 1);
+                                addNewRow();
+                                observer.selected("CAL-TOTAL", "CAL-TOTAL");
+                            }
                         }
+                        progress.setIndeterminate(false);
                     }
-                }
-            }).doOnError((e) -> {
+                }).doOnError((e) -> {
+                    progress.setIndeterminate(false);
+                }).subscribe();
+            } else {
                 progress.setIndeterminate(false);
-            }).subscribe();
+                JOptionPane.showMessageDialog(parent, pd.getStockName() + "need to setup purchase qty in Stock Setup.");
+            }
         }
     }
 

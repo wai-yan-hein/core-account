@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class TmpOpening {
 
     private TmpOpeningKey key;
-    private Double opening;
+    private double opening;
     private Double drAmt;
     private Double crAmt;
     private Double closing;

@@ -51,6 +51,7 @@ import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.inventory.ui.common.PurchaseExportTableModel;
 import com.inventory.ui.common.PurchaseRiceTableModel;
 import com.inventory.ui.entry.dialog.LandingHistoryDialog;
+import com.inventory.ui.entry.dialog.PurchaseMoreDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -119,6 +120,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
+    private PurchaseMoreDialog moreDialog;
     private int type;
     private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
 
@@ -1262,46 +1264,50 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private void setLandingVoucher(LandingHis his) {
-        List<PurHisDetail> list = getListDetail();
-        if (list.size() > 1) {
-            int yn = JOptionPane.showConfirmDialog(this, "Are you sure replace?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (yn == JOptionPane.NO_OPTION) {
-                return;
+        if (!his.isDeleted()) {
+            List<PurHisDetail> list = getListDetail();
+            if (list.size() > 1) {
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure replace?", "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yn == JOptionPane.NO_OPTION) {
+                    return;
+                }
             }
-        }
-        clearDetail();
-        String vouNo = his.getKey().getVouNo();
-        ph.setLandVouNo(vouNo);
-        inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
-            txtRemark.setText(l.getRemark());
-            inventoryRepo.findLocation(l.getLocCode()).doOnSuccess((t) -> {
-                locationAutoCompleter.setLocation(t);
-            }).subscribe();
-            inventoryRepo.findTrader(l.getTraderCode()).doOnSuccess((t) -> {
-                traderAutoCompleter.setTrader(t);
-            }).subscribe();
-            inventoryRepo.getLandingChooseGrade(vouNo).doOnSuccess((g) -> {
-                String stockCode = g.getStockCode();
-                inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
-                    PurHisDetail detail = new PurHisDetail();
-                    detail.setUserCode(s.getUserCode());
-                    detail.setStockCode(s.getKey().getStockCode());
-                    detail.setStockName(s.getStockName());
-                    detail.setPrice(l.getPurPrice());
-                    detail.setWeight(s.getWeight());
-                    detail.setWeightUnit(s.getWeightUnit());
-                    detail.setQty(1);
-                    detail.setUnitCode(s.getPurUnitCode());
-                    detail.setLandVouNo(vouNo);
-                    detail.setPurQty(s.getPurQty());
-                    addPurchase(detail);
-                    addNewRow();
-                    tblPur.setRowSelectionInterval(0, 0);
-                    tblPur.setColumnSelectionInterval(7, 7);
-                    tblPur.requestFocus();
+            clearDetail();
+            String vouNo = his.getKey().getVouNo();
+            ph.setLandVouNo(vouNo);
+            inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
+                txtRemark.setText(l.getRemark());
+                inventoryRepo.findLocation(l.getLocCode()).doOnSuccess((t) -> {
+                    locationAutoCompleter.setLocation(t);
+                }).subscribe();
+                inventoryRepo.findTrader(l.getTraderCode()).doOnSuccess((t) -> {
+                    traderAutoCompleter.setTrader(t);
+                }).subscribe();
+                inventoryRepo.getLandingChooseGrade(vouNo).doOnSuccess((g) -> {
+                    String stockCode = g.getStockCode();
+                    inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
+                        PurHisDetail detail = new PurHisDetail();
+                        detail.setUserCode(s.getUserCode());
+                        detail.setStockCode(s.getKey().getStockCode());
+                        detail.setStockName(s.getStockName());
+                        detail.setPrice(l.getPurPrice());
+                        detail.setWeight(s.getWeight());
+                        detail.setWeightUnit(s.getWeightUnit());
+                        detail.setQty(1);
+                        detail.setUnitCode(s.getPurUnitCode());
+                        detail.setLandVouNo(vouNo);
+                        detail.setPurQty(s.getPurQty());
+                        addPurchase(detail);
+                        addNewRow();
+                        tblPur.setRowSelectionInterval(0, 0);
+                        tblPur.setColumnSelectionInterval(7, 7);
+                        tblPur.requestFocus();
+                    }).subscribe();
                 }).subscribe();
             }).subscribe();
-        }).subscribe();
+        } else {
+            JOptionPane.showMessageDialog(this, "Landing Voucher was deleted.", "Voucher Deleted", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void addPurchase(PurHisDetail p) {
@@ -1313,6 +1319,17 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             case EXPORT ->
                 purExportTableModel.addPurchase(p);
         }
+    }
+
+    private void moreDialog() {
+        if (moreDialog == null) {
+            moreDialog = new PurchaseMoreDialog(Global.parentForm);
+            moreDialog.setLocationRelativeTo(null);
+            moreDialog.setAccountRepo(accountRepo);
+            moreDialog.initMain();
+        }
+        moreDialog.setPurchase(ph);
+        moreDialog.setVisible(true);
     }
 
     private void observeMain() {
@@ -1523,6 +1540,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
         jButton2.setFont(Global.lableFont);
         jButton2.setText("More");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelPurLayout = new javax.swing.GroupLayout(panelPur);
         panelPur.setLayout(panelPurLayout);
@@ -2191,6 +2213,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private void cboLabourGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLabourGroupActionPerformed
         //        searchStock();
     }//GEN-LAST:event_cboLabourGroupActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        moreDialog();
+    }//GEN-LAST:event_jButton2ActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
