@@ -50,8 +50,9 @@ public class SPWeightDetailDialog extends javax.swing.JDialog {
         tblBalance.getColumnModel().getColumn(4).setPreferredWidth(30);
         tblBalance.getColumnModel().getColumn(5).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(6).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(8).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(9).setPreferredWidth(30);
     }
 
     public void setListDetail(List<ClosingBalance> list) {

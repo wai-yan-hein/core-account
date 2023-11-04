@@ -87,14 +87,17 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initTableWeight() {
-        tblBalance.getColumnModel().getColumn(0).setPreferredWidth(30);
-        tblBalance.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tblBalance.getColumnModel().getColumn(2).setPreferredWidth(40);//op
+        tblBalance.getColumnModel().getColumn(0).setPreferredWidth(70);
+        tblBalance.getColumnModel().getColumn(1).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(2).setPreferredWidth(100);//op
         tblBalance.getColumnModel().getColumn(3).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(4).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(5).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(6).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(40);//cl
+        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(8).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(9).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(10).setPreferredWidth(40);//cl
     }
 
     private void initTable() {
@@ -216,11 +219,13 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
             ClosingBalance b = spwTableModel.getSelectVou(row);
             String stockCode = b.getStockCode();
             String stockName = b.getStockName();
+            String traderCode = b.getTraderCode();
             if (!Util1.isNullOrEmpty(stockCode)) {
                 tblBalance.setEnabled(false);
                 progress.setIndeterminate(true);
                 ReportFilter filter = getFilter();
                 filter.setStockCode(stockCode);
+                filter.setTraderCode(traderCode);
                 filter.setReportName("StockPayableDetail");
                 inventoryRepo.getReport(filter).doOnSuccess((t) -> {
                     if (t.getFile() != null) {

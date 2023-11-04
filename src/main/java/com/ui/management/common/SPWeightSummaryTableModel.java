@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SPWeightSummaryTableModel extends AbstractTableModel {
 
     private List<ClosingBalance> listDetail = new ArrayList();
-    private final String[] columnNames = {"Code", "Description", "Op-Qty", "Op-Weight",
+    private final String[] columnNames = {"Trader Name", "Code", "Description", "Op-Qty", "Op-Weight", "Sale-Qty", "Sale-Weight",
         "Out-Qty", "Out-Weight", "Closing-Qty", "Closing-Weight"};
 
     @Override
@@ -48,7 +48,7 @@ public class SPWeightSummaryTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1 ->
+            case 0, 1, 2 ->
                 String.class;
             default ->
                 Double.class;
@@ -63,31 +63,43 @@ public class SPWeightSummaryTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return his.getStockUsrCode();
+                        return his.getTraderName();
                     }
                     case 1 -> {
+                        //date
+                        return his.getStockUsrCode();
+                    }
+                    case 2 -> {
                         //vou-no
                         return his.getStockName();
                     }
-                    case 2 -> {
+                    case 3 -> {
                         return his.getOpenQty();
                     }
-                    case 3 -> {
-                        return his.getOpenWeight();
-                    }                    
                     case 4 -> {
-                        //user
-                        return his.getOutQty();
+                        return his.getOpenWeight();
                     }
                     case 5 -> {
                         //user
-                        return his.getOutWeight();
+                        return his.getSaleQty();
                     }
                     case 6 -> {
                         //user
-                        return his.getBalQty();
+                        return his.getSaleWeight();
                     }
                     case 7 -> {
+                        //user
+                        return his.getOutQty();
+                    }
+                    case 8 -> {
+                        //user
+                        return his.getOutWeight();
+                    }
+                    case 9 -> {
+                        //user
+                        return his.getBalQty();
+                    }
+                    case 10 -> {
                         //user
                         return his.getBalWeight();
                     }
