@@ -257,7 +257,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             oPHis.setDetailList(openingTableModel.getListDetail());
             oPHis.setListDel(openingTableModel.getDelList());
             if (txtCus.isVisible()) {
-
                 oPHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             } else {
                 oPHis.setTraderCode(null);
@@ -278,6 +277,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         if (locationAutoCompleter.getLocation() == null) {
             status = false;
             JOptionPane.showMessageDialog(this, "Invalid Location");
+            txtLocation.requestFocus();
+        }if (traderAutoCompleter.getTrader()== null) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Invalid Trader");
             txtLocation.requestFocus();
         } else if (lblStatus.getText().equals("DELETED")) {
             status = false;

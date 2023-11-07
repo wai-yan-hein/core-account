@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SPWeightDetailTableModel extends AbstractTableModel {
 
     private List<ClosingBalance> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Remark", "Op-Qty", "Op-Weight",
+    private final String[] columnNames = {"Date", "Vou No", "Remark", "Op-Qty", "Op-Weight", "Sale-Qty", "Sale-Weight",
         "Out-Qty", "Out-Weight", "Closing-Qty", "Closing-Weight"};
 
     @Override
@@ -81,41 +81,25 @@ public class SPWeightDetailTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //user
-                        return his.getPurQty();
+                        return his.getSaleQty();
                     }
                     case 6 -> {
                         //user
-                        return his.getPurWeight();
+                        return his.getSaleWeight();
                     }
                     case 7 -> {
                         //user
-                        return his.getInQty();
+                        return his.getOutQty();
                     }
                     case 8 -> {
                         //user
-                        return his.getInWeight();
+                        return his.getOutWeight();
                     }
                     case 9 -> {
                         //user
-                        return his.getSaleQty();
-                    }
-                    case 10 -> {
-                        //user
-                        return his.getSaleWeight();
-                    }
-                    case 11 -> {
-                        //user
-                        return his.getOutQty();
-                    }
-                    case 12 -> {
-                        //user
-                        return his.getOutWeight();
-                    }
-                    case 13 -> {
-                        //user
                         return his.getBalQty();
                     }
-                    case 14 -> {
+                    case 10 -> {
                         //user
                         return his.getBalWeight();
                     }
