@@ -1042,8 +1042,8 @@ public class H2Repo {
         return stockFormulaService.save(t);
     }
     
-    public Mono<List<Job>> getJob(boolean finished) {
-        return Mono.just(jobService.findAll(Global.compCode, finished));
+    public Mono<List<Job>> getJob(boolean finished,int deptId) {
+        return Mono.just(jobService.findAll(Global.compCode, finished,deptId));
     }
     
     public Mono<Job> find(JobKey key) {

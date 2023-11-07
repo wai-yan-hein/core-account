@@ -18,7 +18,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleByBatch;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +49,9 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     private boolean change = false;
     private JLabel lblRecord;
     private SaleByBatch sale;
-    private StockBalanceDialog dialog;
+    private StockBalanceFrame dialog;
 
-    public void setDialog(StockBalanceDialog dialog) {
+    public void setDialog(StockBalanceFrame dialog) {
         this.dialog = dialog;
     }
     

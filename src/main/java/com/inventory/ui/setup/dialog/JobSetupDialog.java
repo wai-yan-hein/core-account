@@ -14,7 +14,10 @@ import com.inventory.model.JobKey;
 import com.inventory.model.MessageType;
 import com.inventory.ui.setup.dialog.common.JobTableModel;
 import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import com.toedter.calendar.JTextFieldDateEditor;
+import com.user.common.DepartmentComboBoxModel;
+import com.user.model.DepartmentUser;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -44,9 +47,11 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
     private Job ord = new Job();
     private final JobTableModel jobTableModel = new JobTableModel();
     private InventoryRepo inventoryRepo;
+    private UserRepo userRepo;
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+    private DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
     private List<Job> listVou = new ArrayList<>();
 
     public List<Job> getListVou() {
@@ -63,6 +68,10 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
         this.inventoryRepo = inventoryRepo;
     }
 
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
     /**
      * Creates new form ItemTypeSetupDialog
      */
@@ -75,7 +84,7 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
+        initCombo();
         initTable();
         txtStartDate.setDate(Util1.getTodayDate());
         txtEndDate.setDate(Util1.getTodayDate());
@@ -112,12 +121,20 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     private void setSize() {
-        long countFinished =listVou.stream().filter((t) -> t.isFinished()).count();
-        long process = listVou.size()-countFinished;
+        long countFinished = listVou.stream().filter((t) -> t.isFinished()).count();
+        long process = listVou.size() - countFinished;
         lblFinised.setText(String.valueOf(countFinished));
         lblProcess.setText(String.valueOf(process));
         lblRecord.setText(String.valueOf(listVou.size()));
 
+    }
+
+    private void initCombo() {
+        cboDep.setModel(departmentComboBoxModel);
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentComboBoxModel.setData(t);
+            cboDep.repaint();
+        }).subscribe();
     }
 
     private void initTable() {
@@ -136,6 +153,7 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
                 }
             }
         });
+        swrf = new StartWithRowFilter(txtFilter);
     }
 
     private void setJob(Job cat) {
@@ -146,6 +164,10 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
         chkFinished.setSelected(ord.isFinished());
         txtStartDate.setDate(ord.getStartDate());
         txtEndDate.setDate(ord.getEndDate());
+        userRepo.findDepartment(cat.getDeptId()).doOnSuccess((t) -> {
+            departmentComboBoxModel.setSelectedItem(t);
+            cboDep.repaint();
+        }).subscribe();
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -198,11 +220,14 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     private boolean isValidEntry() {
-        boolean status = true;
         if (txtName.getText().isEmpty()) {
-            status = false;
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
+            return false;
+        } else if (cboDep.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Department.");
+            cboDep.requestFocus();
+            return false;
         } else {
             if (lblStatus.getText().equals("NEW")) {
                 JobKey key = new JobKey();
@@ -214,12 +239,15 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
             } else {
                 ord.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            if (cboDep.getSelectedItem() instanceof DepartmentUser user) {
+                ord.setDeptId(user.getKey().getDeptId());
+            }
             ord.setStartDate(txtStartDate.getDate());
             ord.setEndDate(txtEndDate.getDate());
             ord.setJobName(txtName.getText());
             ord.setFinished(chkFinished.isSelected());
         }
-        return status;
+        return true;
     }
 
     /**
@@ -254,6 +282,8 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
         lblFinised = new javax.swing.JLabel();
         lblProcess = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        cboDep = new javax.swing.JComboBox<>();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -388,6 +418,11 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
 
         jLabel7.setText("Process :");
 
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Department");
+
+        cboDep.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -409,14 +444,16 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
                                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtName)
                                     .addComponent(txtUserCode)
                                     .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(chkFinished, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                    .addComponent(chkFinished, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(cboDep, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -447,11 +484,15 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(8, 8, 8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel5)
                     .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(cboDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
                 .addComponent(chkFinished)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -472,7 +513,7 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(lblProcess))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(128, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -570,6 +611,7 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JComboBox<DepartmentUser> cboDep;
     private javax.swing.JCheckBox chkFinished;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -578,6 +620,7 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;

@@ -191,7 +191,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
         }).subscribe();
 
-        inventoryRepo.getJob(false).doOnSuccess((t) -> {
+        inventoryRepo.getJob(false, Global.deptId).doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new Job());
                 jobComboBoxModel.setData(t);

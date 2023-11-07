@@ -79,7 +79,7 @@ import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
@@ -218,10 +218,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private SSEListener sseListener;
     @Autowired
     private DateLockUtil dateLockUtil;
-    @Autowired
-    private StockBalanceDialog stockBalanceDialog;
     private PanelControl control;
     private ProgramDownloadDialog pdDialog;
+    private StockBalanceFrame stockBalanceFrame;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
 
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -415,7 +414,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 sale.setName(menuName);
                 sale.setObserver(this);
                 sale.setProgress(progress);
-                sale.setStockBalanceDialog(stockBalanceDialog);
+                sale.setStockBalanceDialog(stockBalanceFrame);
                 sale.initMain();
                 return sale;
             }
@@ -430,7 +429,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleByBatch.setName(menuName);
                 saleByBatch.setObserver(this);
                 saleByBatch.setProgress(progress);
-                saleByBatch.setStockBalanceDialog(stockBalanceDialog);
+                saleByBatch.setStockBalanceDialog(stockBalanceFrame);
                 saleByBatch.initMain();
                 return saleByBatch;
             }
@@ -443,7 +442,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 s.setName(menuName);
                 s.setObserver(this);
                 s.setProgress(progress);
-                s.setStockBalanceDialog(stockBalanceDialog);
+                s.setStockBalanceDialog(stockBalanceFrame);
                 s.initMain();
                 return s;
             }
@@ -981,10 +980,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMain() {
         Global.parentForm = this;
         setTitle("Core Account Cloud : " + Global.version);
+        initStockBalanceFrame();
         scheduleNetwork();
         scheduleExit();
         initUser();
         companyUserRoleAssign();
+    }
+    private void initStockBalanceFrame(){
+        stockBalanceFrame = new StockBalanceFrame();
+        stockBalanceFrame.setInventoryRepo(inventoryRepo);        
     }
 
     private void initUser() {

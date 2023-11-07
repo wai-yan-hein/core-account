@@ -33,7 +33,7 @@ import com.inventory.ui.common.SaleByBatchTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -95,9 +95,9 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
     private double balance = 0;
-    private StockBalanceDialog stockBalanceDialog;
+    private StockBalanceFrame stockBalanceDialog;
 
-    public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
+    public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
     }
 

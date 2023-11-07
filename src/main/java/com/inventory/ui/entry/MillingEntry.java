@@ -64,8 +64,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -181,7 +179,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtEffQty.setHorizontalAlignment(JTextField.RIGHT);
         txtEffWt.setHorizontalAlignment(JTextField.RIGHT);
         txtQtyLoss.setHorizontalAlignment(JTextField.RIGHT);
-
         txtEffWt.setForeground(Color.green);
         txtEffQty.setForeground(Color.red);
     }
@@ -526,6 +523,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 JsonNode n1 = mapper.readTree(Util1.gson.toJson(listOutput));
                 JsonDataSource d1 = new JsonDataSource(n1, null) {
                 };
+                JsonNode n2 = mapper.readTree(Util1.gson.toJson(listRaw));
+                JsonDataSource d2 = new JsonDataSource(n2, null) {
+                };
+                param.put("p_sub_data", d2);
                 JasperPrint main = JasperFillManager.fillReport(reportPath, param, d1);
                 JasperViewer.viewReport(main, false);
             } catch (JsonProcessingException | JRException e) {
@@ -961,7 +962,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtLocation = new javax.swing.JTextField();
         addExpense1 = new javax.swing.JButton();
         txtJob = new javax.swing.JTextField();
-        jLabel24 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRaw = new javax.swing.JTable();
@@ -1163,8 +1164,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
-        jLabel24.setFont(Global.lableFont);
-        jLabel24.setText("Job");
+        jLabel25.setFont(Global.lableFont);
+        jLabel25.setText("Job");
 
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
@@ -1201,7 +1202,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                                 .addComponent(jLabel15)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 254, Short.MAX_VALUE)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(btnTransfer, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -1220,16 +1221,14 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                                 .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addComponent(jLabel24)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 175, Short.MAX_VALUE))
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(addExpense1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(addExpense1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelSaleLayout.createSequentialGroup()
+                        .addGap(906, 906, 906)
+                        .addComponent(jLabel25)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -1252,7 +1251,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(jLabel10)
                         .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel24))
+                        .addComponent(jLabel25))
                     .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1891,7 +1890,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -1983,7 +1982,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         if (jobSearchDialog == null) {
             jobSearchDialog = new JobSearchDialog(Global.parentForm);
             jobSearchDialog.setInventoryRepo(inventoryRepo);
-//            jobSearchDialog.setUserRepo(userRepo);
+            jobSearchDialog.setUserRepo(userRepo);
             jobSearchDialog.setObserver(this);
             jobSearchDialog.initMain();
             jobSearchDialog.setSize(Global.width - 20, Global.height - 20);

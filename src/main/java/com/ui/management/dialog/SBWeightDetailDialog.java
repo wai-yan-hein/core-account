@@ -6,6 +6,8 @@ package com.ui.management.dialog;
 
 import com.common.DecimalFormatRender;
 import com.common.Global;
+import com.common.ProUtil;
+import com.ui.management.common.SBDetailTableModel;
 import com.ui.management.common.SBWeightDetailTableModel;
 import com.ui.management.model.ClosingBalance;
 import java.util.List;
@@ -19,6 +21,7 @@ import javax.swing.ListSelectionModel;
 public class SBWeightDetailDialog extends javax.swing.JDialog {
 
     private SBWeightDetailTableModel tableModel = new SBWeightDetailTableModel();
+    private SBDetailTableModel qtyTableModel = new SBDetailTableModel();
 
     /**
      * Creates new form SBWeightDetailDialog
@@ -31,11 +34,21 @@ public class SBWeightDetailDialog extends javax.swing.JDialog {
     }
 
     public void initMain() {
+        initModel();
         initTable();
     }
 
+    private void initModel() {
+        if (ProUtil.isUseWeight()) {
+            tblBalance.setModel(tableModel);
+            initTableWeight();
+        } else {
+            tblBalance.setModel(qtyTableModel);
+            initTableQty();
+        }
+    }
+
     private void initTable() {
-        tblBalance.setModel(tableModel);
         tblBalance.getTableHeader().setFont(Global.tblHeaderFont);
         tblBalance.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblBalance.setRowHeight(Global.tblRowHeight);
@@ -43,6 +56,9 @@ public class SBWeightDetailDialog extends javax.swing.JDialog {
         tblBalance.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
         tblBalance.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblBalance.setShowGrid(true);
+    }
+
+    private void initTableWeight() {
         tblBalance.getColumnModel().getColumn(0).setPreferredWidth(30);
         tblBalance.getColumnModel().getColumn(1).setPreferredWidth(40);
         tblBalance.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -59,8 +75,24 @@ public class SBWeightDetailDialog extends javax.swing.JDialog {
         tblBalance.getColumnModel().getColumn(13).setPreferredWidth(30);
     }
 
+    private void initTableQty() {
+        tblBalance.getColumnModel().getColumn(0).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(1).setPreferredWidth(40);
+        tblBalance.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tblBalance.getColumnModel().getColumn(3).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(4).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(5).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(6).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(8).setPreferredWidth(30);
+    }
+
     public void setListDetail(List<ClosingBalance> list) {
-        tableModel.setListDetail(list);
+        if (ProUtil.isUseWeight()) {
+            tableModel.setListDetail(list);
+        } else {
+            qtyTableModel.setListDetail(list);
+        }
         lblRecords.setText(String.valueOf(list.size()));
     }
 

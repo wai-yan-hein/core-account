@@ -304,6 +304,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         ShootTriMessageDialog s = new ShootTriMessageDialog(Global.parentForm, true);
         s.setAccountRepo(accountRepo);
         s.initMain();
+        s.setSize(Global.width-100, Global.height-100);
         s.setLocationRelativeTo(null);
         s.setVisible(true);
     }

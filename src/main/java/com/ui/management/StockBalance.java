@@ -18,6 +18,7 @@ import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.repo.InventoryRepo;
+import com.ui.management.common.SBSummaryTableModel;
 import com.ui.management.common.SBWeightSummaryTableModel;
 import com.ui.management.dialog.SBWeightDetailDialog;
 import com.ui.management.model.ClosingBalance;
@@ -40,6 +41,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     private CategoryAutoCompleter categoryAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private SBWeightSummaryTableModel sbwTableModel = new SBWeightSummaryTableModel();
+    private SBSummaryTableModel stockBSummaryTableModel = new SBSummaryTableModel();
     private InventoryRepo inventoryRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
@@ -83,6 +85,9 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         if (ProUtil.isUseWeight()) {
             tblBalance.setModel(sbwTableModel);
             initTableWeight();
+        } else {
+            tblBalance.setModel(stockBSummaryTableModel);
+            initQtyTable();
         }
     }
 
@@ -101,6 +106,17 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         tblBalance.getColumnModel().getColumn(11).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(12).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(13).setPreferredWidth(40);//cl
+    }
+
+    private void initQtyTable() {
+        tblBalance.getColumnModel().getColumn(0).setPreferredWidth(30);
+        tblBalance.getColumnModel().getColumn(1).setPreferredWidth(100);
+        tblBalance.getColumnModel().getColumn(2).setPreferredWidth(40);//op
+        tblBalance.getColumnModel().getColumn(3).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(4).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(5).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(6).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(40);
     }
 
     private void initTable() {
@@ -147,7 +163,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                 Type listType = new TypeToken<List<ClosingBalance>>() {
                 }.getType();
                 List<ClosingBalance> list = Util1.byteArrayToList(t.getFile(), listType);
-                sbwTableModel.setListDetail(list);
+                setListDetail(list);
             }
         }).doOnError((e) -> {
             btnCalculate.setEnabled(true);
@@ -160,8 +176,24 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         }).subscribe();
     }
 
+    private void setListDetail(List<ClosingBalance> list) {
+        if (ProUtil.isUseWeight()) {
+            sbwTableModel.setListDetail(list);
+        } else {
+            stockBSummaryTableModel.setListDetail(list);
+        }
+    }
+
+    private List<ClosingBalance> getListDetail() {
+        if (ProUtil.isUseWeight()) {
+            return sbwTableModel.getListDetail();
+        } else {
+            return stockBSummaryTableModel.getListDetail();
+        }
+    }
+
     private void calTotal() {
-        List<ClosingBalance> list = sbwTableModel.getListDetail();
+        List<ClosingBalance> list = getListDetail();
         double opQty = list.stream().mapToDouble((t) -> t.getOpenQty()).sum();
         double opWt = list.stream().mapToDouble((t) -> t.getOpenWeight()).sum();
         double purQty = list.stream().mapToDouble((t) -> t.getPurQty()).sum();
@@ -205,7 +237,8 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         filter.setCalRI(Util1.getBoolean(ProUtil.isDisableRetIn()));
         filter.setCalRO(Util1.getBoolean(ProUtil.isDisableRetOut()));
         filter.setCalMill(Util1.getBoolean(ProUtil.isDisableMill()));
-        filter.setReportName("StockInOutSummaryByWeight");
+        String reportName = ProUtil.isUseWeight() ? "StockInOutSummaryByWeight" : "StockInOutSummary";
+        filter.setReportName(reportName);
         return filter;
     }
 
@@ -227,7 +260,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         }
         int row = tblBalance.convertRowIndexToModel(tblBalance.getSelectedRow());
         if (row >= 0) {
-            ClosingBalance b = sbwTableModel.getSelectVou(row);
+            ClosingBalance b = getClosingBalance(row);
             String stockCode = b.getStockCode();
             String stockName = b.getStockName();
             if (!Util1.isNullOrEmpty(stockCode)) {
@@ -235,7 +268,8 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                 progress.setIndeterminate(true);
                 ReportFilter filter = getFilter();
                 filter.setStockCode(stockCode);
-                filter.setReportName("StockInOutDetailByWeight");
+                String reportName = ProUtil.isUseWeight() ? "StockInOutDetailByWeight" : "StockInOutDetail";
+                filter.setReportName(reportName);
                 inventoryRepo.getReport(filter).doOnSuccess((t) -> {
                     if (t.getFile() != null) {
                         Type listType = new TypeToken<List<ClosingBalance>>() {
@@ -256,6 +290,14 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
             }
         } else {
             JOptionPane.showMessageDialog(this, "Select Row.");
+        }
+    }
+
+    private ClosingBalance getClosingBalance(int row) {
+        if (ProUtil.isUseWeight()) {
+            return sbwTableModel.getSelectVou(row);
+        } else {
+            return stockBSummaryTableModel.getSelectVou(row);
         }
     }
 

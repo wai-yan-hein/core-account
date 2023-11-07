@@ -17,7 +17,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleDynamic;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SaleExportTableModel extends AbstractTableModel {
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<SaleDetailKey> deleteList = new ArrayList();
-    private StockBalanceDialog dialog;
+    private StockBalanceFrame dialog;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRecord;
@@ -54,7 +54,7 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.sale = sale;
     }
 
-    public void setDialog(StockBalanceDialog dialog) {
+    public void setDialog(StockBalanceFrame dialog) {
         this.dialog = dialog;
     }
 

@@ -20,7 +20,7 @@ import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.ui.entry.Sale;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +50,9 @@ public class SaleTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
-    private StockBalanceDialog dialog;
+    private StockBalanceFrame dialog;
 
-    public void setDialog(StockBalanceDialog dialog) {
+    public void setDialog(StockBalanceFrame dialog) {
         this.dialog = dialog;
     }
 
