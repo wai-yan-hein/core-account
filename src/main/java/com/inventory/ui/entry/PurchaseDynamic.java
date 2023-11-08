@@ -1203,6 +1203,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 pd.setWeight(Util1.getDouble(t.getWeight()));
                 pd.setQty(Util1.getDouble(t.getQty()));
                 pd.setStdWeight(Util1.getDouble(t.getStdWeight()));
+                pd.setTotalWeight(Util1.getDouble(t.getTotalWeight()));
                 pd.setWeightUnit(t.getWeightUnit());
                 pd.setUnitCode(t.getUnit());
                 pd.setLocCode(t.getLocCode());
