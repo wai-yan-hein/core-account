@@ -1,6 +1,6 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
 package com.inventory.ui.entry.dialog;
 
@@ -12,37 +12,30 @@ import com.inventory.ui.common.StockBalanceWeightTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
-public class StockBalanceDialog extends javax.swing.JDialog {
+public class StockBalanceFrame extends javax.swing.JInternalFrame {
 
+    private InventoryRepo inventoryRepo;
     private StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     private StockBalanceWeightTableModel stockBalanceWeightTableModel = new StockBalanceWeightTableModel();
-    @Autowired
-    private InventoryRepo inventoryRepo;
-    private boolean firstTime = true;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     /**
-     * Creates new form StockBalanceDialog
-     *
-     * @param frame
+     * Creates new form StockBalanceIFrame
      */
-    public StockBalanceDialog() {
-        super(Global.parentForm, true);
+    public StockBalanceFrame() {
         initComponents();
-        setFocusableWindowState(false); // The dialog won't receive focus
-        setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
     }
 
     private void setLocationDialog() {
@@ -84,11 +77,6 @@ public class StockBalanceDialog extends javax.swing.JDialog {
 
     public void calStock(String stockCode, JFrame frame) {
         if (ProUtil.isCalStock()) {
-            if (firstTime) {
-                setLocationDialog();
-                firstTime = false;
-            }
-            setLocationRelativeTo(frame);
             boolean weight = ProUtil.isUseWeight();
             initMain(weight);
             progress.setIndeterminate(true);
@@ -129,16 +117,18 @@ public class StockBalanceDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        progress = new javax.swing.JProgressBar();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
         chkSummary = new javax.swing.JCheckBox();
+        progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setClosable(true);
+        setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        setIconifiable(true);
+        setMaximizable(true);
+        setResizable(true);
         setTitle("Stock Balance Dialog");
-        setFocusable(false);
-        setFont(Global.textFont);
-        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
+        setFrameIcon(new javax.swing.ImageIcon(getClass().getResource("/images/spring-icon.png"))); // NOI18N
 
         tblStock.setFont(Global.textFont);
         tblStock.setModel(new javax.swing.table.DefaultTableModel(
@@ -161,7 +151,7 @@ public class StockBalanceDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
                     .addComponent(chkSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
@@ -169,21 +159,17 @@ public class StockBalanceDialog extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkSummary)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkSummary;

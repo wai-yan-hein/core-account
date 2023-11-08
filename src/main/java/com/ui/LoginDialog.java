@@ -20,6 +20,7 @@ import java.awt.Image;
 import java.awt.event.FocusAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -133,6 +134,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             }
         } else {
             Global.macId = t.getMacId();
+            checkAndDeleteData(t);
             saveMachine(t);
             enableForm(false);
             taskExecutor.execute(() -> {
@@ -142,6 +144,20 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             lblStatus.setText("downloading...");
             integration.setObserver(this);
             integration.start();
+        }
+    }
+
+    private void checkAndDeleteData(MachineInfo info) {
+        if (info.isProUpdate()) {
+            log.info("need to delete local data.");
+            File f = new File("data");
+            if (f.isDirectory()) {
+                boolean delete = f.delete();
+                if (delete) {
+                    log.info("local data delete success.");
+                    info.setProUpdate(false);
+                }
+            }
         }
     }
 

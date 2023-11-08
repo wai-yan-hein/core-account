@@ -38,6 +38,7 @@ public class Tray {
 
     public void startup(Image icon) {
         if (SystemTray.isSupported()) {
+            System.setProperty("java.awt.tray", "Core Account");
             log.info("Tray started.");
             tray = SystemTray.getSystemTray();
             PopupMenu menu = new PopupMenu();

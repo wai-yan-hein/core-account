@@ -1378,14 +1378,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Job>> getJob(boolean isFinished) {
+    public Mono<List<Job>> getJob(boolean isFinished, int deptId) {
         if (localDatabase) {
-            return h2Repo.getJob(isFinished);
+            return h2Repo.getJob(isFinished, deptId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getJob")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("finished", isFinished)
+                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(Job.class)

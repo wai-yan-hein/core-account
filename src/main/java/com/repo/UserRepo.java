@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -902,7 +903,10 @@ public class UserRepo {
                 .queryParam("password", password)
                 .build())
                 .retrieve()
-                .bodyToMono(AppUser.class);
+                .onStatus(
+                        status -> status.is4xxClientError(),
+                        response -> Mono.empty()
+                ).bodyToMono(AppUser.class);
     }
 
     public Mono<List<VRoleCompany>> getPrivilegeRoleCompany(String roleCode) {

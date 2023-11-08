@@ -347,7 +347,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                 if (g.isChoose()) {
                     String stockCode = g.getStockCode();
                     inventoryRepo.findStock(stockCode).doOnSuccess((stock) -> {
-                        double orgAmt = stock.getPurAmt();
+                        double orgAmt = Util1.getDouble(stock.getPurAmt());
                         if (orgAmt > 0) {
                             double qty = Util1.getDoubleOne(stock.getPurQty());
                             txtAmt.setValue(orgAmt);

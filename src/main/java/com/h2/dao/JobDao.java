@@ -2,15 +2,13 @@ package com.h2.dao;
 
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 public interface JobDao {
 
     Job save(Job Job);
 
-    List<Job> findAll(String compCode, Boolean isFinished);
+    List<Job> findAll(String compCode, Boolean isFinished,int deptId);
 
     int delete(JobKey key);
 

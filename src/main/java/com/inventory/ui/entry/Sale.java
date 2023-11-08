@@ -56,7 +56,7 @@ import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -121,7 +121,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private UserRepo userRepo;
     @Autowired
     private TaskExecutor taskExecutor;
-    private StockBalanceDialog stockBalanceDialog;
+    private StockBalanceFrame stockBalanceDialog;
     private OrderHistoryDialog orderDialog;
     private TransferHistoryDialog transferHistoryDialog;
     private CurrencyAutoCompleter currAutoCompleter;
@@ -163,7 +163,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         this.observer = observer;
     }
 
-    public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
+    public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
     }
 
@@ -295,25 +295,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     public void initMain() {
+        initStockBalance();
         initCombo();
         initSaleTable();
         initPanelExpesne();
-        initStockInfo();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
 
-    private void initStockInfo() {
-        if (Util1.getBoolean(ProUtil.getProperty(ProUtil.SALE_STOCKINFO_SHOW))) {
-            stockInfoPanel.setUserRepo(userRepo);
-            stockInfoPanel.setInventoryRepo(inventoryRepo);
-            panelStockInfo.setLayout(new BorderLayout());
-            panelStockInfo.add(stockInfoPanel, BorderLayout.NORTH);
-        } else {
-            panelStockInfo.setVisible(false);
-        }
-
+    private void initStockBalance() {
+        stockBalanceDialog.setVisible(ProUtil.isCalStock());
+        deskPane.add(stockBalanceDialog);
     }
 
     private void setStockInfo() {
@@ -1190,7 +1183,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         cboAccount = new javax.swing.JComboBox<>();
         txtOrderNo = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
+        panelInfo = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         chkA5 = new javax.swing.JCheckBox();
@@ -1230,7 +1223,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         expProgress = new javax.swing.JProgressBar();
-        panelStockInfo = new javax.swing.JPanel();
+        deskPane = new javax.swing.JDesktopPane();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1421,7 +1414,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCus)
-                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
                     .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1430,7 +1423,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
                     .addComponent(txtSaleman)
                     .addComponent(txtLocation))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1440,7 +1433,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
                     .addComponent(txtCurrency)
                     .addComponent(txtReference))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1451,11 +1444,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addComponent(txtBatchNo)
+                        .addComponent(txtBatchNo, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel18)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtOrderNo))
+                        .addComponent(txtOrderNo, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE))
                     .addComponent(txtProjectNo)
                     .addComponent(cboAccount, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -1509,7 +1502,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
         panelSaleLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel3, jLabel5});
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        panelInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
         lblStatus.setText("NEW");
@@ -1589,32 +1582,30 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelInfoLayout = new javax.swing.GroupLayout(panelInfo);
+        panelInfo.setLayout(panelInfoLayout);
+        panelInfoLayout.setHorizontalGroup(
+            panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGroup(panelInfoLayout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnOrder)
                             .addComponent(btnBatch)
-                            .addComponent(btnBatch1))
-                        .addGap(0, 30, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(btnBatch1)))))
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        panelInfoLayout.setVerticalGroup(
+            panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGroup(panelInfoLayout.createSequentialGroup()
                         .addComponent(btnOrder)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnBatch)
@@ -1944,14 +1935,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout panelStockInfoLayout = new javax.swing.GroupLayout(panelStockInfo);
-        panelStockInfo.setLayout(panelStockInfoLayout);
-        panelStockInfoLayout.setHorizontalGroup(
-            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 515, Short.MAX_VALUE)
+        javax.swing.GroupLayout deskPaneLayout = new javax.swing.GroupLayout(deskPane);
+        deskPane.setLayout(deskPaneLayout);
+        deskPaneLayout.setHorizontalGroup(
+            deskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 551, Short.MAX_VALUE)
         );
-        panelStockInfoLayout.setVerticalGroup(
-            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        deskPaneLayout.setVerticalGroup(
+            deskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
@@ -1963,9 +1954,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(panelInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panelStockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(deskPane)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1985,8 +1976,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane3)
                     .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelStockInfo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelInfo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(deskPane))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -2359,6 +2350,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
+    private javax.swing.JDesktopPane deskPane;
     private javax.swing.JProgressBar expProgress;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
@@ -2384,7 +2376,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
@@ -2394,8 +2385,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelExpense;
+    private javax.swing.JPanel panelInfo;
     private javax.swing.JPanel panelSale;
-    private javax.swing.JPanel panelStockInfo;
     private javax.swing.JTable tblExpense;
     private javax.swing.JTable tblSale;
     private javax.swing.JTextField txtBatchNo;

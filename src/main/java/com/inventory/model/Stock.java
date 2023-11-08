@@ -102,7 +102,7 @@ public class Stock {
     @Column(name = "formula_code")
     private String formulaCode;
     @Column(name = "pur_amt")
-    private double purAmt;
+    private Double purAmt;
     @Column(name = "pur_qty")
     private Double purQty;
     @Column(name = "sale_amt")

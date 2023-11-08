@@ -8,6 +8,7 @@ import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,8 @@ public class OtherSetupMain extends javax.swing.JPanel {
     private InventoryRepo inventoryRepo;
     @Autowired
     private AccountRepo accountRepo;
+    @Autowired
+    private UserRepo userRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
     private AccountSettingEntry entry;
@@ -65,6 +68,7 @@ public class OtherSetupMain extends javax.swing.JPanel {
             setup = new OtherSetup();
             setup.setInventoryRepo(inventoryRepo);
             setup.setAccountRepo(accountRepo);
+            setup.setUserRepo(userRepo);
         }
         return setup;
 

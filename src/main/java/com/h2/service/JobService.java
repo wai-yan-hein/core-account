@@ -8,7 +8,7 @@ public interface JobService {
 
     Job save(Job status);
 
-    List<Job> findAll(String compCode, Boolean isFinished);
+    List<Job> findAll(String compCode, Boolean isFinished,int deptId);
 
     int delete(JobKey key);
 

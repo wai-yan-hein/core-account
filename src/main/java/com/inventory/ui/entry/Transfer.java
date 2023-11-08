@@ -32,7 +32,6 @@ import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.LabourGroup;
-import com.inventory.ui.common.JobComboBoxModel;
 import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
@@ -76,7 +75,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private SelectionObserver observer;
     private JProgressBar progress;
     private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
-    private final JobComboBoxModel jobComboBoxModel = new JobComboBoxModel();
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -158,10 +156,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             labourGroupComboBoxModel.setData(t);
             cboLabourGroup.setModel(labourGroupComboBoxModel);
             cboLabourGroup.setSelectedItem(null);
-        });
-
-        inventoryRepo.getJob(false).subscribe((t) -> {
-            jobComboBoxModel.setData(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);

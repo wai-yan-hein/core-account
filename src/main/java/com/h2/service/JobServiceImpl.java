@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,8 +30,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> findAll(String compCode, Boolean isFinished) {
-        return dao.findAll(compCode, isFinished);
+    public List<Job> findAll(String compCode, Boolean isFinished, int deptId) {
+        return dao.findAll(compCode, isFinished, deptId);
     }
 
     @Override

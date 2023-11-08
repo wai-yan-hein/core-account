@@ -816,12 +816,13 @@ public class AccountRepo {
 
     }
 
-    public Mono<String> getShootTriMessage() {
+    public Flux<String> getShootTriMessage() {
         return accountApi.get()
-                .uri("/account/shootTri")
-                .accept(MediaType.APPLICATION_JSON)
+                .uri(builder -> builder.path("/account/shootTri")
+                .queryParam("compCode", Global.compCode)
+                .build())
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToFlux(String.class);
     }
 
     public Flux<Message> receiveMessage() {

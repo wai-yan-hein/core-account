@@ -46,10 +46,8 @@ import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.model.LabourGroup;
-import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.inventory.ui.common.SaleRiceTableModel;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.entry.dialog.VouDiscountDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
@@ -120,11 +118,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
     private int type;
     private TransferHistoryDialog transferHistoryDialog;
-    private StockBalanceDialog stockBalanceDialog;
+    private StockBalanceFrame stockBalanceDialog;
     private VouDiscountDialog vouDiscountDialog;
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
 
-    public void setStockBalanceDialog(StockBalanceDialog stockBalanceDialog) {
+    public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
     }
 
@@ -217,12 +215,18 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void initMain() {
+        initStockBalance();
         initCombo();
         initTable();
         initModel();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
+    }
+
+    private void initStockBalance() {
+        stockBalanceDialog.setVisible(ProUtil.isCalStock());
+        deskPane.add(stockBalanceDialog);
     }
 
     private void setStockInfo() {
@@ -1173,6 +1177,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         jSeparator2 = new javax.swing.JSeparator();
         chkPaid = new javax.swing.JCheckBox();
         jButton1 = new javax.swing.JButton();
+        deskPane = new javax.swing.JDesktopPane();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1533,8 +1538,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                             .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnBatch1)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1788,6 +1792,17 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
         });
 
+        javax.swing.GroupLayout deskPaneLayout = new javax.swing.GroupLayout(deskPane);
+        deskPane.setLayout(deskPaneLayout);
+        deskPaneLayout.setHorizontalGroup(
+            deskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        deskPaneLayout.setVerticalGroup(
+            deskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1796,8 +1811,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(512, 512, 512)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(deskPane)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1810,11 +1827,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addGap(4, 4, 4)
                 .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jButton1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1)
+                    .addComponent(deskPane))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -2134,6 +2151,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
+    private javax.swing.JDesktopPane deskPane;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;

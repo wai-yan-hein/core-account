@@ -17,7 +17,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleDynamic;
-import com.inventory.ui.entry.dialog.StockBalanceDialog;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +45,9 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private JLabel lblRecord;
     private SaleDynamic sale;
-    private StockBalanceDialog dialog;
+    private StockBalanceFrame dialog;
 
-    public void setDialog(StockBalanceDialog dialog) {
+    public void setDialog(StockBalanceFrame dialog) {
         this.dialog = dialog;
     }
 

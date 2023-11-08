@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.5" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+<Form version="1.9" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <Events>
     <EventHandler event="componentShown" listener="java.awt.event.ComponentListener" parameters="java.awt.event.ComponentEvent" handler="formComponentShown"/>
     <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="formPropertyChange"/>
@@ -24,9 +24,9 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jPanel2" max="32767" attributes="0"/>
+                      <Component id="panelInfo" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="panelStockInfo" min="-2" max="-2" attributes="0"/>
+                      <Component id="deskPane" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="panelExpense" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -50,10 +50,10 @@
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="jScrollPane3" max="32767" attributes="0"/>
                   <Component id="panelExpense" max="32767" attributes="0"/>
-                  <Component id="panelStockInfo" alignment="1" max="32767" attributes="0"/>
-                  <Component id="jPanel2" alignment="1" max="32767" attributes="0"/>
+                  <Component id="panelInfo" alignment="1" max="32767" attributes="0"/>
+                  <Component id="deskPane" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -81,7 +81,7 @@
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="txtCus" max="32767" attributes="0"/>
-                      <Component id="txtSaleDate" alignment="1" max="32767" attributes="0"/>
+                      <Component id="txtSaleDate" alignment="1" pref="228" max="32767" attributes="0"/>
                       <Component id="txtVouNo" alignment="1" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -92,7 +92,7 @@
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtRemark" max="32767" attributes="0"/>
+                      <Component id="txtRemark" pref="204" max="32767" attributes="0"/>
                       <Component id="txtSaleman" max="32767" attributes="0"/>
                       <Component id="txtLocation" max="32767" attributes="0"/>
                   </Group>
@@ -104,7 +104,7 @@
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="txtDueDate" max="32767" attributes="0"/>
+                      <Component id="txtDueDate" pref="228" max="32767" attributes="0"/>
                       <Component id="txtCurrency" max="32767" attributes="0"/>
                       <Component id="txtReference" max="32767" attributes="0"/>
                   </Group>
@@ -117,11 +117,11 @@
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <Component id="txtBatchNo" max="32767" attributes="0"/>
+                          <Component id="txtBatchNo" pref="134" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jLabel18" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Component id="txtOrderNo" max="32767" attributes="0"/>
+                          <Component id="txtOrderNo" pref="134" max="32767" attributes="0"/>
                       </Group>
                       <Component id="txtProjectNo" max="32767" attributes="0"/>
                       <Component id="cboAccount" alignment="0" max="32767" attributes="0"/>
@@ -479,7 +479,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="jPanel2">
+    <Container class="javax.swing.JPanel" name="panelInfo">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -504,10 +504,8 @@
                               <Component id="btnBatch" min="-2" max="-2" attributes="0"/>
                               <Component id="btnBatch1" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="0" pref="30" max="32767" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -1123,12 +1121,12 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="panelStockInfo">
+    <Container class="javax.swing.JDesktopPane" name="deskPane">
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="515" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="551" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
