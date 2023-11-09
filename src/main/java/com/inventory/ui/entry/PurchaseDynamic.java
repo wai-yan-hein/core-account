@@ -259,30 +259,34 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private void initPanelExpesne() {
-        panelExpense.setVisible(false);
-        expenseTableModel.setObserver(this);
-        expenseTableModel.setTable(tblExpense);
-        expenseTableModel.setTxtVouTotal(txtExpense);
-        tblExpense.setModel(expenseTableModel);
-        tblExpense.getTableHeader().setFont(Global.tblHeaderFont);
-        tblExpense.setFont(Global.textFont);
-        tblExpense.setRowHeight(Global.tblRowHeight);
-        tblExpense.setCellSelectionEnabled(true);
-        tblExpense.setShowGrid(true);
-        tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
-        tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
-        inventoryRepo.getExpense().subscribe((t) -> {
-            tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
-        });
-        tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
-        tblExpense.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        txtExpense.setFormatterFactory(Util1.getDecimalFormat());
-        txtExpense.setFont(Global.amtFont);
-        txtExpense.setHorizontalAlignment(JTextField.RIGHT);
-        getExpense();
+        if (Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_EXPENSE))) {
+            expenseTableModel.setObserver(this);
+            expenseTableModel.setTable(tblExpense);
+            expenseTableModel.setTxtVouTotal(txtExpense);
+            tblExpense.setModel(expenseTableModel);
+            tblExpense.getTableHeader().setFont(Global.tblHeaderFont);
+            tblExpense.setFont(Global.textFont);
+            tblExpense.setRowHeight(Global.tblRowHeight);
+            tblExpense.setCellSelectionEnabled(true);
+            tblExpense.setShowGrid(true);
+            tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                    .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+            tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
+            tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
+            inventoryRepo.getExpense().subscribe((t) -> {
+                tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
+            });
+            tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+            tblExpense.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+            txtExpense.setFormatterFactory(Util1.getDecimalFormat());
+            txtExpense.setFont(Global.amtFont);
+            txtExpense.setHorizontalAlignment(JTextField.RIGHT);
+            getExpense();
+        } else {
+            panelExpense.setVisible(false);
+        }
+
     }
 
     private void getExpense() {
