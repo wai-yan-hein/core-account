@@ -456,7 +456,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
     }
 
-    private void clear() {
+    private void clear(boolean foucs) {
         disableForm(true);
         saleTableModel.removeListDetail();
         saleTableModel.clearDelList();
@@ -471,8 +471,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtRemark.setText(null);
         txtReference.setText(null);
         txtOrderNo.setText(null);
-        txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
+        if (foucs) {
+            txtCus.requestFocus();
+        }
     }
 
     private void orderDialog() {
@@ -528,8 +530,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 progress.setIndeterminate(false);
                 if (print) {
                     printVoucher(t);
+                } else {
+                    clear(true);
                 }
-                clear();
             }).doOnError((e) -> {
                 observeMain();
                 JOptionPane.showMessageDialog(this, e.getMessage());
@@ -542,7 +545,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
             status = false;
-            clear();
+            clear(true);
         } else if (currAutoCompleter.getCurrency() == null) {
             JOptionPane.showMessageDialog(this, "Choose Currency.",
                     "No Currency.", JOptionPane.ERROR_MESSAGE);
@@ -634,7 +637,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         "Are you sure to delete?", "Sale Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
                     inventoryRepo.delete(saleHis).doOnSuccess((t) -> {
-                        clear();
+                        clear(true);
                     }).subscribe();
                 }
             }
@@ -863,11 +866,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 viewReport(list, sh, reportName);
             }
         } else {
-//            if (!Util1.isNullOrEmpty(grnVouNo)) {
-                Mono<List<SaleExpense>> m1 = inventoryRepo.getSaleExpense(vouNo);
-                Mono<List<VSale>> m2 = !Util1.isNullOrEmpty(grnVouNo)
-                        ? inventoryRepo.getSaleByBatchReport(vouNo, grnVouNo)
-                        : inventoryRepo.getSaleReport(vouNo);
+            if (!Util1.isNullOrEmpty(grnVouNo)) {
+                Mono<List<SaleExpense>> m1 = Mono.just(saleExpenseFrame.getListDetail());
+                Mono<List<VSale>> m2 = inventoryRepo.getSaleByBatchReport(vouNo, grnVouNo);
                 Mono<Trader> m3 = inventoryRepo.findTrader(sh.getTraderCode());
                 Mono.zip(m1, m2, m3).doOnSuccess((tuple) -> {
                     try {
@@ -887,19 +888,22 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     } catch (JsonProcessingException | JRException e) {
                         log.error("printVoucher : " + e.getMessage());
                     }
+                }).doOnTerminate(() -> {
+                    clear(false);
                 }).subscribe();
-
-//            } else {
-//                inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
-//                    viewReport(t, sh, reportName);
-//                }).doOnError((e) -> {
-//                    JOptionPane.showMessageDialog(this, e.getMessage());
-//                }).subscribe();
-//            }
+            } else {
+                inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
+                    viewReport(t, sh, reportName);
+                }).doOnError((e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }).doOnTerminate(() -> {
+                    clear(false);
+                }).subscribe();
+            }
         }
     }
 
-    private Map<String, Object> getDefaultParam(SaleHis sh) {
+    private Map<String, Object> getDefaultParam(SaleHis sh) throws JsonProcessingException, JRException {
         String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -909,7 +913,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         param.put("p_logo_path", logoPath);
         param.put("p_balance", balance);
         param.put("p_prv_balance", prvBal);
-        param.put("SUBREPORT_DIR", "report/");
+        param.put("p_sub_report_dir", "report/");
         param.put("p_vou_total", sh.getVouTotal());
         param.put("p_vou_paid", sh.getPaid());
         param.put("p_vou_balance", sh.getBalance());
@@ -917,6 +921,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         param.put("p_vou_no", sh.getKey().getVouNo());
         param.put("p_remark", sh.getRemark());
         param.put("p_vou_date", Util1.toDateStr(sh.getVouDate(), Global.dateFormat));
+        List<SaleExpense> listExp = saleExpenseFrame.getListDetail();
+        JsonNode jn = new ObjectMapper().readTree(Util1.gson.toJson(listExp));
+        JsonDataSource d = new JsonDataSource(jn, null) {
+        };
+        param.put("p_sub_exp_data", d);
         return param;
     }
 
@@ -926,13 +935,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(list));
                 JsonDataSource ds = new JsonDataSource(stream);
-                JasperPrint jp = JasperFillManager.fillReport(reportPath, getDefaultParam(sh), ds);
+                Map<String, Object> hm = getDefaultParam(sh);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, hm, ds);
                 if (chkVou.isSelected()) {
                     JasperReportUtil.print(jp);
                 } else {
                     JasperViewer.viewReport(jp, false);
                 }
-            } catch (JRException ex) {
+            } catch (JRException | JsonProcessingException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
         } else {
@@ -2290,7 +2300,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     @Override
     public void newForm() {
-        clear();
+        clear(true);
     }
 
     @Override

@@ -97,7 +97,7 @@ public class SaleExpenseFrame extends javax.swing.JInternalFrame implements Sele
     }
 
     public List<SaleExpense> getListDetail() {
-        return expenseTableModel.getListDetail();
+        return expenseTableModel.getExpenseList();
     }
 
     public List<SaleExpenseKey> getDeleteList() {

@@ -73,10 +73,10 @@ public class MachineInfoDialog extends javax.swing.JDialog {
 
     private void updateAll() {
         progress.setIndeterminate(true);
-        userRepo.updateAllMachine(false).doOnSuccess((t) -> {
+        userRepo.updateAllMachine(true).doOnSuccess((t) -> {
             if (t) {
                 tableModel.getListDetail().forEach((m) -> {
-                    m.setProUpdate(false);
+                    m.setProUpdate(true);
                 });
                 tableModel.fireTableDataChanged();
                 JOptionPane.showMessageDialog(this, "Success.");
