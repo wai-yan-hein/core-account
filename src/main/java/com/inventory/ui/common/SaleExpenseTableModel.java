@@ -71,7 +71,7 @@ public class SaleExpenseTableModel extends AbstractTableModel {
                 return String.class;
             }
             case 1 -> {
-                return Float.class;
+                return Double.class;
             }
         }
         return null;
@@ -102,7 +102,7 @@ public class SaleExpenseTableModel extends AbstractTableModel {
                 case 0 ->
                     b.getExpenseName();
                 case 1 ->
-                    b.getAmount();
+                    Util1.toNull(b.getAmount());
                 default ->
                     null;
             }; //Code

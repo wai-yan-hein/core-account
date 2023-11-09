@@ -2026,7 +2026,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 txtVouDiscount.setValue(discount);
                 calculateTotalAmount(false);
             }
-
         }
     }
 

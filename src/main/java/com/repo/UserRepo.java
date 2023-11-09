@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -166,11 +167,19 @@ public class UserRepo {
 
     public String updateProgram() {
         Mono<ResponseEntity<String>> result = userApi.get()
-                .uri(builder -> builder.path("/user/update-program")
+                .uri(builder -> builder.path("/user/updateProgram")
                 .queryParam("macId", Global.macId)
                 .build())
                 .retrieve().toEntity(String.class);
         return result.block().getBody();
+    }
+
+    public Mono<Boolean> updateAllMachine(boolean update) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/updateAllMachine")
+                .queryParam("update", update)
+                .build())
+                .retrieve().bodyToMono(Boolean.class);
     }
 
     public Mono<CompanyInfo> saveCompany(CompanyInfo app) {
@@ -625,6 +634,15 @@ public class UserRepo {
         return userApi.post()
                 .uri("/template/deleteMenu")
                 .body(Mono.just(key), MenuTemplate.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<Boolean> delete(int macId) {
+        return userApi.delete()
+                .uri(uriBuilder -> uriBuilder.path("/deleteMac")
+                .queryParam("macId", macId)
+                .build())
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }

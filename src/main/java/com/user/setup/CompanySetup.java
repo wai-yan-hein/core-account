@@ -20,11 +20,13 @@ import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.user.dialog.DateLockDialog;
 import com.user.dialog.DepartmentSetupDialog;
+import com.user.dialog.MachineInfoDialog;
 import com.user.dialog.QRDialog;
 import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
+import com.user.model.MachineInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -61,6 +63,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private SelectionObserver observer;
     private JProgressBar progress;
     private DateLockDialog dateLockDialog;
+    private MachineInfoDialog machineInfoDialog;
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -304,7 +307,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         ShootTriMessageDialog s = new ShootTriMessageDialog(Global.parentForm, true);
         s.setAccountRepo(accountRepo);
         s.initMain();
-        s.setSize(Global.width-100, Global.height-100);
+        s.setSize(Global.width - 100, Global.height - 100);
         s.setLocationRelativeTo(null);
         s.setVisible(true);
     }
@@ -338,6 +341,17 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             dateLockDialog.setLocationRelativeTo(null);
         }
         dateLockDialog.search();
+    }
+
+    private void machineDialog() {
+        if (machineInfoDialog == null) {
+            machineInfoDialog = new MachineInfoDialog(Global.parentForm);
+            machineInfoDialog.setSize(Global.width - 300, Global.height - 300);
+            machineInfoDialog.setLocationRelativeTo(null);
+            machineInfoDialog.setUserRepo(userRepo);
+            machineInfoDialog.initMain();
+        }
+        machineInfoDialog.search();
     }
 
     /**
@@ -385,6 +399,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -666,6 +681,14 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        jButton7.setFont(Global.lableFont);
+        jButton7.setText("Machine");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -673,29 +696,35 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton7))
                     .addComponent(jButton2)
                     .addComponent(jButton3)
                     .addComponent(jButton4)
                     .addComponent(jButton5)
                     .addComponent(jButton6))
-                .addContainerGap(90, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton6)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton6))
+                    .addComponent(jButton7))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -769,6 +798,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         dateLockDialog();
     }//GEN-LAST:event_jButton6ActionPerformed
 
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // TODO add your handling code here:
+        machineDialog();
+    }//GEN-LAST:event_jButton7ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
@@ -779,6 +813,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;

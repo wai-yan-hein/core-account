@@ -13,7 +13,6 @@ import com.common.SelectionObserver;
 import com.common.TokenFile;
 import com.repo.UserRepo;
 import com.common.Util1;
-import com.user.model.AppUser;
 import com.user.model.MachineInfo;
 import com.user.model.AuthenticationResponse;
 import java.awt.Image;

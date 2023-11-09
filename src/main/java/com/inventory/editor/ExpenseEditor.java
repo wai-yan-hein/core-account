@@ -12,6 +12,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 import javax.swing.AbstractCellEditor;
@@ -83,7 +84,9 @@ public class ExpenseEditor extends AbstractCellEditor implements TableCellEditor
         component = jtf;
         if (value != null) {
             jtf.setText(value.toString());
-            //jtf.selectAll();
+        }
+        if (listExpense == null) {
+            listExpense = new ArrayList<>();
         }
         completer = new ExpenseCompeter(jtf, listExpense, this);
 

@@ -10,8 +10,6 @@ import com.common.TableCellRender;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.common.StockBalanceWeightTableModel;
 import com.repo.InventoryRepo;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -36,20 +34,6 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
      */
     public StockBalanceFrame() {
         initComponents();
-    }
-
-    private void setLocationDialog() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-        // Set the dialog size
-        int dialogWidth = getWidth() * 2;
-        int dialogHeight = getHeight();
-
-        // Calculate the location for the top right corner
-        int dialogX = screenSize.width - dialogWidth;
-        int dialogY = screenSize.height - dialogHeight;
-
-        setLocation(dialogX, dialogY);
     }
 
     private void initMain(boolean weight) {
