@@ -425,11 +425,11 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
                     focusTable(i);
                     return false;
-                } else if (sdh.getStdWeight() > 0) {
+                } else if (sdh.getStdWeight() <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Std Weight");
                     focusTable(i);
                     return false;
-                } else if (sdh.getWeight() > 0) {
+                } else if (sdh.getWeight() <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Weight");
                     focusTable(i);
                     return false;

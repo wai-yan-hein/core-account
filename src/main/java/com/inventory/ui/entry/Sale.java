@@ -557,12 +557,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             JOptionPane.showMessageDialog(this, "Choose Trader.",
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
             status = false;
-            txtLocation.requestFocus();
+            txtCus.requestFocus();
         } else if (Util1.getDouble(txtVouTotal.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Amount.",
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
-            txtLocation.requestFocus();
+            txtVouTotal.requestFocus();
         } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
             JOptionPane.showMessageDialog(this, "Invalid Date.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
@@ -863,9 +863,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 viewReport(list, sh, reportName);
             }
         } else {
-            if (!Util1.isNullOrEmpty(grnVouNo)) {
+//            if (!Util1.isNullOrEmpty(grnVouNo)) {
                 Mono<List<SaleExpense>> m1 = inventoryRepo.getSaleExpense(vouNo);
-                Mono<List<VSale>> m2 = inventoryRepo.getSaleByBatchReport(vouNo, grnVouNo);
+                Mono<List<VSale>> m2 = !Util1.isNullOrEmpty(grnVouNo)
+                        ? inventoryRepo.getSaleByBatchReport(vouNo, grnVouNo)
+                        : inventoryRepo.getSaleReport(vouNo);
                 Mono<Trader> m3 = inventoryRepo.findTrader(sh.getTraderCode());
                 Mono.zip(m1, m2, m3).doOnSuccess((tuple) -> {
                     try {
@@ -887,13 +889,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     }
                 }).subscribe();
 
-            } else {
-                inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
-                    viewReport(t, sh, reportName);
-                }).doOnError((e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                }).subscribe();
-            }
+//            } else {
+//                inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
+//                    viewReport(t, sh, reportName);
+//                }).doOnError((e) -> {
+//                    JOptionPane.showMessageDialog(this, e.getMessage());
+//                }).subscribe();
+//            }
         }
     }
 
