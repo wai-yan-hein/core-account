@@ -159,8 +159,10 @@ public class SSEListener {
                             integration.downloadRoleProperty();
                         case MessageType.SYSTEM_PROPERTY ->
                             integration.downloadSystemProperty();
-                        case MessageType.DATE_LOCK -> {
+                        case MessageType.DATE_LOCK ->
                             integration.downloadDateLock();
+                        case MessageType.MACHINE -> {
+                            observer.selected("message", "Program need to logout.");
                         }
 
                     }
@@ -172,7 +174,7 @@ public class SSEListener {
             }
 
         }, (e) -> {
-            log.error("startAccount : " + e.getMessage());
+            log.error("startUser : " + e.getMessage());
         });
     }
 

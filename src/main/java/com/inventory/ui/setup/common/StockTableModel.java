@@ -105,8 +105,7 @@ public class StockTableModel extends AbstractTableModel {
     }
 
     @Override
-    public void setValueAt(Object value, int row, int column
-    ) {
+    public void setValueAt(Object value, int row, int column) {
         Stock s = listStock.get(row);
         switch (column) {
             case 2 -> {

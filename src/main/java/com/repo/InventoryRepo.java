@@ -2286,9 +2286,6 @@ public class InventoryRepo {
     }
 
     public Mono<General> getSmallQty(String stockCode, String unit) {
-        if (localDatabase) {
-            return h2Repo.getSmallQty(stockCode, unit, Global.compCode, Global.deptId);
-        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getSmallQty")
                 .queryParam("stockCode", stockCode)

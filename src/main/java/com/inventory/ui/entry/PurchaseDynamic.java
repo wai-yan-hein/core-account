@@ -39,7 +39,6 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.PurchaseWeightTableModel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.GRNDetailDialog;
-import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -61,7 +60,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -173,49 +171,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblPur.getActionMap().put(solve, new DeleteAction());
-        tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK), "avg-price");
-        tblPur.getActionMap().put("avg-price", new AvgPriceAction());
-
-    }
-
-    private class AvgPriceAction extends AbstractAction {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
-            PurHisDetail pd = getObject(row);
-            inventoryRepo.getStockUnit().subscribe((t) -> {
-                if (pd.getStockCode() != null) {
-                    PurchaseAvgPriceDialog d = new PurchaseAvgPriceDialog(Global.parentForm);
-                    d.setInventoryRepo(inventoryRepo);
-                    d.setListUnit(t);
-                    d.setPd(pd);
-                    d.initMain();
-                    d.setLocationRelativeTo(null);
-                    d.addKeyListener(new KeyAdapter() {
-                        @Override
-                        public void keyPressed(KeyEvent e) {
-                            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                                d.dispose();
-                            }
-                        }
-                    });
-                    d.setVisible(true);
-                    if (d.isConfirm()) {
-                        switch (type) {
-                            case WEIGHT ->
-                                purTableModel.setValueAt(pd, row, 0);
-                            case RICE ->
-                                purchaseRiceTableModel.setValueAt(pd, row, 0);
-                            case EXPORT ->
-                                purchaseRiceTableModel.setValueAt(pd, row, 0);
-
-                        }
-                    }
-                }
-            });
-        }
     }
 
     private PurHisDetail getObject(int row) {

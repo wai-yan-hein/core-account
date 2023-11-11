@@ -49,16 +49,18 @@ public class MachineInfoDialog extends javax.swing.JDialog {
     }
 
     private void initTable() {
+        tableModel.setUserRepo(userRepo);
         tblMac.setModel(tableModel);
-        tblMac.getTableHeader().setFont(Global.textFont);
+        tblMac.getTableHeader().setFont(Global.tblHeaderFont);
         tblMac.setRowHeight(Global.tblRowHeight);
         tblMac.setFont(Global.textFont);
         tblMac.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblMac.setDefaultRenderer(Object.class, new TableCellRender());
         tblMac.setDefaultRenderer(Boolean.class, new TableCellRender());
+        tblMac.setDefaultRenderer(Double.class, new TableCellRender());
         swrf = new StartWithRowFilter(txtFilter);
         sorter = new TableRowSorter<>(tblMac.getModel());
-
+        tblMac.setRowSorter(sorter);
     }
 
     public void search() {
@@ -86,7 +88,7 @@ public class MachineInfoDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, t.getMessage());
             progress.setIndeterminate(false);
         }).doOnTerminate(() -> {
-            sendMessage("");
+            sendMessage("Program need to logout.");
         }).subscribe();
     }
 

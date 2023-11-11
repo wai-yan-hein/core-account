@@ -55,6 +55,10 @@ public class SaleHisDetail {
     private Double stdWeight;
     @Column(name = "total_weight")
     private Double totalWeight;
+    @Column(name = "org_price")
+    private double orgPrice;
+    @Column(name = "weight_loss")
+    private double weightLoss;
     @Transient
     private String userCode;
     @Transient

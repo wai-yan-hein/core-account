@@ -640,7 +640,7 @@ public class UserRepo {
 
     public Mono<Boolean> delete(int macId) {
         return userApi.delete()
-                .uri(uriBuilder -> uriBuilder.path("/deleteMac")
+                .uri(uriBuilder -> uriBuilder.path("/user/deleteMac")
                 .queryParam("macId", macId)
                 .build())
                 .retrieve()

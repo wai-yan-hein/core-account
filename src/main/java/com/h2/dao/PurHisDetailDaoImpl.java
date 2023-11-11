@@ -66,7 +66,7 @@ public class PurHisDetailDaoImpl extends AbstractDao<PurDetailKey, PurHisDetail>
                     op.setDeptId(rs.getInt("dept_id"));
                     op.setStockCode(rs.getString("stock_code"));
                     op.setQty(rs.getDouble("qty"));
-                    op.setAvgQty(rs.getDouble("avg_qty"));
+                    op.setWeightLoss(rs.getDouble("avg_qty"));
                     op.setOrgPrice(rs.getDouble("org_price"));
                     op.setWeight(rs.getDouble("weight"));
                     op.setStdWeight(rs.getDouble("std_weight"));

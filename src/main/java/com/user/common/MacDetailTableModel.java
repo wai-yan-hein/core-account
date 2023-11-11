@@ -4,6 +4,8 @@
  */
 package com.user.common;
 
+import com.common.Util1;
+import com.repo.UserRepo;
 import com.user.model.MachineInfo;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,12 @@ public class MacDetailTableModel extends AbstractTableModel {
 
     private List<MachineInfo> listDetail = new ArrayList();
     private final String[] columnNames = {"Mac Id", "Machine Name", "Mac Ip", "Mac Address",
-        "Serial No", "Os Name", "Os Version", "Os arch", "Updated"};
+        "Serial No", "Os Name", "Os Version", "Os arch", "Need Update"};
+    private UserRepo userRepo;
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -34,6 +41,8 @@ public class MacDetailTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
+            case 0 ->
+                Double.class;
             case 8 ->
                 Boolean.class;
             default ->
@@ -47,7 +56,7 @@ public class MacDetailTableModel extends AbstractTableModel {
             MachineInfo p = listDetail.get(row);
             switch (column) {
                 case 0 -> {
-                    return p.getMacId();
+                    return Util1.getDouble(p.getMacId());
                 }
                 case 1 -> {
                     return p.getMachineName();
@@ -82,7 +91,17 @@ public class MacDetailTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
-
+        MachineInfo s = listDetail.get(row);
+        switch (column) {
+            case 8 -> {
+                if (value instanceof Boolean active) {
+                    s.setProUpdate(active);
+                    userRepo.saveMachine(s).doOnSuccess((t) -> {
+                        listDetail.set(row, t);
+                    }).subscribe();
+                }
+            }
+        }
     }
 
     @Override
@@ -107,7 +126,6 @@ public class MacDetailTableModel extends AbstractTableModel {
         }
     }
 
-
     public MachineInfo getObject(int row) {
         return listDetail.get(row);
     }
@@ -130,7 +148,5 @@ public class MacDetailTableModel extends AbstractTableModel {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
-    
-    
 
 }

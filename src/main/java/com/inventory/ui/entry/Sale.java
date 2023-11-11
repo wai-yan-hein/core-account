@@ -54,6 +54,7 @@ import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.ui.entry.dialog.SaleExpenseFrame;
+import com.inventory.ui.entry.dialog.SaleWeightLossPriceDialog;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
@@ -65,6 +66,8 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -139,6 +142,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
     private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
     private SaleExpenseFrame saleExpenseFrame;
+    private SaleWeightLossPriceDialog saleWeightLossPriceDialog;
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
@@ -183,7 +187,40 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
         tblSale.getActionMap().put(solve, new DeleteSale());
+        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK), "loss-price");
+        tblSale.getActionMap().put("loss-price", new LossPriceAction());
 
+    }
+
+    private class LossPriceAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
+            SaleHisDetail pd = saleTableModel.getSale(row);
+            if (pd.getStockCode() != null) {
+                if (saleWeightLossPriceDialog == null) {
+                    saleWeightLossPriceDialog = new SaleWeightLossPriceDialog(Global.parentForm);
+                    saleWeightLossPriceDialog.setLocationRelativeTo(null);
+                    saleWeightLossPriceDialog.setInventoryRepo(inventoryRepo);
+                    saleWeightLossPriceDialog.addKeyListener(new KeyAdapter() {
+                        @Override
+                        public void keyPressed(KeyEvent e) {
+                            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                                saleWeightLossPriceDialog.dispose();
+                            }
+                        }
+                    });
+                }
+                saleWeightLossPriceDialog.setSaleDetail(pd);
+                saleWeightLossPriceDialog.setVisible(true);
+                if (saleWeightLossPriceDialog.isConfirm()) {
+                    saleTableModel.setValueAt(pd, row, 0);
+                }
+
+            }
+        }
     }
 
     private void setSaleVoucherDetail(OrderHis oh, boolean local) {
@@ -344,8 +381,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         } else {
             tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
         }
-        tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender());
+        tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
+        tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

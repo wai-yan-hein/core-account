@@ -42,11 +42,12 @@ import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.common.StockInfoPanel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.GRNDetailDialog;
-import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.ui.entry.dialog.PurchaseWeightLossPriceDialog;
+import com.inventory.ui.entry.dialog.SaleWeightLossPriceDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -124,6 +125,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
     private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
+    private PurchaseWeightLossPriceDialog purchaseWLDialog;
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -168,22 +170,22 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
             PurHisDetail pd = purTableModel.getObject(row);
             if (pd.getStockCode() != null) {
-                PurchaseAvgPriceDialog d = new PurchaseAvgPriceDialog(Global.parentForm);
-                d.setInventoryRepo(inventoryRepo);
-                d.setListUnit(listUnit);
-                d.setPd(pd);
-                d.initMain();
-                d.setLocationRelativeTo(null);
-                d.addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyPressed(KeyEvent e) {
-                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                            d.dispose();
+                if (purchaseWLDialog == null) {
+                    purchaseWLDialog = new PurchaseWeightLossPriceDialog(Global.parentForm);
+                    purchaseWLDialog.setLocationRelativeTo(null);
+                    purchaseWLDialog.setInventoryRepo(inventoryRepo);
+                    purchaseWLDialog.addKeyListener(new KeyAdapter() {
+                        @Override
+                        public void keyPressed(KeyEvent e) {
+                            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                                purchaseWLDialog.dispose();
+                            }
                         }
-                    }
-                });
-                d.setVisible(true);
-                if (d.isConfirm()) {
+                    });
+                }
+                purchaseWLDialog.setPurDetail(pd);
+                purchaseWLDialog.setVisible(true);
+                if (purchaseWLDialog.isConfirm()) {
                     purTableModel.setValueAt(pd, row, 0);
                 }
             }
@@ -337,8 +339,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         });
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
+        tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
+        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -988,7 +990,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     pd.setUserCode(sd.getUserCode());
                     pd.setStockName(sd.getStockName());
                     pd.setRelName(sd.getRelName());
-                    pd.setAvgQty(0.0);
+                    pd.setWeightLoss(0.0);
                     pd.setQty(Util1.getDouble(sd.getQty()));
                     pd.setUnitCode(sd.getUnit());
                     pd.setPrice(0.0);
@@ -1009,7 +1011,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     pd.setUserCode(sd.getUserCode());
                     pd.setStockName(sd.getStockName());
                     pd.setRelName(sd.getRelName());
-                    pd.setAvgQty(0.0);
+                    pd.setWeightLoss(0.0);
                     pd.setQty(sd.getQty());
                     pd.setUnitCode(sd.getUnitCode());
                     pd.setPrice(sd.getPrice());

@@ -149,13 +149,11 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     private void checkAndDeleteData(MachineInfo info) {
         if (info.isProUpdate()) {
             log.info("need to delete local data.");
-            File f = new File("data");
-            if (f.isDirectory()) {
-                boolean delete = f.delete();
-                if (delete) {
-                    log.info("local data delete success.");
-                    info.setProUpdate(false);
-                }
+            File f = new File("data/database.mv.db");
+            boolean delete = f.delete();
+            if (delete) {
+                log.info("local data delete success.");
+                info.setProUpdate(false);
             }
         }
     }

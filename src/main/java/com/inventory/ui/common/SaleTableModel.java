@@ -243,6 +243,7 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setQty(1.0);
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(Util1.getDouble(getTraderPrice(s)));
+                            sd.setOrgPrice(sd.getPrice());
                             sd.setStock(s);
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             sd.setWeight(Util1.getDouble(s.getWeight()));
@@ -292,6 +293,7 @@ public class SaleTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getDouble(value));
+                                sd.setOrgPrice(sd.getPrice());
                                 parent.setColumnSelectionInterval(0, 0);
                                 parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
@@ -318,6 +320,7 @@ public class SaleTableModel extends AbstractTableModel {
                                 inventoryRepo.getSaleRecentPrice(stockCode,
                                         Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).doOnSuccess((t) -> {
                                     sd.setPrice(Util1.getDouble(t.getAmount()));
+                                    sd.setOrgPrice(sd.getPrice());
                                     calculateAmount(sd);
                                     fireTableRowsUpdated(row, row);
                                 }).subscribe();
