@@ -72,12 +72,17 @@ public class JobSearchDialog extends javax.swing.JDialog {
             departmentComboBoxModel.setData(t);
             cboDep.repaint();
         }).block();
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentComboBoxModel.setSelectedItem(t);
+            cboDep.repaint();
+        }).block();
     }
 
     public void search() {
         progress.setIndeterminate(true);
         DepartmentUser d = (DepartmentUser) cboDep.getSelectedItem();
-        inventoryRepo.getJob(false,d.getKey().getDeptId()).subscribe((t) -> {
+        int deptId = d.getKey() == null ? Global.deptId:d.getKey().getDeptId();
+        inventoryRepo.getJob(false,deptId).subscribe((t) -> {
             tableModel.setListDetail(t);
             lblRecord.setText(String.valueOf(t.size()));
             txtFilter.requestFocus();
@@ -246,6 +251,11 @@ public class JobSearchDialog extends javax.swing.JDialog {
 
         jButton2.setFont(Global.textFont);
         jButton2.setText("Search");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton1.setFont(Global.lableFont);
         jButton1.setText("Select");
@@ -359,6 +369,11 @@ public class JobSearchDialog extends javax.swing.JDialog {
     private void txtFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFilterActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFilterActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        search();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments

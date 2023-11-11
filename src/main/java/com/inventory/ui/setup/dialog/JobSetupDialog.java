@@ -131,6 +131,11 @@ public class JobSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private void initCombo() {
         cboDep.setModel(departmentComboBoxModel);
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentComboBoxModel.setSelectedItem(t);
+            cboDep.setEditable(false);
+            cboDep.repaint();
+        }).subscribe();
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentComboBoxModel.setData(t);
             cboDep.repaint();
