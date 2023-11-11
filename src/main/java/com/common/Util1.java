@@ -1089,11 +1089,14 @@ public class Util1 {
     }
 
     public static double getTotalWeight(double wt, String qtyStr) {
-        String[] parts = qtyStr.split("\\.");
-        int qty = Integer.parseInt(parts[0]);
-        int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        double ttlWt = (qty * wt) + decimalWt;
-        return ttlWt;
+        if (qtyStr != null) {
+            String[] parts = qtyStr.split("\\.");
+            int qty = Integer.parseInt(parts[0]);
+            int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+            double ttlWt = (qty * wt) + decimalWt;
+            return ttlWt;
+        }
+        return 0;
     }
 
     public static float getTotalWeight(float wt, String qtyStr) {
