@@ -682,8 +682,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 b.initMain();
                 return b;
             }
-            case "Stock Payable" -> {
-                StockPayable b = new StockPayable();
+            case "Stock Customer Payable" -> {
+                StockPayable b = new StockPayable(StockPayable.SPCUS);
+                b.setInventoryRepo(inventoryRepo);
+                b.setProgress(progress);
+                b.setObserver(this);
+                b.initMain();
+                return b;
+            }
+             case "Stock Consignor Payable" -> {
+                StockPayable b = new StockPayable(StockPayable.SPCON);
                 b.setInventoryRepo(inventoryRepo);
                 b.setProgress(progress);
                 b.setObserver(this);

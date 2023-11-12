@@ -16,10 +16,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class SIOTWeightTableModel extends AbstractTableModel {
+public class SPConsignorDetailTableModel extends AbstractTableModel {
 
     private List<ClosingBalance> listDetail = new ArrayList();
-    private final String[] columnNames = {"Trader Name", "Code", "Description", "Op-Qty", "Op-Weight", "In-Qty", "In-Weight",
+    private final String[] columnNames = {"Date", "Vou No", "Remark", "Op-Qty", "Op-Weight", "In-Qty", "In-Weight",
         "Out-Qty", "Out-Weight", "Closing-Qty", "Closing-Weight"};
 
     @Override
@@ -63,15 +63,15 @@ public class SIOTWeightTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return his.getTraderName();
+                        return his.getVouDate();
                     }
                     case 1 -> {
-                        //date
-                        return his.getStockUsrCode();
+                        //vou-no
+                        return his.getVouNo();
                     }
                     case 2 -> {
-                        //vou-no
-                        return his.getStockName();
+                        //remark
+                        return his.getRemark();
                     }
                     case 3 -> {
                         return his.getOpenQty();

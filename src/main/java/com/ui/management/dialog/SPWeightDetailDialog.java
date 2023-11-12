@@ -6,7 +6,8 @@ package com.ui.management.dialog;
 
 import com.common.DecimalFormatRender;
 import com.common.Global;
-import com.ui.management.common.SPWeightDetailTableModel;
+import com.ui.management.common.SPConsignorDetailTableModel;
+import com.ui.management.common.SPCustomerDetailTableModel;
 import com.ui.management.model.ClosingBalance;
 import java.util.List;
 import javax.swing.JFrame;
@@ -18,24 +19,37 @@ import javax.swing.ListSelectionModel;
  */
 public class SPWeightDetailDialog extends javax.swing.JDialog {
 
-    private SPWeightDetailTableModel tableModel = new SPWeightDetailTableModel();
+    private SPCustomerDetailTableModel customerDetailTableModel = new SPCustomerDetailTableModel();
+    private SPConsignorDetailTableModel consignorDetailTableModel = new SPConsignorDetailTableModel();
+    private int type;
 
     /**
      * Creates new form SBWeightDetailDialog
      *
      * @param frame
+     * @param type
      */
-    public SPWeightDetailDialog(JFrame frame) {
+    public SPWeightDetailDialog(JFrame frame, int type) {
         super(frame, true);
         initComponents();
+        this.type = type;
     }
 
     public void initMain() {
+        initModel();
         initTable();
     }
 
+    private void initModel() {
+        switch (type) {
+            case 1 ->
+                tblBalance.setModel(customerDetailTableModel);
+            case 2 ->
+                tblBalance.setModel(consignorDetailTableModel);
+        }
+    }
+
     private void initTable() {
-        tblBalance.setModel(tableModel);
         tblBalance.getTableHeader().setFont(Global.tblHeaderFont);
         tblBalance.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblBalance.setRowHeight(Global.tblRowHeight);
@@ -56,12 +70,18 @@ public class SPWeightDetailDialog extends javax.swing.JDialog {
     }
 
     public void setListDetail(List<ClosingBalance> list) {
-        tableModel.setListDetail(list);
+        switch (type) {
+            case 1 ->
+                customerDetailTableModel.setListDetail(list);
+            case 2 ->
+                consignorDetailTableModel.setListDetail(list);
+        }
         lblRecords.setText(String.valueOf(list.size()));
     }
 
-    public void setStockName(String stockName) {
-        lblStockName.setText(stockName);
+    public void setDescription(String traderName, String stockName) {
+        String desp = traderName + "'s " + stockName;
+        lblStockName.setText(desp);
     }
 
     /**

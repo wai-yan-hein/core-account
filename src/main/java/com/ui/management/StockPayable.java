@@ -17,10 +17,9 @@ import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockTypeAutoCompleter;
-import com.inventory.model.PayableType;
 import com.repo.InventoryRepo;
-import com.ui.management.common.SIOTWeightTableModel;
-import com.ui.management.common.SPWeightSummaryTableModel;
+import com.ui.management.common.SPConsignorSummaryTableModel;
+import com.ui.management.common.SPCustomerSummaryTableModel;
 import com.ui.management.dialog.SPWeightDetailDialog;
 import com.ui.management.model.ClosingBalance;
 import java.lang.reflect.Type;
@@ -28,30 +27,30 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Slf4j
 public class StockPayable extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
+    public static final int SPCUS = 1;
+    public static final int SPCON = 2;
     private StockTypeAutoCompleter stockTypeAutoCompleter;
     private BrandAutoCompleter brandAutoCompleter;
     private CategoryAutoCompleter categoryAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
-    private final SPWeightSummaryTableModel spwTableModel = new SPWeightSummaryTableModel();
-    private final SIOTWeightTableModel siotwtm = new SIOTWeightTableModel();
+    private final SPCustomerSummaryTableModel customerSummaryTableModel = new SPCustomerSummaryTableModel();
+    private final SPConsignorSummaryTableModel consignorSummaryTableModel = new SPConsignorSummaryTableModel();
     private InventoryRepo inventoryRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
     private SPWeightDetailDialog dialog;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+    private int type;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -67,9 +66,12 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
 
     /**
      * Creates new form StockBalance
+     *
+     * @param type
      */
-    public StockPayable() {
+    public StockPayable(int type) {
         initComponents();
+        this.type = type;
     }
 
     public void initMain() {
@@ -86,22 +88,18 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initModel() {
-        int status = cboType.getSelectedIndex();
-        log.info(status + "");
-        spwTableModel.clear();
-        siotwtm.clear();
-        switch (status) {
-            case 0 -> {
-                tblBalance.setModel(spwTableModel);
-                initTableWeight();
-            }
+        switch (type) {
             case 1 -> {
-                tblBalance.setModel(siotwtm);
+                tblBalance.setModel(customerSummaryTableModel);
                 initTableWeight();
             }
+            case 2 -> {
+                tblBalance.setModel(consignorSummaryTableModel);
+                initTableWeight();
+            }
+
         }
-        tblBalance.revalidate();
-        tblBalance.repaint();
+
     }
 
     private void initTableWeight() {
@@ -157,24 +155,6 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         }).subscribe();
     }
 
-    private void setListDetail(List<ClosingBalance> list) {
-        SwingUtilities.invokeLater(() -> {
-            log.info(list.size()+"");
-            int status = cboType.getSelectedIndex();
-            switch (status) {
-                case 0 -> {
-                    spwTableModel.setListDetail(list);
-                }
-                case 1 -> {
-                    siotwtm.setListDetail(list);
-                }
-            }
-            tblBalance.revalidate();
-            tblBalance.repaint();
-        });
-
-    }
-
     private void calculate() {
         btnCalculate.setEnabled(false);
         progress.setIndeterminate(true);
@@ -196,8 +176,30 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         }).subscribe();
     }
 
+    private void setListDetail(List<ClosingBalance> list) {
+        switch (type) {
+            case 1 ->
+                customerSummaryTableModel.setListDetail(list);
+            case 2 ->
+                consignorSummaryTableModel.setListDetail(list);
+
+        }
+    }
+
+    private List<ClosingBalance> getListDetail() {
+        switch (type) {
+            case SPCUS -> {
+                return customerSummaryTableModel.getListDetail();
+            }
+            case SPCON -> {
+                return consignorSummaryTableModel.getListDetail();
+            }
+        }
+        return null;
+    }
+
     private void calTotal() {
-        List<ClosingBalance> list = spwTableModel.getListDetail();
+        List<ClosingBalance> list = getListDetail();
         double opQty = list.stream().mapToDouble((t) -> t.getOpenQty()).sum();
         double opWt = list.stream().mapToDouble((t) -> t.getOpenWeight()).sum();
         double outQty = list.stream().mapToDouble((t) -> t.getOutQty()).sum();
@@ -235,15 +237,27 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
     }
 
     private String getReportName() {
-        int status = cboType.getSelectedIndex();
-        return switch (status) {
-            case 0 ->
-                "StockPayableSummary";
-            case 1 ->
-                "StockInOutByTraderSummary";
-            default ->
-                "";
-        };
+        switch (type) {
+            case SPCUS -> {
+                return "StockPayableCustomerSummary";
+            }
+            case SPCON -> {
+                return "StockPayableConsignorSummary";
+            }
+        }
+        return null;
+    }
+
+    private String getDetailReportName() {
+        switch (type) {
+            case SPCUS -> {
+                return "StockPayableCustomerDetail";
+            }
+            case SPCON -> {
+                return "StockPayableConsignorDetail";
+            }
+        }
+        return null;
     }
 
     private void observeMain() {
@@ -255,18 +269,31 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         observer.selected("refresh", true);
     }
 
+    private ClosingBalance getObject(int row) {
+        switch (type) {
+            case 1 -> {
+                return customerSummaryTableModel.getSelectVou(row);
+            }
+            case 2 -> {
+                return consignorSummaryTableModel.getSelectVou(row);
+            }
+        }
+        return null;
+    }
+
     private void detailDialog() {
         if (dialog == null) {
-            dialog = new SPWeightDetailDialog(Global.parentForm);
+            dialog = new SPWeightDetailDialog(Global.parentForm, type);
             dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
             dialog.initMain();
         }
         int row = tblBalance.convertRowIndexToModel(tblBalance.getSelectedRow());
         if (row >= 0) {
-            ClosingBalance b = spwTableModel.getSelectVou(row);
+            ClosingBalance b = getObject(row);
             String stockCode = b.getStockCode();
             String stockName = b.getStockName();
+            String traderName = b.getTraderName();
             String traderCode = b.getTraderCode();
             if (!Util1.isNullOrEmpty(stockCode)) {
                 tblBalance.setEnabled(false);
@@ -274,14 +301,14 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
                 ReportFilter filter = getFilter();
                 filter.setStockCode(stockCode);
                 filter.setTraderCode(traderCode);
-                filter.setReportName("StockPayableDetail");
+                filter.setReportName(getDetailReportName());
                 inventoryRepo.getReport(filter).doOnSuccess((t) -> {
                     if (t.getFile() != null) {
                         Type listType = new TypeToken<List<ClosingBalance>>() {
                         }.getType();
                         List<ClosingBalance> list = Util1.byteArrayToList(t.getFile(), listType);
                         dialog.setListDetail(list);
-                        dialog.setStockName(stockName);
+                        dialog.setDescription(traderName, stockName);
                     }
                 }).doOnError((e) -> {
                     tblBalance.setEnabled(true);
@@ -333,8 +360,6 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         jLabel9 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         txtSearch = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
-        cboType = new javax.swing.JComboBox<>(PayableType.values());
         jScrollPane1 = new javax.swing.JScrollPane();
         tblBalance = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -417,15 +442,6 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
-        jLabel10.setText("Type");
-
-        cboType.setFont(Global.textFont);
-        cboType.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                cboTypeItemStateChanged(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -459,13 +475,9 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
                     .addComponent(txtCat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtLoc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtSearch)
-                    .addComponent(cboType, 0, 180, Short.MAX_VALUE))
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCalculate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -503,9 +515,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10)
-                            .addComponent(cboType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -591,53 +601,47 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
                     .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtOpWt)
-                    .addComponent(txtOpQty))
+                    .addComponent(txtOpWt, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                    .addComponent(txtOpQty, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtOutWt)
-                    .addComponent(txtOutQty))
+                    .addComponent(txtOutWt, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                    .addComponent(txtOutQty, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtClWt)
-                    .addComponent(txtClQty))
+                    .addComponent(txtClWt, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                    .addComponent(txtClQty, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtOutQty))
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtClQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtOutWt)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtClWt)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtOpQty))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtOpWt)
-                            .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtOutQty)
+                        .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtOpQty))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtClQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtOpWt)
+                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtOutWt)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtClWt)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -645,11 +649,11 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 914, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -659,7 +663,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -688,17 +692,10 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         searchTable();
     }//GEN-LAST:event_txtSearchKeyReleased
 
-    private void cboTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cboTypeItemStateChanged
-        // TODO add your handling code here:
-        initModel();
-    }//GEN-LAST:event_cboTypeItemStateChanged
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCalculate;
-    private javax.swing.JComboBox<PayableType> cboType;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
