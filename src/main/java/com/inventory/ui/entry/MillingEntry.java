@@ -1670,7 +1670,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void addExpense1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addExpense1ActionPerformed
-        // TODO add your handling code here:
+        expenseDialog();
     }//GEN-LAST:event_addExpense1ActionPerformed
 
     private void txtJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtJobActionPerformed
