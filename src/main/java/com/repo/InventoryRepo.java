@@ -649,6 +649,20 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    
+    public Mono<List<Trader>> getEmployee() {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getEmployee")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", ProUtil.getDepId())
+                .build())
+                .retrieve().bodyToFlux(Trader.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<Trader>> getSupplier() {
         return inventoryApi.get()

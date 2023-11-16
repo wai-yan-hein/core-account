@@ -74,12 +74,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
+import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
+import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
@@ -143,6 +145,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private CustomerSetup customerSetup;
     @Autowired
     private SupplierSetup supplierSetup;
+    @Autowired
+    private EmployeeSetup employeeSetup;
     @Autowired
     private OtherSetupMain otherSetupMain;
     @Autowired
@@ -418,12 +422,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 sale.initMain();
                 return sale;
             }
-            case "Order" -> {
-                order.setName(menuName);
-                order.setObserver(this);
-                order.setProgress(progress);
-                order.initMain();
-                return order;
+            case "Order", "Purchase Order" -> {
+                int type = getOrderType(menuName);
+                OrderDynamic orderDynamic = new OrderDynamic(type);
+                orderDynamic.setName(menuName);
+                orderDynamic.setInventoryRepo(inventoryRepo);
+                orderDynamic.setUserRepo(userRepo);
+                orderDynamic.setObserver(this);
+                orderDynamic.setProgress(progress);
+                orderDynamic.initMain();
+                return orderDynamic;
             }
             case "Sale By Batch" -> {
                 saleByBatch.setName(menuName);
@@ -541,6 +549,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 supplierSetup.setProgress(progress);
                 supplierSetup.initMain();
                 return supplierSetup;
+            }
+            case "Employee" -> {
+                employeeSetup.setName(menuName);
+                employeeSetup.setObserver(this);
+                employeeSetup.setProgress(progress);
+                employeeSetup.initMain();
+                return employeeSetup;
             }
             case "Other Setup" -> {
                 otherSetupMain.setName(menuName);
@@ -690,7 +705,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 b.initMain();
                 return b;
             }
-             case "Stock Consignor Payable" -> {
+            case "Stock Consignor Payable" -> {
                 StockPayable b = new StockPayable(StockPayable.SPCON);
                 b.setInventoryRepo(inventoryRepo);
                 b.setProgress(progress);
@@ -885,6 +900,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         };
     }
 
+    private int getOrderType(String menuName) {
+        return switch (menuName) {
+            case "Order" ->
+                SaleDynamic.WEIGHT;
+            case "Purchase Order" ->
+                SaleDynamic.EXPORT;
+            default ->
+                0;
+        };
+    }
+
     private int getOpeningType(String menuName) {
         return switch (menuName) {
             case "Stock Opening" ->
@@ -994,9 +1020,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         initUser();
         companyUserRoleAssign();
     }
-    private void initStockBalanceFrame(){
+
+    private void initStockBalanceFrame() {
         stockBalanceFrame = new StockBalanceFrame();
-        stockBalanceFrame.setInventoryRepo(inventoryRepo);        
+        stockBalanceFrame.setInventoryRepo(inventoryRepo);
     }
 
     private void initUser() {
