@@ -540,7 +540,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
             case EXPORT -> {
                 purExportTableModel.clear();
-                purchaseRiceTableModel.clearDelList();
+                purExportTableModel.clearDelList();
             }
         }
     }

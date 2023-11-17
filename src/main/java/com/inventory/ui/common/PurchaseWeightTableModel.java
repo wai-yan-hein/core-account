@@ -489,6 +489,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            addNewRow();
             fireTableDataChanged();
         }
     }
