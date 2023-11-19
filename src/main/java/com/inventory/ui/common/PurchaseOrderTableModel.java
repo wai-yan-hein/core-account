@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author DELL
  */
-public class OrderTableModel extends AbstractTableModel {
+public class PurchaseOrderTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(OrderTableModel.class);
+    private static final Logger log = LoggerFactory.getLogger(PurchaseOrderTableModel.class);
     private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit",
         "Order Qty", "Actual Qty", "Unit", "Price", "Amount"};
     private JTable parent;

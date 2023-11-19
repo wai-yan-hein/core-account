@@ -144,7 +144,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                         return Util1.toNull(record.getLength());
                     }
                     case 4 -> {
-                        return Util1.toNull( record.getWidth());
+                        return Util1.toNull(record.getWidth());
                     }
                     case 5 -> {
                         return record.getMPercent();
@@ -157,7 +157,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                         return record.getWeightUnit();
                     }
                     case 8 -> {
-                        return Util1.toNull( record.getQty());
+                        return Util1.toNull(record.getQty());
                     }
                     case 9 -> {
                         return record.getUnitCode();
@@ -310,7 +310,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
 
     private void assignLocation(PurHisDetail sd) {
         if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer =purchase.getLocationAutoCompleter();
+            LocationAutoCompleter completer = purchase.getLocationAutoCompleter();
             if (completer != null) {
                 Location l = completer.getLocation();
                 if (l != null) {
@@ -457,6 +457,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            addNewRow();
             fireTableDataChanged();
         }
     }

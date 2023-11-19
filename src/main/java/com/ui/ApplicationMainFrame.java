@@ -74,6 +74,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
+import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
@@ -81,7 +82,9 @@ import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
+import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.OpeningSetup;
+import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
 import com.ui.management.StockBalance;
@@ -142,6 +145,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private CustomerSetup customerSetup;
     @Autowired
     private SupplierSetup supplierSetup;
+    @Autowired
+    private EmployeeSetup employeeSetup;
+    @Autowired
+    private OutputCostSetup outputCostSetup;
     @Autowired
     private OtherSetupMain otherSetupMain;
     @Autowired
@@ -422,12 +429,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 sale.initMain();
                 return sale;
             }
-            case "Order" -> {
-                order.setName(menuName);
-                order.setObserver(this);
-                order.setProgress(progress);
-                order.initMain();
-                return order;
+            case "Order", "Purchase Order" -> {
+                int type = getOrderType(menuName);
+                OrderDynamic orderDynamic = new OrderDynamic(type);
+                orderDynamic.setName(menuName);
+                orderDynamic.setInventoryRepo(inventoryRepo);
+                orderDynamic.setUserRepo(userRepo);
+                orderDynamic.setObserver(this);
+                orderDynamic.setProgress(progress);
+                orderDynamic.initMain();
+                return orderDynamic;
             }
             case "Sale By Batch" -> {
                 saleByBatch.setName(menuName);
@@ -545,6 +556,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 supplierSetup.setProgress(progress);
                 supplierSetup.initMain();
                 return supplierSetup;
+            }
+            case "Employee" -> {
+                employeeSetup.setName(menuName);
+                employeeSetup.setObserver(this);
+                employeeSetup.setProgress(progress);
+                employeeSetup.initMain();
+                return employeeSetup;
+            }
+            case "Output Cost" -> {
+                outputCostSetup.setName(menuName);
+                outputCostSetup.setObserver(this);
+                outputCostSetup.setProgress(progress);
+                outputCostSetup.initMain();
+                return outputCostSetup;
             }
             case "Other Setup" -> {
                 otherSetupMain.setName(menuName);
@@ -894,6 +919,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.EXPORT;
             case "Sale Rice" ->
                 SaleDynamic.RICE;
+            default ->
+                0;
+        };
+    }
+
+    private int getOrderType(String menuName) {
+        return switch (menuName) {
+            case "Order" ->
+                SaleDynamic.WEIGHT;
+            case "Purchase Order" ->
+                SaleDynamic.EXPORT;
             default ->
                 0;
         };
