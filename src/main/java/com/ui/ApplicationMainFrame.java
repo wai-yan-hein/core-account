@@ -83,6 +83,7 @@ import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.OpeningSetup;
+import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
 import com.ui.management.StockBalance;
@@ -147,6 +148,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private SupplierSetup supplierSetup;
     @Autowired
     private EmployeeSetup employeeSetup;
+    @Autowired
+    private OutputCostSetup outputCostSetup;
     @Autowired
     private OtherSetupMain otherSetupMain;
     @Autowired
@@ -556,6 +559,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 employeeSetup.setProgress(progress);
                 employeeSetup.initMain();
                 return employeeSetup;
+            }
+            case "Output Cost" -> {
+                outputCostSetup.setName(menuName);
+                outputCostSetup.setObserver(this);
+                outputCostSetup.setProgress(progress);
+                outputCostSetup.initMain();
+                return outputCostSetup;
             }
             case "Other Setup" -> {
                 otherSetupMain.setName(menuName);

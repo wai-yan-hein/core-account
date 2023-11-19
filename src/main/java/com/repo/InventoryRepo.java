@@ -50,6 +50,8 @@ import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.OrderStatus;
 import com.inventory.model.OrderStatusKey;
+import com.inventory.model.OutputCost;
+import com.inventory.model.OutputCostKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PaymentHis;
 import com.inventory.model.PaymentHisDetail;
@@ -649,7 +651,20 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
+    public Mono<List<OutputCost>> getOutputCost() {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getOutputCost")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(OutputCost.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Trader>> getEmployee() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getEmployee")
@@ -1463,6 +1478,23 @@ public class InventoryRepo {
                 .doOnSuccess((s) -> {
                     if (localDatabase) {
                         h2Repo.save(s);
+                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<OutputCost> saveOutputCost(OutputCost t) {
+        return inventoryApi.post()
+                .uri("/setup/saveOutputCost")
+                .body(Mono.just(t), OutputCost.class)
+                .retrieve()
+                .bodyToMono(OutputCost.class)
+                .doOnSuccess((s) -> {
+                    if (localDatabase) {
+//                        h2Repo.save(s);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -2333,6 +2365,18 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToFlux(General.class)
                 .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Integer> deleteOutputCost(OutputCostKey key) {
+        return inventoryApi.post()
+                .uri("/setup/deleteOutputCost")
+                .body(Mono.just(key), OutputCostKey.class)
+                .retrieve()
+                .bodyToMono(Integer.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
