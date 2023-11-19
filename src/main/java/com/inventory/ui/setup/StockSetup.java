@@ -28,6 +28,7 @@ import com.inventory.model.StockFormula;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockUnit;
+import com.inventory.model.UnitRelation;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.StockTableModel;
 import com.inventory.ui.setup.dialog.CategorySetupDialog;
@@ -72,6 +73,7 @@ import org.apache.commons.csv.CSVPrinter;
 @Slf4j
 public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl, SelectionObserver {
 
+    private boolean noUnit = false;
     private int selectRow = -1;
     private CategorySetupDialog categorySetupDailog;
     private StockTypeSetupDialog typeSetupDialog;
@@ -139,9 +141,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     /**
      * Creates new form StockSetup
+     *
+     * @param noUnit
      */
-    public StockSetup() {
+    public StockSetup(boolean noUnit) {
+        this.noUnit = noUnit;
         initComponents();
+        panelUnit.setVisible(!noUnit);
         initKeyListener();
         initFocusListener();
     }
@@ -196,13 +202,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setModel(stockTableModel);
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(2).setPreferredWidth(300);
-        tblStock.getColumnModel().getColumn(3).setPreferredWidth(10);
-        tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(50);//code
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(200);//name
+        tblStock.getColumnModel().getColumn(3).setPreferredWidth(150);//group
+        tblStock.getColumnModel().getColumn(4).setPreferredWidth(150);//cat
+        tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);//weight
+        tblStock.getColumnModel().getColumn(6).setPreferredWidth(1);//active
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
+        tblStock.setDefaultRenderer(Double.class, new TableCellRender());
         tblStock.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
                 if (tblStock.getSelectedRow() >= 0) {
@@ -382,6 +391,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private boolean isValidEntry() {
         boolean status = true;
+        StockUnit purUnit = purUnitCompleter.getStockUnit();
+        StockUnit saleUnit = saleUnitCompleter.getStockUnit();
+        StockUnit weightUnit = wlUnitCompleter.getStockUnit();
+        UnitRelation relation = relationAutoCompleter.getRelation();
+        StockFormula formula = stockFormulaCompleter.getStockFormula();
+        Category category = categoryAutoCompleter.getCategory();
+        StockBrand brand = brandAutoCompleter.getBrand();
+        DepartmentUser department = (DepartmentUser) cboDept.getSelectedItem();
         if (txtStockName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Stock Name must not be blank.",
                     "Stock name.", JOptionPane.ERROR_MESSAGE);
@@ -392,18 +409,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     "Stock Type.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtBrand.requestFocus();
-        } else if (purUnitCompleter.getStockUnit() == null) {
+        } else if (purUnit == null && !noUnit) {
             JOptionPane.showMessageDialog(this, "Purchase Unit  cannot be blank.",
-                    "Stock Unit Pattern.", JOptionPane.ERROR_MESSAGE);
+                    "Purhcase Unit.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtPurUnit.requestFocus();
-        } else if (saleUnitCompleter.getStockUnit() == null) {
+        } else if (saleUnit == null && !noUnit) {
             JOptionPane.showMessageDialog(this, "Sale Unit  cannot be blank.",
                     "Sale Unit", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtSaleUnit.requestFocus();
-        } else if (relationAutoCompleter.getRelation() == null) {
-            JOptionPane.showMessageDialog(this, "Relation Unit  cannot be blank.",
+        } else if (relation == null && !noUnit) {
+            JOptionPane.showMessageDialog(this, "Relation Unit cannot be blank.",
                     "Stock Relation.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtRelation.requestFocus();
@@ -413,46 +430,43 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             status = false;
             cboDept.requestFocus();
         } else {
+            if (ProUtil.isUseWeight() && weightUnit == null && !noUnit) {
+                int yn = JOptionPane.showConfirmDialog(this, "Weight Unit can not be blank.",
+                        "Weight Unit.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yn == JOptionPane.NO_OPTION) {
+                    txtWeightUnit.requestFocus();
+                    return false;
+                }
+            }
             stock.setUserCode(txtUserCode.getText().trim());
-            stock.setTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
             stock.setStockName(txtStockName.getText().trim());
-            Category c = categoryAutoCompleter.getCategory();
-            if (c != null) {
-                stock.setCatCode(c.getKey().getCatCode());
-            }
-            StockBrand b = brandAutoCompleter.getBrand();
-            if (b != null) {
-                stock.setBrandCode(b.getKey().getBrandCode());
-            }
+            stock.setTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
+            stock.setGroupName(typeAutoCompleter.getStockType().getStockTypeName());
+            stock.setCatCode(category == null ? null : category.getKey().getCatCode());
+            stock.setCatName(category == null ? null : category.getCatName());
+            stock.setBrandCode(brand == null ? null : brand.getKey().getBrandCode());
+            stock.setBrandName(brand == null ? null : brand.getBrandName());
             stock.setActive(chkActive.isSelected());
             stock.setBarcode(txtBarCode.getText().trim());
-            stock.setWeight(Util1.getFloat(txtWt.getText()));
-            stock.setPurUnitCode(purUnitCompleter.getStockUnit().getKey().getUnitCode());
-            stock.setSaleUnitCode(saleUnitCompleter.getStockUnit().getKey().getUnitCode());
-            stock.setRelCode(relationAutoCompleter.getRelation().getKey().getRelCode());
-            StockUnit unit = wlUnitCompleter.getStockUnit();
-            if (unit != null) {
-                stock.setWeightUnit(unit.getKey().getUnitCode());
-            }
-            StockFormula f = stockFormulaCompleter.getStockFormula();
-            if (f != null) {
-                stock.setFormulaCode(f.getKey().getFormulaCode());
-            }
-            stock.setPurPrice(Util1.getFloat(txtPurPrice.getText()));
-            stock.setSalePriceN(Util1.getFloat(txtSalePrice.getText()));
-            stock.setSalePriceA(Util1.getFloat(txtSalePriceA.getText()));
-            stock.setSalePriceB(Util1.getFloat(txtSalePriceB.getText()));
-            stock.setSalePriceC(Util1.getFloat(txtSalePriceC.getText()));
-            stock.setSalePriceD(Util1.getFloat(txtSalePriceD.getText()));
-            stock.setSalePriceE(Util1.getFloat(txtSalePriceE.getText()));
+            stock.setWeight(Util1.getDouble(txtWt.getText()));
+            stock.setPurUnitCode(purUnit == null ? null : purUnit.getKey().getUnitCode());
+            stock.setSaleUnitCode(saleUnit == null ? null : saleUnit.getKey().getUnitCode());
+            stock.setRelCode(relation == null ? null : relation.getKey().getRelCode());
+            stock.setWeightUnit(weightUnit == null ? null : weightUnit.getKey().getUnitCode());
+            stock.setFormulaCode(formula == null ? null : formula.getKey().getFormulaCode());
+            stock.setPurPrice(Util1.getDouble(txtPurPrice.getText()));
+            stock.setSalePriceN(Util1.getDouble(txtSalePrice.getText()));
+            stock.setSalePriceA(Util1.getDouble(txtSalePriceA.getText()));
+            stock.setSalePriceB(Util1.getDouble(txtSalePriceB.getText()));
+            stock.setSalePriceC(Util1.getDouble(txtSalePriceC.getText()));
+            stock.setSalePriceD(Util1.getDouble(txtSalePriceD.getText()));
+            stock.setSalePriceE(Util1.getDouble(txtSalePriceE.getText()));
             stock.setCalculate(chkCal.isSelected());
             stock.setExplode(chkEx.isSelected());
             stock.setPurAmt(Util1.getDouble(txtPurAmt.getText()));
             stock.setSaleAmt(Util1.getDouble(txtSaleAmt.getText()));
             stock.setPurQty(Util1.getDouble(txtPurQty.getText()));
-            if (cboDept.getSelectedItem() instanceof DepartmentUser dep) {
-                stock.setDeptId(dep.getKey().getDeptId());
-            }
+            stock.setDeptId(department == null ? null : department.getKey().getDeptId());
             if (lblStatus.getText().equals("NEW")) {
                 StockKey key = new StockKey();
                 key.setStockCode(null);
@@ -471,18 +485,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void saveStock() {
         if (isValidEntry()) {
-            if (ProUtil.isUseWeight() && wlUnitCompleter.getStockUnit() == null) {
-                int yn = JOptionPane.showConfirmDialog(this, "Weight Unit can not be blank.",
-                        "Weight Unit.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (yn == JOptionPane.NO_OPTION) {
-                    txtWeightUnit.requestFocus();
-                    return;
-                }
-            }
             observer.selected("save", false);
             progress.setIndeterminate(true);
             inventoryRepo.saveStock(stock).doOnSuccess((t) -> {
                 if (t.getKey().getStockCode() != null) {
+                    t.setGroupName(stock.getGroupName());
+                    t.setCatName(stock.getCatName());
                     if (lblStatus.getText().equals("NEW")) {
                         stockTableModel.addStock(t);
                     } else {
@@ -676,9 +684,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
-        lblRecord = new javax.swing.JTextField();
-        jLabel19 = new javax.swing.JLabel();
-        txtFilter = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -693,8 +698,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         btnAddBrand = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         txtBarCode = new javax.swing.JTextField();
-        chkActive = new javax.swing.JCheckBox();
-        lblStatus = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -702,26 +705,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
         txtSalePrice = new javax.swing.JTextField();
         txtSalePriceA = new javax.swing.JTextField();
         txtSalePriceB = new javax.swing.JTextField();
         txtSalePriceC = new javax.swing.JTextField();
         txtSalePriceD = new javax.swing.JTextField();
         txtSalePriceE = new javax.swing.JTextField();
-        txtSaleUnit = new javax.swing.JTextField();
         jLabel23 = new javax.swing.JLabel();
         txtSaleAmt = new javax.swing.JTextField();
-        btnAddItemType1 = new javax.swing.JButton();
         txtBrand = new javax.swing.JTextField();
         txtCat = new javax.swing.JTextField();
         txtType = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
-        txtPurUnit = new javax.swing.JTextField();
-        btnUnit = new javax.swing.JButton();
-        jLabel20 = new javax.swing.JLabel();
-        txtWeightUnit = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
         txtWt = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
@@ -732,17 +727,29 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtPurQty = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtStockCode = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
-        txtRelation = new javax.swing.JTextField();
-        btnAddRelation = new javax.swing.JButton();
-        chkCal = new javax.swing.JCheckBox();
-        chkEx = new javax.swing.JCheckBox();
-        btnDownload = new javax.swing.JButton();
-        chkDeleted = new javax.swing.JCheckBox();
         jLabel30 = new javax.swing.JLabel();
         cboDept = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
         txtFormula = new javax.swing.JTextField();
+        panelUnit = new javax.swing.JPanel();
+        jLabel10 = new javax.swing.JLabel();
+        txtPurUnit = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        txtWeightUnit = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        txtSaleUnit = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtRelation = new javax.swing.JTextField();
+        btnUnit = new javax.swing.JButton();
+        btnAddRelation = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        lblStatus = new javax.swing.JLabel();
+        btnDownload = new javax.swing.JButton();
+        chkEx = new javax.swing.JCheckBox();
+        btnAddItemType1 = new javax.swing.JButton();
+        chkCal = new javax.swing.JCheckBox();
+        chkDeleted = new javax.swing.JCheckBox();
+        chkActive = new javax.swing.JCheckBox();
         jPanel5 = new javax.swing.JPanel();
         jLabel25 = new javax.swing.JLabel();
         txtGroup1 = new javax.swing.JTextField();
@@ -754,7 +761,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel28 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
         cboDept1 = new javax.swing.JComboBox<>();
+        jPanel6 = new javax.swing.JPanel();
         jLabel22 = new javax.swing.JLabel();
+        txtFilter = new javax.swing.JTextField();
+        lblRecord = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -777,21 +788,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setName("tblStock"); // NOI18N
         tblStock.setRowHeight(Global.tblRowHeight);
         jScrollPane1.setViewportView(tblStock);
-
-        lblRecord.setEditable(false);
-        lblRecord.setFont(Global.lableFont);
-        lblRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-        lblRecord.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-
-        jLabel19.setFont(Global.lableFont);
-        jLabel19.setText("Record :");
-
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel1.setPreferredSize(new java.awt.Dimension(57, 16));
@@ -882,14 +878,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
-        chkActive.setFont(Global.lableFont);
-        chkActive.setSelected(true);
-        chkActive.setText("Active");
-        chkActive.setName("chkActive"); // NOI18N
-
-        lblStatus.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
-        lblStatus.setText("NEW");
-
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sale Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
 
         jLabel11.setFont(Global.lableFont);
@@ -915,9 +903,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel18.setFont(Global.lableFont);
         jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel18.setText("Sale Price E");
-
-        jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Sale Unit");
 
         txtSalePrice.setFont(Global.textFont);
         txtSalePrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -983,20 +968,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
-        txtSaleUnit.setFont(Global.textFont);
-        txtSaleUnit.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-        txtSaleUnit.setName("txtSaleUnit"); // NOI18N
-        txtSaleUnit.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtSaleUnitFocusGained(evt);
-            }
-        });
-        txtSaleUnit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtSaleUnitActionPerformed(evt);
-            }
-        });
-
         jLabel23.setFont(Global.lableFont);
         jLabel23.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel23.setText("Sale Amount");
@@ -1015,93 +986,84 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(4, 4, 4)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(1, 1, 1)
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(5, 5, 5)
-                                .addComponent(txtSalePrice))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtSalePriceB)
-                                    .addComponent(txtSalePriceA)))))
+                            .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+                        .addContainerGap()
+                        .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(txtSalePrice))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSaleUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtSalePriceB, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
+                            .addComponent(txtSalePriceA)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSalePriceE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSalePriceC, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE))
+                        .addComponent(txtSalePriceC, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                            .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSalePriceD)
-                            .addComponent(txtSalePriceE)))
+                        .addComponent(txtSalePriceD))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSaleAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)))
+                        .addComponent(txtSaleAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel11, jLabel12, jLabel14, jLabel15});
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel11, jLabel14, jLabel15});
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel16, jLabel17, jLabel18});
 
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel12)
-                    .addComponent(txtSaleUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel23)
-                    .addComponent(txtSaleAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel23)
+                            .addComponent(txtSaleAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel16)
+                            .addComponent(txtSalePriceC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel17)
+                            .addComponent(txtSalePriceD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(txtSalePrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel14)
+                            .addComponent(txtSalePriceA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel15)
+                            .addComponent(txtSalePriceB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel11)
-                    .addComponent(txtSalePrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel16)
-                    .addComponent(txtSalePriceC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel14)
-                    .addComponent(txtSalePriceA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel17)
-                    .addComponent(txtSalePriceD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15)
-                    .addComponent(txtSalePriceB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel18)
                     .addComponent(txtSalePriceE, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 6, Short.MAX_VALUE))
         );
-
-        btnAddItemType1.setFont(Global.lableFont);
-        btnAddItemType1.setText("Import");
-        btnAddItemType1.setName("btnAddItemType"); // NOI18N
-        btnAddItemType1.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        btnAddItemType1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnAddItemType1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddItemType1ActionPerformed(evt);
-            }
-        });
 
         txtBrand.setFont(Global.textFont);
         txtBrand.setName("txtBrand"); // NOI18N
@@ -1118,41 +1080,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         });
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Purchase Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
-
-        jLabel10.setFont(Global.lableFont);
-        jLabel10.setText("Purchase Unit");
-
-        txtPurUnit.setFont(Global.textFont);
-        txtPurUnit.setToolTipText("Purchase Price");
-        txtPurUnit.setName("txtPurUnit"); // NOI18N
-        txtPurUnit.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtPurUnitFocusGained(evt);
-            }
-        });
-
-        btnUnit.setBackground(Global.selectionColor);
-        btnUnit.setFont(Global.lableFont);
-        btnUnit.setForeground(new java.awt.Color(255, 255, 255));
-        btnUnit.setText("...");
-        btnUnit.setName("btnUnit"); // NOI18N
-        btnUnit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUnitActionPerformed(evt);
-            }
-        });
-
-        jLabel20.setFont(Global.lableFont);
-        jLabel20.setText("Weight Unit");
-
-        txtWeightUnit.setFont(Global.textFont);
-        txtWeightUnit.setToolTipText("Purchase Price");
-        txtWeightUnit.setName("txtPurUnit"); // NOI18N
-        txtWeightUnit.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtWeightUnitFocusGained(evt);
-            }
-        });
 
         jLabel21.setFont(Global.lableFont);
         jLabel21.setText("Weight");
@@ -1219,32 +1146,21 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtWt)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtWeightUnit, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(txtPurPrice)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel31)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtPurQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(txtPurAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE))))
+                    .addComponent(jLabel13)
+                    .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtPurAmt, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtPurPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel31, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtPurQty, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                    .addComponent(txtWt))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1252,27 +1168,19 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtPurQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtPurQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel31))
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel10)
-                        .addComponent(txtPurUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnUnit)
                         .addComponent(txtPurPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel13)))
+                        .addComponent(jLabel13)
+                        .addComponent(jLabel31)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel24)
-                        .addComponent(txtPurAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel21)
+                        .addComponent(txtWt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel20)
-                        .addComponent(txtWeightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel21)
-                    .addComponent(txtWt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel24)
+                        .addComponent(txtPurAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1292,61 +1200,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 txtStockCodeActionPerformed(evt);
             }
         });
-
-        jLabel8.setFont(Global.lableFont);
-        jLabel8.setText("Unit Relation");
-
-        txtRelation.setFont(Global.textFont);
-        txtRelation.setName("txtRelation"); // NOI18N
-        txtRelation.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtRelationFocusGained(evt);
-            }
-        });
-        txtRelation.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtRelationActionPerformed(evt);
-            }
-        });
-
-        btnAddRelation.setBackground(Global.selectionColor);
-        btnAddRelation.setFont(Global.lableFont);
-        btnAddRelation.setForeground(new java.awt.Color(255, 255, 255));
-        btnAddRelation.setText("...");
-        btnAddRelation.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAddRelation.setName("btnAddBrand"); // NOI18N
-        btnAddRelation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnAddRelation.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddRelationActionPerformed(evt);
-            }
-        });
-
-        chkCal.setFont(Global.lableFont);
-        chkCal.setSelected(true);
-        chkCal.setText("Calulate Stock");
-        chkCal.setName("chkActive"); // NOI18N
-
-        chkEx.setFont(Global.lableFont);
-        chkEx.setSelected(true);
-        chkEx.setText("Explode");
-        chkEx.setName("chkActive"); // NOI18N
-
-        btnDownload.setFont(Global.lableFont);
-        btnDownload.setText("Download");
-        btnDownload.setName("btnAddItemType"); // NOI18N
-        btnDownload.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        btnDownload.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnDownload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDownloadActionPerformed(evt);
-            }
-        });
-
-        chkDeleted.setFont(Global.lableFont);
-        chkDeleted.setSelected(true);
-        chkDeleted.setText("Deleted");
-        chkDeleted.setName("chkActive"); // NOI18N
 
         jLabel30.setFont(Global.lableFont);
         jLabel30.setText("Department");
@@ -1369,6 +1222,223 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
+        panelUnit.setBorder(javax.swing.BorderFactory.createTitledBorder("Unit"));
+
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Purchase Unit");
+
+        txtPurUnit.setFont(Global.textFont);
+        txtPurUnit.setToolTipText("Purchase Price");
+        txtPurUnit.setName("txtPurUnit"); // NOI18N
+        txtPurUnit.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtPurUnitFocusGained(evt);
+            }
+        });
+
+        jLabel20.setFont(Global.lableFont);
+        jLabel20.setText("Weight Unit");
+
+        txtWeightUnit.setFont(Global.textFont);
+        txtWeightUnit.setToolTipText("Purchase Price");
+        txtWeightUnit.setName("txtPurUnit"); // NOI18N
+        txtWeightUnit.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtWeightUnitFocusGained(evt);
+            }
+        });
+
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Sale Unit");
+
+        txtSaleUnit.setFont(Global.textFont);
+        txtSaleUnit.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        txtSaleUnit.setName("txtSaleUnit"); // NOI18N
+        txtSaleUnit.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtSaleUnitFocusGained(evt);
+            }
+        });
+        txtSaleUnit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtSaleUnitActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Unit Relation");
+
+        txtRelation.setFont(Global.textFont);
+        txtRelation.setName("txtRelation"); // NOI18N
+        txtRelation.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtRelationFocusGained(evt);
+            }
+        });
+        txtRelation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtRelationActionPerformed(evt);
+            }
+        });
+
+        btnUnit.setBackground(Global.selectionColor);
+        btnUnit.setFont(Global.lableFont);
+        btnUnit.setForeground(new java.awt.Color(255, 255, 255));
+        btnUnit.setText("...");
+        btnUnit.setName("btnUnit"); // NOI18N
+        btnUnit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUnitActionPerformed(evt);
+            }
+        });
+
+        btnAddRelation.setBackground(Global.selectionColor);
+        btnAddRelation.setFont(Global.lableFont);
+        btnAddRelation.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddRelation.setText("...");
+        btnAddRelation.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAddRelation.setName("btnAddBrand"); // NOI18N
+        btnAddRelation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAddRelation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddRelationActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout panelUnitLayout = new javax.swing.GroupLayout(panelUnit);
+        panelUnit.setLayout(panelUnitLayout);
+        panelUnitLayout.setHorizontalGroup(
+            panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelUnitLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel10))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtPurUnit)
+                    .addComponent(txtWeightUnit))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtSaleUnit)
+                    .addComponent(txtRelation))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                    .addComponent(btnAddRelation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        panelUnitLayout.setVerticalGroup(
+            panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelUnitLayout.createSequentialGroup()
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(txtPurUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12)
+                    .addComponent(txtSaleUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnUnit))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelUnitLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel20)
+                        .addComponent(txtWeightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtRelation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel8))
+                    .addComponent(btnAddRelation))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        lblStatus.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        lblStatus.setText("NEW");
+
+        btnDownload.setFont(Global.lableFont);
+        btnDownload.setText("Download");
+        btnDownload.setName("btnAddItemType"); // NOI18N
+        btnDownload.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        btnDownload.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnDownload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDownloadActionPerformed(evt);
+            }
+        });
+
+        chkEx.setFont(Global.lableFont);
+        chkEx.setSelected(true);
+        chkEx.setText("Explode");
+        chkEx.setName("chkActive"); // NOI18N
+
+        btnAddItemType1.setFont(Global.lableFont);
+        btnAddItemType1.setText("Import");
+        btnAddItemType1.setName("btnAddItemType"); // NOI18N
+        btnAddItemType1.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        btnAddItemType1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAddItemType1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddItemType1ActionPerformed(evt);
+            }
+        });
+
+        chkCal.setFont(Global.lableFont);
+        chkCal.setSelected(true);
+        chkCal.setText("Calulate Stock");
+        chkCal.setName("chkActive"); // NOI18N
+
+        chkDeleted.setFont(Global.lableFont);
+        chkDeleted.setSelected(true);
+        chkDeleted.setText("Deleted");
+        chkDeleted.setName("chkActive"); // NOI18N
+
+        chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
+        chkActive.setText("Active");
+        chkActive.setName("chkActive"); // NOI18N
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(chkEx)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkCal)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkActive)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkDeleted)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnDownload)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnAddItemType1)
+                .addContainerGap())
+        );
+
+        jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAddItemType1, btnDownload});
+
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnAddItemType1)
+                    .addComponent(chkActive)
+                    .addComponent(lblStatus)
+                    .addComponent(btnDownload)
+                    .addComponent(chkDeleted)
+                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(chkEx, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(chkCal, javax.swing.GroupLayout.Alignment.LEADING)))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1376,20 +1446,27 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(panelUnit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel6)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtStockCode))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel1)
+                                    .addComponent(txtStockCode)
+                                    .addComponent(txtUserCode)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel2)
-                                    .addComponent(jLabel5))
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtFormula)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(txtBrand)
@@ -1397,21 +1474,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(btnAddItemType)
-                                            .addComponent(btnAddBrand, javax.swing.GroupLayout.Alignment.TRAILING)))
-                                    .addComponent(txtUserCode)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtRelation)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnAddRelation)))
+                                            .addComponent(btnAddBrand, javax.swing.GroupLayout.Alignment.TRAILING))))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel30, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel30, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -1420,30 +1489,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                                 .addComponent(btnAddCategory))
                             .addComponent(txtStockName)
                             .addComponent(txtBarCode, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cboDept, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtFormula, javax.swing.GroupLayout.Alignment.LEADING)))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
-                        .addComponent(chkEx)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(chkCal)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(chkActive)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(chkDeleted)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnDownload)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAddItemType1)))
+                            .addComponent(cboDept, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel2, jLabel3, jLabel30, jLabel4, jLabel5, jLabel6, jLabel7, jLabel8});
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAddItemType1, btnDownload});
-
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -1457,7 +1506,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
-                        .addGap(9, 9, 9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnAddItemType)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1468,13 +1517,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             .addComponent(btnAddBrand)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel5))))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel30)
-                            .addComponent(cboDept, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel5)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel9)
+                            .addComponent(txtFormula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(cboDept, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtStockName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1485,35 +1537,19 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             .addComponent(btnAddCategory))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel7)
-                            .addComponent(txtBarCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtRelation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel8))
-                    .addComponent(btnAddRelation)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel9)
-                        .addComponent(txtFormula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(txtBarCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7)))
+                    .addComponent(jLabel30, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnAddItemType1)
-                    .addComponent(chkActive)
-                    .addComponent(lblStatus)
-                    .addComponent(btnDownload)
-                    .addComponent(chkDeleted)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(chkEx, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(chkCal, javax.swing.GroupLayout.Alignment.LEADING)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(panelUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(76, Short.MAX_VALUE))
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel2, jLabel5, jLabel6, jLabel8});
 
         jScrollPane2.setViewportView(jPanel1);
 
@@ -1557,23 +1593,23 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addContainerGap()
                 .addComponent(jLabel25)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                .addComponent(txtGroup1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel26)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCat1, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                .addComponent(txtCat1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel27)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtBrand1, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                .addComponent(txtBrand1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel28)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtStock1, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                .addComponent(txtStock1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel29)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cboDept1, 0, 82, Short.MAX_VALUE)
+                .addComponent(cboDept1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -1595,8 +1631,52 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
         jLabel22.setFont(Global.lableFont);
         jLabel22.setText("Search Contains :");
+
+        txtFilter.setFont(Global.textFont);
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFilterKeyReleased(evt);
+            }
+        });
+
+        lblRecord.setEditable(false);
+        lblRecord.setFont(Global.lableFont);
+        lblRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        lblRecord.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
+        jLabel19.setFont(Global.lableFont);
+        jLabel19.setText("Record :");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel19)
+                .addGap(18, 18, 18)
+                .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel22)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtFilter)
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel19)
+                    .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel22))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -1604,20 +1684,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel19)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel22)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFilter))
-                    .addComponent(jScrollPane1)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 683, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1628,13 +1700,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 378, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel19)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel22))))
+                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1873,11 +1941,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField lblRecord;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JPanel panelUnit;
     private javax.swing.JTable tblStock;
     private javax.swing.JTextField txtBarCode;
     private javax.swing.JTextField txtBrand;

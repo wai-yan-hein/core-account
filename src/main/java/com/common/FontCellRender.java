@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -32,6 +33,7 @@ public class FontCellRender extends DefaultTableCellRenderer {
         if (isSelected) {
             c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         }
+        ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
         ((JLabel) c).setFont(Global.lableFont);
         return c;
     }

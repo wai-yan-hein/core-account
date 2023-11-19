@@ -47,6 +47,10 @@ public class StockType {
     private Integer deptId;
     @Column(name = "finished_group")
     private boolean finishedGroup;
+    @Column(name = "deleted")
+    private boolean deleted;
+    @Column(name = "active")
+    private boolean active;
 
     public StockType() {
     }

@@ -58,6 +58,12 @@ public class PurHisDetail implements Serializable {
     private double totalWeight;
     @Column(name = "m_percent")
     private String mPercent;
+    @Column(name = "wet")
+    private double wet;
+    @Column(name = "rice")
+    private double rice;
+    @Column(name = "bag")
+    private double bag;
     @Transient
     private double purQty;
     @Transient

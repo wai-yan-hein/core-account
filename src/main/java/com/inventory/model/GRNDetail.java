@@ -29,17 +29,17 @@ public class GRNDetail {
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty")
-    private Float qty;
+    private Double qty;
     @Column(name = "unit")
     private String unit;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "weight")
-    private Float weight;
+    private Double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")
-    private Float totalWeight;
+    private Double totalWeight;
     @Transient
     private String userCode;
     @Transient
@@ -49,7 +49,7 @@ public class GRNDetail {
     @Transient
     private String locName;
     @Transient
-    private Float stdWeight;
+    private Double stdWeight;
     @Transient
     private Stock stock;
 }

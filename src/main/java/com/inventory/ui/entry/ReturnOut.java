@@ -206,7 +206,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblRet.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblRet.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblRet.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblRet.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
 

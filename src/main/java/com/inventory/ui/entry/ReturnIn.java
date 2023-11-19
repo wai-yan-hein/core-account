@@ -200,7 +200,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblRet.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblRet.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblRet.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblRet.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblRet.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

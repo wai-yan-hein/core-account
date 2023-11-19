@@ -51,24 +51,24 @@ public class Stock {
     @Column(name = "short_name")
     private String shortName;
     @Column(name = "pur_price")
-    private Float purPrice;
+    private Double purPrice;
     @Temporal(TemporalType.DATE)
     @Column(name = "licence_exp_date")
     private Date expireDate;
     @Column(name = "remark")
     private String remark;
     @Column(name = "sale_price_n")
-    private Float salePriceN;
+    private Double salePriceN;
     @Column(name = "sale_price_a")
-    private Float salePriceA;
+    private Double salePriceA;
     @Column(name = "sale_price_b")
-    private Float salePriceB;
+    private Double salePriceB;
     @Column(name = "sale_price_c")
-    private Float salePriceC;
+    private Double salePriceC;
     @Column(name = "sale_price_d")
-    private Float salePriceD;
+    private Double salePriceD;
     @Column(name = "sale_price_e")
-    private Float salePriceE;
+    private Double salePriceE;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
@@ -90,7 +90,7 @@ public class Stock {
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "weight")
-    private Float weight;
+    private Double weight;
     @Column(name = "favorite")
     private boolean favorite;
     @Column(name = "dept_id")
@@ -107,6 +107,8 @@ public class Stock {
     private Double purQty;
     @Column(name = "sale_amt")
     private double saleAmt;
+    @Column(name = "sale_qty")
+    private Double saleQty;
     private transient String relName;
     private transient String groupName;
     private transient String brandName;

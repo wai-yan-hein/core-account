@@ -136,8 +136,8 @@ public class ReorderTableModel extends AbstractTableModel {
                         }
                     }
                     case 3 -> {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            p.setMinQty(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            p.setMinQty(Util1.getDouble(value));
                             p.setMinUnitCode(getPurUnit(p.getKey().getStockCode()));
                             table.setColumnSelectionInterval(3, 3);
                         } else {
@@ -151,8 +151,8 @@ public class ReorderTableModel extends AbstractTableModel {
                         }
                     }
                     case 5 -> {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            p.setMaxQty(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            p.setMaxQty(Util1.getDouble(value));
                             p.setMaxUnitCode(getPurUnit(p.getKey().getStockCode()));
                             table.setColumnSelectionInterval(5, 5);
                         } else {
@@ -188,8 +188,8 @@ public class ReorderTableModel extends AbstractTableModel {
         return inventoryRepo.findStock(stockCode).block().getPurUnitCode();
     }
 
-    private float getSmallQty(String stockCode, String unit) {
-        float qty = 0.0f;
+    private double getSmallQty(String stockCode, String unit) {
+        double qty = 0.0f;
         if (!Objects.isNull(stockCode) && !Objects.isNull(unit)) {
             qty = inventoryRepo.getSmallQty(stockCode, unit).block().getSmallQty();
         }
@@ -197,9 +197,9 @@ public class ReorderTableModel extends AbstractTableModel {
     }
 
     private int getPosition(ReorderLevel rl) {
-        float balQty = rl.getBalSmallQty();
-        float minQty = rl.getMinSmallQty();
-        float maxQty = rl.getMaxSmallQty();
+        double balQty = rl.getBalSmallQty();
+        double minQty = rl.getMinSmallQty();
+        double maxQty = rl.getMaxSmallQty();
         if (balQty < minQty) {
             return 1;
         } else if (balQty > minQty) {

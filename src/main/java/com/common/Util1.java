@@ -5,7 +5,6 @@
 package com.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.myanmartools.TransliterateZ2U;
@@ -58,10 +57,8 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 
 /**
@@ -491,7 +488,7 @@ public class Util1 {
     }
 
     public static Double getDouble(Object number) {
-        if (number == null) {
+        if (Util1.isNullOrEmpty(number)) {
             return 0.0; // Return default value if input is null
         }
         String str = number.toString().trim().replace(",", "");
@@ -516,6 +513,10 @@ public class Util1 {
             default ->
                 number;
         };
+    }
+
+    public static int roundDownToNearest100(int number) {
+        return (number / 100) * 100;
     }
 
     public static double round1(double number) {
@@ -1262,4 +1263,23 @@ public class Util1 {
         return input;
     }
 
+    public static String getDate(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return ""; // or handle null as needed
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Global.dateFormat);
+        return localDateTime.format(formatter);
+    }
+
+    public static String getTime(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return ""; // or handle null as needed
+        }
+        LocalTime time = localDateTime.toLocalTime();
+
+        // Format the LocalTime using the specified pattern
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
+        String formattedTime = time.format(formatter);
+        return formattedTime;
+    }
 }

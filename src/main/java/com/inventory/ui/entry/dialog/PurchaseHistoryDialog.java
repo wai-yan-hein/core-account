@@ -133,12 +133,12 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
-        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
-        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
-        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(15);
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
+        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(70);
+        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
+        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(150);
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(80);
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(80);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -173,7 +173,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
-        filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());

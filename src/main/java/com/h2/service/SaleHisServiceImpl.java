@@ -125,7 +125,7 @@ public class SaleHisServiceImpl implements SaleHisService {
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
-        String cusCode = Util1.isNull(filter.getCusCode(), "-");
+        String cusCode = Util1.isNull(filter.getTraderCode(), "-");
         String remark = Util1.isNull(filter.getRemark(), "-");
         String stockCode = Util1.isNull(filter.getStockCode(), "-");
         String saleManCode = Util1.isNull(filter.getSaleManCode(), "-");

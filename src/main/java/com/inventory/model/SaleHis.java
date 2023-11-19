@@ -10,11 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -106,6 +103,14 @@ public class SaleHis {
     private String labourGroupCode;
     @Column(name = "print_count")
     private Integer printCount;
+    @Column(name = "receivable_acc")
+    private String receivableAcc;
+    @Column(name = "cash_acc")
+    private String cashAcc;
+    @Column(name = "sale_acc")
+    private String saleAcc;
+    @Column(name = "dept_code")
+    private String deptCode;
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";

@@ -31,17 +31,17 @@ public class WeightLossDetail {
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "qty")
-    private Float qty;
+    private Double qty;
     @Column(name = "unit")
     private String unit;
     @Column(name = "price")
-    private Float price;
+    private Double price;
     @Column(name = "loss_qty")
-    private Float lossQty;
+    private Double lossQty;
     @Column(name = "loss_unit")
     private String lossUnit;
     @Column(name = "loss_price")
-    private Float lossPrice;
+    private Double lossPrice;
     @Transient
     private String stockUserCode;
     @Transient

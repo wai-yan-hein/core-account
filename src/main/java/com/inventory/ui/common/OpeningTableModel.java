@@ -72,7 +72,7 @@ public class OpeningTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 3, 5, 7, 8 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -114,7 +114,7 @@ public class OpeningTableModel extends AbstractTableModel {
                     return record.getRelName();
                 }
                 case 3 -> {
-                    return Util1.getFloat(record.getWeight()) == 0 ? null : record.getWeight();
+                    return Util1.getDouble(record.getWeight()) == 0 ? null : record.getWeight();
                 }
                 case 4 -> {
                     return record.getWeightUnit();
@@ -132,11 +132,11 @@ public class OpeningTableModel extends AbstractTableModel {
 
                 case 7 -> {
                     //price
-                    return Util1.getFloat(record.getPrice()) == 0 ? null : record.getPrice();
+                    return Util1.getDouble(record.getPrice()) == 0 ? null : record.getPrice();
                 }
                 case 8 -> {
                     //amount
-                    return Util1.getFloat(record.getAmount()) == 0 ? null : record.getAmount();
+                    return Util1.getDouble(record.getAmount()) == 0 ? null : record.getAmount();
                 }
                 default -> {
                     return new Object();
@@ -161,7 +161,7 @@ public class OpeningTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
@@ -177,8 +177,8 @@ public class OpeningTableModel extends AbstractTableModel {
                 case 3 -> { // weight
                     if (value != null) {
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setWeight(Util1.getFloat(value));
+                            if (Util1.isPositive(Util1.getDouble(value))) {
+                                record.setWeight(Util1.getDouble(value));
                             } else {
                                 showMessageBox("Input value must be positive");
                                 setSelection(row, column);
@@ -200,16 +200,16 @@ public class OpeningTableModel extends AbstractTableModel {
                 case 5 -> {
                     // Qty
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
+                        if (Util1.isPositive(Util1.getDouble(value))) {
                             if (ProUtil.isUseWeightPoint()) {
                                 String str = String.valueOf(value);
-                                float wt = Util1.getFloat(record.getWeight());
-                                record.setQty(Util1.getFloat(value));
+                                double wt = Util1.getDouble(record.getWeight());
+                                record.setQty(Util1.getDouble(value));
                                 record.setTotalWeight(Util1.getTotalWeight(wt, str));
                                 setSelection(row, 5);
                             } else {
-                                record.setQty(Util1.getFloat(value));
-                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                                record.setQty(Util1.getDouble(value));
+                                record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                             }
 
                         } else {
@@ -235,8 +235,8 @@ public class OpeningTableModel extends AbstractTableModel {
                 case 7 -> {
                     // Price
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setPrice(Util1.getDouble(value));
                             setSelection(row + 1, 0);
                             calculateAmount(record);
                         } else {
@@ -251,8 +251,8 @@ public class OpeningTableModel extends AbstractTableModel {
                 case 8 -> {
                     //Amount
                     if (value != null) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setAmount(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setAmount(Util1.getDouble(value));
                             setSelection(row + 1, 0);
                             calculatePrice(record);
                         } else {
@@ -278,9 +278,9 @@ public class OpeningTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (OPHisDetail op : listDetail) {
-            op.setAmount(Util1.getFloat(op.getAmount()));
-            op.setPrice(Util1.getFloat(op.getPrice()));
-            op.setQty(Util1.getFloat(op.getQty()));
+            op.setAmount(Util1.getDouble(op.getAmount()));
+            op.setPrice(Util1.getDouble(op.getPrice()));
+            op.setQty(Util1.getDouble(op.getQty()));
             if (op.getStockCode() != null) {
                 if (op.getUnitCode() == null) {
                     status = false;
@@ -323,18 +323,18 @@ public class OpeningTableModel extends AbstractTableModel {
 
     private void calculatePrice(OPHisDetail pd) {
         if (pd.getStockCode() != null) {
-            float qty = Util1.getFloat(pd.getQty());
-            float purAmt = Util1.getFloat(pd.getAmount());
-            float price = purAmt / qty;
+            double qty = Util1.getDouble(pd.getQty());
+            double purAmt = Util1.getDouble(pd.getAmount());
+            double price = purAmt / qty;
             pd.setPrice(price);
         }
     }
 
     private void calculateAmount(OPHisDetail pur) {
-        float price = Util1.getFloat(pur.getPrice());
-        float qty = Util1.getFloat(pur.getQty());
+        double price = Util1.getDouble(pur.getPrice());
+        double qty = Util1.getDouble(pur.getQty());
         if (pur.getStockCode() != null) {
-            float amount = qty * price;
+            double amount = qty * price;
             pur.setPrice(price);
             pur.setAmount(amount);
         }

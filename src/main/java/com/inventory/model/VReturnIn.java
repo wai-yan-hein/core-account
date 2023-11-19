@@ -16,27 +16,26 @@ import java.time.ZonedDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VReturnIn {
 
-    private String rdCode;
     private String vouNo;
     private String traderCode;
     private String vouDate;
     private String curCode;
     private String remark;
-    private Float vouTotal;
-    private Float discount;
-    private Float discountPrice;
+    private Double vouTotal;
+    private Double discount;
+    private Double discountPrice;
     private String createdBy;
     private boolean deleted;
-    private Float paid;
-    private Float vouBalance;
+    private Double paid;
+    private Double vouBalance;
     private String compCode;
     private Integer macId;
     private String stockCode;
-    private Float qty;
-    private Float wt;
+    private Double qty;
+    private Double wt;
     private String unit;
-    private Float price;
-    private Float amount;
+    private Double price;
+    private Double amount;
     private String locCode;
     private int uniqueId;
     private String traderName;

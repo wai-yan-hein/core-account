@@ -190,10 +190,10 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
         try {
             ResultSet rs = getResult(sql);
             if (rs.next()) {
-                g.setQty(rs.getFloat("vou_count"));
-                g.setAmount(rs.getFloat("paid"));
+                g.setQty(rs.getDouble("vou_count"));
+                g.setAmount(rs.getDouble("paid"));
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error("getVoucherCount : " + e.getMessage());
         }
         return g;
@@ -238,8 +238,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
                     s.setRemark(rs.getString("remark"));
                     s.setReference(rs.getString("reference"));
                     s.setCreatedBy(rs.getString("created_by"));
-//                    s.setPaid(rs.getFloat("paid"));
-                    s.setVouTotal(rs.getFloat("vou_total"));
+                    s.setVouTotal(rs.getDouble("vou_total"));
                     s.setDeleted(rs.getBoolean("deleted"));
                     s.setDeptId(rs.getInt("dept_id"));
                     saleList.add(s);

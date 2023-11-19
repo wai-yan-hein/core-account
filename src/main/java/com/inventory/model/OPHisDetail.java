@@ -30,21 +30,21 @@ public class OPHisDetail {
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty")
-    private Float qty;
+    private Double qty;
     @Column(name = "price")
-    private Float price;
+    private Double price;
     @Column(name = "amount")
-    private Float amount;
+    private Double amount;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "unit")
     private String unitCode;
     @Column(name = "weight")
-    private Float weight;
+    private Double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")
-    private Float totalWeight;
+    private Double totalWeight;
     @Transient
     private String userCode;
     @Transient

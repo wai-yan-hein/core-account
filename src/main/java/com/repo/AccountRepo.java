@@ -451,6 +451,14 @@ public class AccountRepo {
                 });
     }
 
+    public Mono<List<ChartOfAccount>> getPurchaseAcc() {
+        return getCOAByHead(ProUtil.getProperty(ProUtil.PURCHASE));
+    }
+
+    public Mono<List<ChartOfAccount>> getPayableAcc() {
+        return getCOAByHead(ProUtil.getProperty(ProUtil.LIA));
+    }
+
     public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCOAByHead")

@@ -25,7 +25,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "pur_his")
-public class PurHis implements java.io.Serializable {
+public class PurHis implements java.io.Serializable, Cloneable {
 
     @EmbeddedId
     private PurHisKey key;
@@ -46,11 +46,11 @@ public class PurHis implements java.io.Serializable {
     @Column(name = "vou_total")
     private Double vouTotal;
     @Column(name = "paid")
-    private Double paid;
+    private double paid;
     @Column(name = "discount")
     private Double discount;
     @Column(name = "balance")
-    private Double balance;
+    private double balance;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
@@ -97,8 +97,18 @@ public class PurHis implements java.io.Serializable {
     private String landVouNo;
     @Column(name = "print_count")
     private Integer printCount;
+    @Column(name = "weight_vou_no")
+    private String weightVouNo;
     @Column(name = "payable_acc")
     private String payableAcc;
+    @Column(name = "cash_acc")
+    private String cashAcc;
+    @Column(name = "purchase_acc")
+    private String purchaseAcc;
+    @Column(name = "dept_code")
+    private String deptCode;
+    @Column(name = "grand_total")
+    private double grandTotal;
     @Transient
     private String status = "STATUS";
     @Transient
@@ -113,4 +123,13 @@ public class PurHis implements java.io.Serializable {
     public PurHis() {
     }
 
+    @Override
+    public PurHis clone() {
+        try {
+            PurHis clonedGl = (PurHis) super.clone();
+            return clonedGl;
+        } catch (CloneNotSupportedException ex) {
+        }
+        return null;
+    }
 }

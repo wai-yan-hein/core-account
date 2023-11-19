@@ -15,13 +15,17 @@ import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
+import com.common.UndoItem;
+import com.common.UndoStack;
 import com.common.Util1;
+import com.common.YNOptionPane;
 import com.user.model.Currency;
 import com.user.model.Project;
 import java.awt.HeadlessException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -45,6 +49,7 @@ public class AllCashTableModel extends AbstractTableModel {
     private DepartmentA department;
     private AccountRepo accountRepo;
     private JProgressBar progress;
+    private UndoStack undo = new UndoStack();
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -182,6 +187,7 @@ public class AllCashTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             Gl gl = listVGl.get(row);
+            undo.addUndo(new UndoItem(row, gl.clone()));
             switch (column) {
                 case 0 -> {
                     if (value != null) {
@@ -294,12 +300,37 @@ public class AllCashTableModel extends AbstractTableModel {
                     gl.setDrAmt(null);
                 }
             }
-            save(gl, row, column);
+            if (canEdit(gl, row)) {
+                save(gl, row, column);
+            }
             parent.requestFocus();
 
         } catch (HeadlessException e) {
             log.info("setValueAt : " + e.getMessage());
         }
+    }
+
+    private boolean canEdit(Gl gl, int row) {
+        if (!Util1.isNull(gl.getKey().getGlCode())) {
+            YNOptionPane optionPane = new YNOptionPane("Are you sure to edit?", JOptionPane.QUESTION_MESSAGE);
+            JDialog dialog = optionPane.createDialog("Edit");
+            dialog.setVisible(true);
+            int yn = (int) optionPane.getValue();
+            if (yn == JOptionPane.NO_OPTION) {
+                UndoItem item = undo.undo();
+                if (item != null && item.getOldValue() instanceof Gl) {
+                    Gl undoGl = (Gl) item.getOldValue();
+                    listVGl.set(row, undoGl);
+                    fireTableRowsUpdated(row, row);
+                    return false;
+                }
+            }
+            gl.setModifyBy(Global.loginUser.getUserCode());
+            return yn == JOptionPane.YES_OPTION;
+        }
+
+        // If glCode is null, return true
+        return true;
     }
 
     private void save(Gl gl, int row, int column) {
@@ -349,12 +380,6 @@ public class AllCashTableModel extends AbstractTableModel {
                 parent.setColumnSelectionInterval(1, 1);
                 parent.setRowSelectionInterval(row, row);
             }
-        } else if (!Util1.isNull(gl.getKey().getGlCode())) {
-            int yn = JOptionPane.showConfirmDialog(Global.parentForm,
-                    "Are you sure to edit?", "Edit",
-                    JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE);
-            gl.setModifyBy(Global.loginUser.getUserCode());
-            status = yn == JOptionPane.YES_OPTION;
         } else if (gl.getSrcAccCode().equals(gl.getAccCode())) {
             JOptionPane.showMessageDialog(parent, "Invalid Account.");
             status = false;

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,9 +48,9 @@ public class OPHisDetailDaoImpl extends AbstractDao<OPHisDetailKey, OPHisDetail>
                     op.setDeptId(rs.getInt("dept_id"));
                     op.setKey(key);
                     op.setStockCode(rs.getString("stock_code"));
-                    op.setQty(rs.getFloat("qty"));
-                    op.setPrice(rs.getFloat("price"));
-                    op.setAmount(rs.getFloat("amount"));
+                    op.setQty(rs.getDouble("qty"));
+                    op.setPrice(rs.getDouble("price"));
+                    op.setAmount(rs.getDouble("amount"));
                     op.setLocCode(rs.getString("loc_code"));
                     op.setUnitCode(rs.getString("unit"));
                     op.setUserCode(rs.getString("user_code"));
@@ -60,7 +61,7 @@ public class OPHisDetailDaoImpl extends AbstractDao<OPHisDetailKey, OPHisDetail>
                     op.setRelName(rs.getString("rel_name"));
                     listOP.add(op);
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 log.error(e.getMessage());
             }
         }

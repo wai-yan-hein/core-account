@@ -456,8 +456,8 @@ public class SaleTableModel extends AbstractTableModel {
         return status;
     }
 
-    private float getTraderPrice(Stock s) {
-        float price = 0.0f;
+    private double getTraderPrice(Stock s) {
+        double price = 0.0;
         String priceType = getTraderType();
         switch (priceType) {
             case "N" -> {

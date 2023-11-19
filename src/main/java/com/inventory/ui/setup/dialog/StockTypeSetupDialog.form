@@ -132,6 +132,7 @@
                               <Component id="txtUserCode" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtAccount" alignment="0" max="32767" attributes="0"/>
                               <Component id="rdoFinish" alignment="0" max="32767" attributes="0"/>
+                              <Component id="chkActive" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -158,6 +159,8 @@
                       <Component id="txtAccount" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkActive" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                   <Component id="rdoFinish" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                   <Component id="jSeparator1" min="-2" max="-2" attributes="0"/>
@@ -167,7 +170,7 @@
                       <Component id="btnSave" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="200" max="32767" attributes="0"/>
+                  <EmptySpace pref="172" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="btnSave1" max="32767" attributes="0"/>
                       <Component id="lblLog" max="32767" attributes="0"/>
@@ -304,6 +307,15 @@
               <Connection code="Global.lableFont" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Finished Group"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JRadioButton" name="chkActive">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="Active"/>
           </Properties>
         </Component>
       </SubComponents>

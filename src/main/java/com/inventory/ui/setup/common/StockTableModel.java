@@ -21,7 +21,7 @@ public class StockTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockTableModel.class.getName());
     private List<Stock> listStock = new ArrayList();
-    private String[] columnNames = {"No", "Code", "Description", "Active", "Calulate Stock"};
+    private String[] columnNames = {"No", "Code", "Description", "Group Name", "Cat Name", "Weight", "Active"};
     private InventoryRepo inventoryRepo;
 
     public StockTableModel() {
@@ -47,7 +47,7 @@ public class StockTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 3, 4 -> {
+            case 6 -> {
                 return true;
             }
 
@@ -58,8 +58,11 @@ public class StockTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 3, 4 -> {
+            case 6 -> {
                 return Boolean.class;
+            }
+            case 5 -> {
+                return Double.class;
             }
             default -> {
                 return String.class;
@@ -89,9 +92,13 @@ public class StockTableModel extends AbstractTableModel {
                 case 2 ->
                     med.getStockName();
                 case 3 ->
-                    med.isActive();
+                    med.getGroupName();
                 case 4 ->
-                    med.isCalculate();
+                    med.getCatName();
+                case 5 ->
+                    med.getWeight();
+                case 6 ->
+                    med.isActive();
                 default ->
                     null;
             }; //Code
@@ -108,15 +115,9 @@ public class StockTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         Stock s = listStock.get(row);
         switch (column) {
-            case 2 -> {
+            case 6 -> {
                 if (value instanceof Boolean active) {
                     s.setActive(active);
-                    inventoryRepo.saveStock(s);
-                }
-            }
-            case 3 -> {
-                if (value instanceof Boolean active) {
-                    s.setCalculate(active);
                     inventoryRepo.saveStock(s);
                 }
             }

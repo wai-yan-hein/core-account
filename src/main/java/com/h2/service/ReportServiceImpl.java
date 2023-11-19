@@ -41,7 +41,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public General getPurchaseRecentPrice(String stockCode, String purDate, String unit, String compCode, Integer deptId) {
         General general = new General();
-        general.setAmount(0.0f);
+        general.setAmount(0.0);
         String sql = "select rel.smallest_qty * smallest_price price,rel.unit\n" + "from (\n"
                 + "select pur_unit,pur_price/rel.smallest_qty smallest_price,pd.rel_code,pd.comp_code,pd.dept_id\n"
                 + "from v_purchase pd\n" + "join v_relation rel on pd.rel_code = rel.rel_code\n"
@@ -55,9 +55,9 @@ public class ReportServiceImpl implements ReportService {
         try {
             ResultSet rs = reportDao.executeSql(sql);
             if (rs.next()) {
-                general.setAmount(rs.getFloat("price"));
+                general.setAmount(rs.getDouble("price"));
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error(String.format("getPurchaseRecentPrice: %s", e.getMessage()));
         }
         return general;
@@ -66,7 +66,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public General getSmallestQty(String stockCode, String unit, String compCode, Integer deptId) {
         General g = new General();
-        g.setSmallQty(1.0f);
+        g.setSmallQty(1.0);
         String sql = "select ud.qty,ud.smallest_qty\n" + "from stock s join unit_relation_detail ud\n"
                 + "on s.rel_code = ud.rel_code\n" + "and s.comp_code =ud.comp_code\n" + "and s.dept_id =ud.dept_id\n"
                 + "where s.stock_code ='" + stockCode + "'\n" + "and s.comp_code ='" + compCode + "'\n"
@@ -74,10 +74,10 @@ public class ReportServiceImpl implements ReportService {
         try {
             ResultSet rs = reportDao.executeSql(sql);
             if (rs.next()) {
-                g.setQty(rs.getFloat("qty"));
-                g.setSmallQty(rs.getFloat("smallest_qty"));
+                g.setQty(rs.getDouble("qty"));
+                g.setSmallQty(rs.getDouble("smallest_qty"));
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error(String.format("getSmallestQty: %s", e.getMessage()));
         }
         return g;
@@ -312,14 +312,14 @@ public class ReportServiceImpl implements ReportService {
                 s.setTraderName(rs.getString("trader_name"));
                 //s.setRemark(rs.getString("remark"));
                 s.setCreatedBy(rs.getString("created_by"));
-                s.setPaid(rs.getFloat("paid"));
-                s.setVouTotal(rs.getFloat("vou_total"));
+                s.setPaid(rs.getDouble("paid"));
+                s.setVouTotal(rs.getDouble("vou_total"));
                 s.setDeleted(rs.getBoolean("deleted"));
                 s.setDeptId(rs.getInt("dept_id"));
                 returnInList.add(s);
             }
         }
-        }catch(Exception e){
+        }catch(SQLException e){
             e.printStackTrace();
         }
         return returnInList;
@@ -358,8 +358,8 @@ public class ReportServiceImpl implements ReportService {
                 s.setTraderName(rs.getString("trader_name"));
                 s.setRemark(rs.getString("remark"));
                 s.setCreatedBy(rs.getString("created_by"));
-                s.setPaid(rs.getFloat("paid"));
-                s.setVouTotal(rs.getFloat("vou_total"));
+                s.setPaid(rs.getDouble("paid"));
+                s.setVouTotal(rs.getDouble("vou_total"));
                 s.setDeleted(rs.getBoolean("deleted"));
                 s.setDeptId(rs.getInt("dept_id"));
                 returnOutList.add(s);

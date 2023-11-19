@@ -155,7 +155,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeptId(getDepId());
         filter.setLocal(chkLocal.isSelected());
         if (traderAutoCompleter.getTrader() != null) {
-            filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
+            filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         }
         inventoryRepo.getTrasnfer(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);

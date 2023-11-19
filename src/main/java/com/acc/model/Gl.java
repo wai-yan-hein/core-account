@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Data;
 
 /**
@@ -22,7 +24,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "gl")
-public class Gl {
+public class Gl implements Cloneable {
 
     @EmbeddedId
     private GlKey key;
@@ -126,6 +128,17 @@ public class Gl {
 
     public Gl(String tranSource) {
         this.tranSource = tranSource;
+    }
+
+    @Override
+    public Gl clone() {
+        try {
+            Gl clonedGl = (Gl) super.clone();
+            return clonedGl;
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(Gl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
 }

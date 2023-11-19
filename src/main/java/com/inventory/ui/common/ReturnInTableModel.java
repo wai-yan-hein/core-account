@@ -119,7 +119,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 4, 6, 8, 9 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -166,7 +166,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     //weight
-                    return Util1.getFloat(record.getWeight()) == 0 ? null : record.getWeight();
+                    return Util1.getDouble(record.getWeight()) == 0 ? null : record.getWeight();
                 }
                 case 5 -> {
                     //weight unit
@@ -213,7 +213,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
@@ -235,8 +235,8 @@ public class ReturnInTableModel extends AbstractTableModel {
                     }
                     case 4 -> { // weight
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setWeight(Util1.getFloat(value));
+                            if (Util1.isPositive(Util1.getDouble(value))) {
+                                record.setWeight(Util1.getDouble(value));
                                 setSelection(row, 7);
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -257,15 +257,15 @@ public class ReturnInTableModel extends AbstractTableModel {
                     case 6 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
+                            if (Util1.isPositive(Util1.getDouble(value))) {
                                 if (ProUtil.isUseWeightPoint()) {
                                     String str = String.valueOf(value);
-                                    float wt = Util1.getFloat(record.getWeight());
-                                    record.setQty(Util1.getFloat(value));
+                                    double wt = Util1.getDouble(record.getWeight());
+                                    record.setQty(Util1.getDouble(value));
                                     record.setTotalWeight(Util1.getTotalWeight(wt, str));
                                 } else {
-                                    record.setQty(Util1.getFloat(value));
-                                    record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                                    record.setQty(Util1.getDouble(value));
+                                    record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                                 }
 
                                 setSelection(row, 6);
@@ -289,8 +289,8 @@ public class ReturnInTableModel extends AbstractTableModel {
                     case 8 -> {
                         // Price
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setPrice(Util1.getFloat(value));
+                            if (Util1.isPositive(Util1.getDouble(value))) {
+                                record.setPrice(Util1.getDouble(value));
                                 setSelection(row + 1, 0);
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -303,12 +303,12 @@ public class ReturnInTableModel extends AbstractTableModel {
                     }
                     case 9 -> {
                         //Amount
-                        record.setAmount(Util1.getFloat(value));
+                        record.setAmount(Util1.getDouble(value));
 
                     }
                 }
                 if (column != 8) {
-                    if (Util1.getFloat(record.getPrice()) == 0) {
+                    if (Util1.getDouble(record.getPrice()) == 0) {
                         if (record.getStockCode() != null && record.getUnitCode() != null) {
                             inventoryRepo.getSaleRecentPrice(
                                     record.getStockCode(),
@@ -388,9 +388,9 @@ public class ReturnInTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(RetInHisDetail s) {
-        float price = Util1.getFloat(s.getPrice());
-        float qty = Util1.getFloat(s.getQty());
-        float amount = qty * price;
+        double price = Util1.getDouble(s.getPrice());
+        double qty = Util1.getDouble(s.getQty());
+        double amount = qty * price;
         s.setAmount(amount);
     }
 
@@ -402,7 +402,7 @@ public class ReturnInTableModel extends AbstractTableModel {
         boolean status = true;
         for (RetInHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     status = false;

@@ -192,6 +192,7 @@ public final class COA3AutoCompleter implements KeyListener {
             if (editor == null) {
                 if (observer != null) {
                     observer.selected("COA", coa.getKey().getCoaCode());
+                    observer.selected("COA_TF", (JTextField) textComp);
                 }
             }
         }

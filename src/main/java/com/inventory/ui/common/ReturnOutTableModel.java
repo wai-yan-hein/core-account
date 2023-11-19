@@ -98,7 +98,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 4, 6, 8, 9 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -145,7 +145,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     return record.getLocName();
                 }
                 case 4 -> {
-                    return Util1.getFloat(record.getWeight()) == 0 ? null : record.getWeight();
+                    return Util1.getDouble(record.getWeight()) == 0 ? null : record.getWeight();
                 }
                 case 5 -> {
                     return record.getWeightUnit();
@@ -191,7 +191,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
@@ -214,8 +214,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setWeight(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setWeight(Util1.getDouble(value));
                             setSelection(row, 7);
                         } else {
                             setSelection(row, column);
@@ -235,8 +235,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 case 6 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setQty(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setQty(Util1.getDouble(value));
                         } else {
                             showMessageBox("Input value must be positive");
                             setSelection(row, column);
@@ -260,8 +260,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 case 8 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setPrice(Util1.getDouble(value));
                             setSelection(row + 1, 0);
                         } else {
                             showMessageBox("Input value must be positive");
@@ -275,7 +275,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
             }
             if (column != 8) {
-                if (Util1.getFloat(record.getPrice()) == 0) {
+                if (Util1.getDouble(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"),
@@ -352,9 +352,9 @@ public class ReturnOutTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(RetOutHisDetail s) {
-        float price = Util1.getFloat(s.getPrice());
-        float qty = Util1.getFloat(s.getQty());
-        float amount = qty * price;
+        double price = Util1.getDouble(s.getPrice());
+        double qty = Util1.getDouble(s.getQty());
+        double amount = qty * price;
         s.setAmount(amount);
     }
 
@@ -366,7 +366,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
         boolean status = true;
         for (RetOutHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     status = false;

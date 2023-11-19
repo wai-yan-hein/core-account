@@ -173,9 +173,9 @@ public class WeightLossTableModel extends AbstractTableModel {
                         }
                     }
                     case 4 -> {
-                        if (Util1.getFloat(value) > 0) {
-                            p.setQty(Util1.getFloat(value));
-                            if (Util1.getFloat(p.getLossQty()) == 0) {
+                        if (Util1.getDouble(value) > 0) {
+                            p.setQty(Util1.getDouble(value));
+                            if (Util1.getDouble(p.getLossQty()) == 0) {
                                 p.setLossQty(p.getQty());
                             }
                         }
@@ -186,13 +186,13 @@ public class WeightLossTableModel extends AbstractTableModel {
                         }
                     }
                     case 6 -> {
-                        if (Util1.getFloat(value) > 0) {
-                            p.setPrice(Util1.getFloat(value));
+                        if (Util1.getDouble(value) > 0) {
+                            p.setPrice(Util1.getDouble(value));
                         }
                     }
                     case 7 -> {
-                        if (Util1.getFloat(value) > 0) {
-                            p.setLossQty(Util1.getFloat(value));
+                        if (Util1.getDouble(value) > 0) {
+                            p.setLossQty(Util1.getDouble(value));
                         }
                     }
                     case 8 -> {
@@ -201,13 +201,13 @@ public class WeightLossTableModel extends AbstractTableModel {
                         }
                     }
                     case 9 -> {
-                        if (Util1.getFloat(value) > 0) {
-                            p.setLossPrice(Util1.getFloat(value));
+                        if (Util1.getDouble(value) > 0) {
+                            p.setLossPrice(Util1.getDouble(value));
                         }
                     }
                 }
                 if (column != 6) {
-                    if (Util1.getFloat(p.getPrice()) == 0) {
+                    if (Util1.getDouble(p.getPrice()) == 0) {
                         if (p.getStockCode() != null && p.getUnit() != null) {
                             p.setPrice(inventoryRepo.getPurRecentPrice(p.getStockCode(), Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), p.getUnit()).block().getAmount());
                         }
@@ -228,13 +228,13 @@ public class WeightLossTableModel extends AbstractTableModel {
         String unit = pd.getUnit();
         String lossUnit = pd.getLossUnit();
         String stockCode = pd.getStockCode();
-        float lossQty = Util1.getFloat(pd.getLossQty());
-        float qty = Util1.getFloat(pd.getQty());
+        double lossQty = Util1.getDouble(pd.getLossQty());
+        double qty = Util1.getDouble(pd.getQty());
         if (unit != null && stockCode != null && lossUnit != null && qty > 0 && lossQty > 0) {
-            float tmp1 = inventoryRepo.getSmallQty(stockCode, unit).block().getSmallQty() * qty;
-            float tmp2 = inventoryRepo.getSmallQty(stockCode, lossUnit).block().getSmallQty() * lossQty;
-            float price = Util1.getFloat(pd.getPrice());
-            float lossPrice = (tmp1 / tmp2) * price;
+            double tmp1 = inventoryRepo.getSmallQty(stockCode, unit).block().getSmallQty() * qty;
+            double tmp2 = inventoryRepo.getSmallQty(stockCode, lossUnit).block().getSmallQty() * lossQty;
+            double price = Util1.getDouble(pd.getPrice());
+            double lossPrice = (tmp1 / tmp2) * price;
             pd.setLossPrice(lossPrice);
         }
     }
@@ -245,10 +245,10 @@ public class WeightLossTableModel extends AbstractTableModel {
                 if (d.getLocCode() == null) {
                     JOptionPane.showMessageDialog(table, "Invalid Location.");
                     return false;
-                } else if (Util1.getFloat(d.getQty()) <= 0) {
+                } else if (Util1.getDouble(d.getQty()) <= 0) {
                     JOptionPane.showMessageDialog(table, "Invalid Qty.");
                     return false;
-                } else if (Util1.getFloat(d.getPrice()) <= 0) {
+                } else if (Util1.getDouble(d.getPrice()) <= 0) {
                     JOptionPane.showMessageDialog(table, "Invalid Price.");
                     return false;
                 }

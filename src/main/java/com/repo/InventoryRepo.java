@@ -117,9 +117,13 @@ import com.inventory.model.VTransfer;
 import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.inventory.model.WeightHis;
+import com.inventory.model.WeightHisDetail;
+import com.inventory.model.WeightHisKey;
 import com.inventory.model.WeightLossDetail;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
+import com.model.WeightColumn;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
@@ -2830,6 +2834,42 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<WeightHis> saveWeight(WeightHis his) {
+        return inventoryApi.post()
+                .uri("weight/saveWeight")
+                .body(Mono.just(his), WeightHis.class)
+                .retrieve()
+                .bodyToMono(WeightHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> delete(WeightHisKey key) {
+        return inventoryApi.post()
+                .uri("/weight/deleteWeight")
+                .body(Mono.just(key), WeightHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> restore(WeightHisKey key) {
+        return inventoryApi.post()
+                .uri("/weight/restoreWeight")
+                .body(Mono.just(key), WeightHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<GRN>> getGRNHistory(FilterObject filter) {
         return inventoryApi
                 .post()
@@ -2837,6 +2877,48 @@ public class InventoryRepo {
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(GRN.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<WeightHis>> getWeightHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/weight/getWeightHistory")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(WeightHis.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<WeightHisDetail>> getWeightDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/weight/getWeightDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(WeightHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<WeightColumn>> getWeightColumn(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/weight/getWeightColumn")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(WeightColumn.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());

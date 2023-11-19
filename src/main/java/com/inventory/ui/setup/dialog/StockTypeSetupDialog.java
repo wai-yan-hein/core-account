@@ -118,6 +118,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         txtName.setText(stockType.getStockTypeName());
         txtAccount.setText(stockType.getAccount());
         rdoFinish.setSelected(stockType.isFinishedGroup());
+        chkActive.setSelected(stockType.isActive());
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
         txtUserCode.requestFocus();
@@ -152,6 +153,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void clear() {
         progress.setIndeterminate(false);
+        chkActive.setSelected(true);
         btnSave.setEnabled(true);
         txtUserCode.setText(null);
         txtFilter.setText(null);
@@ -178,6 +180,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
             stockType.setStockTypeName(txtName.getText());
             stockType.setAccount(txtAccount.getText());
             stockType.setFinishedGroup(rdoFinish.isSelected());
+            stockType.setActive(chkActive.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 StockTypeKey key = new StockTypeKey();
                 key.setCompCode(Global.compCode);
@@ -272,6 +275,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         jLabel4 = new javax.swing.JLabel();
         txtAccount = new javax.swing.JTextField();
         rdoFinish = new javax.swing.JRadioButton();
+        chkActive = new javax.swing.JRadioButton();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -387,6 +391,10 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         rdoFinish.setFont(Global.lableFont);
         rdoFinish.setText("Finished Group");
 
+        chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
+        chkActive.setText("Active");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -415,7 +423,8 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtName)
                             .addComponent(txtUserCode)
                             .addComponent(txtAccount)
-                            .addComponent(rdoFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(rdoFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 
@@ -437,6 +446,8 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(jLabel4)
                     .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkActive)
+                .addGap(7, 7, 7)
                 .addComponent(rdoFinish)
                 .addGap(7, 7, 7)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -445,7 +456,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 200, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 172, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnSave1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -548,6 +559,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSave1;
+    private javax.swing.JRadioButton chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

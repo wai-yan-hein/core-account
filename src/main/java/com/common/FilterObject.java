@@ -18,7 +18,6 @@ public class FilterObject {
 
     private String fromDate;
     private String toDate;
-    private String cusCode;
     private String vouNo;
     private String userCode;
     private String description;
@@ -47,7 +46,8 @@ public class FilterObject {
     private String saleVouNo;
     private String tranOption;
     private String orderStatus;
-    private int tranSource;
+    private String tranSource;
+    private boolean draft;
 
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;

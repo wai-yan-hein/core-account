@@ -81,6 +81,10 @@ public class VPurchase {
     private String regionName;
     private List<LandingHisPrice> listPrice;
     private boolean local;
-    
+    private String reference;
+    private Double bag;
+    private Double wet;
+    private Double rice;
+    private Double grandTotal;
 
 }

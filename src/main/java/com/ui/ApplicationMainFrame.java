@@ -78,6 +78,7 @@ import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.Transfer;
+import com.inventory.ui.entry.WeightEntry;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.OpeningSetup;
@@ -95,9 +96,9 @@ import com.user.setup.CompanyTemplate;
 import com.user.setup.CurrencyExchange;
 import com.user.setup.HMSIntegration;
 import com.user.setup.ProjectSetup;
+import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.KeyAdapter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.Duration;
@@ -123,8 +124,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private AccountRepo accounRepo;
     @Autowired
     private UserRepo userRepo;
-//    @Autowired
-//    private OpeningSetup openingSetup;
     @Autowired
     private Sale sale;
     @Autowired
@@ -221,7 +220,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private PanelControl control;
     private ProgramDownloadDialog pdDialog;
     private StockBalanceFrame stockBalanceFrame;
+    private Timer inactivityTimer;
+    private long lastActivityTime;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
+    private KeyEventDispatcher keyEventDispatcher; // Maintain a reference to the dispatcher
 
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
         JMenuItem actionMenu = (JMenuItem) evt.getSource();
@@ -247,22 +249,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         initComponents();
         initKeyFoucsManager();
         initPopup();
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                int confirmed = JOptionPane.showConfirmDialog(null,
-                        "Are you sure you want to exit?", "Exit Confirmation",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (confirmed == JOptionPane.YES_OPTION) {
-                    dispose();
-                    System.exit(0);
-                }
-            }
-        });
+        addMouseAndKeyboardListeners();
+        startInactivityTimer();
     }
 
     private void initKeyFoucsManager() {
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher((KeyEvent ke) -> {
+        keyEventDispatcher = (KeyEvent ke) -> {
             if (ke.isAltDown()) {
                 if (ke.getKeyCode() == KeyEvent.VK_F4) {
                     System.exit(0);
@@ -271,6 +263,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             switch (ke.getID()) {
                 case KeyEvent.KEY_PRESSED -> {
                     if (control != null) {
+                        setKeyEventDispatcherEnabled(false);
                         switch (ke.getKeyCode()) {
                             case KeyEvent.VK_F5 -> {
                                 if (btnSave.isEnabled()) {
@@ -312,13 +305,24 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                                     control.filter();
                                 }
                             }
-
                         }
+                        setKeyEventDispatcherEnabled(true);
                     }
                 }
             }
             return false;
-        });
+        };
+
+        // Add the dispatcher when initializing
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
+    }
+
+    private void setKeyEventDispatcherEnabled(boolean enabled) {
+        if (enabled) {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
+        } else {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyEventDispatcher);
+        }
     }
 
     private void addTabMain(JPanel panel, String menuName) {
@@ -460,7 +464,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchase.initMain();
                 return purchase;
             }
-            case "Purchase By Weight", "Purchase Rice", "Purchase Export" -> {
+            case "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy" -> {
                 int type = getPurType(menuName);
                 PurchaseDynamic p = new PurchaseDynamic(type);
                 p.setName(menuName);
@@ -498,7 +502,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return io;
             }
             case "Stock" -> {
-                StockSetup setup = new StockSetup();
+                StockSetup setup = new StockSetup(ProUtil.isStockNoUnit());
                 setup.setName(menuName);
                 setup.setUserRepo(userRepo);
                 setup.setInventoryRepo(inventoryRepo);
@@ -690,13 +694,23 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 b.initMain();
                 return b;
             }
-             case "Stock Consignor Payable" -> {
+            case "Stock Consignor Payable" -> {
                 StockPayable b = new StockPayable(StockPayable.SPCON);
                 b.setInventoryRepo(inventoryRepo);
                 b.setProgress(progress);
                 b.setObserver(this);
                 b.initMain();
                 return b;
+            }
+
+            case "Weight Entry" -> {
+                WeightEntry e = new WeightEntry();
+                e.setUserRepo(userRepo);
+                e.setInventoryRepo(inventoryRepo);
+                e.setProgress(progress);
+                e.setObserver(this);
+                e.initMain();
+                return e;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);
@@ -905,6 +919,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 PurchaseDynamic.RICE;
             case "Purchase Export" ->
                 PurchaseDynamic.EXPORT;
+            case "Purchase Paddy" ->
+                PurchaseDynamic.PADDY;
             default ->
                 0;
         };
@@ -990,13 +1006,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         setTitle("Core Account Cloud : " + Global.version);
         initStockBalanceFrame();
         scheduleNetwork();
-        scheduleExit();
         initUser();
         companyUserRoleAssign();
     }
-    private void initStockBalanceFrame(){
+
+    private void initStockBalanceFrame() {
         stockBalanceFrame = new StockBalanceFrame();
-        stockBalanceFrame.setInventoryRepo(inventoryRepo);        
+        stockBalanceFrame.setInventoryRepo(inventoryRepo);
     }
 
     private void initUser() {
@@ -1191,31 +1207,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }, 0, Duration.ofSeconds(5).toMillis());
     }
 
-    private void scheduleExit() {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        log.info("exit");
-                        System.exit(0);
-                    }
-                }, Duration.ofMinutes(5).toMillis());
-                int confirmed = JOptionPane.showConfirmDialog(null,
-                        "Do you want to exit the program due to inactivity? Program will exit within 5 minutes.", "Exit Confirmation",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (confirmed == JOptionPane.YES_OPTION) {
-                    System.exit(0);
-                } else {
-                    timer.cancel();
-                }
-            }
-        }, Duration.ofDays(8).toMillis(), Duration.ofMinutes(8).toMillis());
-    }
-
     @Override
     public void selected(Object source, Object selectObj) {
         String type = source.toString();
@@ -1281,6 +1272,86 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void changeCompany() {
         companyUserRoleAssign();
+    }
+
+    private void addMouseAndKeyboardListeners() {
+        // Add mouse listener
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                resetInactivityTimer();
+            }
+        });
+
+        // Add keyboard listener
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                resetInactivityTimer();
+            }
+        });
+
+        // Set focusable to true for the frame to receive keyboard events
+        setFocusable(true);
+    }
+
+    private void resetInactivityTimer() {
+        // Reset the inactivity timer and update the last activity time
+        lastActivityTime = System.currentTimeMillis();
+        if (inactivityTimer != null) {
+            inactivityTimer.cancel();
+        }
+
+        inactivityTimer = new Timer();
+        inactivityTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                showExitConfirmation();
+            }
+        }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    }
+
+    private void showExitConfirmation() {
+        int confirmed = JOptionPane.showConfirmDialog(this,
+                "Do you want to exit the program due to inactivity? Program will exit within 5 minutes.",
+                "Exit Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (confirmed == JOptionPane.YES_OPTION) {
+            exitProgram();
+        }
+    }
+
+    private void exitProgram() {
+        System.out.println("Exiting due to inactivity.");
+        if (inactivityTimer != null) {
+            inactivityTimer.cancel();
+        }
+        dispose(); // Close the JFrame
+        System.exit(0);
+    }
+
+    private void startInactivityTimer() {
+        // Set the initial last activity time
+        lastActivityTime = System.currentTimeMillis();
+
+        // Start a timer to check for inactivity
+        Timer checkInactivityTimer = new Timer(true);
+        checkInactivityTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                checkInactivity();
+            }
+        }, 0, 60 * 1000); // Check every minute
+    }
+
+    private void checkInactivity() {
+        long currentTime = System.currentTimeMillis();
+        long inactiveDuration = currentTime - lastActivityTime;
+
+        if (inactiveDuration >= 5 * 60 * 1000) { // 5 minutes in milliseconds
+            // Trigger exit due to inactivity
+            SwingUtilities.invokeLater(() -> showExitConfirmation());
+        }
     }
 
     /**

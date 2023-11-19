@@ -453,11 +453,7 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     focusTable(i);
                     return false;
-                } else if (sdh.getUnitCode() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
-                    focusTable(i);
-                    return false;
-                } else if (sdh.getWeight() == 0) {
+                }  else if (sdh.getWeight() == 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Weight");
                     focusTable(i);
                     return false;

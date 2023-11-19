@@ -135,7 +135,7 @@ public class GRNTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 4, 5, 6, 8 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -180,7 +180,7 @@ public class GRNTableModel extends AbstractTableModel {
                         return record.getLocName();
                     }
                     case 4 -> {
-                        if (Util1.getFloat(record.getWeight()) == 0) {
+                        if (Util1.getDouble(record.getWeight()) == 0) {
                             return null;
                         }
                         return record.getWeight();
@@ -198,7 +198,7 @@ public class GRNTableModel extends AbstractTableModel {
                     }
 
                     case 8 -> {
-                        float ttl = Util1.getFloat(record.getTotalWeight());
+                        double ttl = Util1.getDouble(record.getTotalWeight());
                         return ttl == 0 ? null : ttl;
                     }
                     default -> {
@@ -227,7 +227,7 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnit(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
@@ -249,7 +249,7 @@ public class GRNTableModel extends AbstractTableModel {
                     }
                 }
                 case 4 -> {
-                    record.setWeight(Util1.getFloat(value));
+                    record.setWeight(Util1.getDouble(value));
                     setSelection(row, 6);
                 }
                 case 5 -> {
@@ -261,16 +261,16 @@ public class GRNTableModel extends AbstractTableModel {
                 case 6 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
+                        if (Util1.isPositive(Util1.getDouble(value))) {
                             if (ProUtil.isUseWeightPoint()) {
                                 String str = String.valueOf(value);
-                                float wt = Util1.getFloat(record.getWeight());
-                                record.setQty(Util1.getFloat(value));
+                                double wt = Util1.getDouble(record.getWeight());
+                                record.setQty(Util1.getDouble(value));
                                 record.setTotalWeight(Util1.getTotalWeight(wt, str));
                             } else {
-                                record.setQty(Util1.getFloat(value));
+                                record.setQty(Util1.getDouble(value));
                                 if (record.getQty() != null && record.getWeight() != null) {
-                                    record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                                    record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                                 }
                             }
 

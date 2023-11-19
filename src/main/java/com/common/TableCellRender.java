@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TableCellRender extends DefaultTableCellRenderer {
 
     private final JCheckBox check = new JCheckBox();
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
 
     public TableCellRender() {
     }
@@ -58,7 +58,7 @@ public class TableCellRender extends DefaultTableCellRenderer {
             JLabel lblInt = (JLabel) c;
             lblInt.setHorizontalAlignment(SwingConstants.RIGHT);
             lblInt.setBackground(c.getBackground());
-        }
+        }   
 
         if (value instanceof Boolean boolean1) {
             check.setSelected(boolean1);

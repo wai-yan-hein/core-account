@@ -206,7 +206,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblOpening.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblOpening.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblOpening.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -273,33 +273,34 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private boolean isValidEntry() {
-        boolean status = true;
         if (locationAutoCompleter.getLocation() == null) {
-            status = false;
             JOptionPane.showMessageDialog(this, "Invalid Location");
             txtLocation.requestFocus();
-        }if (traderAutoCompleter.getTrader()== null) {
-            status = false;
-            JOptionPane.showMessageDialog(this, "Invalid Trader");
-            txtLocation.requestFocus();
+            return false;
         } else if (lblStatus.getText().equals("DELETED")) {
-            status = false;
             clear();
+            return false;
         } else if (openingTableModel.getListDetail().size() == 1) {
-            status = false;
             JOptionPane.showMessageDialog(this, "Invalid Transaction.");
             tblOpening.requestFocus();
+            return false;
         } else if (currencyAAutoCompleter.getCurrency() == null) {
-            status = false;
             JOptionPane.showMessageDialog(this, "Invalid Currency.");
             txtCurrency.requestFocus();
+            return false;
         } else if (!Util1.isDateBetween(txtOPDate.getDate())) {
             JOptionPane.showMessageDialog(this, "Invalid Date.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtOPDate.requestFocus();
+            return false;
+        } else if (type == STKOPENINGPAYABLE) {
+            if (traderAutoCompleter.getTrader() == null) {
+                JOptionPane.showMessageDialog(this, "Invalid Trader");
+                txtLocation.requestFocus();
+                return false;
+            }
         }
-        return status;
+        return true;
     }
 
     public void historyOP() {
@@ -481,11 +482,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 OPHisDetail op = new OPHisDetail();
                 op.setStockCode(row.isMapped("SystemCode") ? Util1.convertToUniCode(row.get("SystemCode")) : "");
                 op.setStockName(row.isMapped("StockName") ? Util1.convertToUniCode(row.get("StockName")) : "");
-                op.setWeight(row.isMapped("Weight") ? Float.valueOf(row.get("Weight")) : 0.0f);
+                op.setWeight(row.isMapped("Weight") ? Double.valueOf(row.get("Weight")) : 0.0);
                 op.setWeightUnit(row.isMapped("WeightUnit") ? Util1.convertToUniCode(row.get("WeightUnit")) : "");
-                op.setQty(row.isMapped("Qty") ? Float.valueOf(row.get("Qty")) : 0.0f);
+                op.setQty(row.isMapped("Qty") ? Double.valueOf(row.get("Qty")) : 0.0);
                 op.setUnitCode(row.isMapped("Unit") ? Util1.convertToUniCode(row.get("Unit")) : "");
-                op.setPrice(row.isMapped("Price") ? Float.valueOf(row.get("Price")) : 0.0f);
+                op.setPrice(row.isMapped("Price") ? Double.valueOf(row.get("Price")) : 0.0);
                 op.setAmount(op.getQty() * op.getPrice());
                 listOP.add(op);
 

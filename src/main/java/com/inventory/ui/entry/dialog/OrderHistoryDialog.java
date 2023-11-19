@@ -199,7 +199,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     public void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
-        filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());

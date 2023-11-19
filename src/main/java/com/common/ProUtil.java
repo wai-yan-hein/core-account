@@ -87,6 +87,13 @@ public class ProUtil {
     public static final String TRANSFER_PRINT_COUNT = "transfer.print.count";
     public static final String STOCKIO_PRINT_COUNT = "stockio.print.count";
     public static final String MILLING_PRINT_COUNT = "milling.print.count";
+    public static final String STOCK_NO_UNIT = "stock.no.unit";
+    public static final String MAX_STOCK_WEIGHT = "max.stock.weight";
+    public static final String PUR_RD_DIS = "purchase.round.down.discount";
+
+    public static boolean isPurRDDis() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(PUR_RD_DIS));
+    }
 
     public static boolean isDisableDrVoucher() {
         return Util1.getBoolean(Global.hmRoleProperty.get(DISABLE_DR_VOUCHER));
@@ -138,6 +145,10 @@ public class ProUtil {
 
     public static String getProperty(String key) {
         return Global.hmRoleProperty.get(key);
+    }
+
+    public static boolean isStockNoUnit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_NO_UNIT));
     }
 
     public static boolean isDisableMill() {
@@ -226,6 +237,11 @@ public class ProUtil {
 
     public static Integer getDepId() {
         return Util1.getBoolean(Global.hmRoleProperty.get("department.filter")) ? Global.deptId : 0;
+    }
+
+    public static double getMaxSW() {
+        double wt = Util1.getDouble(Global.hmRoleProperty.get(MAX_STOCK_WEIGHT));
+        return wt == 0 ? 500 : wt;
     }
 
     public static Date lockDate() {
