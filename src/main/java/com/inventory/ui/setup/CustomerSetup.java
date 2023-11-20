@@ -11,6 +11,7 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -40,6 +41,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -133,7 +135,14 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void initMain() {
         initCombo();
         initTable();
+        initRowHeader();
         searchCustomer();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCustomer, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initSpinner() {
@@ -177,15 +186,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.getColumnModel().getColumn(3).setPreferredWidth(40);// Active   
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
-        tblCustomer.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblCustomer.getSelectedRow() >= 0) {
-                    selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
-                    setCustomer(customerTabelModel.getCustomer(selectRow));
-                }
-
-            }
-        });
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
         sorter.toggleSortOrder(1);
@@ -383,6 +383,13 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
     };
 
+    private void setCustomer() {
+        if (tblCustomer.getSelectedRow() >= 0) {
+            selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
+            setCustomer(customerTabelModel.getCustomer(selectRow));
+        }
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -447,7 +454,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         jLabel17 = new javax.swing.JLabel();
         txtCountry = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
@@ -851,12 +858,17 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         ));
         tblCustomer.setName("tblCustomer"); // NOI18N
         tblCustomer.setRowHeight(Global.tblRowHeight);
+        tblCustomer.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblCustomerMouseClicked(evt);
+            }
+        });
         tblCustomer.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 tblCustomerKeyReleased(evt);
             }
         });
-        jScrollPane2.setViewportView(tblCustomer);
+        scroll.setViewportView(tblCustomer);
 
         jLabel6.setText("Record :");
 
@@ -886,7 +898,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE))
                     .addComponent(txtFilter)
-                    .addComponent(jScrollPane2))
+                    .addComponent(scroll))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -899,7 +911,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2))
+                        .addComponent(scroll))
                     .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1005,6 +1017,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         printFile();
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void tblCustomerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCustomerMouseClicked
+        // TODO add your handling code here:
+        setCustomer();
+    }//GEN-LAST:event_tblCustomerMouseClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDownload;
     private javax.swing.JButton btnGroup;
@@ -1030,13 +1047,13 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblGroup;
     private javax.swing.JLabel lblGroup1;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelEntry;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JSpinner spPercent;
     private javax.swing.JTable tblCustomer;
     private javax.swing.JTextField txtAccount;

@@ -14,6 +14,7 @@ import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -29,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -112,7 +114,14 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         batchLock(!Global.batchLock);
         initCombo();
         initTable();
+        initRowHeader();
         searchTrader();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCustomer, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initCombo() {
@@ -325,7 +334,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         jLabel8 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
         cboGroup = new javax.swing.JComboBox<>();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
@@ -572,7 +581,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 tblCustomerKeyReleased(evt);
             }
         });
-        jScrollPane2.setViewportView(tblCustomer);
+        scroll.setViewportView(tblCustomer);
 
         txtFilter.setFont(Global.textFont);
         txtFilter.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -622,7 +631,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                    .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                     .addComponent(txtFilter)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -638,7 +647,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2)
+                        .addComponent(scroll)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -715,13 +724,13 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblGroup1;
     private javax.swing.JLabel lblGroup2;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelEntry;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblCustomer;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtCusAddress;

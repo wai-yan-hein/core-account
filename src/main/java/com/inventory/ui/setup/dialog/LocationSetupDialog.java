@@ -192,15 +192,16 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void save() {
         if (isValidEntry()) {
-            inventoryRepo.saveLocation(location).subscribe((t) -> {
+            inventoryRepo.saveLocation(location).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     locationTableModel.setLocation(t, selectRow);
                 } else {
                     locationTableModel.addLocation(t);
                 }
+            }).doOnTerminate(() -> {
+                sendMessage(location.getLocName());
                 clear();
-                sendMessage(t.getLocName());
-            });
+            }).subscribe();
         }
     }
 
@@ -247,6 +248,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             if (cboWH.getSelectedItem() instanceof WareHouse wh) {
                 WareHouseKey key = wh.getKey();
                 location.setWareHouseCode(key == null ? null : key.getCode());
+                location.setWareHouseName(wh.getDescription());
 
             }
             location.setUserCode(txtUserCode.getText());

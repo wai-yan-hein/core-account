@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -206,16 +207,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Invalid Cash");
             txtCash.requestFocus();
         }
-        if (txtDiscount.getText().isEmpty()) {
-            status = false;
-            JOptionPane.showMessageDialog(this, "Invalid Discount");
-            txtDiscount.requestFocus();
-        }
-        if (txtTax.getText().isEmpty()) {
-            status = false;
-            JOptionPane.showMessageDialog(this, "Invalid Tax");
-            txtTax.requestFocus();
-        }
         if (txtBal.getText().isEmpty()) {
             status = false;
             JOptionPane.showMessageDialog(this, "Invalid Balance");
@@ -233,10 +224,12 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             setting.setKey(key);
             setting.setSourceAcc(sourceCompleter.getCOA().getKey().getCoaCode());
             setting.setPayAcc(cashCompleter.getCOA().getKey().getCoaCode());
-            setting.setDiscountAcc(disCompleter.getCOA().getKey().getCoaCode());
-            setting.setTaxAcc(taxCompleter.getCOA().getKey().getCoaCode());
             setting.setBalanceAcc(balCompleter.getCOA().getKey().getCoaCode());
             setting.setDeptCode(departmentAutoCompleter.getDepartment().getKey().getDeptCode());
+            ChartOfAccount dis = disCompleter.getCOA();
+            setting.setDiscountAcc(dis == null ? null : dis.getKey().getCoaCode());
+            ChartOfAccount tax = taxCompleter.getCOA();
+            setting.setTaxAcc(tax == null ? null : tax.getKey().getCoaCode());
         }
         return status;
     }

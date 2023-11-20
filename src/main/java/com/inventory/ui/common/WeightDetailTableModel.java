@@ -51,7 +51,7 @@ public class WeightDetailTableModel extends DefaultTableModel {
             }
             calTotal(row);
             observer.selected("CAL_TOTAL", "CAL_TOTAL");
-            addNewRow();
+            addNewRow(true);
 
         }
 
@@ -73,10 +73,13 @@ public class WeightDetailTableModel extends DefaultTableModel {
         fireTableCellUpdated(row, colCount);
     }
 
-    public void addNewRow() {
+    public void addNewRow(boolean foucs) {
         if (needAddRow()) {
             Object[] rowData = new Object[15];
             addRow(rowData);
+            if (foucs) {
+                focusTable();
+            }
         }
     }
 

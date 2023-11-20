@@ -10,6 +10,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -52,6 +53,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -155,6 +157,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initData();
         initCombo();
         initTable();
+        initRowHeader();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblStock, 30);
+        s1.setRowHeaderView(list);
     }
 
     private void initData() {
@@ -652,7 +661,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
+        s1 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         panelStock = new javax.swing.JPanel();
@@ -759,7 +768,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         ));
         tblStock.setName("tblStock"); // NOI18N
         tblStock.setRowHeight(Global.tblRowHeight);
-        jScrollPane1.setViewportView(tblStock);
+        s1.setViewportView(tblStock);
 
         panelStock.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panelStock.setName("panelStock"); // NOI18N
@@ -1698,7 +1707,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(s1)
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1716,7 +1725,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
+                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1965,7 +1974,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField lblRecord;
     private javax.swing.JLabel lblStatus;
@@ -1973,6 +1981,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JPanel panelUnit;
     private javax.swing.JRadioButton rdoActive;
     private javax.swing.JRadioButton rdoDel;
+    private javax.swing.JScrollPane s1;
     private javax.swing.JTable tblStock;
     private javax.swing.JTextField txtBarCode;
     private javax.swing.JTextField txtBrand;

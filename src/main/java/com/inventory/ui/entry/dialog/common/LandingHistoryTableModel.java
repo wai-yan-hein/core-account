@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LandingHistoryTableModel extends AbstractTableModel {
 
     private List<LandingHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Trader", "Stock Name", "Remark", "Cargo", "Vou Total ", "Created By"};
+    private final String[] columnNames = {"Date", "Vou No", "Trader", "Stock Name", "Remark", "Cargo", "Vou Total ", "Created By", "Post"};
 
     @Override
     public String getColumnName(int column) {
@@ -94,6 +94,10 @@ public class LandingHistoryTableModel extends AbstractTableModel {
                     case 7 -> {
                         //user
                         return Global.hmUser.get(his.getCreatedBy());
+                    }
+                    case 8 -> {
+                        //post
+                        return his.isPost();
                     }
                 }
             }

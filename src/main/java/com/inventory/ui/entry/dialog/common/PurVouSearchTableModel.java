@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PurVouSearchTableModel extends AbstractTableModel {
 
     private List<VPurchase> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Supplier", "Remark", "Reference", "Paid Amt", "V-Total",};
+    private final String[] columnNames = {"Date", "Vou No", "Supplier", "Reference", "Remark", "Paid Amt", "V-Total",};
 
     @Override
     public String getColumnName(int column) {
@@ -77,10 +77,10 @@ public class PurVouSearchTableModel extends AbstractTableModel {
                     }
                     case 3 -> {
                         //remark
-                        return his.getRemark();
+                        return his.getReference();
                     }
                     case 4 -> {
-                        return his.getReference();
+                        return his.getRemark();
                         //user
                     }
                     case 5 -> {

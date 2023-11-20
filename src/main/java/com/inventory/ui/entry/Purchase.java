@@ -13,6 +13,7 @@ import com.common.Global;
 import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,7 +48,6 @@ import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.ui.entry.dialog.PurchaseWeightLossPriceDialog;
-import com.inventory.ui.entry.dialog.SaleWeightLossPriceDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -74,6 +74,7 @@ import java.util.Map;
 import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -119,7 +120,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private PurHis ph = new PurHis();
     private Mono<List<Location>> monoLoc;
     private Mono<List<StockUnit>> monoUnit;
-    private List<StockUnit> listUnit;
     private final PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private final GRNTableModel grnTableModel = new GRNTableModel();
     private BatchSearchDialog batchDialog;
@@ -203,10 +203,17 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     public void initMain() {
         initCombo();
         initPurTable();
+        initRowHeader();
         initPanelExpesne();
         initStockInfo();
         assignDefaultValue();
         txtCus.requestFocus();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblPur, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initStockInfo() {
@@ -334,7 +341,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         });
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         monoUnit.subscribe((t) -> {
-            listUnit = t;
             tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
         });
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
@@ -1109,7 +1115,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtComPercent = new javax.swing.JFormattedTextField();
         jLabel23 = new javax.swing.JLabel();
         txtComAmt = new javax.swing.JFormattedTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblPur = new javax.swing.JTable();
         txtDefaultCom = new javax.swing.JFormattedTextField();
         txtQty = new javax.swing.JFormattedTextField();
@@ -1722,7 +1728,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 tblPurKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblPur);
+        scroll.setViewportView(tblPur);
 
         txtDefaultCom.setName("txtDefaultCom"); // NOI18N
 
@@ -1735,7 +1741,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(scroll)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(15, 15, 15)
@@ -1753,7 +1759,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 .addGap(6, 6, 6)
                 .addComponent(panelPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2117,7 +2123,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
@@ -2126,6 +2131,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private javax.swing.JPanel panelExpense;
     private javax.swing.JPanel panelPur;
     private javax.swing.JPanel panelStockInfo;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblExpense;
     private javax.swing.JTable tblPur;
     private javax.swing.JTextField txtBatchNo;

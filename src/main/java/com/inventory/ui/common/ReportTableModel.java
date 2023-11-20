@@ -7,7 +7,6 @@ package com.inventory.ui.common;
 
 import com.inventory.model.VRoleMenu;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.swing.table.AbstractTableModel;
@@ -42,8 +41,7 @@ public class ReportTableModel extends AbstractTableModel {
     }
 
     public ReportTableModel(String columName) {
-        this.columnNames.add(0, "No");
-        this.columnNames.add(1, columName);
+        this.columnNames.add(columName);
         this.columnNames.add("Excel");
         fireTableStructureChanged();
     }
@@ -53,10 +51,8 @@ public class ReportTableModel extends AbstractTableModel {
         VRoleMenu report = listReport.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                String.valueOf(rowIndex + 1 + ". ");
-            case 1 ->
                 report.getMenuName();
-            case 2 ->
+            case 1 ->
                 excelReport == null ? false : excelReport.contains(report.getMenuUrl());
             default ->
                 null;
@@ -65,7 +61,7 @@ public class ReportTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return columnIndex == 2 ? Boolean.class : String.class;
+        return columnIndex == 1 ? Boolean.class : String.class;
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.inventory.model.WeightHis;
 import com.inventory.model.WeightHisDetail;
 import com.inventory.model.WeightHisKey;
 import com.inventory.model.WeightStatus;
-import com.inventory.ui.common.RowNumberListModel;
 import com.inventory.ui.common.WeightDetailTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.WeightHistoryDialog;
@@ -42,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.swing.AbstractAction;
-import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -71,9 +69,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private final WeightDetailTableModel tableModel = new WeightDetailTableModel();
-    private final RowNumberListModel rowNumberListModel = new RowNumberListModel();
     private WeightHistoryDialog dialog;
-
     private WeightHis his = new WeightHis();
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -113,14 +109,9 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void initRowHeader() {
-        JList rowHeader = new JList(rowNumberListModel);
-        rowHeader.setFixedCellWidth(50);
-        rowHeader.setFixedCellHeight(tblWeight.getRowHeight()
-                + tblWeight.getRowMargin());
-//                             + table.getIntercellSpacing().height);
-        rowNumberListModel.setRowCount(tableModel.getRowCount());
-        rowHeader.setCellRenderer(new RowHeaderRenderer(tblWeight));
-        scroll.setRowHeaderView(rowHeader);
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblWeight,30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initTextBox() {
@@ -193,7 +184,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     private void initTable() {
         tableModel.setObserver(this);
         tableModel.setTable(tblWeight);
-        tableModel.addNewRow();
+        tableModel.addNewRow(false);
         tblWeight.getTableHeader().setFont(Global.tblHeaderFont);
         tblWeight.setCellSelectionEnabled(true);
         tblWeight.setRowHeight(Global.tblRowHeight);
@@ -298,7 +289,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
 
     private void clearTableModel() {
         tableModel.clear();
-        tableModel.addNewRow();
+        tableModel.addNewRow(false);
     }
 
     private void clearTextBox() {
@@ -320,29 +311,18 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void clear(boolean focus) {
-        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
-        if (yes) {
-            his = new WeightHis();
-            assignDefaultValue();
-            disableForm(true);
-            clearTableModel();
-            setRowCount();
-            clearTextBox();
-            if (focus) {
-                txtTrader.requestFocus();
-            }
+        his = new WeightHis();
+        assignDefaultValue();
+        disableForm(true);
+        clearTableModel();
+        clearTextBox();
+        if (focus) {
+            txtTrader.requestFocus();
         }
     }
 
     private void disableForm(boolean status) {
-        txtDate.setEnabled(status);
-        txtTrader.setEnabled(status);
-        txtStock.setEnabled(status);
-        txtDesp.setEnabled(status);
-        txtRemark.setEnabled(status);
-        cboStatus.setEnabled(status);
-        chkDraft.setEnabled(status);
-        tblWeight.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("print", status);
         observer.selected("deleted", status);
@@ -504,11 +484,6 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         txtWeightTotal.setValue(ttlWt);
         txtBag.setValue(getListDetail().size());
         lblRec.setText(String.valueOf(rowCount));
-        setRowCount();
-    }
-
-    private void setRowCount() {
-        rowNumberListModel.setRowCount(tableModel.getRowCount());
     }
 
     private void observeMain() {
@@ -557,7 +532,6 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             for (int row = 0; row < tblWeight.getRowCount(); row++) {
                 tableModel.calTotal(row);
             }
-            setRowCount();
         } else {
             addNewRow();
         }
@@ -1001,7 +975,10 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void newForm() {
-        clear(true);
+        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
+        if (yes) {
+            clear(true);
+        }
     }
 
     @Override

@@ -255,8 +255,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         initComponents();
         initKeyFoucsManager();
         initPopup();
-        addMouseAndKeyboardListeners();
-        startInactivityTimer();
+        //addMouseAndKeyboardListeners();
+        //startInactivityTimer();
+    }
+
+    private void exitProgram() {
+        int confirmed = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to exit?", "Exit Confirmation",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirmed == JOptionPane.YES_OPTION) {
+            dispose();
+            System.exit(0);
+        }
     }
 
     private void initKeyFoucsManager() {
@@ -975,13 +985,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 d.setLocationRelativeTo(null);
                 d.setVisible(true);
                 if (d.getCompanyInfo() == null) {
-                    int confirmed = JOptionPane.showConfirmDialog(null,
-                            "Are you sure you want to exit?", "Exit Confirmation",
-                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                    if (confirmed == JOptionPane.YES_OPTION) {
-                        dispose();
-                        System.exit(0);
-                    }
+                    exitProgram();
                 }
                 assignCompany(d.getCompanyInfo());
             } else {
@@ -1775,8 +1779,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
         // TODO add your handling code here:
-        if (control != null)
+        if (control != null) {
             control.print();
+        }
     }//GEN-LAST:event_btnPrintActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
@@ -1805,6 +1810,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
+        exitProgram();
     }//GEN-LAST:event_formWindowClosing
 
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized

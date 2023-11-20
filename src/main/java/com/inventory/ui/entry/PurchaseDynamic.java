@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
@@ -908,6 +909,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     public void historyLanding() {
         if (landingDialog == null) {
             landingDialog = new LandingHistoryDialog(Global.parentForm);
+            landingDialog.setOther(true);
             landingDialog.setInventoryRepo(inventoryRepo);
             landingDialog.setUserRepo(userRepo);
             landingDialog.setObserver(this);
@@ -1098,6 +1100,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 } else if (t.size() == 1) {
                     VPurchase p1 = t.get(0);
                     param.put("p_total_qty", p1.getQty());
+                    param.put("p_qty_unit", p1.getPurUnitName());
                 }
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(t));
                 JsonDataSource ds = new JsonDataSource(stream);
@@ -2645,7 +2648,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     @Override
     public void newForm() {
-        clear(true);
+        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
+        if (yes) {
+            clear(true);
+        }
     }
 
     @Override

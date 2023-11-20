@@ -17,6 +17,7 @@ import com.common.JasperReportUtil;
 import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -81,6 +82,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -322,10 +324,17 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initStockBalance();
         initCombo();
         initSaleTable();
+        initRowHeader();
         initPanelExpense();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblSale, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initStockBalance() {
@@ -1185,7 +1194,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtGrandTotal = new javax.swing.JFormattedTextField();
         jSeparator2 = new javax.swing.JSeparator();
         chkPaid = new javax.swing.JCheckBox();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblSale = new javax.swing.JTable();
         deskPane = new javax.swing.JDesktopPane();
         jButton1 = new javax.swing.JButton();
@@ -1838,7 +1847,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 tblSaleKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblSale);
+        scroll.setViewportView(tblSale);
 
         javax.swing.GroupLayout deskPaneLayout = new javax.swing.GroupLayout(deskPane);
         deskPane.setLayout(deskPaneLayout);
@@ -1875,7 +1884,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(scroll, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1884,7 +1893,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -2289,7 +2298,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
@@ -2297,6 +2305,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelInfo;
     private javax.swing.JPanel panelSale;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblSale;
     private javax.swing.JTextField txtBatchNo;
     private javax.swing.JTextField txtCurrency;

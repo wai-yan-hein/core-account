@@ -8,9 +8,11 @@ package com.inventory.ui.setup;
 import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -37,6 +39,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -105,8 +108,16 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     public void initMain() {
+        ComponentUtil.addFocusListener(this);
         initCombo();
         initTable();
+        initRowHeader();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCustomer, 30);
+        s1.setRowHeaderView(list);
     }
 
     private void initSpinner() {
@@ -157,16 +168,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCustomer.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblCustomer.getSelectedRow() >= 0) {
-                    selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
-                    setCustomer(supplierTabelModel.getCustomer(selectRow));
-
-                }
-
-            }
-        });
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
         searchSupplier();
@@ -358,6 +359,14 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
     };
 
+    private void setSupplier() {
+        if (tblCustomer.getSelectedRow() >= 0) {
+            selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
+            setCustomer(supplierTabelModel.getCustomer(selectRow));
+
+        }
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -407,7 +416,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         spPercent = new javax.swing.JSpinner();
         jLabel30 = new javax.swing.JLabel();
         cboDept = new javax.swing.JComboBox<>();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        s1 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
@@ -658,12 +667,17 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         ));
         tblCustomer.setName("tblCustomer"); // NOI18N
         tblCustomer.setRowHeight(Global.tblRowHeight);
+        tblCustomer.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblCustomerMouseClicked(evt);
+            }
+        });
         tblCustomer.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 tblCustomerComponentShown(evt);
             }
         });
-        jScrollPane2.setViewportView(tblCustomer);
+        s1.setViewportView(tblCustomer);
 
         jLabel6.setText("Record :");
 
@@ -690,7 +704,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jScrollPane2)
+                            .addComponent(s1)
                             .addComponent(txtFilter))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -708,7 +722,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE))
+                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE))
                     .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -756,7 +770,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void txtFilterFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtFilterFocusGained
         // TODO add your handling code here:
-        txtFilter.selectAll();
     }//GEN-LAST:event_txtFilterFocusGained
 
     private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
@@ -771,6 +784,11 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             dialog.setVisible(true);
         });
     }//GEN-LAST:event_btnGroupActionPerformed
+
+    private void tblCustomerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCustomerMouseClicked
+        // TODO add your handling code here:
+        setSupplier();
+    }//GEN-LAST:event_tblCustomerMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -793,10 +811,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelEntry;
+    private javax.swing.JScrollPane s1;
     private javax.swing.JSpinner spPercent;
     private javax.swing.JTable tblCustomer;
     private javax.swing.JTextField txtAccount;
