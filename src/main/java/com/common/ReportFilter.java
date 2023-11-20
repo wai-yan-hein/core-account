@@ -89,6 +89,8 @@ public class ReportFilter {
     private String glVouNo;
     private boolean local;
     private boolean orderFavorite;
+    private boolean deleted;
+    private boolean active;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

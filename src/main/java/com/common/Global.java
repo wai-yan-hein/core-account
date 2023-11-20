@@ -6,6 +6,7 @@
 package com.common;
 
 import com.acc.model.DateModel;
+import com.inventory.model.AccSetting;
 import com.user.model.AppUser;
 import java.awt.Color;
 import java.awt.Font;
@@ -60,6 +61,7 @@ public class Global {
     public static String fontName;
     public static Map<String, String> hmRoleProperty = new HashMap<>();
     public static Map<String, String> hmUser = new HashMap<>();
+    public static Map<String,AccSetting> hmAcc = new HashMap<>();
     public static String currency;
     public static List<DateModel> listDate;
     public static double version = 2.0;

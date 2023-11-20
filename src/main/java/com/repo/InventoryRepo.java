@@ -119,6 +119,8 @@ import com.inventory.model.VTransfer;
 import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.inventory.model.WareHouse;
+import com.inventory.model.WareHouseKey;
 import com.inventory.model.WeightHis;
 import com.inventory.model.WeightHisDetail;
 import com.inventory.model.WeightHisKey;
@@ -891,6 +893,24 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<WareHouse> findWareHouse(String code) {
+        WareHouseKey key = new WareHouseKey();
+        key.setCompCode(Global.compCode);
+        key.setCode(code);
+        if (localDatabase) {
+//            return h2Repo.find(key);
+        }
+        return inventoryApi.post()
+                .uri("/warehouse/findWareHouse")
+                .body(Mono.just(key), WareHouseKey.class)
+                .retrieve()
+                .bodyToMono(WareHouse.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<VouStatus> findVouStatus(String code) {
         VouStatusKey key = new VouStatusKey();
         key.setCompCode(Global.compCode);
@@ -1411,6 +1431,23 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<WareHouse>> getWareHouse() {
+        /*if (localDatabase) {
+        return h2Repo.getLabourGroup();
+        }*/
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/warehouse/getWareHouse")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(WareHouse.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Job>> getJob(boolean isFinished, int deptId) {
         if (localDatabase) {
             return h2Repo.getJob(isFinished, deptId);
@@ -1681,6 +1718,23 @@ public class InventoryRepo {
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
                         h2Repo.save(t);
+                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<WareHouse> saveWareHouse(WareHouse vou) {
+        return inventoryApi.post()
+                .uri("/warehouse/saveWareHouse")
+                .body(Mono.just(vou), WareHouse.class)
+                .retrieve()
+                .bodyToMono(WareHouse.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        //h2Repo.save(t);
                     }
                 })
                 .onErrorResume((e) -> {

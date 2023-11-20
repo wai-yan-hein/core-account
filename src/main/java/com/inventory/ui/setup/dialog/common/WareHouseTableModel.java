@@ -5,7 +5,9 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.Location;
+import com.inventory.model.WareHouse;
+import com.inventory.model.OrderStatus;
+import com.inventory.model.VouStatus;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -14,17 +16,30 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author Lenovo
  */
-public class LocationTableModel extends AbstractTableModel {
+public class WareHouseTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Code", "Location", "Ware House"};
-    private List<Location> listLocation = new ArrayList<>();
+    private final String[] columnNames = {"Code", "Name"};
+    private List<WareHouse> listVou = new ArrayList<>();
 
-    public LocationTableModel() {
+    public WareHouseTableModel() {
+    }
+
+    public WareHouseTableModel(List<WareHouse> listVou) {
+        this.listVou = listVou;
+    }
+
+    public List<WareHouse> getListVou() {
+        return listVou;
+    }
+
+    public void setListVou(List<WareHouse> listVou) {
+        this.listVou = listVou;
+        fireTableDataChanged();
     }
 
     @Override
     public int getRowCount() {
-        return listLocation == null ? 0 : listLocation.size();
+        return listVou == null ? 0 : listVou.size();
     }
 
     @Override
@@ -39,14 +54,12 @@ public class LocationTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Location location = listLocation.get(rowIndex);
+        WareHouse category = listVou.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                location.getUserCode();
+                category.getUserCode();
             case 1 ->
-                location.getLocName();
-            case 2->
-                location.getWareHouseName();
+                category.getDescription();
             default ->
                 null;
         };
@@ -62,36 +75,27 @@ public class LocationTableModel extends AbstractTableModel {
         return false;
     }
 
-    public List<Location> getListLocation() {
-        return listLocation;
+    public WareHouse getOrderStatus(int row) {
+        return listVou.get(row);
     }
 
-    public void setListLocation(List<Location> listLocation) {
-        this.listLocation = listLocation;
-        fireTableDataChanged();
-    }
-
-    public Location getLocation(int row) {
-        return listLocation.get(row);
-    }
-
-    public void setLocation(Location location, int row) {
-        if (!listLocation.isEmpty()) {
-            listLocation.set(row, location);
+    public void setOrderStatus(WareHouse category, int row) {
+        if (!listVou.isEmpty()) {
+            listVou.set(row, category);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public void addLocation(Location item) {
-        if (!listLocation.isEmpty()) {
-            listLocation.add(item);
-            fireTableRowsInserted(listLocation.size() - 1, listLocation.size() - 1);
+    public void addOrderStatus(WareHouse item) {
+        if (!listVou.isEmpty()) {
+            listVou.add(item);
+            fireTableRowsInserted(listVou.size() - 1, listVou.size() - 1);
         }
     }
 
     public void remove(int row) {
-        if (listLocation.isEmpty()) {
-            listLocation.remove(row);
+        if (listVou.isEmpty()) {
+            listVou.remove(row);
             fireTableRowsDeleted(row, row);
         }
     }

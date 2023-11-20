@@ -307,7 +307,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
             int roundAmt = (int) amount;
             pur.setPrice(price);
             if (ProUtil.isPurRDDis()) {
-                int netAmt = Util1.roundDownToNearest100(roundAmt);
+                int netAmt = Util1.roundDownToNearest10(roundAmt);
                 double discount = roundAmt - netAmt;
                 observer.selected("DISCOUNT", discount);
             }

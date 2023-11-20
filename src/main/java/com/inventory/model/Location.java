@@ -10,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import lombok.Data;
 
@@ -57,6 +58,10 @@ public class Location {
     private boolean deleted;
     @Column(name = "active")
     private boolean active;
+    @Column(name = "warehouse_code")
+    private String wareHouseCode;
+    @Transient
+    private String wareHouseName;
 
     public Location(String locCode, String locName) {
         this.key = new LocationKey();

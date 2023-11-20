@@ -34,6 +34,8 @@ public class MessageType {
     public static final String CRITERIA = "CRITERIA";
     public static final String JOB = "JOB";
     public static final String PATTERN = "PATTERN";
+    public static final String WARE_HOUSE = "WARE_HOUSE";
+
     //account
     public static final String DEPARTMENT_ACC = "DEPARTMENT_ACC";
     public static final String TRADER_ACC = "TRADER_ACC";

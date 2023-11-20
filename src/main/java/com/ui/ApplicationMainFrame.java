@@ -30,6 +30,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.common.YNOptionPane;
 import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
@@ -38,7 +39,6 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.LandingEntry;
 import com.inventory.ui.entry.Manufacture;
-import com.inventory.ui.entry.OrderEntry;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
@@ -109,6 +109,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
@@ -129,8 +130,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private UserRepo userRepo;
     @Autowired
     private Sale sale;
-    @Autowired
-    private OrderEntry order;
     @Autowired
     private SaleByBatch saleByBatch;
     @Autowired
@@ -231,7 +230,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private long lastActivityTime;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private KeyEventDispatcher keyEventDispatcher; // Maintain a reference to the dispatcher
-
+    private JDialog ynDialog;
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
         JMenuItem actionMenu = (JMenuItem) evt.getSource();
         String menuName = actionMenu.getText();
@@ -988,11 +987,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             } else {
                 assignCompany(t.get(0));
             }
+            initAccSetting();
             initDate();
             departmentAssign();
             initMenu();
             sseListener();
-
             lblCompName.setText(Global.companyName);
             lblUserName.setText(Global.loginUser.getUserLongName());
             userRepo.setupProperty().doOnSuccess((u) -> {
@@ -1052,11 +1051,23 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void initUser() {
-        userRepo.getAppUser().subscribe((list) -> {
-            list.forEach((t) -> {
-                Global.hmUser.put(t.getUserCode(), t.getUserShortName());
-            });
-        });
+        userRepo.getAppUser().doOnSuccess((list) -> {
+            if (list != null) {
+                list.forEach((t) -> {
+                    Global.hmUser.put(t.getUserCode(), t.getUserShortName());
+                });
+            }
+        }).subscribe();
+    }
+
+    private void initAccSetting() {
+        inventoryRepo.getAccSetting().doOnSuccess((list) -> {
+            if (list != null) {
+                list.forEach((t) -> {
+                    Global.hmAcc.put(t.getKey().getType(), t);
+                });
+            }
+        }).subscribe();
     }
 
     private void departmentAssign() {
@@ -1348,17 +1359,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void showExitConfirmation() {
-        int confirmed = JOptionPane.showConfirmDialog(this,
-                "Do you want to exit the program due to inactivity? Program will exit within 5 minutes.",
-                "Exit Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-        if (confirmed == JOptionPane.YES_OPTION) {
-            exitProgram();
+        if (ynDialog != null) {
+            logoutProgram();
+        }
+        YNOptionPane optionPane = new YNOptionPane("Do you want to exit the program due to inactivity? Program will logout within 10 minutes.", JOptionPane.WARNING_MESSAGE);
+        ynDialog = optionPane.createDialog("Edit");
+        ynDialog.setVisible(true);
+        int yn = (int) optionPane.getValue();
+        if (yn == JOptionPane.YES_OPTION) {
+            logoutProgram();
         }
     }
 
-    private void exitProgram() {
-        System.out.println("Exiting due to inactivity.");
+    private void logoutProgram() {
+        log.info("logout due to inactivity.");
         if (inactivityTimer != null) {
             inactivityTimer.cancel();
         }
@@ -1377,14 +1391,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             public void run() {
                 checkInactivity();
             }
-        }, 0, 60 * 1000); // Check every minute
+        }, 5, 60 * 1000); // Check every minute
     }
 
     private void checkInactivity() {
         long currentTime = System.currentTimeMillis();
         long inactiveDuration = currentTime - lastActivityTime;
 
-        if (inactiveDuration >= 5 * 60 * 1000) { // 5 minutes in milliseconds
+        if (inactiveDuration >= 10 * 60 * 1000) { // 5 minutes in milliseconds
             // Trigger exit due to inactivity
             SwingUtilities.invokeLater(() -> showExitConfirmation());
         }
@@ -1733,27 +1747,30 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        if (control != null)
+        if (control != null) {
             control.save();
+        }
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnHistoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistoryActionPerformed
         // TODO add your handling code here:
-        if (control != null)
+        if (control != null) {
             control.history();
+        }
     }//GEN-LAST:event_btnHistoryActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
-        if (control != null)
+        if (control != null) {
             control.delete();
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
         // TODO add your handling code here:
-        if (control != null)
-
+        if (control != null) {
             control.newForm();
+        }
     }//GEN-LAST:event_btnNewActionPerformed
 
     private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed

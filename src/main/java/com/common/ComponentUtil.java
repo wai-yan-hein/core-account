@@ -6,19 +6,23 @@ package com.common;
 
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JDialog;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class ComponentUtil {
 
     public static void setComponentHierarchyEnabled(Component component, boolean enabled) {
@@ -44,13 +48,32 @@ public class ComponentUtil {
 
     }
 
-    public static void addFocusListener(JPanel panel) {
-        for (Component component : panel.getComponents()) {
-            if (component instanceof JTextField) {
-                JTextField textField = (JTextField) component;
-                textField.addFocusListener(fa);
-            } else if (component instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
+    public static void addFocusListener(Component component) {
+        if (component instanceof JTextField textField) {
+            textField.addFocusListener(fa); // replace 'yourFocusListener' with your actual focus listener
+        } else if (component instanceof JTextFieldDateEditor txt) {
+            txt.addFocusListener(fa); // replace 'yourFocusListener' with your actual focus listener
+            txt.selectAll();
+        } else if (component instanceof Container container) {
+            for (Component child : container.getComponents()) {
+                addFocusListener(child);
+            }
+        }
+    }
+
+    public static void addFocusListener(JScrollPane pane) {
+        for (Component component : pane.getComponents()) {
+            if (component instanceof JPanel p) {
+                addFocusListener(p);
+            }
+        }
+    }
+
+    public static void enableForm(Container container, boolean status) {
+        for (Component component : container.getComponents()) {
+            component.setEnabled(status);
+            if (component instanceof Container) {
+                enableForm((Container) component, status);
             }
         }
     }

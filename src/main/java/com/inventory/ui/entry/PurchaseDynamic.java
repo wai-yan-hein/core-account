@@ -1021,7 +1021,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtCarNo.setText(ph.getCarNo());
     }
 
-
     private void searchExpense(String vouNo) {
         if (panelExpense.isVisible()) {
             expProgress.setIndeterminate(true);

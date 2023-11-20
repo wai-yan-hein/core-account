@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.acc.common;
+package com.inventory.ui.common;
 
-import com.acc.model.ChartOfAccount;
+import com.inventory.model.WareHouse;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
@@ -14,16 +14,16 @@ import javax.swing.event.ListDataListener;
  *
  * @author Lenovo
  */
-public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implements ComboBoxModel<ChartOfAccount> {
+public class WareHouseComboModel extends AbstractListModel<WareHouse> implements ComboBoxModel<WareHouse> {
 
-    private List<ChartOfAccount> data;
-    private ChartOfAccount selected;
+    private List<WareHouse> data;
+    private WareHouse selected;
 
-    public List<ChartOfAccount> getData() {
+    public List<WareHouse> getData() {
         return data;
     }
 
-    public void setData(List<ChartOfAccount> data) {
+    public void setData(List<WareHouse> data) {
         if (data == null) {
             return;
         }
@@ -35,7 +35,7 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
         if (anItem == null) {
             this.selected = null;
             fireContentsChanged(this, -1, -1);
-        } else if (anItem instanceof ChartOfAccount coa) {
+        } else if (anItem instanceof WareHouse coa) {
             this.selected = coa;
             fireContentsChanged(this, -1, -1);
         }
@@ -53,7 +53,7 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
     }
 
     @Override
-    public ChartOfAccount getElementAt(int index) {
+    public WareHouse getElementAt(int index) {
         return data.get(index);
     }
 

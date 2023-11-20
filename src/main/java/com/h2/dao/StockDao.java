@@ -28,6 +28,7 @@ public interface StockDao {
 
     List<Stock> findActiveStock(String compCode);
 
-    List<Stock> search(String stockCode, String stockType, String cat, String brand, String compCode, Integer deptId, boolean orderFavorite);
+    List<Stock> search(String stockCode, String stockType, String cat, 
+            String brand, String compCode, Integer deptId, boolean active,boolean deleted);
 
 }

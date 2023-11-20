@@ -130,7 +130,8 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     }
 
     @Override
-    public List<Stock> search(String stockCode, String stockType, String cat, String brand, String compCode, Integer deptId, boolean orderFavorite) {
+    public List<Stock> search(String stockCode, String stockType, String cat, String brand,
+            String compCode, Integer deptId, boolean active, boolean deleted) {
         List<Stock> list = new ArrayList<>();
         String sql = """
                 select s.*,st.stock_type_name,cat.cat_name
@@ -142,7 +143,8 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                 on s.category_code = cat.cat_code
                 and s.comp_code = cat.comp_code
                 where s.comp_code =?
-                and s.deleted = false
+                and s.deleted = ?
+                and s.active = ?  
                 and (stock_code =? or '-'=?)
                 and (s.stock_type_code =? or '-'=?)
                 and (s.category_code =? or '-'=?)
@@ -150,7 +152,8 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                 and (s.dept_id =? or 0=?)
                 order by st.user_code,cat.user_code,s.user_code,s.stock_name
                 """;
-        ResultSet rs = getResult(sql, compCode, stockCode, stockCode, stockType, stockType, cat, cat, brand, brand, deptId, deptId);
+        ResultSet rs = getResult(sql, compCode, deleted, active,
+                stockCode, stockCode, stockType, stockType, cat, cat, brand, brand, deptId, deptId);
         try {
             while (rs.next()) {
                 //stock_code, comp_code, active, brand_code, stock_name, category_code,

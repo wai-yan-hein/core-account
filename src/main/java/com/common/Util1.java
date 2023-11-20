@@ -519,6 +519,10 @@ public class Util1 {
         return (number / 100) * 100;
     }
 
+    public static int roundDownToNearest10(int number) {
+        return (number / 10) * 10;
+    }
+
     public static double round1(double number) {
         return Math.round(number / 10) * 10;
     }
