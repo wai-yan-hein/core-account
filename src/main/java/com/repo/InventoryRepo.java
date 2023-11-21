@@ -1366,6 +1366,18 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> restoreStock(StockKey key) {
+        return inventoryApi.post()
+                .uri("/setup/restoreStock")
+                .body(Mono.just(key), StockKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<VouStatus>> getVoucherStatus() {
         if (localDatabase) {
             return h2Repo.getVouStatus();

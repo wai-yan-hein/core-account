@@ -15,6 +15,7 @@ import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.common.YNOptionPane;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -2222,8 +2223,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     @Override
     public void delete() {
-        if (stock.getKey() != null) {
-            inventoryRepo.deleteStock(stock.getKey()).subscribe((t) -> {
+        StockKey key = stock.getKey();
+        if (key != null) {
+            if (stock.isDeleted()) {
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure to restore?", "Stock Restore", JOptionPane.YES_OPTION);
+                if (yn == JOptionPane.YES_OPTION) {
+                    inventoryRepo.restoreStock(key).doOnSuccess((t) -> {
+                        stockTableModel.deleteStock(selectRow);
+                    }).doOnTerminate(() -> {
+                        sendMessage(stock.getStockName() + " : restored.");
+                        clear();
+                    }).subscribe();
+                }
+            }
+            inventoryRepo.deleteStock(stock.getKey()).doOnSuccess((t) -> {
                 if (!t.isEmpty()) {
                     JOptionPane.showMessageDialog(this, t.get(0).getMessage());
                 } else {
@@ -2233,7 +2246,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     JOptionPane.showMessageDialog(this, "Deleted.");
                 }
 
-            });
+            }).subscribe();
 
         }
     }

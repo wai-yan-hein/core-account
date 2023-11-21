@@ -14,6 +14,7 @@ import com.common.KeyPropagate;
 import com.common.NumberConverter;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,6 +77,7 @@ import java.util.Map;
 import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -207,8 +209,15 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         initCombo();
         initPanelExpesne();
         initModel();
+        initRowHeader();
         assignDefaultValue();
         txtCus.requestFocus();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblPur, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initModel() {
@@ -1534,7 +1543,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtComPercent = new javax.swing.JFormattedTextField();
         jLabel23 = new javax.swing.JLabel();
         txtComAmt = new javax.swing.JFormattedTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblPur = new javax.swing.JTable();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -2204,7 +2213,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 tblPurKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblPur);
+        scroll.setViewportView(tblPur);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -2217,7 +2226,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1)
+                    .addComponent(scroll)
                     .addComponent(panelPur, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -2227,7 +2236,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addGap(6, 6, 6)
                 .addComponent(panelPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2596,7 +2605,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
@@ -2604,6 +2612,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelExpense;
     private javax.swing.JPanel panelPur;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblExpense;
     private javax.swing.JTable tblPur;
     private javax.swing.JTextField txtBatchNo;
