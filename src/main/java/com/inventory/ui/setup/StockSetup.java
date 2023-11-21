@@ -10,12 +10,10 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
-import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.common.YNOptionPane;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -54,13 +52,11 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
@@ -158,13 +154,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initData();
         initCombo();
         initTable();
-        initRowHeader();
-    }
-
-    private void initRowHeader() {
-        RowHeader header = new RowHeader();
-        JList list = header.createRowHeader(tblStock, 30);
-        s1.setRowHeaderView(list);
     }
 
     private void initData() {
@@ -188,14 +177,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
         tblStock.setDefaultRenderer(Double.class, new TableCellRender());
-        tblStock.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblStock.getSelectedRow() >= 0) {
-                    selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
-                    setStock(selectRow);
-                }
-            }
-        });
         sorter = new TableRowSorter<>(tblStock.getModel());
         tblStock.setRowSorter(sorter);
         swrf = new StartWithRowFilter(txtFilter);
@@ -644,6 +625,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         }
     }
 
+    private void setSelectStock() {
+        selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+        if (selectRow >= 0) {
+            setStock(selectRow);
+        }
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -769,6 +757,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         ));
         tblStock.setName("tblStock"); // NOI18N
         tblStock.setRowHeight(Global.tblRowHeight);
+        tblStock.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblStockMouseClicked(evt);
+            }
+        });
         s1.setViewportView(tblStock);
 
         panelStock.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -1924,6 +1917,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         searchStock();
     }//GEN-LAST:event_rdoDelActionPerformed
 
+    private void tblStockMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblStockMouseClicked
+        // TODO add your handling code here:
+        setSelectStock();
+    }//GEN-LAST:event_tblStockMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
@@ -2235,19 +2233,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         clear();
                     }).subscribe();
                 }
+            } else {
+                inventoryRepo.deleteStock(stock.getKey()).doOnSuccess((t) -> {
+                    if (!t.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, t.get(0).getMessage());
+                    } else {
+                        stockTableModel.deleteStock(selectRow);
+                        sendMessage(stock.getStockName() + " : deleted");
+                        clear();
+                        JOptionPane.showMessageDialog(this, "Deleted.");
+                    }
+                }).subscribe();
             }
-            inventoryRepo.deleteStock(stock.getKey()).doOnSuccess((t) -> {
-                if (!t.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, t.get(0).getMessage());
-                } else {
-                    stockTableModel.deleteStock(selectRow);
-                    sendMessage(stock.getStockName() + " : deleted");
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Deleted.");
-                }
-
-            }).subscribe();
-
         }
     }
 

@@ -74,9 +74,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
-        initRowHeaderHead();
-        initRowHeaderGroup();
-        initRowHeaderChild();
+        //initRowHeaderHead();
+        //initRowHeaderGroup();
+        //initRowHeaderChild();
     }
 
     private void initRowHeaderHead() {
