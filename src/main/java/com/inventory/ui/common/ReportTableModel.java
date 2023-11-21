@@ -41,8 +41,8 @@ public class ReportTableModel extends AbstractTableModel {
     }
 
     public ReportTableModel(String columName) {
-        this.columnNames.add(columName);
-        this.columnNames.add("Excel");
+        this.columnNames.add(0, columName);
+        this.columnNames.add(1, "Excel");
         fireTableStructureChanged();
     }
 

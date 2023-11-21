@@ -167,10 +167,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         initExcel();
         initTableReport();
         initRowHeader();
+        initRowSorter();
         initCombo();
         initDate();
+        getReport();
     }
-     private void initRowHeader() {
+
+    private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblReport, 30);
         scroll.setRowHeaderView(list);
@@ -221,18 +224,18 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblReport.setDefaultRenderer(Object.class, new TableCellRender());
         tblReport.setDefaultRenderer(Boolean.class, new TableCellRender());
-        tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());
-        tblReport.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
-        tblReport.getSelectionModel().addListSelectionListener((e) -> {
-            if (e.getValueIsAdjusting()) {
-                int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
-                btnExcel.setEnabled(row > 0 ? excelReport.contains(tableModel.getReport(row).getMenuUrl()) : false);
-            }
-        });
+        tblReport.getColumnModel().getColumn(0).setPreferredWidth(900);
+        tblReport.getColumnModel().getColumn(1).setPreferredWidth(50);
+    }
+
+    private void initRowSorter() {
         sorter = new TableRowSorter(tblReport.getModel());
         tblReport.setRowSorter(sorter);
-        getReport();
+    }
+
+    private void setEnableExcel() {
+        int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
+        btnExcel.setEnabled(row > 0 ? excelReport.contains(tableModel.getReport(row).getMenuUrl()) : false);
     }
 
     private void getReport() {
@@ -642,6 +645,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             }
         ));
         tblReport.setRowHeight(26);
+        tblReport.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblReportMouseClicked(evt);
+            }
+        });
         scroll.setViewportView(tblReport);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -1203,6 +1211,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         // TODO add your handling code here:
         Util1.openFolder(exporter.getLastPath());
     }//GEN-LAST:event_btnSIFActionPerformed
+
+    private void tblReportMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblReportMouseClicked
+        // TODO add your handling code here:
+        setEnableExcel();
+    }//GEN-LAST:event_tblReportMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

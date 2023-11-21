@@ -8,16 +8,18 @@ import com.inventory.ui.common.RowNumberListModel;
 import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class RowHeader {
 
     private RowNumberListModel rowNumberListModel = new RowNumberListModel();
 
-    public JList createRowHeader(JTable table,int width) {
+    public JList createRowHeader(JTable table, int width) {
         addListener(table);
         JList rowHeader = new JList(rowNumberListModel);
         rowHeader.setFixedCellWidth(width);
@@ -31,8 +33,8 @@ public class RowHeader {
 
     private void addListener(JTable table) {
         table.getModel().addTableModelListener((e) -> {
-            if (e.getType() == TableModelEvent.INSERT || e.getType() == TableModelEvent.DELETE) {
-                rowNumberListModel.setRowCount(table.getRowCount());
+            if (e.getType() == TableModelEvent.INSERT || e.getType() == TableModelEvent.DELETE || e.getType() == TableModelEvent.UPDATE) {
+                rowNumberListModel.setRowCount(table.getRowCount() + 1);
             }
         });
     }

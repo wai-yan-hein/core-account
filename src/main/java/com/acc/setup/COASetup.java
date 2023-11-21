@@ -74,9 +74,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
-        //initRowHeaderHead();
-        //initRowHeaderGroup();
-        //initRowHeaderChild();
+        initRowHeaderHead();
+        initRowHeaderGroup();
+        initRowHeaderChild();
     }
 
     private void initRowHeaderHead() {
@@ -108,19 +108,11 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaHead.setModel(coaHeadTableModel);
         tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
         tblCoaHead.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(10);// Code
+        tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(20);// Code
         tblCoaHead.getColumnModel().getColumn(1).setPreferredWidth(500);// Name
         tblCoaHead.setDefaultRenderer(Object.class, new TableCellRender());
         tblCoaHead.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblCoaHead.getSelectionModel().addListSelectionListener((e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblCoaHead.getSelectedRow() >= 0) {
-                    selectRow = tblCoaHead.convertRowIndexToModel(tblCoaHead.getSelectedRow());
-                    getCOAGroup(selectRow);
-                }
-            }
-        });
         filterHeader = new TableFilterHeader(tblCoaHead, AutoChoices.ENABLED);
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
@@ -149,14 +141,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         coaGroupTableModel.setParent(tblCoaGroup);
         coaGroupTableModel.setParetnDesp(lblCoaGroup);
         coaGroupTableModel.setAccountRepo(accountRepo);
-        tblCoaGroup.getColumnModel().getColumn(0).setPreferredWidth(1);// no
-        tblCoaGroup.getColumnModel().getColumn(1).setPreferredWidth(20);// Sys Code
-        tblCoaGroup.getColumnModel().getColumn(2).setPreferredWidth(20);// Usr Code
-        tblCoaGroup.getColumnModel().getColumn(3).setPreferredWidth(500);// Name
-        tblCoaGroup.getColumnModel().getColumn(4).setPreferredWidth(1);// Active
+        tblCoaGroup.getColumnModel().getColumn(0).setPreferredWidth(20);// Sys Code
+        tblCoaGroup.getColumnModel().getColumn(1).setPreferredWidth(20);// Usr Code
+        tblCoaGroup.getColumnModel().getColumn(2).setPreferredWidth(500);// Name
+        tblCoaGroup.getColumnModel().getColumn(3).setPreferredWidth(1);// Active
+        tblCoaGroup.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCoaGroup.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCoaGroup.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCoaGroup.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 1));
+        tblCoaGroup.getColumnModel().getColumn(4).setCellEditor(new COA3CellEditor(accountRepo, 1));
         tblCoaGroup.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCoaGroup.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -183,15 +174,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         cOAGroupChildTableModel.setParent(tblCOAGroupChild);
         cOAGroupChildTableModel.setAccountRepo(accountRepo);
         cOAGroupChildTableModel.setProgress(progress);
-        tblCOAGroupChild.getColumnModel().getColumn(0).setPreferredWidth(1);// no
-        tblCOAGroupChild.getColumnModel().getColumn(1).setPreferredWidth(20);// Sys Code
-        tblCOAGroupChild.getColumnModel().getColumn(2).setPreferredWidth(20);// Usr Code
-        tblCOAGroupChild.getColumnModel().getColumn(3).setPreferredWidth(500);// Name
-        tblCOAGroupChild.getColumnModel().getColumn(4).setPreferredWidth(1);// Active
-        tblCOAGroupChild.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblCOAGroupChild.getColumnModel().getColumn(0).setPreferredWidth(20);// Sys Code
+        tblCOAGroupChild.getColumnModel().getColumn(1).setPreferredWidth(20);// Usr Code
+        tblCOAGroupChild.getColumnModel().getColumn(2).setPreferredWidth(500);// Name
+        tblCOAGroupChild.getColumnModel().getColumn(3).setPreferredWidth(1);// Active
+        tblCOAGroupChild.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCOAGroupChild.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCOAGroupChild.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 2));
+        tblCOAGroupChild.getColumnModel().getColumn(4).setCellEditor(new COA3CellEditor(accountRepo, 2));
         tblCOAGroupChild.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -249,6 +238,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
+        } else {
+            coaGroupTableModel.clear();
+            coaGroupTableModel.addEmptyRow();
         }
     }
 
@@ -282,7 +274,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
-
+        } else {
+            cOAGroupChildTableModel.clear();
+            cOAGroupChildTableModel.addEmptyRow();
         }
     }
 
@@ -304,6 +298,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         cOAGroupChildTableModel.clear();
         lblCoaChild.setText("...");
         lblCoaGroup.setText("...");
+    }
+
+    private void setCOAHead() {
+        selectRow = tblCoaHead.convertRowIndexToModel(tblCoaHead.getSelectedRow());
+        if (selectRow >= 0) {
+            getCOAGroup(selectRow);
+        }
     }
 
     private void observeMain() {
@@ -515,6 +516,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
 
     private void tblCoaHeadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCoaHeadMouseClicked
         // TODO add your handling code here:
+        setCOAHead();
     }//GEN-LAST:event_tblCoaHeadMouseClicked
 
 
