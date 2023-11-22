@@ -632,6 +632,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         }
     }
 
+    private void calPurAmt() {
+        double qty = Util1.getDoubleOne(txtPurQty.getText());
+        double price = Util1.getDoubleOne(txtPurPrice.getText());
+        txtPurAmt.setText(Util1.getString(price * qty));
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1093,6 +1099,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtPurAmt.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtPurAmtFocusGained(evt);
+            }
+        });
+        txtPurAmt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPurAmtActionPerformed(evt);
             }
         });
 
@@ -1767,6 +1778,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void txtPurPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPurPriceActionPerformed
         // TODO add your handling code here:
+        calPurAmt();
     }//GEN-LAST:event_txtPurPriceActionPerformed
 
     private void txtPurPriceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPurPriceFocusGained
@@ -1901,6 +1913,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void txtPurQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPurQtyActionPerformed
         // TODO add your handling code here:
+        calPurAmt();
     }//GEN-LAST:event_txtPurQtyActionPerformed
 
     private void txtFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFilterActionPerformed
@@ -1921,6 +1934,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
         setSelectStock();
     }//GEN-LAST:event_tblStockMouseClicked
+
+    private void txtPurAmtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPurAmtActionPerformed
+        // TODO add your handling code here:
+        double qty = Util1.getDoubleOne(txtPurQty.getText());
+        double price = Util1.getDoubleOne(txtPurAmt.getText()) / qty;
+        txtPurPrice.setText(Util1.getString(price));
+    }//GEN-LAST:event_txtPurAmtActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

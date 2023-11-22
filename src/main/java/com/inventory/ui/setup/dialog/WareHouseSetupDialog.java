@@ -99,7 +99,7 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(labourGroupTableModel.getOrderStatus(selectRow));
+                    setCategory(labourGroupTableModel.getObject(selectRow));
                 }
             }
         });

@@ -6,13 +6,11 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.common.Resolution;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.common.Util1;
-import com.inventory.model.Stock;
-import com.repo.InventoryRepo;
-import com.inventory.ui.common.StockCompleterTableModel;
+import com.inventory.model.WareHouse;
+import com.inventory.model.WareHouseKey;
+import com.inventory.ui.setup.dialog.common.WareHouseTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -32,33 +30,36 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.RowFilter;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author wai yan
+ * @author Lenovo
  */
-@Slf4j
-public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
+public final class WareHouseAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
-    private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
-    private StockCompleterTableModel tableModel;
-    private Stock stock;
+    private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
+    private final WareHouseTableModel tableModel = new WareHouseTableModel();
+    private WareHouse type;
     public AbstractCellEditor editor;
+    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
-    private List<String> listOption = new ArrayList<>();
+    private List<WareHouse> listStockType;
     private boolean filter;
-    private InventoryRepo inventoryRepo;
+
+    public List<WareHouse> getListStockType() {
+        return listStockType;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -68,40 +69,41 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         this.observer = observer;
     }
 
-    public List<String> getListOption() {
-        return listOption;
+    public void setListObject(List<WareHouse> list) {
+        if (filter) {
+            WareHouse st = new WareHouse(new WareHouseKey("-", Global.compCode), "All");
+            list.add(0, st);
+            setObject(st);
+        }
+        tableModel.setListVou(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listStockType = list;
     }
 
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
+    public WareHouseAutoCompleter() {
     }
 
-    public StockAutoCompleter1() {
-    }
-
-    public StockAutoCompleter1(JTextComponent comp, InventoryRepo inventoryRepo,
+    public WareHouseAutoCompleter(JTextComponent comp,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.inventoryRepo = inventoryRepo;
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        textComp.getDocument().addDocumentListener(documentListener);
-        tableModel = new StockCompleterTableModel();
         table.setModel(tableModel);
-        table.setFont(Global.textFont); // NOI18N
         table.getTableHeader().setFont(Global.tblHeaderFont);
-        table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
+        table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
+        sorter = new TableRowSorter(table.getModel());
+        table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Code
-        table.getColumnModel().getColumn(2).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(3).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(4).setPreferredWidth(50);//Code
+        table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -115,8 +117,8 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        Resolution r = Util1.getPopSize();
-        popup.setPopupSize(r.getWidth(), r.getHeight());
+        popup.setPopupSize(300, 300);
+
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -142,48 +144,40 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+
             }
 
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 textComp.unregisterKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
-
             }
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
+                if (editor != null) {
+                    editor.stopCellEditing();
+                }
             }
         });
+        setListObject(new ArrayList<>());
 
-        table.setRequestFocusEnabled(false);
-    }
-
-    public Stock getStock() {
-        return stock;
-    }
-
-    public void setStock(Stock stock) {
-        this.stock = stock;
-        this.textComp.setText(this.stock == null ? null : this.stock.getStockName());
     }
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            stock = tableModel.getStock(table.convertRowIndexToModel(
+            type = tableModel.getObject(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            try {
-                textComp.setText(stock.getStockName());
-            } catch (Exception e) {
+            textComp.setText(type.getDescription());
+            if (observer != null) {
+                observer.selected("WareHouse", "WareHouse");
             }
             popup.setVisible(false);
-            if (observer != null) {
-                observer.selected("STOCK", "STOCK");
-            }
             if (editor != null) {
                 editor.stopCellEditing();
-
             }
-
+            if (observer != null) {
+                observer.selected("ST", type.getKey().getCode());
+            }
         }
     }
 
@@ -215,13 +209,12 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         }
         textComp.requestFocus();
     }
-
     Action showAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockAutoCompleter1 completer = (StockAutoCompleter1) tf.getClientProperty(AUTOCOMPLETER);
-            if (tf.isEnabled()) {
+            WareHouseAutoCompleter completer = (WareHouseAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            if (tf.isFocusable()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
                 } else {
@@ -234,7 +227,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockAutoCompleter1 completer = (StockAutoCompleter1) tf.getClientProperty(AUTOCOMPLETER);
+            WareHouseAutoCompleter completer = (WareHouseAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -246,7 +239,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockAutoCompleter1 completer = (StockAutoCompleter1) tf.getClientProperty(AUTOCOMPLETER);
+            WareHouseAutoCompleter completer = (WareHouseAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
             }
@@ -287,67 +280,74 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         table.scrollRectToVisible(rect);
     }
 
+    public WareHouse getObject() {
+        return type;
+
+    }
+
+    public void setObject(WareHouse type) {
+        this.type = type;
+        textComp.setText(type == null ? null : type.getDescription());
+    }
+
+
+    /*
+     * KeyListener implementation
+     */
+    /**
+     * Handle the key typed event from the text field.
+     */
     @Override
     public void keyTyped(KeyEvent e) {
 
     }
 
+    /**
+     * Handle the key-pressed event from the text field.
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() != 10) {
             showPopup();
         }
-
-    }
-    private final DocumentListener documentListener = new DocumentListener() {
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            if (editor != null) {
-                showPopup();
-            }
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            if (editor != null) {
-                showPopup();
-            }
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-        }
-    };
-
-    @Override
-    public void selected(Object source, Object selectObj) {
-
     }
 
+    /**
+     * Handle the key-released event from the text field.
+     */
     @Override
     public void keyReleased(KeyEvent e) {
         String str = textComp.getText();
-        if (!str.isEmpty()) {
-            if (!containKey(e)) {
-                inventoryRepo.getStock(str).subscribe((t) -> {
-                    if (this.filter) {
-                        Stock s = new Stock("-", "All");
-                        t.add(s);
-                    }
-                    tableModel.setListStock(t);
-                    if (!t.isEmpty()) {
+        if (str.length() == 0) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(startsWithFilter);
+            try {
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
                         table.setRowSelectionInterval(0, 0);
                     }
-                }, (er) -> {
-                    log.error(er.getMessage());
-                });
+                }
+            } catch (Exception ex) {
             }
 
         }
     }
+    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
+        @Override
+        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = textComp.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text)
+                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
+        }
+    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
-
 }

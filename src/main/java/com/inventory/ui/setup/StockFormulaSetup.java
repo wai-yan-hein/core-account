@@ -4,16 +4,15 @@
  */
 package com.inventory.ui.setup;
 
-import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockCriteriaEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.GradeDetail;
-import com.inventory.model.Message;
 import com.inventory.model.MessageType;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
@@ -27,6 +26,7 @@ import com.repo.InventoryRepo;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -76,6 +76,34 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         initTableGrade();
         initTableQty();
         searchFormual();
+        initRowHeaderFormula();
+        initRowHeaderQty();
+        initRowHeaderPrice();
+        initRowHeaderGrade();
+    }
+
+    private void initRowHeaderFormula() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblFormula, 30);
+        s1.setRowHeaderView(list);
+    }
+
+    private void initRowHeaderQty() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblQty, 30);
+        s2.setRowHeaderView(list);
+    }
+
+    private void initRowHeaderPrice() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblPrice, 30);
+        s3.setRowHeaderView(list);
+    }
+
+    private void initRowHeaderGrade() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblGrade, 30);
+        s4.setRowHeaderView(list);
     }
 
     private void actionMapping() {
@@ -237,8 +265,6 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblPrice.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblPrice.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPrice.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblPrice.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
-        tblPrice.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblPrice.getColumnModel().getColumn(0).setPreferredWidth(20);//code
         tblPrice.getColumnModel().getColumn(1).setPreferredWidth(100);//name
         tblPrice.getColumnModel().getColumn(2).setPreferredWidth(5);//percent
@@ -270,8 +296,6 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblGrade.getColumnModel().getColumn(0).setPreferredWidth(200);
         tblGrade.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblGrade.getColumnModel().getColumn(2).setPreferredWidth(50);
-        tblGrade.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
-        tblGrade.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
     }
 
     private void initTableQty() {
@@ -295,8 +319,6 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             tblQty.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
         tblQty.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblQty.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
-        tblQty.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblQty.getColumnModel().getColumn(0).setPreferredWidth(20);//code
         tblQty.getColumnModel().getColumn(1).setPreferredWidth(100);//name
         tblQty.getColumnModel().getColumn(2).setPreferredWidth(5);//percent
@@ -348,7 +370,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                     stockFormulaQtyTableModel.addNewRow();
                 }).subscribe();
             } else {
-                stockFormulaPriceTableModel.clear();
+                stockFormulaQtyTableModel.clear();
             }
         }
     }
@@ -359,7 +381,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             StockFormulaPrice f = stockFormulaPriceTableModel.getObject(row);
             String formulaCode = f.getKey().getFormulaCode();
             String criteraCode = f.getCriteriaCode();
-            if (!Util1.isNullOrEmpty(formulaCode)) {
+            if (!Util1.isNullOrEmpty(formulaCode) && !Util1.isNullOrEmpty(criteraCode)) {
                 inventoryRepo.getGradeDetail(formulaCode, criteraCode).doOnSuccess((t) -> {
                     gradeDetailTableModel.setListDetail(t);
                     gradeDetailTableModel.setFormulaCode(formulaCode);
@@ -415,18 +437,18 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
 
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
+        s4 = new javax.swing.JScrollPane();
         tblGrade = new javax.swing.JTable();
         jPanel5 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        s3 = new javax.swing.JScrollPane();
         tblPrice = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        s1 = new javax.swing.JScrollPane();
         tblFormula = new javax.swing.JTable();
-        jScrollPane4 = new javax.swing.JScrollPane();
+        s2 = new javax.swing.JScrollPane();
         tblQty = new javax.swing.JTable();
         jPanel6 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -471,7 +493,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane3.setViewportView(tblGrade);
+        s4.setViewportView(tblGrade);
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -507,7 +529,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(tblPrice);
+        s3.setViewportView(tblPrice);
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -557,7 +579,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(tblFormula);
+        s1.setViewportView(tblFormula);
 
         tblQty.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -570,7 +592,8 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane4.setViewportView(tblQty);
+        tblQty.setName("tblQty"); // NOI18N
+        s2.setViewportView(tblQty);
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -602,15 +625,15 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                    .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4)
+                    .addComponent(s2)
                     .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2)
+                    .addComponent(s4, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
+                    .addComponent(s3)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -622,19 +645,19 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                        .addComponent(s2, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                        .addComponent(s3, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
+                        .addComponent(s4, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(s1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -660,10 +683,10 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane s1;
+    private javax.swing.JScrollPane s2;
+    private javax.swing.JScrollPane s3;
+    private javax.swing.JScrollPane s4;
     private javax.swing.JTable tblFormula;
     private javax.swing.JTable tblGrade;
     private javax.swing.JTable tblPrice;

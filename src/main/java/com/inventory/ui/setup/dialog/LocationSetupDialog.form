@@ -128,7 +128,7 @@
                               <Component id="cboDepartment" alignment="0" max="32767" attributes="0"/>
                               <Component id="cboCash" alignment="0" max="32767" attributes="0"/>
                               <Component id="chkActive" alignment="0" max="32767" attributes="0"/>
-                              <Component id="cboWH" max="32767" attributes="0"/>
+                              <Component id="txtWH" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -152,7 +152,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="cboWH" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtWH" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jSeparator1" min="-2" max="-2" attributes="0"/>
@@ -342,18 +342,17 @@
             <Property name="text" type="java.lang.String" value="Ware House"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cboWH">
+        <Component class="javax.swing.JTextField" name="txtWH">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
-            </Property>
+            <Property name="name" type="java.lang.String" value="txtName" noResource="true"/>
           </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;WareHouse&gt;"/>
-          </AuxValues>
+          <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtWHFocusGained"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtWHActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

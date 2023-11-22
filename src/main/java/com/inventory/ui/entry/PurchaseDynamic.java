@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.CarNoAutoCompleter;
 import com.inventory.editor.ExpenseEditor;
+import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
@@ -50,7 +51,6 @@ import com.inventory.model.LabourGroup;
 import com.inventory.model.LandingHis;
 import com.inventory.model.PurDetailKey;
 import com.inventory.model.WeightHis;
-import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.inventory.ui.common.PurchaseExportTableModel;
 import com.inventory.ui.common.PurchasePaddyTableModel;
 import com.inventory.ui.common.PurchaseRiceTableModel;
@@ -129,7 +129,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private AccountOptionDialog moreDialog;
     private WeightHistoryDialog weightHistoryDialog;
     private int type;
-    private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
+    private LabourGroupAutoCompleter labourGroupAutoCompleter;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -207,6 +207,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     public void initMain() {
         initCombo();
+        initData();
         initPanelExpesne();
         initModel();
         initRowHeader();
@@ -477,29 +478,31 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);
-        monoLoc = inventoryRepo.getLocation();
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
-            currAutoCompleter.setCurrency(c);
-        });
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
+        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
+        batchAutoCompeter.setObserver(this);
+        labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, false);
+        carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false, "Purchase");
+        carNoAutoCompleter.setObserver(this);
+    }
+
+    private void initData() {
+        monoLoc = inventoryRepo.getLocation();
+        userRepo.getCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setListCurrency(t);
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
+            currAutoCompleter.setCurrency(c);
+        }).subscribe();
         monoLoc.doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
         }).subscribe();
-        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
-        batchAutoCompeter.setObserver(this);
-        inventoryRepo.getLabourGroup().subscribe((t) -> {
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
             t.add(new LabourGroup());
-            labourGroupComboBoxModel.setData(t);
-            cboLabourGroup.setModel(labourGroupComboBoxModel);
-            cboLabourGroup.setSelectedItem(null);
-        });
-        carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false, "Purchase");
-        carNoAutoCompleter.setObserver(this);
+            labourGroupAutoCompleter.setListObject(t);
+        }).subscribe();
     }
 
     private void initKeyListener() {
@@ -599,8 +602,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         clearDetail();
         initTextBoxValue();
         assignDefaultValue();
-        labourGroupComboBoxModel.setSelectedItem(null);
-        cboLabourGroup.repaint();
+        labourGroupAutoCompleter.setObject(null);
         txtComPercent.setValue(Util1.getDouble(ProUtil.getProperty("purchase.commission")));
         ph = new PurHis();
         lblStatus.setText("NEW");
@@ -744,12 +746,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             ph.setCommAmt(Util1.getDouble(txtComAmt.getValue()));
             ph.setExpense(Util1.getDouble(txtExpense.getValue()));
             ph.setCarNo(txtCarNo.getText());
-            if (labourGroupComboBoxModel.getSelectedItem() instanceof LabourGroup lg) {
-                if (lg.getKey() != null) {
-                    ph.setLabourGroupCode(lg.getKey().getCode());
-                } else {
-                    ph.setLabourGroupCode(null);
-                }
+            LabourGroup lg = labourGroupAutoCompleter.getObject();
+            if (lg != null) {
+                ph.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
             }
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
@@ -985,8 +984,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             traderAutoCompleter.setTrader(t);
         }).subscribe();
         inventoryRepo.findLabourGroup(ph.getLabourGroupCode()).doOnSuccess((t) -> {
-            labourGroupComboBoxModel.setSelectedItem(t);
-            cboLabourGroup.repaint();
+            labourGroupAutoCompleter.setObject(t);
         }).subscribe();
         ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
         if (ph.isVouLock()) {
@@ -1051,26 +1049,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private void disableForm(boolean status) {
-        tblPur.setEnabled(status);
-        panelPur.setEnabled(status);
-        txtPurDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtLocation.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtDueDate.setEnabled(status);
-        txtVouPaid.setEnabled(status);
-        txtTax.setEnabled(status);
-        txtVouTaxP.setEnabled(status);
-        txtVouDiscP.setEnabled(status);
-        txtVouDiscount.setEnabled(status);
-        txtGrandTotal.setEnabled(status);
-        txtReference.setEnabled(status);
-        txtComAmt.setEnabled(status);
-        txtComPercent.setEnabled(status);
-        txtBatchNo.setEnabled(status);
-        cboLabourGroup.setEnabled(status);
-        txtCarNo.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -1466,7 +1445,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         observer.selected("print", true);
         observer.selected("history", true);
         observer.selected("delete", true);
-        observer.selected("refresh", false);
+        observer.selected("refresh", true);
     }
 
     /**
@@ -1498,10 +1477,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         jLabel10 = new javax.swing.JLabel();
         txtBatchNo = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        cboLabourGroup = new javax.swing.JComboBox<>();
         jLabel24 = new javax.swing.JLabel();
         txtCarNo = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
+        txtLG = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
@@ -1657,13 +1636,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Labour Group");
 
-        cboLabourGroup.setFont(Global.textFont);
-        cboLabourGroup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboLabourGroupActionPerformed(evt);
-            }
-        });
-
         jLabel24.setFont(Global.lableFont);
         jLabel24.setText("Car No");
 
@@ -1688,7 +1660,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelPurLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -1702,7 +1674,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
                     .addComponent(txtLocation)
                     .addComponent(txtCurrency))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1713,7 +1685,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtReference, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
                     .addComponent(txtBatchNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1723,8 +1695,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                             .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCarNo)
-                            .addComponent(cboLabourGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                            .addComponent(txtLG, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPurLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton2)))
@@ -1747,7 +1719,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     .addComponent(txtDueDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel11)
-                        .addComponent(cboLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtLG, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtPurDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2354,10 +2326,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         historyLanding();
     }//GEN-LAST:event_btnLandingActionPerformed
 
-    private void cboLabourGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLabourGroupActionPerformed
-        //        searchStock();
-    }//GEN-LAST:event_cboLabourGroupActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         moreDialog();
@@ -2574,7 +2542,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JButton btnBatch;
     private javax.swing.JButton btnLanding;
     private javax.swing.JButton btnLanding1;
-    private javax.swing.JComboBox<LabourGroup> cboLabourGroup;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JProgressBar expProgress;
     private javax.swing.JButton jButton1;
@@ -2624,6 +2591,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private com.toedter.calendar.JDateChooser txtDueDate;
     private javax.swing.JFormattedTextField txtExpense;
     private javax.swing.JFormattedTextField txtGrandTotal;
+    private javax.swing.JTextField txtLG;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtPurDate;
     private javax.swing.JFormattedTextField txtQty;
@@ -2670,6 +2638,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     @Override
     public void refresh() {
+        initData();
     }
 
     @Override

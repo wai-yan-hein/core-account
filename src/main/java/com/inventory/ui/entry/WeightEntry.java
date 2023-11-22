@@ -110,7 +110,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
 
     private void initRowHeader() {
         RowHeader header = new RowHeader();
-        JList list = header.createRowHeader(tblWeight,30);
+        JList list = header.createRowHeader(tblWeight, 30);
         scroll.setRowHeaderView(list);
     }
 
@@ -479,7 +479,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         double weight = Util1.getDouble(txtWeight.getValue());
         if (weight > 0) {
             double qty = ttlWt / weight;
-            txtQty.setValue(qty);
+            txtQty.setValue(Util1.roundDown2D(qty));
         }
         txtWeightTotal.setValue(ttlWt);
         txtBag.setValue(getListDetail().size());

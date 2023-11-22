@@ -6,8 +6,6 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.inventory.model.LabourGroup;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.VouStatus;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -75,18 +73,18 @@ public class LabourGroupTableModel extends AbstractTableModel {
         return false;
     }
 
-    public LabourGroup getOrderStatus(int row) {
+    public LabourGroup getObject(int row) {
         return listVou.get(row);
     }
 
-    public void setOrderStatus(LabourGroup category, int row) {
+    public void setObject(LabourGroup category, int row) {
         if (!listVou.isEmpty()) {
             listVou.set(row, category);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public void addOrderStatus(LabourGroup item) {
+    public void addObject(LabourGroup item) {
         if (!listVou.isEmpty()) {
             listVou.add(item);
             fireTableRowsInserted(listVou.size() - 1, listVou.size() - 1);

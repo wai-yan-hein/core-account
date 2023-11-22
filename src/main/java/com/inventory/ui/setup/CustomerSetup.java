@@ -194,14 +194,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void searchCustomer() {
         progress.setIndeterminate(true);
         inventoryRepo.getCustomer()
-                .subscribe((t) -> {
+                .doOnSuccess((t) -> {
                     customerTabelModel.setListCustomer(t);
                     lblRecord.setText(String.valueOf(t.size()));
                     progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
+                }).subscribe();
 
     }
 

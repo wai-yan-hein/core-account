@@ -6,8 +6,6 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.inventory.model.WareHouse;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.VouStatus;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -75,11 +73,11 @@ public class WareHouseTableModel extends AbstractTableModel {
         return false;
     }
 
-    public WareHouse getOrderStatus(int row) {
+    public WareHouse getObject(int row) {
         return listVou.get(row);
     }
 
-    public void setOrderStatus(WareHouse category, int row) {
+    public void setObject(WareHouse category, int row) {
         if (!listVou.isEmpty()) {
             listVou.set(row, category);
             fireTableRowsUpdated(row, row);

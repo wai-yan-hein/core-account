@@ -32,6 +32,14 @@ public class WareHouse {
     @Column(name = "deleted")
     private boolean deleted;
 
+    public WareHouse(WareHouseKey key, String description) {
+        this.key = key;
+        this.description = description;
+    }
+
+    public WareHouse() {
+    }
+
     @Override
     public String toString() {
         return description;
