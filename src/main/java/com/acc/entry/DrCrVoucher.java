@@ -21,6 +21,7 @@ import com.acc.model.TmpOpening;
 import com.common.DateLockUtil;
 import com.common.ProUtil;
 import com.common.ReportFilter;
+import com.common.RowHeader;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -179,7 +181,14 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         initDisable();
         initCombo();
         initTable();
+        initRowHeader();
         search();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblVoucher, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initKeyListener() {
@@ -372,7 +381,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
@@ -425,7 +434,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 tblVoucherMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(tblVoucher);
+        scroll.setViewportView(tblVoucher);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -645,7 +654,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(scroll)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -656,7 +665,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -708,8 +717,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRecord;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JFormattedTextField txtClosing;
     private javax.swing.JFormattedTextField txtCr;

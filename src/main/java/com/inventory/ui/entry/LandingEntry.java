@@ -78,7 +78,6 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     public StockAutoCompleter1 getStockAutoCompleter() {
         return stockAutoCompleter;
     }
-    
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -209,8 +208,6 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         tblPrice.getColumnModel().getColumn(3).setPreferredWidth(5);
         tblPrice.getColumnModel().getColumn(4).setPreferredWidth(100);
         tblPrice.getColumnModel().getColumn(5).setPreferredWidth(150);
-        tblPrice.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
-        tblPrice.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
     }
 
     private void initTableQty() {
@@ -356,7 +353,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                             double ttlCriteria = listC.stream().mapToDouble((t) -> t.getAmount()).sum();
                             double purAmt = orgAmt + ttlCriteria;
                             txtPurAmt.setValue(purAmt);
-                            txtPurPrice.setValue(purAmt / 100);
+                            txtPurPrice.setValue(purAmt / qty);
                             txtCriteriaAmt.setValue(ttlCriteria);
                         }
                     }).subscribe();
@@ -484,6 +481,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                         param.put("p_remark", t.getRemark());
                         param.put("p_cargo", t.getCargo());
                         param.put("p_stock_name", t.getStockName());
+                        param.put("p_pur_unit",t.getPurUnitName());
                         param.put("p_grade_stock_name", t.getGradeStockName());
                         param.put("p_pur_qty", t.getPurQty());
                         param.put("p_pur_price", t.getPurPrice());
@@ -1059,7 +1057,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1072,12 +1070,11 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel5)
-                        .addComponent(txtGrossQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtGrossQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
                 .addContainerGap())
         );
 

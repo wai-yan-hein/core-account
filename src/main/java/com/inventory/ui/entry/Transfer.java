@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -99,9 +101,16 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     public void initMain() {
         initTable();
+        initRowHeader();
         initCombo();
         initButttonGroup();
         clear();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblTransfer, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void initButttonGroup() {
@@ -478,7 +487,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initComponents() {
 
         chkGroupReport = new javax.swing.ButtonGroup();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblTransfer = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -530,7 +539,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 tblTransferKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblTransfer);
+        scroll.setViewportView(tblTransfer);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -719,7 +728,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1107, Short.MAX_VALUE))
+                    .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 1107, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -730,7 +739,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -766,11 +775,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JRadioButton rdoA4;
     private javax.swing.JRadioButton rdoA5;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblTransfer;
     private javax.swing.JTextField txtCustomer;
     private com.toedter.calendar.JDateChooser txtDate;

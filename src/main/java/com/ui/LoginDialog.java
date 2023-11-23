@@ -138,6 +138,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             enableForm(false);
             taskExecutor.execute(() -> {
                 setLocationRelativeTo(null);
+                focus();
                 setVisible(true);
             });
             lblStatus.setText("downloading...");

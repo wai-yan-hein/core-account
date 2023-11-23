@@ -19,14 +19,15 @@ public class VLanding {
     private double purWeight;
     private double purWeightTotal;
     private double overPayment;
-    private String purUnit;
-    private double paid;
     private double balance;
     private double grandTotal;
     private double discount;
+    private double paid;
+
     private String vouNo;
     private String vouDate;
     private double grossQty;
+    private double totalQty;
     private double qty;
     private String unit;
     private String unitName;
@@ -41,6 +42,7 @@ public class VLanding {
     private String regionName;
     private String traderPhoneNo;
     private double wetPercent;
+    private String purUnitName;
     List<VLanding> listPrice;
     List<VLanding> listQty;
 }

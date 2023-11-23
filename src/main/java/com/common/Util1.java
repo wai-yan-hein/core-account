@@ -60,6 +60,7 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Type;
+import java.math.RoundingMode;
 
 /**
  * @author WSwe
@@ -515,8 +516,19 @@ public class Util1 {
         };
     }
 
+    public static double roundDown2D(double number) {
+        DecimalFormat f = new DecimalFormat("0.00");
+        f.setRoundingMode(RoundingMode.DOWN);
+        // Format the number
+        return Double.parseDouble(f.format(number));
+    }
+
     public static int roundDownToNearest100(int number) {
         return (number / 100) * 100;
+    }
+
+    public static int roundDownToNearest10(int number) {
+        return (number / 10) * 10;
     }
 
     public static double round1(double number) {

@@ -30,4 +30,15 @@ public class WareHouse {
     private boolean active;
     @Column(name = "deleted")
     private boolean deleted;
+    
+    
+    public WareHouse() {
+    }
+
+    public WareHouse(String code, String compCode) {
+        this.key = new WareHouseKey();
+        this.key.setCode(code);
+        this.key.setCompCode(compCode);
+    }
+    
 }

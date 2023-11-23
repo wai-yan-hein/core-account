@@ -283,7 +283,6 @@ public class StockFormulaQtyTableModel extends AbstractTableModel {
     }
 
     public void addNewRow() {
-//        if (listDetail != null) {
         if (!hasEmptyRow()) {
             StockFormulaQty pd = new StockFormulaQty();
             StockFormulaQtyKey key = new StockFormulaQtyKey();
@@ -293,7 +292,6 @@ public class StockFormulaQtyTableModel extends AbstractTableModel {
             listDetail.add(pd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
-//        }
     }
 
     private boolean hasEmptyRow() {

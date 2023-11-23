@@ -13,6 +13,7 @@ import com.common.JasperReportUtil;
 import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.BatchCellEditor;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -126,6 +128,11 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         initDateListner();
         actionMapping();
     }
+     private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblSale, 30);
+        scroll.setRowHeaderView(list);
+    }
 
     private void actionMapping() {
         String solve = "delete";
@@ -178,6 +185,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     public void initMain() {
         initCombo();
         initSaleTable();
+        initRowHeader();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
@@ -819,7 +827,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         chkVou = new javax.swing.JCheckBox();
         chkA4 = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -1383,7 +1391,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jScrollPane3.setViewportView(jPanel3);
+        scroll.setViewportView(jPanel3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -1395,7 +1403,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(339, 339, 339)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(scroll, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1406,7 +1414,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(scroll, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1710,12 +1718,12 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblSale;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;

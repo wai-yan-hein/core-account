@@ -176,17 +176,20 @@ public final class StockAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             stock = stockTableModel.getStock(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            textComp.setText(stock.getStockName());
+            try {
+                textComp.setText(stock.getStockName());
+            } catch (Exception e) {
+            }
             if (observer != null) {
                 observer.selected("STOCK", "STOCK");
             }
         }
-
         popup.setVisible(false);
         popupOpen = false;
         if (editor != null) {
             editor.stopCellEditing();
         }
+
     }
 
     private final Action acceptAction = new AbstractAction() {

@@ -171,7 +171,10 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         if (table.getSelectedRow() != -1) {
             stock = tableModel.getStock(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            textComp.setText(stock.getStockName());
+            try {
+                textComp.setText(stock.getStockName());
+            } catch (Exception e) {
+            }
             popup.setVisible(false);
             if (observer != null) {
                 observer.selected("STOCK", "STOCK");

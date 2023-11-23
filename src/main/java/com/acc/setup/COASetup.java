@@ -13,6 +13,7 @@ import com.acc.editor.COA3CellEditor;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -20,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.AbstractAction;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -72,6 +74,27 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
+        initRowHeaderHead();
+        initRowHeaderGroup();
+        initRowHeaderChild();
+    }
+
+    private void initRowHeaderHead() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCoaHead, 30);
+        s1.setRowHeaderView(list);
+    }
+
+    private void initRowHeaderGroup() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCoaGroup, 30);
+        s2.setRowHeaderView(list);
+    }
+
+    private void initRowHeaderChild() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCOAGroupChild, 30);
+        s3.setRowHeaderView(list);
     }
 
     private void batchLock(boolean lock) {
@@ -85,19 +108,11 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaHead.setModel(coaHeadTableModel);
         tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
         tblCoaHead.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(10);// Code
+        tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(20);// Code
         tblCoaHead.getColumnModel().getColumn(1).setPreferredWidth(500);// Name
         tblCoaHead.setDefaultRenderer(Object.class, new TableCellRender());
         tblCoaHead.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblCoaHead.getSelectionModel().addListSelectionListener((e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblCoaHead.getSelectedRow() >= 0) {
-                    selectRow = tblCoaHead.convertRowIndexToModel(tblCoaHead.getSelectedRow());
-                    getCOAGroup(selectRow);
-                }
-            }
-        });
         filterHeader = new TableFilterHeader(tblCoaHead, AutoChoices.ENABLED);
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
@@ -126,14 +141,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         coaGroupTableModel.setParent(tblCoaGroup);
         coaGroupTableModel.setParetnDesp(lblCoaGroup);
         coaGroupTableModel.setAccountRepo(accountRepo);
-        tblCoaGroup.getColumnModel().getColumn(0).setPreferredWidth(1);// no
-        tblCoaGroup.getColumnModel().getColumn(1).setPreferredWidth(20);// Sys Code
-        tblCoaGroup.getColumnModel().getColumn(2).setPreferredWidth(20);// Usr Code
-        tblCoaGroup.getColumnModel().getColumn(3).setPreferredWidth(500);// Name
-        tblCoaGroup.getColumnModel().getColumn(4).setPreferredWidth(1);// Active
+        tblCoaGroup.getColumnModel().getColumn(0).setPreferredWidth(20);// Sys Code
+        tblCoaGroup.getColumnModel().getColumn(1).setPreferredWidth(20);// Usr Code
+        tblCoaGroup.getColumnModel().getColumn(2).setPreferredWidth(500);// Name
+        tblCoaGroup.getColumnModel().getColumn(3).setPreferredWidth(1);// Active
+        tblCoaGroup.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCoaGroup.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCoaGroup.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCoaGroup.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 1));
+        tblCoaGroup.getColumnModel().getColumn(4).setCellEditor(new COA3CellEditor(accountRepo, 1));
         tblCoaGroup.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCoaGroup.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -160,15 +174,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         cOAGroupChildTableModel.setParent(tblCOAGroupChild);
         cOAGroupChildTableModel.setAccountRepo(accountRepo);
         cOAGroupChildTableModel.setProgress(progress);
-        tblCOAGroupChild.getColumnModel().getColumn(0).setPreferredWidth(1);// no
-        tblCOAGroupChild.getColumnModel().getColumn(1).setPreferredWidth(20);// Sys Code
-        tblCOAGroupChild.getColumnModel().getColumn(2).setPreferredWidth(20);// Usr Code
-        tblCOAGroupChild.getColumnModel().getColumn(3).setPreferredWidth(500);// Name
-        tblCOAGroupChild.getColumnModel().getColumn(4).setPreferredWidth(1);// Active
-        tblCOAGroupChild.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblCOAGroupChild.getColumnModel().getColumn(0).setPreferredWidth(20);// Sys Code
+        tblCOAGroupChild.getColumnModel().getColumn(1).setPreferredWidth(20);// Usr Code
+        tblCOAGroupChild.getColumnModel().getColumn(2).setPreferredWidth(500);// Name
+        tblCOAGroupChild.getColumnModel().getColumn(3).setPreferredWidth(1);// Active
+        tblCOAGroupChild.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCOAGroupChild.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCOAGroupChild.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 2));
+        tblCOAGroupChild.getColumnModel().getColumn(4).setCellEditor(new COA3CellEditor(accountRepo, 2));
         tblCOAGroupChild.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -226,6 +238,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
+        } else {
+            coaGroupTableModel.clear();
+            coaGroupTableModel.addEmptyRow();
         }
     }
 
@@ -259,7 +274,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
-
+        } else {
+            cOAGroupChildTableModel.clear();
+            cOAGroupChildTableModel.addEmptyRow();
         }
     }
 
@@ -283,6 +300,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         lblCoaGroup.setText("...");
     }
 
+    private void setCOAHead() {
+        selectRow = tblCoaHead.convertRowIndexToModel(tblCoaHead.getSelectedRow());
+        if (selectRow >= 0) {
+            getCOAGroup(selectRow);
+        }
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -301,11 +325,11 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
+        s1 = new javax.swing.JScrollPane();
         tblCoaHead = new javax.swing.JTable();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        s2 = new javax.swing.JScrollPane();
         tblCoaGroup = new javax.swing.JTable();
-        jScrollPane3 = new javax.swing.JScrollPane();
+        s3 = new javax.swing.JScrollPane();
         tblCOAGroupChild = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         lblCoaChild = new javax.swing.JLabel();
@@ -345,7 +369,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 tblCoaHeadKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblCoaHead);
+        s1.setViewportView(tblCoaHead);
 
         tblCoaGroup.setFont(Global.textFont);
         tblCoaGroup.setModel(new javax.swing.table.DefaultTableModel(
@@ -374,7 +398,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 tblCoaGroupKeyReleased(evt);
             }
         });
-        jScrollPane2.setViewportView(tblCoaGroup);
+        s2.setViewportView(tblCoaGroup);
 
         tblCOAGroupChild.setFont(Global.textFont);
         tblCOAGroupChild.setModel(new javax.swing.table.DefaultTableModel(
@@ -395,7 +419,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 tblCOAGroupChildKeyReleased(evt);
             }
         });
-        jScrollPane3.setViewportView(tblCOAGroupChild);
+        s3.setViewportView(tblCOAGroupChild);
 
         jLabel1.setFont(Global.menuFont);
         jLabel1.setText("Account Head");
@@ -415,7 +439,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(s1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
                     .addComponent(jSeparator4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -423,8 +447,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator1)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(s3, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
+                    .addComponent(s2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(lblCoaGroup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblCoaChild, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator2))
@@ -445,18 +469,18 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                                 .addGap(7, 7, 7)
                                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                .addComponent(s2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(lblCoaChild, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                                .addComponent(s3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)))))
+                                .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)))))
                 .addGap(10, 10, 10))
         );
 
@@ -492,20 +516,21 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
 
     private void tblCoaHeadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCoaHeadMouseClicked
         // TODO add your handling code here:
+        setCOAHead();
     }//GEN-LAST:event_tblCoaHeadMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JLabel lblCoaChild;
     private javax.swing.JLabel lblCoaGroup;
+    private javax.swing.JScrollPane s1;
+    private javax.swing.JScrollPane s2;
+    private javax.swing.JScrollPane s3;
     private javax.swing.JTable tblCOAGroupChild;
     private javax.swing.JTable tblCoaGroup;
     private javax.swing.JTable tblCoaHead;

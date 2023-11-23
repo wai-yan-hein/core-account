@@ -30,7 +30,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(COAGroupChildTableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList();
-    String[] columnNames = {"No", "System Code", "User Code", "Name", "Active", "Group"};
+    String[] columnNames = {"System Code", "User Code", "Name", "Active", "Group"};
     private JTable parent;
     private String coaGroupCode;
     private AccountRepo accountRepo;
@@ -86,21 +86,18 @@ public class COAGroupChildTableModel extends AbstractTableModel {
             ChartOfAccount coa = listCOA.get(row);
             switch (column) {
                 case 0 -> {
-                    return String.valueOf(row + 1 + ". ");
-                }
-                case 1 -> {
                     return coa.getKey() == null ? null : coa.getKey().getCoaCode();
                 }
-                case 2 -> {
+                case 1 -> {
                     return coa.getCoaCodeUsr();
                 }
-                case 3 -> {
+                case 2 -> {
                     return coa.getCoaNameEng();
                 }
-                case 4 -> {
+                case 3 -> {
                     return coa.isActive();
                 }
-                case 5 -> {
+                case 4 -> {
                     return getParentName(coa.getCoaParent());
                 }
             } //Code
@@ -132,19 +129,19 @@ public class COAGroupChildTableModel extends AbstractTableModel {
         try {
             ChartOfAccount coa = listCOA.get(row);
             switch (column) {
-                case 2 -> {
+                case 1 -> {
                     //user code
                     if (value != null) {
                         coa.setCoaCodeUsr(value.toString());
                         parent.setColumnSelectionInterval(2, 2);
                     }
                 }
-                case 3 -> {
+                case 2 -> {
                     if (value != null) {
                         coa.setCoaNameEng(value.toString());
                     }
                 }
-                case 4 -> {
+                case 3 -> {
                     if (value != null) {
                         Boolean active = (Boolean) value;
                         coa.setActive(active);
@@ -152,7 +149,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
                         coa.setActive(Boolean.TRUE);
                     }
                 }
-                case 5 -> {
+                case 4 -> {
                     if (value instanceof ChartOfAccount c) {
                         int yn = JOptionPane.showConfirmDialog(parent, "Do you want to change group?", "Confirm Dialog", JOptionPane.WARNING_MESSAGE);
                         if (yn == JOptionPane.YES_OPTION) {
@@ -193,7 +190,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4 ->
+            case 3 ->
                 Boolean.class;
             default ->
                 String.class;
@@ -208,7 +205,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
                 return false;
             }
             return switch (column) {
-                case 0, 1 ->
+                case 0 ->
                     false;
                 default ->
                     true;

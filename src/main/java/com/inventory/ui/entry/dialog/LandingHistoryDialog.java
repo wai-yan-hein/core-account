@@ -18,20 +18,15 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.user.model.AppUser;
-import com.inventory.model.GRN;
 import com.inventory.model.LandingHis;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.repo.InventoryRepo;
-import com.inventory.ui.entry.dialog.common.GRNHistoryTableModel;
 import com.inventory.ui.entry.dialog.common.LandingHistoryTableModel;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -58,6 +53,11 @@ public class LandingHistoryDialog extends javax.swing.JDialog implements KeyList
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
+    private boolean other = false;
+
+    public void setOther(boolean other) {
+        this.other = other;
+    }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -166,6 +166,12 @@ public class LandingHistoryDialog extends javax.swing.JDialog implements KeyList
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             LandingHis his = tableModel.getSelectVou(row);
+            if (other) {
+                if (his.isPost()) {
+                    JOptionPane.showMessageDialog(this, "This Voucher is posted.");
+                    return;
+                }
+            }
             observer.selected("LANDING-HISTORY", his);
             setVisible(false);
         } else {

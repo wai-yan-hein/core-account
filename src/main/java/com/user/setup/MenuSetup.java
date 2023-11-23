@@ -650,6 +650,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     @Override
     public void newForm() {
+        clear();
     }
 
     @Override

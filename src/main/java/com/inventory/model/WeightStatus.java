@@ -9,7 +9,7 @@ package com.inventory.model;
  * @author Lenovo
  */
 public enum WeightStatus {
-    SALE,
     PURCHASE,
+    SALE,
     OTHER
 }

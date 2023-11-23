@@ -81,6 +81,7 @@ E:\WORKSPACE\core-account\src\main\java\com\inventory\model\LandingHisQtyKey.jav
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\PurExpenseKey.java
 E:\WORKSPACE\core-account\src\main\java\com\acc\dialog\CurrencyConversionDialog.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\setup\SupplierSetup.java
+E:\WORKSPACE\core-account\src\main\java\com\h2\service\WareHouseService.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\CategoryKey.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\RetInServiceImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\tree\MyTreeTableSelectionModel.java
@@ -91,6 +92,7 @@ E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\ProcessTypeCombo
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\GlLogServiceImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\AccSetting.java
 E:\WORKSPACE\core-account\src\main\java\com\SSEListener.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\WareHouseComboModel.java
 E:\WORKSPACE\core-account\src\main\java\com\user\common\TextTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\RolePropertyServiceImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\common\ColorCellRender.java
@@ -227,6 +229,7 @@ E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\OrderEntry.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\GRN.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\OtherSetupMain.java
 E:\WORKSPACE\core-account\src\main\java\com\acc\entry\AllCash.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\editor\LabourGroupAutoCompleter.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\THDetailKey.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\PurchaseExportTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\StockService.java
@@ -268,6 +271,7 @@ E:\WORKSPACE\core-account\src\main\java\com\common\ProUtil.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\Reports.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\OrderSearchTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\editor\SaleManAutoCompleter.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\model\WareHouseKey.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\StockFormula.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\setup\dialog\common\UnitPatternTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\editor\AppUserAutoCompleter.java
@@ -359,6 +363,8 @@ E:\WORKSPACE\core-account\src\main\java\com\user\common\MenuTreeTrasnferHandler.
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\LandingHisPrice.java
 E:\WORKSPACE\core-account\src\main\java\com\acc\model\DepartmentA.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\PurHisDetailServiceImpl.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\editor\WareHouseAutoCompleter.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\setup\dialog\WareHouseSetupDialog.java
 E:\WORKSPACE\core-account\src\main\java\com\acc\report\FinancialReport.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\VStockIO.java
 E:\WORKSPACE\core-account\src\main\java\com\user\model\DepartmentUser.java
@@ -407,6 +413,7 @@ E:\WORKSPACE\core-account\src\main\java\com\user\model\AuthenticationResponse.ja
 E:\WORKSPACE\core-account\src\main\java\com\common\RightCellRender.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\SaleHisDetailDao.java
 E:\WORKSPACE\core-account\src\main\java\com\user\common\FileTableModel.java
+E:\WORKSPACE\core-account\src\main\java\com\h2\dao\WareHouseDaoImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\StockTypeServiceImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\SaleManDao.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\PaymentHis.java
@@ -458,6 +465,7 @@ E:\WORKSPACE\core-account\src\main\java\com\h2\service\PatternService.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\StockBalanceWeightTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\LabourGroupComboBoxModel.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\PriceOptionDao.java
+E:\WORKSPACE\core-account\src\main\java\com\common\RowHeader.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\MacPropertyService.java
 E:\WORKSPACE\core-account\src\main\java\com\acc\common\DepartmentTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\setup\dialog\LabourGroupSetupDialog.java
@@ -502,6 +510,7 @@ E:\WORKSPACE\core-account\src\main\java\com\h2\dao\TransferHisDao.java
 E:\WORKSPACE\core-account\src\main\java\com\ui\management\model\ClosingBalance.java
 E:\WORKSPACE\core-account\src\main\java\com\common\ExcelExporter.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\StockUnitDao.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\setup\dialog\common\WareHouseTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\common\TokenFile.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\VMilling.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\StockFormulaQtyDaoImpl.java
@@ -829,6 +838,7 @@ E:\WORKSPACE\core-account\src\main\java\com\repo\UserRepo.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\dialog\GRNHistoryDialog.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\editor\TraderAutoCompleter.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\dialog\OPHistoryDialog.java
+E:\WORKSPACE\core-account\src\main\java\com\h2\dao\WareHouseDao.java
 E:\WORKSPACE\core-account\src\main\java\com\acc\editor\TraderAAutoCompleter.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\setup\dialog\StockUnitSetupDailog.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\VRoleMenu.java
@@ -844,6 +854,7 @@ E:\WORKSPACE\core-account\src\main\java\com\h2\service\CurrencyService.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\WeightDetailTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\StockInOutEntry.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\VouStatusKey.java
+E:\WORKSPACE\core-account\src\main\java\com\h2\service\WareHouseServiceImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\SaleHisDao.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\common\DiscountDescriptionTableModel.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\dao\SeqDao.java
@@ -927,6 +938,7 @@ E:\WORKSPACE\core-account\src\main\java\com\h2\service\RegionServiceImpl.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\ui\entry\Manufacture.java
 E:\WORKSPACE\core-account\src\main\java\com\common\ReorderCellRender.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\VRoleMenuService.java
+E:\WORKSPACE\core-account\src\main\java\com\inventory\model\WareHouse.java
 E:\WORKSPACE\core-account\src\main\java\com\h2\service\RelationService.java
 E:\WORKSPACE\core-account\src\main\java\com\inventory\model\LandingHisPriceKey.java
 E:\WORKSPACE\core-account\src\main\java\com\common\RowHeaderRenderer.java

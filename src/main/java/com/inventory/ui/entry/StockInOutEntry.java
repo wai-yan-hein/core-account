@@ -13,6 +13,7 @@ import javax.swing.KeyStroke;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -125,8 +127,15 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         assignDefault();
         initTable();
         initModel();
+        initRowHeader();
         initCombo();
         clear();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblStock, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void assignDefault() {
@@ -728,7 +737,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -786,7 +795,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 tblStockKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblStock);
+        scroll.setViewportView(tblStock);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -1031,7 +1040,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scroll, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1041,7 +1050,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -1093,10 +1102,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblWeight;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblStock;
     private javax.swing.JFormattedTextField txtCost;
     private com.toedter.calendar.JDateChooser txtDate;

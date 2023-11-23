@@ -11,6 +11,7 @@ import com.common.ExcelExporter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
@@ -41,6 +42,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -112,8 +114,15 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     public void initMain() {
         initCompleter();
         initTable();
+        initRowHeader();
         txtOPDate.setDate(Util1.getTodayDate());
         txtCurrency.setEnabled(ProUtil.isMultiCur());
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblOpening, 30);
+        scroll.setRowHeaderView(list);
     }
 
     private void actionMapping() {
@@ -579,7 +588,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         lblStatus = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblOpening = new javax.swing.JTable();
         txtAmount = new javax.swing.JFormattedTextField();
         jLabel5 = new javax.swing.JLabel();
@@ -750,7 +759,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 tblOpeningKeyReleased(evt);
             }
         });
-        jScrollPane1.setViewportView(tblOpening);
+        scroll.setViewportView(tblOpening);
 
         txtAmount.setEditable(false);
         txtAmount.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
@@ -806,7 +815,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
+                    .addComponent(scroll)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -833,7 +842,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -903,10 +912,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblOpening;
     private javax.swing.JFormattedTextField txtAmount;
     private javax.swing.JTextField txtCurrency;

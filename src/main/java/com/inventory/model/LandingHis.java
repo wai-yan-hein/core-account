@@ -69,6 +69,8 @@ public class LandingHis {
     private double grossQty;
     @Column(name = "print_count")
     private Integer printCount;
+    @Column(name = "post")
+    private boolean post;
     @Transient
     private List<LandingHisPrice> listPrice;
     @Transient

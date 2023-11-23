@@ -29,7 +29,7 @@
           <Group type="102" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="tblScrollPane" max="32767" attributes="0"/>
+                  <Component id="scroll" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="jScrollPane2" pref="559" max="32767" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -52,7 +52,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="tblScrollPane" pref="486" max="32767" attributes="0"/>
+              <Component id="scroll" pref="486" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="jScrollPane2" alignment="1" pref="0" max="32767" attributes="0"/>
@@ -69,7 +69,7 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JScrollPane" name="tblScrollPane">
+    <Container class="javax.swing.JScrollPane" name="scroll">
       <AuxValues>
         <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
       </AuxValues>
@@ -96,6 +96,9 @@
             <Property name="showHorizontalLines" type="boolean" value="true"/>
             <Property name="showVerticalLines" type="boolean" value="true"/>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tblCashMouseClicked"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

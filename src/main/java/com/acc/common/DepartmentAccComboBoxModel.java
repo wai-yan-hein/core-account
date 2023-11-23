@@ -25,6 +25,9 @@ public class DepartmentAccComboBoxModel extends AbstractListModel<DepartmentA> i
     }
 
     public void setData(List<DepartmentA> data) {
+        if (data == null) {
+            return;
+        }
         this.data = data;
     }
 
@@ -47,7 +50,7 @@ public class DepartmentAccComboBoxModel extends AbstractListModel<DepartmentA> i
 
     @Override
     public int getSize() {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override

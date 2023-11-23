@@ -120,6 +120,7 @@ import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WareHouse;
+import com.inventory.model.WareHouseKey;
 import com.inventory.model.WeightHis;
 import com.inventory.model.WeightHisDetail;
 import com.inventory.model.WeightHisKey;
@@ -264,7 +265,7 @@ public class InventoryRepo {
     
     public Mono<List<WareHouse>> getWarehouse(String updatedDate) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getUpdatedAccSetting")
+                .uri(builder -> builder.path("/warehouse/getUpdatedWarehouse")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
@@ -935,6 +936,24 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<WareHouse> findWareHouse(String code) {
+        WareHouseKey key = new WareHouseKey();
+        key.setCompCode(Global.compCode);
+        key.setCode(code);
+        if (localDatabase) {
+           return h2Repo.find(key);
+        }
+        return inventoryApi.post()
+                .uri("/warehouse/findWareHouse")
+                .body(Mono.just(key), WareHouseKey.class)
+                .retrieve()
+                .bodyToMono(WareHouse.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<VouStatus> findVouStatus(String code) {
         VouStatusKey key = new VouStatusKey();
         key.setCompCode(Global.compCode);
@@ -1390,6 +1409,18 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> restoreStock(StockKey key) {
+        return inventoryApi.post()
+                .uri("/setup/restoreStock")
+                .body(Mono.just(key), StockKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<VouStatus>> getVoucherStatus() {
         if (localDatabase) {
             return h2Repo.getVouStatus();
@@ -1448,6 +1479,23 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(LabourGroup.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<WareHouse>> getWareHouse() {
+        if (localDatabase) {
+        return h2Repo.getWarehouse();
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/warehouse/getWareHouse")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(WareHouse.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -1725,6 +1773,23 @@ public class InventoryRepo {
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
                         h2Repo.save(t);
+                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<WareHouse> saveWareHouse(WareHouse vou) {
+        return inventoryApi.post()
+                .uri("/warehouse/saveWareHouse")
+                .body(Mono.just(vou), WareHouse.class)
+                .retrieve()
+                .bodyToMono(WareHouse.class)
+                .doOnSuccess((w) -> {
+                    if (localDatabase) {
+                        h2Repo.save(w);
                     }
                 })
                 .onErrorResume((e) -> {

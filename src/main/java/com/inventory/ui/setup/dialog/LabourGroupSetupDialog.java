@@ -99,7 +99,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(labourGroupTableModel.getOrderStatus(selectRow));
+                    setCategory(labourGroupTableModel.getObject(selectRow));
                 }
             }
         });

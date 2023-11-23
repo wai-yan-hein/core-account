@@ -24,6 +24,9 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
     }
 
     public void setData(List<ChartOfAccount> data) {
+        if (data == null) {
+            return;
+        }
         this.data = data;
     }
 
@@ -46,7 +49,7 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
 
     @Override
     public int getSize() {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override

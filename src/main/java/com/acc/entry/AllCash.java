@@ -33,7 +33,6 @@ import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
 import com.acc.model.DepartmentA;
-import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
@@ -41,6 +40,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -70,6 +70,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
@@ -91,7 +92,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 /**
  *
@@ -172,6 +172,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         initTableCashOP();
         initDateDecorator();
         actionMapping();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblCash, 40);
+        scroll.setRowHeaderView(list);
     }
 
     private void initFocus() {
@@ -321,6 +327,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         initFilter();
         initTableModel();
         initTableCB();
+        initRowHeader();
         createDateFilter();
         searchCash();
     }
@@ -396,16 +403,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblCash.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblCash.getSelectedRow() >= 0) {
-                    selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
-                    Gl gl = getGl(selectRow);
-                    setGl(gl);
-                }
-
-            }
-        });
         filterHeader = new TableFilterHeader(tblCash, AutoChoices.ENABLED);
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
@@ -815,6 +812,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
+    private void checkLock() {
+        int row = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
+        if (row >= 0) {
+            Gl gl = getGl(row);
+            setGl(gl);
+        }
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -829,7 +834,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void initComponents() {
 
         jMenuItem1 = new javax.swing.JMenuItem();
-        tblScrollPane = new javax.swing.JScrollPane();
+        scroll = new javax.swing.JScrollPane();
         tblCash = new javax.swing.JTable();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCIO = new javax.swing.JTable();
@@ -882,7 +887,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.setRowHeight(Global.tblRowHeight);
         tblCash.setShowHorizontalLines(true);
         tblCash.setShowVerticalLines(true);
-        tblScrollPane.setViewportView(tblCash);
+        tblCash.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblCashMouseClicked(evt);
+            }
+        });
+        scroll.setViewportView(tblCash);
 
         tblCIO.setFont(Global.shortCutFont);
         tblCIO.setModel(new javax.swing.table.DefaultTableModel(
@@ -1275,7 +1285,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(tblScrollPane)
+                    .addComponent(scroll)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1293,7 +1303,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -1447,6 +1457,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_chkLocalActionPerformed
 
+    private void tblCashMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCashMouseClicked
+        // TODO add your handling code here:
+        checkLock();
+    }//GEN-LAST:event_tblCashMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAdjust;
@@ -1471,10 +1486,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField lblRecord;
     private javax.swing.JPanel panelDate;
     private javax.swing.JPanel panelOption;
+    private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblCIO;
     private javax.swing.JTable tblCash;
     private javax.swing.JTable tblCashOP;
-    private javax.swing.JScrollPane tblScrollPane;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtBatchNo;
     private javax.swing.JTextField txtCurrency;

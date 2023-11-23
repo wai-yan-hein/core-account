@@ -16,7 +16,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class LocationTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Code", "Location"};
+    private final String[] columnNames = {"Code", "Location", "Ware House"};
     private List<Location> listLocation = new ArrayList<>();
 
     public LocationTableModel() {
@@ -45,6 +45,8 @@ public class LocationTableModel extends AbstractTableModel {
                 location.getUserCode();
             case 1 ->
                 location.getLocName();
+            case 2->
+                location.getWareHouseName();
             default ->
                 null;
         };

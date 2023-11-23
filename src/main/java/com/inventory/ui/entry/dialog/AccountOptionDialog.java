@@ -13,24 +13,26 @@ import com.common.Util1;
 import com.inventory.model.PurHis;
 import com.inventory.model.SaleHis;
 import com.repo.AccountRepo;
-import com.repo.InventoryRepo;
 import javax.swing.JFrame;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class AccountOptionDialog extends javax.swing.JDialog {
 
     private AccountRepo accountRepo;
-    private InventoryRepo inventoryRepo;
     private final DepartmentAccComboBoxModel departmentComboBoxModel = new DepartmentAccComboBoxModel();
     private final COAComboBoxModel cashComboModel = new COAComboBoxModel();
     private final COAComboBoxModel purchaseComboModel = new COAComboBoxModel();
     private final COAComboBoxModel payableComboModel = new COAComboBoxModel();
-    
-
     private Object object;
+    private final String sale = "SALE";
+    private final String purchase = "PURCHASE";
+    private final String returnIn = "RETURN_IN";
+    private final String returnOut = "RETURN_OUT";
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -44,6 +46,14 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     public AccountOptionDialog(JFrame frame) {
         super(frame, false);
         initComponents();
+        initModel();
+    }
+
+    private void initModel() {
+        cboDepartment.setModel(departmentComboBoxModel);
+        cboCash.setModel(cashComboModel);
+        cboPurchase.setModel(purchaseComboModel);
+        cboPayable.setModel(payableComboModel);
     }
 
     public void initMain() {
@@ -53,19 +63,15 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     private void initCompleter() {
         accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentComboBoxModel.setData(t);
-            cboDepartment.setModel(departmentComboBoxModel);
         }).subscribe();
         accountRepo.getCashBank().doOnSuccess((t) -> {
             cashComboModel.setData(t);
-            cboCash.setModel(cashComboModel);
         }).subscribe();
         accountRepo.getPurchaseAcc().doOnSuccess((t) -> {
             purchaseComboModel.setData(t);
-            cboPurchase.setModel(purchaseComboModel);
         }).subscribe();
         accountRepo.getPayableAcc().doOnSuccess((t) -> {
             payableComboModel.setData(t);
-            cboPayable.setModel(payableComboModel);
         }).subscribe();
     }
 
@@ -80,11 +86,10 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     private void setPayable(String payableAcc) {
-        if (!Util1.isNullOrEmpty(payableAcc)) {
-            accountRepo.findCOA(payableAcc).doOnSuccess((t) -> {
-                payableComboModel.setSelectedItem(t);
-            }).subscribe();
-        }
+        accountRepo.findCOA(Util1.isNull(payableAcc, balanceAcc())).doOnSuccess((t) -> {
+            payableComboModel.setSelectedItem(t);
+            cboPayable.repaint();
+        }).subscribe();
     }
 
     private String getPayable() {
@@ -97,11 +102,10 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     private void setPurchase(String purAcc) {
-        if (!Util1.isNullOrEmpty(purAcc)) {
-            accountRepo.findCOA(purAcc).doOnSuccess((t) -> {
-                purchaseComboModel.setSelectedItem(t);
-            }).subscribe();
-        }
+        accountRepo.findCOA(Util1.isNull(purAcc, sourceAcc())).doOnSuccess((t) -> {
+            purchaseComboModel.setSelectedItem(t);
+            cboPurchase.repaint();
+        }).subscribe();
     }
 
     private String getPurchase() {
@@ -114,11 +118,10 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     private void setCash(String cashAcc) {
-        if (!Util1.isNullOrEmpty(cashAcc)) {
-            accountRepo.findCOA(cashAcc).doOnSuccess((t) -> {
-                cashComboModel.setSelectedItem(t);
-            }).subscribe();
-        }
+        accountRepo.findCOA(Util1.isNull(cashAcc, payAcc())).doOnSuccess((t) -> {
+            cashComboModel.setSelectedItem(t);
+            cboCash.repaint();
+        }).subscribe();
     }
 
     private String getCash() {
@@ -131,11 +134,10 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     private void setDepartment(String deptCode) {
-        if (!Util1.isNullOrEmpty(deptCode)) {
-            accountRepo.findDepartment(deptCode).doOnSuccess((t) -> {
-                departmentComboBoxModel.setSelectedItem(t);
-            }).subscribe();
-        }
+        accountRepo.findDepartment(Util1.isNull(deptCode, depAcc())).doOnSuccess((t) -> {
+            departmentComboBoxModel.setSelectedItem(t);
+            cboDepartment.repaint();
+        }).subscribe();
     }
 
     private String getDepartment() {
@@ -160,6 +162,42 @@ public class AccountOptionDialog extends javax.swing.JDialog {
             s.setSaleAcc(getPurchase());
         }
         dispose();
+    }
+
+    private String sourceAcc() {
+        if (object instanceof SaleHis) {
+            return Global.hmAcc.get(sale).getSourceAcc();
+        } else if (object instanceof PurHis) {
+            return Global.hmAcc.get(purchase).getSourceAcc();
+        }
+        return null;
+    }
+
+    private String payAcc() {
+        if (object instanceof SaleHis) {
+            return Global.hmAcc.get(sale).getPayAcc();
+        } else if (object instanceof PurHis) {
+            return Global.hmAcc.get(purchase).getPayAcc();
+        }
+        return null;
+    }
+
+    private String balanceAcc() {
+        if (object instanceof SaleHis) {
+            return Global.hmAcc.get(sale).getBalanceAcc();
+        } else if (object instanceof PurHis) {
+            return Global.hmAcc.get(purchase).getBalanceAcc();
+        }
+        return null;
+    }
+
+    private String depAcc() {
+        if (object instanceof SaleHis) {
+            return Global.hmAcc.get(sale).getDeptCode();
+        } else if (object instanceof PurHis) {
+            return Global.hmAcc.get(purchase).getDeptCode();
+        }
+        return null;
     }
 
     /**
