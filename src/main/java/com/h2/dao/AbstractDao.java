@@ -6,6 +6,7 @@ package com.h2.dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.sql.PreparedStatement;
@@ -112,5 +113,9 @@ public abstract class AbstractDao<PK extends Serializable, T> {
             }
             return stmt.executeQuery();
         });
+    }
+    @Transactional
+    public TypedQuery<T> createQuery(String hsql) {
+        return entityManager.createQuery(hsql, persistentClass);
     }
 }

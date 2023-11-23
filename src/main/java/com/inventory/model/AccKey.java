@@ -4,18 +4,29 @@
  */
 package com.inventory.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
  *
- * @author Lenovo
+ * @author pann
  */
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class AccKey {
-
+@Embeddable
+public class AccKey implements Serializable{
+    
+    @Column(name = "type")
     private String type;
+    @Column(name = "comp_code")
     private String compCode;
+      public AccKey() {
+
+    }
+    public AccKey(String type, String compCode) {
+        this.type = type;
+        this.compCode = compCode;
+    }
 
 }

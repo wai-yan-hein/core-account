@@ -18,6 +18,7 @@ import com.common.ReportFilter;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.h2.dao.DateFilterRepo;
+import com.h2.service.AccSettingService;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -97,6 +98,7 @@ import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
+import com.h2.service.OutputCostService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisDetailService;
@@ -115,6 +117,7 @@ import com.h2.service.StockInOutService;
 import com.h2.service.TransferHisDetailService;
 import com.h2.service.TransferHisService;
 import com.h2.service.WeightLossService;
+import com.inventory.model.AccSetting;
 import com.inventory.model.General;
 import com.inventory.model.GradeDetail;
 import com.inventory.model.GradeDetailKey;
@@ -127,6 +130,8 @@ import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.OrderStatus;
 import com.inventory.model.OrderStatusKey;
+import com.inventory.model.OutputCost;
+import com.inventory.model.OutputCostKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
@@ -297,6 +302,10 @@ public class H2Repo {
     private JobService jobService;
     @Autowired
     private PatternService patternService;
+    @Autowired
+    private OutputCostService outputCostService;
+    @Autowired
+    private AccSettingService accSettingService;
     
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -1047,5 +1056,25 @@ public class H2Repo {
     
     public Mono<Job> find(JobKey key) {
         return Mono.just(jobService.findById(key));
+    }
+    
+    public OutputCost save(OutputCost s) {
+        return outputCostService.save(s);
+    }
+    
+    public Mono<List<OutputCost>> getOutputCost() {
+        return Mono.just(outputCostService.findAll(Global.compCode));
+    }
+    
+    public boolean delete(OutputCostKey key) {
+        return outputCostService.delete(key);
+    }
+    
+    public AccSetting save(AccSetting acc) {
+        return accSettingService.save(acc);
+    }
+    
+    public Mono<List<AccSetting>> getAccSetting() {
+        return Mono.just(accSettingService.findAll(Global.compCode));
     }
 }

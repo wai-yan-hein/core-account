@@ -1,0 +1,1147 @@
+[{
+        "key": {
+            "menuId": 1,
+            "busId": 1
+        },
+        "menuClass": "Inventory",
+        "menuName": "System",
+        "menuUrl": "",
+        "parentMenuId": 0,
+        "menuType": "Menu",
+        "account": "",
+        "orderBy": 0,
+        "child": [{
+                "key": {
+                    "menuId": 4,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "User Setup",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }, {
+                "key": {
+                    "menuId": 5,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Companry",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }, {
+                "key": {
+                    "menuId": 6,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Machine Property",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }, {
+                "key": {
+                    "menuId": 7,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "System Property",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }, {
+                "key": {
+                    "menuId": 8,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Role Setting",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }, {
+                "key": {
+                    "menuId": 9,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Menu",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }, {
+                "key": {
+                    "menuId": 10,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Company Template",
+                "menuUrl": "",
+                "parentMenuId": 1,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": []
+            }]
+    }, {
+        "key": {
+            "menuId": 2,
+            "busId": 1
+        },
+        "menuClass": "Inventory",
+        "menuName": "Account",
+        "menuUrl": "",
+        "parentMenuId": 0,
+        "menuType": "Menu",
+        "account": "",
+        "orderBy": 0,
+        "child": [{
+                "key": {
+                    "menuId": 11,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Cash Book",
+                "menuUrl": "",
+                "parentMenuId": 2,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 12,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "နေ့စဉ်ငွေစားရင်း",
+                        "menuUrl": "",
+                        "parentMenuId": 11,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 13,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Bank",
+                "menuUrl": "",
+                "parentMenuId": 2,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 18,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "KPay A/C",
+                        "menuUrl": "",
+                        "parentMenuId": 13,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 19,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "AYA A/C",
+                        "menuUrl": "",
+                        "parentMenuId": 13,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 14,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Day Book",
+                "menuUrl": "",
+                "parentMenuId": 2,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 20,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "အဝယ်စားရင်း",
+                        "menuUrl": "",
+                        "parentMenuId": 14,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 21,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "အရောင်းစားရင်း",
+                        "menuUrl": "",
+                        "parentMenuId": 14,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 15,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Setup",
+                "menuUrl": "",
+                "parentMenuId": 2,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 22,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Department",
+                        "menuUrl": "",
+                        "parentMenuId": 15,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 23,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "COA Management",
+                        "menuUrl": "",
+                        "parentMenuId": 15,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 24,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Chart Of Account",
+                        "menuUrl": "",
+                        "parentMenuId": 15,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 25,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Trader",
+                        "menuUrl": "",
+                        "parentMenuId": 15,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 26,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Opening Balance",
+                        "menuUrl": "",
+                        "parentMenuId": 15,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 16,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Journal",
+                "menuUrl": "",
+                "parentMenuId": 2,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 27,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Journal Voucher",
+                        "menuUrl": "",
+                        "parentMenuId": 16,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 28,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Journal Stock Closing",
+                        "menuUrl": "",
+                        "parentMenuId": 16,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 17,
+                    "busId": 1
+                },
+                "menuClass": "",
+                "menuName": "Report",
+                "menuUrl": "",
+                "parentMenuId": 2,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 29,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "AR / AP",
+                        "menuUrl": "",
+                        "parentMenuId": 17,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 30,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "G/L Listing",
+                        "menuUrl": "",
+                        "parentMenuId": 17,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 31,
+                            "busId": 1
+                        },
+                        "menuClass": "Account",
+                        "menuName": "Financial Report",
+                        "menuUrl": "",
+                        "parentMenuId": 17,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": [{
+                                "key": {
+                                    "menuId": 66,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Credit Detail",
+                                "menuUrl": "CreditDetail",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 67,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Income \u0026 Expenditure (Detail)",
+                                "menuUrl": "Income\u0026ExpenditureDetail",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 68,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Income \u0026 Expenditure (Summary)",
+                                "menuUrl": "Income\u0026ExpenditureSummary",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 69,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Profit \u0026 Loss (Detail)",
+                                "menuUrl": "Profit\u0026LossDetail",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 70,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Profit \u0026 Loss (Summary)",
+                                "menuUrl": "Profit\u0026LossSummary",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 71,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Balance Sheet (Detail)",
+                                "menuUrl": "BalanceSheetDetail",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 72,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Balance Sheet (Summary)",
+                                "menuUrl": "BalanceSheetSummary",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }, {
+                                "key": {
+                                    "menuId": 73,
+                                    "busId": 1
+                                },
+                                "menuClass": "Account",
+                                "menuName": "Individual Statement",
+                                "menuUrl": "IndividualStatement",
+                                "parentMenuId": 31,
+                                "menuType": "Report",
+                                "account": "",
+                                "orderBy": 0,
+                                "child": []
+                            }]
+                    }]
+            }]
+    }, {
+        "key": {
+            "menuId": 3,
+            "busId": 1
+        },
+        "menuClass": "Inventory",
+        "menuName": "Inventory",
+        "menuUrl": "",
+        "parentMenuId": 0,
+        "menuType": "Menu",
+        "account": "",
+        "orderBy": 0,
+        "child": [{
+                "key": {
+                    "menuId": 32,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Entry",
+                "menuUrl": "",
+                "parentMenuId": 3,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 35,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Reorder Level",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 36,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Order",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 37,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Manufacture",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 38,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Milling",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 39,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 40,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Weight",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 41,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 42,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase By Weight",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 43,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase Export",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 44,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "GRN",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 45,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Transfer",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 46,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Return In",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 47,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Return Out",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 48,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock In/Out",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 49,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Customer Payment",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 50,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Supplier Payment",
+                        "menuUrl": "",
+                        "parentMenuId": 32,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 33,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Setup",
+                "menuUrl": "",
+                "parentMenuId": 3,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 51,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Department",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 52,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Opening",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 53,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 54,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Pattern Setup",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 55,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Customer",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 56,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Supplier",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 57,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Other Setup",
+                        "menuUrl": "",
+                        "parentMenuId": 33,
+                        "menuType": "Menu",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }, {
+                "key": {
+                    "menuId": 34,
+                    "busId": 1
+                },
+                "menuClass": "Inventory",
+                "menuName": "Report",
+                "menuUrl": "",
+                "parentMenuId": 3,
+                "menuType": "Menu",
+                "account": "",
+                "orderBy": 0,
+                "child": [{
+                        "key": {
+                            "menuId": 58,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Stock (Summary)",
+                        "menuUrl": "SaleByStockSummary",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 61,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Customer (Summary)",
+                        "menuUrl": "SaleByCustomerSummary",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 62,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase By Supplier (Summary)",
+                        "menuUrl": "PurchaseBySupplierSummary",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 63,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase By Stock (Summary)",
+                        "menuUrl": "PurchaseByStockSummary",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 64,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock In/Out (Summary)",
+                        "menuUrl": "StockInOutSummary",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 65,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock In/Out (Detail)",
+                        "menuUrl": "StockInOutDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 83,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Stock (Detail)",
+                        "menuUrl": "SaleByStockDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 84,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Customer (Detail)",
+                        "menuUrl": "SaleByCustomerDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 85,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase By Supplier (Detail)",
+                        "menuUrl": "PurchaseBySupplierDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 86,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase By Stock (Detail)",
+                        "menuUrl": "PurchaseByStockDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 87,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock List By Group",
+                        "menuUrl": "StockListByGroup",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 88,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Top Sale By Customer",
+                        "menuUrl": "TopSaleByCustomer",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 89,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Top Sale By Sale Man",
+                        "menuUrl": "TopSaleBySaleMan",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 90,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Top Sale By Stock",
+                        "menuUrl": "TopSaleByStock",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 59,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Opening Stock By Group",
+                        "menuUrl": "OpeningByGroup",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 60,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Opening Stock By Location",
+                        "menuUrl": "OpeningByLocation",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 74,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock Out By Voucher Type (Detail)",
+                        "menuUrl": "StockOutByVoucherTypeDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 75,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock In/Out Price Calender",
+                        "menuUrl": "StockInOutPriceCalender",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 76,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Sale Man (Summary)",
+                        "menuUrl": "SaleBySaleManSummary",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 77,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale By Sale Man (Detail)",
+                        "menuUrl": "SaleBySaleManDetail",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 78,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Sale Price Calender",
+                        "menuUrl": "SalePriceCalender",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 79,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Purchase Price Calender",
+                        "menuUrl": "PurchasePriceCalender",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 80,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock Value",
+                        "menuUrl": "StockValue",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "account": "",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 81,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": "Stock In/Out (Summary By Weight)",
+                        "menuUrl": "StockInOutSummaryByWeight",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "orderBy": 0,
+                        "child": []
+                    }, {
+                        "key": {
+                            "menuId": 82,
+                            "busId": 1
+                        },
+                        "menuClass": "Inventory",
+                        "menuName": " Stock In/Out (Detail By Weight)",
+                        "menuUrl": "StockInOutDetailByWeight",
+                        "parentMenuId": 34,
+                        "menuType": "Report",
+                        "orderBy": 0,
+                        "child": []
+                    }]
+            }]
+    }]

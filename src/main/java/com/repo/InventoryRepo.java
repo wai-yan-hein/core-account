@@ -119,6 +119,7 @@ import com.inventory.model.VTransfer;
 import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.inventory.model.WareHouse;
 import com.inventory.model.WeightHis;
 import com.inventory.model.WeightHisDetail;
 import com.inventory.model.WeightHisKey;
@@ -228,6 +229,46 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Job.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    public Mono<List<OutputCost>> getOutputCost(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateOutputCost")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(OutputCost.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    public Mono<List<AccSetting>> getAccSetting(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdatedAccSetting")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(AccSetting.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<WareHouse>> getWarehouse(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdatedAccSetting")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(WareHouse.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -657,6 +698,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<OutputCost>> getOutputCost() {
+        if (localDatabase) {
+            return h2Repo.getOutputCost();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getOutputCost")
                 .queryParam("compCode", Global.compCode)
@@ -1498,7 +1542,7 @@ public class InventoryRepo {
                 .bodyToMono(OutputCost.class)
                 .doOnSuccess((s) -> {
                     if (localDatabase) {
-//                        h2Repo.save(s);
+                       h2Repo.save(s);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -2381,6 +2425,11 @@ public class InventoryRepo {
                 .body(Mono.just(key), OutputCostKey.class)
                 .retrieve()
                 .bodyToMono(Integer.class)
+                .doOnSuccess((s1) -> {
+                    if (localDatabase) {
+                        h2Repo.delete(key);
+                    }
+                 })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -3327,6 +3376,11 @@ public class InventoryRepo {
                 .body(Mono.just(sh), AccSetting.class)
                 .retrieve()
                 .bodyToMono(AccSetting.class)
+                .doOnSuccess((acc) -> {
+                    if (localDatabase) {
+                       h2Repo.save(acc);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -3375,6 +3429,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<AccSetting>> getAccSetting() {
+        if(localDatabase){
+            return h2Repo.getAccSetting();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getAccSetting")
                 .queryParam("compCode", Global.compCode)

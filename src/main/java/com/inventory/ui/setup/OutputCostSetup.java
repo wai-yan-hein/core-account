@@ -154,6 +154,8 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         outputCost = optCost;
         txtSysCode.setText(outputCost.getKey().getOutputCostCode());
         txtCusCode.setText(outputCost.getUserCode());
+        txtOutputName.setText(outputCost.getName());
+        txtOutputPrice.setText(String.valueOf(outputCost.getPrice()));
         chkActive.setSelected(outputCost.isActive());
         lblStatus.setText("EDIT");
     }
@@ -167,6 +169,8 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         } else {
             outputCost.setUserCode(txtCusCode.getText());
             outputCost.setActive(chkActive.isSelected());
+            outputCost.setPrice(Double.parseDouble(txtOutputPrice.getText()));
+            outputCost.setName(txtOutputName.getText());
             if (lblStatus.getText().equals("NEW")) {
 //                outputCost.setMacId(Global.macId);
                 outputCost.setCreatedBy(Global.loginUser.getUserCode());
@@ -174,7 +178,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
 //                outputCost.setDeptId(Global.deptId);
                 OutputCostKey key = new OutputCostKey();
                 key.setCompCode(Global.compCode);
-                key.setOutputCostCode(null);
+                key.setOutputCostCode(null);                
                 outputCost.setKey(key);
             } else {
                 outputCost.setUpdatedBy(Global.loginUser.getUserCode());
@@ -222,6 +226,8 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         txtSysCode.setText(null);
         txtCusCode.setText(null);
         chkActive.setSelected(true);
+        txtOutputName.setText(null);
+        txtOutputPrice.setText(null);
         lblStatus.setText("NEW");
         outputCostTableModel.refresh();
         txtCusCode.requestFocus();
