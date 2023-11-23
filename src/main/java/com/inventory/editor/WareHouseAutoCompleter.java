@@ -72,7 +72,7 @@ public final class WareHouseAutoCompleter implements KeyListener {
 
     public void setListObject(List<WareHouse> list) {
         if (filter) {
-        WareHouse st = new WareHouse(new WareHouseKey("-", Global.compCode), "All");
+        WareHouse st = new WareHouse("-", "All");
             
             list.add(0, st);
             setObject(st);
