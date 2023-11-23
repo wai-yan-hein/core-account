@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "warehouse")
 public class WareHouse {
-
     @EmbeddedId
     private WareHouseKey key;
     @Column(name = "description")
@@ -32,17 +31,15 @@ public class WareHouse {
     @Column(name = "deleted")
     private boolean deleted;
 
-    public WareHouse(WareHouseKey key, String description) {
-        this.key = key;
-        this.description = description;
-    }
-
     public WareHouse() {
     }
 
-    @Override
-    public String toString() {
-        return description;
+    public WareHouse(String wareHouseCode, String description) {
+        this.key = new WareHouseKey();
+        this.key.setCode(wareHouseCode);
+        this.description = description;
     }
-
+    
+    
+    
 }

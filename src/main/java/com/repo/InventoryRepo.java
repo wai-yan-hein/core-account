@@ -236,6 +236,46 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    public Mono<List<OutputCost>> getOutputCost(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateOutputCost")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(OutputCost.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    public Mono<List<AccSetting>> getAccSetting(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdatedAccSetting")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(AccSetting.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<WareHouse>> getWarehouse(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/warehouse/getUpdatedWarehouse")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(WareHouse.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<Category>> getCategory() {
         if (localDatabase) {
@@ -659,6 +699,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<OutputCost>> getOutputCost() {
+        if (localDatabase) {
+            return h2Repo.getOutputCost();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getOutputCost")
                 .queryParam("compCode", Global.compCode)
@@ -898,7 +941,7 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setCode(code);
         if (localDatabase) {
-//            return h2Repo.find(key);
+           return h2Repo.find(key);
         }
         return inventoryApi.post()
                 .uri("/warehouse/findWareHouse")
@@ -918,7 +961,6 @@ public class InventoryRepo {
         if (localDatabase) {
             return h2Repo.find(key);
         }
-
         return inventoryApi.post()
                 .uri("/setup/findVouStatus")
                 .body(Mono.just(key), VouStatusKey.class)
@@ -1444,9 +1486,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<WareHouse>> getWareHouse() {
-        /*if (localDatabase) {
-        return h2Repo.getLabourGroup();
-        }*/
+        if (localDatabase) {
+        return h2Repo.getWarehouse();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/warehouse/getWareHouse")
                 .queryParam("compCode", Global.compCode)
@@ -1547,7 +1589,7 @@ public class InventoryRepo {
                 .bodyToMono(OutputCost.class)
                 .doOnSuccess((s) -> {
                     if (localDatabase) {
-//                        h2Repo.save(s);
+                       h2Repo.save(s);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -1744,9 +1786,9 @@ public class InventoryRepo {
                 .body(Mono.just(vou), WareHouse.class)
                 .retrieve()
                 .bodyToMono(WareHouse.class)
-                .doOnSuccess((t) -> {
+                .doOnSuccess((w) -> {
                     if (localDatabase) {
-                        //h2Repo.save(t);
+                        h2Repo.save(w);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -2447,6 +2489,11 @@ public class InventoryRepo {
                 .body(Mono.just(key), OutputCostKey.class)
                 .retrieve()
                 .bodyToMono(Integer.class)
+                .doOnSuccess((s1) -> {
+                    if (localDatabase) {
+                        h2Repo.delete(key);
+                    }
+                 })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -3393,6 +3440,11 @@ public class InventoryRepo {
                 .body(Mono.just(sh), AccSetting.class)
                 .retrieve()
                 .bodyToMono(AccSetting.class)
+                .doOnSuccess((acc) -> {
+                    if (localDatabase) {
+                       h2Repo.save(acc);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -3441,6 +3493,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<AccSetting>> getAccSetting() {
+        if(localDatabase){
+            return h2Repo.getAccSetting();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getAccSetting")
                 .queryParam("compCode", Global.compCode)
