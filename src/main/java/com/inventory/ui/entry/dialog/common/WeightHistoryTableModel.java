@@ -97,7 +97,7 @@ public class WeightHistoryTableModel extends AbstractTableModel {
                         return his.getTotalQty();
                     }
                     case 9 -> {
-                        return his.getTotalWeight();
+                        return his.getTotalBag();
                     }
                     case 10->{
                         return his.isPost();

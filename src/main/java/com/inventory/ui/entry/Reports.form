@@ -114,6 +114,7 @@
                       <Component id="jLabel13" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
                       <Component id="jLabel15" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
                       <Component id="jLabel17" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel19" min="-2" pref="80" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
@@ -141,9 +142,16 @@
                       <Component id="txtCategory" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtStockType" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtStock" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtLocation" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtSaleMan" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtTrader" max="32767" attributes="0"/>
+                      <Component id="txtLG" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" alignment="1" attributes="0">
+                          <Component id="txtWH" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabel20" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="txtLocation" min="-2" pref="121" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
@@ -182,8 +190,14 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="txtLocation" max="32767" attributes="0"/>
-                      <Component id="jLabel2" min="-2" pref="22" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="txtLocation" alignment="3" max="32767" attributes="0"/>
+                          <Component id="jLabel20" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jLabel2" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                          <Component id="txtWH" alignment="3" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -224,6 +238,11 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel16" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
                       <Component id="txtProjectNo" alignment="3" max="32767" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel19" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                      <Component id="txtLG" alignment="3" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -282,7 +301,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Location"/>
+            <Property name="text" type="java.lang.String" value="Ware House"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtLocation">
@@ -445,6 +464,34 @@
             </Property>
             <Property name="text" type="java.lang.String" value="To Due Date"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel19">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Labour Group"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtLG">
+          <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtLGFocusGained"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtLGActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel20">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Location"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtWH">
+          <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtWHFocusGained"/>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtWHKeyReleased"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

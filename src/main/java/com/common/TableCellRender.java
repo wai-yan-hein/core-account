@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TableCellRender extends DefaultTableCellRenderer {
 
     private final JCheckBox check = new JCheckBox();
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
+    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT4);
 
     public TableCellRender() {
     }

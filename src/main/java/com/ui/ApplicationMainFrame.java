@@ -1058,7 +1058,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         userRepo.getAppUser().doOnSuccess((list) -> {
             if (list != null) {
                 list.forEach((t) -> {
-                    Global.hmUser.put(t.getUserCode(), t.getUserShortName());
+                    Global.hmUser.put(t.getUserCode(), t.getUserLongName());
                 });
             }
         }).subscribe();
