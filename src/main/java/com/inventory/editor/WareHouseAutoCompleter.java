@@ -8,6 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.inventory.model.Location;
 import com.inventory.model.WareHouse;
 import com.inventory.model.WareHouseKey;
 import com.inventory.ui.setup.dialog.common.WareHouseTableModel;
@@ -71,7 +72,8 @@ public final class WareHouseAutoCompleter implements KeyListener {
 
     public void setListObject(List<WareHouse> list) {
         if (filter) {
-            WareHouse st = new WareHouse(new WareHouseKey("-", Global.compCode), "All");
+        WareHouse st = new WareHouse(new WareHouseKey("-", Global.compCode), "All");
+            
             list.add(0, st);
             setObject(st);
         }

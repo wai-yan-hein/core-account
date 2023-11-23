@@ -961,7 +961,6 @@ public class InventoryRepo {
         if (localDatabase) {
             return h2Repo.find(key);
         }
-
         return inventoryApi.post()
                 .uri("/setup/findVouStatus")
                 .body(Mono.just(key), VouStatusKey.class)
