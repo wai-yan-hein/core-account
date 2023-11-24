@@ -169,14 +169,11 @@ public final class JobAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(type.getJobName());
             if (observer != null) {
-                observer.selected("WareHouse", "WareHouse");
+                observer.selected("Job", "Job");
             }
             popup.setVisible(false);
             if (editor != null) {
                 editor.stopCellEditing();
-            }
-            if (observer != null) {
-                observer.selected("ST", type.getKey().getJobNo());
             }
         }
     }

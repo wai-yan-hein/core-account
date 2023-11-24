@@ -79,7 +79,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -100,11 +99,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private final MillingExpenseTableModel milingExpenseTableModel = new MillingExpenseTableModel();
     private MillingHistoryDialog dialog;
     private ProcessTypeComboBoxModel vouStatusTableModel = new ProcessTypeComboBoxModel();
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -115,6 +111,19 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private JProgressBar progress;
     private MillingUsageDialog usageDialog;
     private JobSearchDialog jobSearchDialog;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;

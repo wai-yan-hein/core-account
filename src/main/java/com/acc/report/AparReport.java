@@ -33,15 +33,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -54,15 +51,12 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
 
@@ -70,9 +64,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     /**
      * Creates new form AparReport
      */
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private final APARTableModel aPARTableModel = new APARTableModel();
     private DateAutoCompleter dateAutoCompleter;
@@ -87,6 +79,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private JProgressBar progress;
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;

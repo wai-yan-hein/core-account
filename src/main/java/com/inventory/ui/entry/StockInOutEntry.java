@@ -18,6 +18,7 @@ import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.inventory.editor.JobAutoCompleter;
 import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
@@ -87,6 +88,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private Mono<List<Location>> monoLoc;
     private int type;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
+    private JobAutoCompleter jobAutoCompleter;
     private StockIOMoreDialog moreDialog;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -128,6 +130,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         initModel();
         initRowHeader();
         initCombo();
+        initData();
         clear();
     }
 
@@ -188,6 +191,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         vouStatusAutoCompleter.setVoucher(null);
         labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, false);
         labourGroupAutoCompleter.setObserver(this);
+        jobAutoCompleter = new JobAutoCompleter(txtJob, null, false);
+        jobAutoCompleter.setObserver(this);
+
+    }
+
+    private void initData() {
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListVouStatus(t);
         }).subscribe();
@@ -202,9 +211,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         inventoryRepo.getJob(false, Global.deptId).doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new Job());
-                jobComboBoxModel.setData(t);
-                cboJob.setModel(jobComboBoxModel);
-                cboJob.setSelectedItem(null);
+                jobAutoCompleter.setListObject(t);
             }
         }).subscribe();
     }
@@ -417,9 +424,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtInQty.setValue(0.0);
         txtOutQty.setValue(0.0);
         vouStatusAutoCompleter.setVoucher(null);
-        jobComboBoxModel.setSelectedItem(null);
         labourGroupAutoCompleter.setObject(null);
-        cboJob.repaint();
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
@@ -558,12 +563,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 if (lg != null) {
                     io.setLabourGroupCode(lg.getKey() == null ? null : lg.getKey().getCode());
                 }
-                if (cboJob.getSelectedItem() instanceof Job job) {
-                    if (job.getKey() != null) {
-                        io.setJobCode(job.getKey().getJobNo());
-                    } else {
-                        io.setJobCode(null);
-                    }
+                Job job = jobAutoCompleter.getObject();
+                if (job != null) {
+                    io.setJobCode(job.getKey() == null ? null : job.getKey().getJobNo());
                 }
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
@@ -590,8 +592,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             if (!Util1.isNullOrEmpty(jobNo)) {
                 inventoryRepo.findJob(jobNo).doOnSuccess((t) -> {
                     if (t != null) {
-                        jobComboBoxModel.setSelectedItem(t);
-                        cboJob.repaint();
+                        jobAutoCompleter.setObject(t);
                         if (t.isFinished()) {
                             lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
                             lblStatus.setForeground(Color.red);
@@ -1125,7 +1126,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void refresh() {
-        initCombo();
+        initData();
     }
 
     @Override

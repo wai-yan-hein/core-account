@@ -56,8 +56,11 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private BrandAutoCompleter brandAutoCompleter;
     private CategoryAutoCompleter categoryAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
-    @Autowired
     private InventoryRepo inventoryRepo;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public JProgressBar getProgress() {
         return progress;

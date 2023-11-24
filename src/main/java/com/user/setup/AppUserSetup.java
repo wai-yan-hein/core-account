@@ -34,15 +34,12 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class AppUserSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
@@ -52,15 +49,24 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private final DepartmentAccComboBoxModel departmentAccComboBoxModel = new DepartmentAccComboBoxModel();
     private final LocationComboModel locationComboModel = new LocationComboModel();
 
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
     private RoleAutoCompleter roleAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public JProgressBar getProgress() {
         return progress;

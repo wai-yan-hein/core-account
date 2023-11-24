@@ -10,8 +10,6 @@ import com.common.DecimalFormatRender;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -61,14 +59,11 @@ import net.sf.jasperreports.view.JasperViewer;
  *
  * @author Lenovo
  */
-@Component
 public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
     private final TransferTableModel tranTableModel = new TransferTableModel();
     private TransferHistoryDialog dialog;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
     private LocationAutoCompleter fromLocaitonCompleter;
     private LocationAutoCompleter toLocaitonCompleter;
@@ -77,6 +72,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private SelectionObserver observer;
     private JProgressBar progress;
     private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;

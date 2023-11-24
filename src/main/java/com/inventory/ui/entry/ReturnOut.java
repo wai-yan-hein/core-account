@@ -68,15 +68,12 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
@@ -84,13 +81,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private final ReturnOutTableModel roTableModel = new ReturnOutTableModel();
     private RetOutHistoryDialog dialog;
-    @Autowired
-    private WebClient inventoryApi;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -100,6 +92,18 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private RetOutHis ri = new RetOutHis();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -340,16 +344,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void printVoucher(String vouNo) {
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-return-out-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
+        inventoryRepo.getReturnOutReport(vouNo).doOnSuccess((t) -> {
             try {
                 if (t != null) {
                     String reportName = "ReturnOutVoucher";
@@ -370,9 +365,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 log.error("printVoucher : " + ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
-        }, (e) -> {
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
     }
 
     private boolean isValidEntry() {
@@ -512,7 +507,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         if (dialog == null) {
             dialog = new RetOutHistoryDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIconImage(searchIcon);
             dialog.setCloudIntegration(integration);

@@ -34,21 +34,16 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author DELL
  */
-@Component
 @Slf4j
 public class WeightLossEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
     private WeightLossHistoryDialog dialog;
@@ -56,6 +51,15 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     private SelectionObserver observer;
     private JProgressBar progress;
     private WeightLossHis his = new WeightLossHis();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;

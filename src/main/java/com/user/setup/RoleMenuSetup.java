@@ -17,21 +17,22 @@ import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, SelectionObserver {
 
     private SelectionObserver observer;
     private JProgressBar progress;
-    @Autowired
     private UserRepo userRepo;
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;

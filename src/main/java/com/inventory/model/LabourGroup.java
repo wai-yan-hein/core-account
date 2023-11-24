@@ -37,7 +37,6 @@ public class LabourGroup {
     private Integer memberCount;
 
     public LabourGroup() {
-        this.key = new LabourGroupKey();
     }
 
     public LabourGroup(String code, String name) {

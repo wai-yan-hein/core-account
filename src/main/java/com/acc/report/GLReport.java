@@ -53,14 +53,11 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
 
@@ -69,12 +66,18 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private DateAutoCompleter dateAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     /**
      * Creates new form AparGlReport

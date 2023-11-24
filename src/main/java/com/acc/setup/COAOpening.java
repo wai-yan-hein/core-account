@@ -68,14 +68,11 @@ import net.sf.jasperreports.view.JasperViewer;
  * @author myoht
  */
 @Slf4j
-@Component
 public class COAOpening extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final OpeningBalanceTableModel openingTableModel = new OpeningBalanceTableModel();
 
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
 
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -86,6 +83,14 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private SelectionObserver observer;
     private TableFilterHeader filterHeader;
     private JProgressBar progress;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     /**
      * Creates new form COAOpening

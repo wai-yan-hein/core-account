@@ -50,20 +50,22 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class TraderSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    private AccountRepo accountRepo;
     private int selectRow = -1;
     private TraderA trader = new TraderA();
     private final TraderATableModel traderATableModel = new TraderATableModel();
     private COA3AutoCompleter cOAAutoCompleter;
     private final TraderGroupComboModel comboModel = new TraderGroupComboModel();
-    @Autowired
-    private AccountRepo accountRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
     private TraderAGroupDialog dialog;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+    
 
     public JProgressBar getProgress() {
         return progress;

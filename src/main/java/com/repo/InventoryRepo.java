@@ -3659,6 +3659,17 @@ public class InventoryRepo {
                 .bodyToMono(ByteArrayResource.class)
                 .map(ByteArrayResource::getByteArray);
     }
+    public Mono<byte[]> getReturnOutReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getReturnOutReport")
+                .queryParam("vouNo", vouNo)
+                .queryParam("macId", Global.macId)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray);
+    }
 
     public Mono<List<VSale>> getSaleByBatchReport(String vouNo, String grnVouNo) {
         return inventoryApi.get()

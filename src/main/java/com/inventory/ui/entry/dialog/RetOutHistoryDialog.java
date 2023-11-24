@@ -49,7 +49,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
      */
     private final RetOutVouSearchTableModel tableModel = new RetOutVouSearchTableModel();
 
-    private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
@@ -70,14 +69,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
 
     public CloudIntegration getCloudIntegration() {
         return integration;
-    }
-
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
     }
 
     public InventoryRepo getInventoryRepo() {

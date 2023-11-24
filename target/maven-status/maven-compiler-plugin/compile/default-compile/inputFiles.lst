@@ -400,6 +400,7 @@ D:\CoreValue\GitHub\core-inventory\src\main\java\com\inventory\model\PurHisDetai
 D:\CoreValue\GitHub\core-inventory\src\main\java\com\common\RowHeaderRenderer.java
 D:\CoreValue\GitHub\core-inventory\src\main\java\com\inventory\model\RetOutHis.java
 D:\CoreValue\GitHub\core-inventory\src\main\java\com\inventory\model\VLanding.java
+D:\CoreValue\GitHub\core-inventory\src\main\java\com\inventory\editor\JobAutoCompleter.java
 D:\CoreValue\GitHub\core-inventory\src\main\java\com\h2\dao\WareHouseDao.java
 D:\CoreValue\GitHub\core-inventory\src\main\java\com\h2\service\AccSettingServiceImpl.java
 D:\CoreValue\GitHub\core-inventory\src\main\java\com\inventory\model\LandingHisPrice.java

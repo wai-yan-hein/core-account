@@ -5,7 +5,9 @@
  */
 package com.ui;
 
+import com.CloudIntegration;
 import com.CoreAccountApplication;
+import com.H2Repo;
 import com.SSEListener;
 import com.repo.AccountRepo;
 import com.acc.entry.AllCash;
@@ -32,11 +34,12 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.common.YNOptionPane;
 import com.h2.dao.DateFilterRepo;
+import com.inventory.model.ReorderLevel;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
-import com.repo.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.LandingEntry;
 import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
@@ -87,6 +90,7 @@ import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
+import com.repo.HMSRepo;
 import com.ui.management.StockBalance;
 import com.ui.management.StockPayable;
 import com.user.dialog.CompanyOptionDialog;
@@ -112,6 +116,7 @@ import java.util.TimerTask;
 import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -125,96 +130,28 @@ import org.springframework.stereotype.Component;
 public class ApplicationMainFrame extends javax.swing.JFrame implements SelectionObserver {
 
     @Autowired
+    private H2Repo h2Repo;
+    @Autowired
+    private CloudIntegration integration;
+    @Autowired
     private AccountRepo accounRepo;
+    @Autowired
+    private HMSRepo hmsRepo;
     @Autowired
     private UserRepo userRepo;
     @Autowired
-    private Sale sale;
+    private String getToken;
     @Autowired
-    private SaleByBatch saleByBatch;
-    @Autowired
-    private RFID rfid;
-    @Autowired
-    private Purchase purchase;
-    @Autowired
-    private ReturnIn retIn;
-    @Autowired
-    private ReturnOut retOut;
-    @Autowired
-    private CustomerSetup customerSetup;
-    @Autowired
-    private SupplierSetup supplierSetup;
-    @Autowired
-    private EmployeeSetup employeeSetup;
-    @Autowired
-    private OutputCostSetup outputCostSetup;
-    @Autowired
-    private OtherSetupMain otherSetupMain;
-    @Autowired
-    private RoleSetting roleSetting;
-    @Autowired
-    private Reports report;
-    @Autowired
-    private PatternSetup patternSetup;
-    @Autowired
-    private ReorderLevelEntry reorderLevel;
-    @Autowired
-    private Transfer transfer;
-    @Autowired
-    private Manufacture manufacture;
-    @Autowired
-    private WeightLossEntry weightLoss;
-    @Autowired
-    private GRNEntry grnEntry;
-    @Autowired
-    private MillingEntry millingEntry;
+    private Environment environment;
 //account
     @Autowired
-    private DepartmentSetup departmentSetup;
-    @Autowired
-    private COAManagment cOAManagment;
-    @Autowired
-    private COASetup cOASetup;
-    @Autowired
-    private GLReport gLReport;
-    @Autowired
-    private AparReport aparReport;
-    @Autowired
-    private TraderSetup traderSetup;
-    @Autowired
     private TaskExecutor taskExecutor;
-    @Autowired
-    private FinancialReport financialReport;
-    @Autowired
-    private Journal journal;
-    @Autowired
-    private JournalClosingStock journalClosingStock;
-    @Autowired
-    private COAOpening coaOpening;
-    @Autowired
-    private DrCrVoucher drcrVoucher;
-    @Autowired
-    private ExcelReport excelReport;
 
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
-    private AppUserSetup userSetup;
-    @Autowired
-    private MenuSetup menuSetup;
-    @Autowired
-    private CompanySetup companySetup;
-    @Autowired
-    private CompanyTemplate companyTemplate;
-    @Autowired
-    private ProjectSetup projectSetup;
-    @Autowired
-    private CurrencyExchange currencyExchange;
-    @Autowired
     private String hostName;
-    @Autowired
-    private HMSIntegration hmsIntegration;
     @Autowired
     private DateFilterRepo dateFilterRepo;
     @Autowired
@@ -431,10 +368,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         enableToolBar(true);
         switch (menuName) {
             case "Sale" -> {
+                Sale sale = new Sale();
                 sale.setName(menuName);
                 sale.setObserver(this);
                 sale.setProgress(progress);
                 sale.setStockBalanceDialog(stockBalanceFrame);
+                sale.setUserRepo(userRepo);
+                sale.setInventoryRepo(inventoryRepo);
+                sale.setAccountRepo(accounRepo);
+                sale.setTaskExecutor(taskExecutor);
+                sale.setIntegration(integration);
+                sale.setH2Repo(h2Repo);
                 sale.initMain();
                 return sale;
             }
@@ -450,10 +394,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return orderDynamic;
             }
             case "Sale By Batch" -> {
+                SaleByBatch saleByBatch = new SaleByBatch();
                 saleByBatch.setName(menuName);
                 saleByBatch.setObserver(this);
                 saleByBatch.setProgress(progress);
                 saleByBatch.setStockBalanceDialog(stockBalanceFrame);
+                saleByBatch.setUserRepo(userRepo);
+                saleByBatch.setInventoryRepo(inventoryRepo);
+                saleByBatch.setAccountRepo(accounRepo);
                 saleByBatch.initMain();
                 return saleByBatch;
             }
@@ -471,16 +419,24 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return s;
             }
             case "RFID" -> {
+                RFID rfid = new RFID();
                 rfid.setName(menuName);
                 rfid.setObserver(this);
                 rfid.setProgress(progress);
+                rfid.setUserRepo(userRepo);
+                rfid.setInventoryRepo(inventoryRepo);
                 rfid.initMain();
                 return rfid;
             }
             case "Purchase" -> {
+                Purchase purchase = new Purchase();
                 purchase.setName(menuName);
                 purchase.setObserver(this);
                 purchase.setProgress(progress);
+                purchase.setUserRepo(userRepo);
+                purchase.setInventoryRepo(inventoryRepo);
+                purchase.setAccountRepo(accounRepo);
+                purchase.setIntegration(integration);
                 purchase.initMain();
                 return purchase;
             }
@@ -497,16 +453,24 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return p;
             }
             case "Return In" -> {
+                ReturnIn retIn = new ReturnIn();
                 retIn.setName(menuName);
                 retIn.setObserver(this);
                 retIn.setProgress(progress);
+                retIn.setUserRepo(userRepo);
+                retIn.setInventoryRepo(inventoryRepo);
+                retIn.setIntegration(integration);
                 retIn.initMain();
                 return retIn;
             }
             case "Return Out" -> {
+                ReturnOut retOut = new ReturnOut();
                 retOut.setName(menuName);
                 retOut.setObserver(this);
                 retOut.setProgress(progress);
+                retOut.setUserRepo(userRepo);
+                retOut.setInventoryRepo(inventoryRepo);
+                retOut.setIntegration(integration);
                 retOut.initMain();
                 return retOut;
             }
@@ -553,51 +517,80 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return openingSetup;
             }
             case "Customer" -> {
+                CustomerSetup customerSetup = new CustomerSetup();
                 customerSetup.setName(menuName);
                 customerSetup.setObserver(this);
                 customerSetup.setProgress(progress);
+                customerSetup.setUserRepo(userRepo);
+                customerSetup.setInventoryRepo(inventoryRepo);
+                customerSetup.setAccountRepo(accounRepo);
+                customerSetup.setTaskExecutor(taskExecutor);
                 customerSetup.initMain();
                 return customerSetup;
             }
             case "Supplier" -> {
-                customerSetup.setName(menuName);
+                SupplierSetup supplierSetup = new SupplierSetup();
+                supplierSetup.setName(menuName);
                 supplierSetup.setObserver(this);
                 supplierSetup.setProgress(progress);
+                supplierSetup.setUserRepo(userRepo);
+                supplierSetup.setInventoryRepo(inventoryRepo);
+                supplierSetup.setAccountRepo(accounRepo);
                 supplierSetup.initMain();
                 return supplierSetup;
             }
             case "Employee" -> {
+                EmployeeSetup employeeSetup = new EmployeeSetup();
                 employeeSetup.setName(menuName);
                 employeeSetup.setObserver(this);
                 employeeSetup.setProgress(progress);
+                employeeSetup.setUserRepo(userRepo);
+                employeeSetup.setInventoryRepo(inventoryRepo);
+                employeeSetup.setAccountRepo(accounRepo);
+                employeeSetup.setTaskExecutor(taskExecutor);
                 employeeSetup.initMain();
                 return employeeSetup;
             }
             case "Output Cost" -> {
+                OutputCostSetup outputCostSetup = new OutputCostSetup();
                 outputCostSetup.setName(menuName);
                 outputCostSetup.setObserver(this);
                 outputCostSetup.setProgress(progress);
+                outputCostSetup.setInventoryRepo(inventoryRepo);
+                outputCostSetup.setAccountRepo(accounRepo);
                 outputCostSetup.initMain();
                 return outputCostSetup;
             }
             case "Other Setup" -> {
+                OtherSetupMain otherSetupMain = new OtherSetupMain();
                 otherSetupMain.setName(menuName);
                 otherSetupMain.setObserver(this);
                 otherSetupMain.setProgress(progress);
+                otherSetupMain.setUserRepo(userRepo);
+                otherSetupMain.setInventoryRepo(inventoryRepo);
+                otherSetupMain.setAccountRepo(accounRepo);
                 otherSetupMain.initMain();
                 return otherSetupMain;
             }
             case "Role Setting" -> {
+                RoleSetting roleSetting = new RoleSetting();
                 roleSetting.setName(menuName);
                 roleSetting.setObserver(this);
                 roleSetting.setProgress(progress);
+                roleSetting.setUserRepo(userRepo);
+                roleSetting.setInventoryRepo(inventoryRepo);
+                roleSetting.setAccountRepo(accounRepo);
                 roleSetting.initMain();
                 return roleSetting;
             }
             case "Report" -> {
+                Reports report = new Reports();
                 report.setName(menuName);
                 report.setObserver(this);
                 report.setProgress(progress);
+                report.setInventoryRepo(inventoryRepo);
+                report.setUserRepo(userRepo);
+                report.setTaskExecutor(taskExecutor);
                 report.initMain();
                 return report;
             }
@@ -626,53 +619,72 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return systemProperty;
             }
             case "Project" -> {
+                ProjectSetup projectSetup = new ProjectSetup();
                 projectSetup.setName(menuName);
                 projectSetup.setObserver(this);
                 projectSetup.setProgress(progress);
+                projectSetup.setUserRepo(userRepo);
                 projectSetup.initMain();
                 return projectSetup;
             }
             case "Pattern Setup" -> {
+                PatternSetup patternSetup = new PatternSetup();
                 patternSetup.setName(menuName);
                 patternSetup.setObserver(this);
                 patternSetup.setProgress(progress);
+                patternSetup.setInventoryRepo(inventoryRepo);
                 patternSetup.initMain();
                 return patternSetup;
             }
             case "Reorder Level" -> {
+                ReorderLevelEntry reorderLevel = new ReorderLevelEntry();
                 reorderLevel.setName(menuName);
                 reorderLevel.setObserver(this);
                 reorderLevel.setProgress(progress);
+                reorderLevel.setInventoryRepo(inventoryRepo);
                 reorderLevel.initMain();
                 return reorderLevel;
             }
             case "Transfer" -> {
+                Transfer transfer = new Transfer();
                 transfer.setName(menuName);
                 transfer.setObserver(this);
                 transfer.setProgress(progress);
+                transfer.setUserRepo(userRepo);
+                transfer.setInventoryRepo(inventoryRepo);
                 transfer.initMain();
                 return transfer;
             }
             case "Manufacture" -> {
+                Manufacture manufacture = new Manufacture();
                 manufacture.setName(menuName);
                 manufacture.setObserver(this);
                 manufacture.setProgress(progress);
+                manufacture.setUserRepo(userRepo);
+                manufacture.setInventoryRepo(inventoryRepo);
+                manufacture.setIntegration(integration);
                 manufacture.initMain();
                 return manufacture;
             }
             case "Weight Loss" -> {
+                WeightLossEntry weightLoss = new WeightLossEntry();
                 weightLoss.setName(menuName);
                 weightLoss.setObserver(this);
                 weightLoss.setProgress(progress);
+                weightLoss.setUserRepo(userRepo);
+                weightLoss.setInventoryRepo(inventoryRepo);
                 weightLoss.initMain();
                 return weightLoss;
             }
             case "GRN" -> {
-                grnEntry.setName(menuName);
-                grnEntry.setObserver(this);
-                grnEntry.setProgress(progress);
-                grnEntry.initMain();
-                return grnEntry;
+                GRNEntry entry = new GRNEntry();
+                entry.setName(menuName);
+                entry.setObserver(this);
+                entry.setProgress(progress);
+                entry.setInventoryRepo(inventoryRepo);
+                entry.setUserRepo(userRepo);
+                entry.initMain();
+                return entry;
             }
             case "Customer Payment" -> {
                 PaymentEntry payment = new PaymentEntry("C");
@@ -697,9 +709,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return payment;
             }
             case "Milling Entry", "Milling" -> {
+                MillingEntry millingEntry = new MillingEntry();
                 millingEntry.setName(menuName);
                 millingEntry.setObserver(this);
                 millingEntry.setProgress(progress);
+                millingEntry.setUserRepo(userRepo);
+                millingEntry.setAccountRepo(accounRepo);
+                millingEntry.setInventoryRepo(inventoryRepo);
                 millingEntry.initMain();
                 return millingEntry;
             }
@@ -747,121 +763,173 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return e;
             }
             case "Menu" -> {
+                MenuSetup menuSetup = new MenuSetup();
                 menuSetup.setName(menuName);
                 menuSetup.setObserver(this);
                 menuSetup.setProgress(progress);
+                menuSetup.setAccountRepo(accounRepo);
+                menuSetup.setUserRepo(userRepo);
                 menuSetup.initMain();
                 return menuSetup;
             }
             case "Department" -> {
+                DepartmentSetup departmentSetup = new DepartmentSetup();
                 departmentSetup.setName(menuName);
                 departmentSetup.setObserver(this);
                 departmentSetup.setProgress(progress);
+                departmentSetup.setAccountRepo(accounRepo);
+                departmentSetup.setTaskExecutor(taskExecutor);
                 departmentSetup.initMain();
                 return departmentSetup;
             }
             case "COA Management" -> {
+                COAManagment cOAManagment = new COAManagment();
                 cOAManagment.setName(menuName);
                 cOAManagment.setObserver(this);
                 cOAManagment.setProgress(progress);
+                cOAManagment.setUserRepo(userRepo);
+                cOAManagment.setAccountRepo(accounRepo);
                 cOAManagment.initMain();
                 return cOAManagment;
             }
             case "User Setup" -> {
+                AppUserSetup userSetup = new AppUserSetup();
                 userSetup.setName(menuName);
                 userSetup.setObserver(this);
                 userSetup.setProgress(progress);
+                userSetup.setAccountRepo(accounRepo);
+                userSetup.setInventoryRepo(inventoryRepo);
+                userSetup.setUserRepo(userRepo);
                 userSetup.initMain();
                 return userSetup;
             }
             case "Company" -> {
+                CompanySetup companySetup = new CompanySetup();
                 companySetup.setName(menuName);
                 companySetup.setObserver(this);
                 companySetup.setProgress(progress);
+                companySetup.setUserRepo(userRepo);
+                companySetup.setAccountRepo(accounRepo);
+                companySetup.setEnvironment(environment);
+                companySetup.setToken(getToken);
                 companySetup.initMain();
                 return companySetup;
             }
             case "HMS Integration" -> {
+                HMSIntegration hmsIntegration = new HMSIntegration();
                 hmsIntegration.setName(menuName);
                 hmsIntegration.setObserver(this);
                 hmsIntegration.setProgress(progress);
+                hmsIntegration.setAccountRepo(accounRepo);
+                hmsIntegration.setHmsRepo(hmsRepo);
                 hmsIntegration.initMain();
                 return hmsIntegration;
             }
             case "Company Template" -> {
+                CompanyTemplate companyTemplate = new CompanyTemplate();
                 companyTemplate.setName(menuName);
                 companyTemplate.setObserver(this);
                 companyTemplate.setProgress(progress);
+                companyTemplate.setAccountRepo(accounRepo);
+                companyTemplate.setUserRepo(userRepo);
+                companyTemplate.setTaskExecutor(taskExecutor);
                 companyTemplate.intTabMain();
                 return companyTemplate;
             }
             case "Currency" -> {
+                CurrencyExchange currencyExchange = new CurrencyExchange();
                 currencyExchange.setName(menuName);
                 currencyExchange.setObserver(this);
                 currencyExchange.setProgress(progress);
+                currencyExchange.setUserRepo(userRepo);
                 currencyExchange.initMain();
                 return currencyExchange;
             }
             case "G/L Listing" -> {
+                GLReport gLReport = new GLReport();
                 gLReport.setName(menuName);
                 gLReport.setObserver(this);
                 gLReport.setProgress(progress);
+                gLReport.setAccountRepo(accounRepo);
+                gLReport.setUserRepo(userRepo);
                 gLReport.initMain();
                 return gLReport;
             }
             case "AR / AP" -> {
+                AparReport aparReport = new AparReport();
                 aparReport.setName(menuName);
                 aparReport.setObserver(this);
                 aparReport.setProgress(progress);
+                aparReport.setAccountRepo(accounRepo);
+                aparReport.setUserRepo(userRepo);
                 aparReport.initMain();
                 return aparReport;
             }
             case "Financial Report" -> {
+                FinancialReport financialReport = new FinancialReport();
                 financialReport.setName(menuName);
                 financialReport.setObserver(this);
                 financialReport.setProgress(progress);
+                financialReport.setAccountRepo(accounRepo);
+                financialReport.setUserRepo(userRepo);
                 financialReport.initMain();
                 return financialReport;
             }
             case "Chart Of Account" -> {
+                COASetup cOASetup = new COASetup();
                 cOASetup.setName(menuName);
                 cOASetup.setObserver(this);
                 cOASetup.setProgress(progress);
+                cOASetup.setAccountRepo(accounRepo);
                 cOASetup.initMain();
                 return cOASetup;
             }
             case "Opening Balance" -> {
+                COAOpening coaOpening = new COAOpening();
                 coaOpening.setName(menuName);
                 coaOpening.setObservaer(this);
                 coaOpening.setProgress(progress);
+                coaOpening.setUserRepo(userRepo);
+                coaOpening.setAccountRepo(accounRepo);
                 coaOpening.initMain();
                 return coaOpening;
             }
             case "Journal Voucher" -> {
+                Journal journal = new Journal();
                 journal.setName(menuName);
                 journal.setObserver(this);
                 journal.setProgress(progress);
+                journal.setAccountRepo(accounRepo);
+                journal.setUserRepo(userRepo);
                 journal.initMain();
                 return journal;
             }
             case "Dr & Cr Voucher" -> {
-                drcrVoucher.setName(menuName);
-                drcrVoucher.setObserver(this);
-                drcrVoucher.setProgress(progress);
-                drcrVoucher.initMain();
-                return drcrVoucher;
+                DrCrVoucher drCrVoucher = new DrCrVoucher();
+                drCrVoucher.setName(menuName);
+                drCrVoucher.setObserver(this);
+                drCrVoucher.setProgress(progress);
+                drCrVoucher.setAccountRepo(accounRepo);
+                drCrVoucher.setUserRepo(userRepo);
+                drCrVoucher.initMain();
+                return drCrVoucher;
             }
             case "Journal Stock Closing" -> {
+                JournalClosingStock journalClosingStock = new JournalClosingStock();
                 journalClosingStock.setName(menuName);
                 journalClosingStock.setObserver(this);
                 journalClosingStock.setProgress(progress);
+                journalClosingStock.setAccountRepo(accounRepo);
+                journalClosingStock.setUserRepo(userRepo);
                 journalClosingStock.initMain();
                 return journalClosingStock;
             }
             case "Trader" -> {
+                TraderSetup traderSetup = new TraderSetup();
                 traderSetup.setName(menuName);
                 traderSetup.setObserver(this);
                 traderSetup.setProgress(progress);
+                traderSetup.setAccountRepo(accounRepo);
                 traderSetup.initMain();
                 return traderSetup;
             }
@@ -877,9 +945,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return adj;
             }
             case "Excel Report" -> {
+                ExcelReport excelReport = new ExcelReport();
                 excelReport.setName(menuName);
                 excelReport.setObserver(this);
                 excelReport.setProgress(progress);
+                excelReport.setUserRepo(userRepo);
+                excelReport.setAccountRepo(accounRepo);
+                excelReport.setTaskExecutor(taskExecutor);
                 excelReport.initMain();
                 return excelReport;
             }

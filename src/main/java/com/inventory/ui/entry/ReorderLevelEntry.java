@@ -5,6 +5,7 @@
 package com.inventory.ui.entry;
 
 import com.common.ColorCellRender;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -25,33 +26,26 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final ButtonGroup g = new ButtonGroup();
-    @Autowired
     private InventoryRepo inventoryRepo;
     private final ReorderTableModel reorderTableModel = new ReorderTableModel();
     private StockTypeAutoCompleter typeAutoCompleter;
@@ -63,18 +57,10 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private SelectionObserver observer;
     private Mono<List<StockUnit>> monoUnit;
     private TableRowSorter<TableModel> sorter;
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusLost(FocusEvent e) {
-        }
 
-        @Override
-        public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            jtf.selectAll();
-        }
-
-    };
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public JProgressBar getProgress() {
         return progress;
@@ -102,11 +88,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void initFoucsAdapter() {
-        txtStock.addFocusListener(fa);
-        txtLoc.addFocusListener(fa);
-        txtGroup.addFocusListener(fa);
-        txtCat.addFocusListener(fa);
-        txtBrand.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
 
     public void initMain() {

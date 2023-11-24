@@ -21,32 +21,37 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class RoleSetting extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private final SystemProperty sysProperty = new SystemProperty();
-    @Autowired
     private RoleMenuSetup roleMenuSetup;
-    @Autowired
     private RoleCompany roleCompany;
     private final UserRoleTableModel userRoleTableModel = new UserRoleTableModel();
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private int selectRow = -1;
     private AppRole role = new AppRole();
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -61,6 +66,13 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
      */
     public RoleSetting() {
         initComponents();
+    }
+
+    private void initData() {
+        roleMenuSetup = new RoleMenuSetup();
+        roleMenuSetup.setUserRepo(userRepo);
+        roleCompany = new RoleCompany();
+        roleCompany.setUserRepo(userRepo);
     }
 
     private void initTableUser() {
@@ -115,6 +127,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     public void initMain() {
+        initData();
         initTableUser();
     }
 

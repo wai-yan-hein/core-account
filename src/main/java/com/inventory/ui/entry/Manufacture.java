@@ -48,23 +48,17 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class Manufacture extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private CloudIntegration integration;
     private JProgressBar progress;
     private SelectionObserver observer;
@@ -76,6 +70,19 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private ProcessHis ph = new ProcessHis();
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
+    
 
     /**
      * Creates new form Manufacture

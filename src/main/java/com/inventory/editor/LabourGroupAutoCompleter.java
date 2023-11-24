@@ -164,7 +164,7 @@ public final class LabourGroupAutoCompleter implements KeyListener {
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-                type = tableModel.getObject(table.convertRowIndexToModel(
+            type = tableModel.getObject(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getLabourName());
             if (observer != null) {
@@ -173,9 +173,6 @@ public final class LabourGroupAutoCompleter implements KeyListener {
             popup.setVisible(false);
             if (editor != null) {
                 editor.stopCellEditing();
-            }
-            if (observer != null) {
-                observer.selected("ST", type.getKey().getCode());
             }
         }
     }

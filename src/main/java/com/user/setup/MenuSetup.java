@@ -47,21 +47,26 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl, SelectionObserver {
 
     private DefaultMutableTreeNode treeRoot;
-    DefaultTreeModel treeModel;
-    DefaultMutableTreeNode selectedNode;
+    private DefaultTreeModel treeModel;
+    private DefaultMutableTreeNode selectedNode;
     private COA3AutoCompleter cOA3AutoCompleter;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private AccountRepo accountRepo;
 
     private SelectionObserver observer;
     private final String parentRootName = "Core Account";
     private JProgressBar progress;
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public JProgressBar getProgress() {
         return progress;

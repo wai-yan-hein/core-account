@@ -66,21 +66,16 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
     private Trader employee = new Trader();
     private final EmployeeTabelModel employeeTabelModel = new EmployeeTabelModel();
-    @Autowired
     private TaskExecutor taskExecutor;
     private TraderGroupAutoCompleter traderGroupAutoCompleter;
     private COAAutoCompleter cOAAutoCompleter;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private RegionAutoCompleter regionAutoCompleter;
     private CountryAutoCompleter countryAutoCompleter;
@@ -116,6 +111,22 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     /**

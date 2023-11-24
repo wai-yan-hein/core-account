@@ -6,10 +6,8 @@
 package com.user.setup;
 
 import com.common.Global;
-import com.inventory.model.MessageType;
 import com.user.common.RoleCompanyTableModel;
 import com.repo.UserRepo;
-import com.user.model.PrivilegeCompany;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
@@ -22,17 +20,14 @@ import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class RoleCompany extends javax.swing.JPanel {
 
-    @Autowired
     private UserRepo userRepo;
     private final RoleCompanyTableModel tableModel = new RoleCompanyTableModel();
     private JProgressBar progress;
@@ -44,6 +39,11 @@ public class RoleCompany extends javax.swing.JPanel {
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     /**
      * Creates new form SystemProperty

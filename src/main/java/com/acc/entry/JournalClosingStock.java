@@ -38,15 +38,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author DELL
  */
-@Component
 public class JournalClosingStock extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final JournalClosingStockTableModel tableModel = new JournalClosingStockTableModel();
@@ -56,12 +53,18 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private ProjectAutoCompleter projectAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private Mono<List<Currency>> monoCur;
     private Mono<List<DepartmentA>> monoDep;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -121,6 +124,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             deleteVoucher();
         }
     };
+
     private void deleteVoucher() {
         int selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
         if (selectRow >= 0) {
