@@ -42,4 +42,12 @@ public class Job {
         return jobName;
     }
 
+    public Job(JobKey key, String jobName) {
+        this.key = key;
+        this.jobName = jobName;
+    }
+
+    public Job() {
+    }
+
 }

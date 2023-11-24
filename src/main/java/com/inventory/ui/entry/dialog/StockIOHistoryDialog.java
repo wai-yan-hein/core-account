@@ -14,6 +14,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.JobAutoCompleter;
 import com.user.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -25,14 +26,12 @@ import com.inventory.model.VStockIO;
 import com.inventory.model.VouStatus;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIOVouSearchTableModel;
-import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.plaf.ComponentUI;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +58,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
+    private JobAutoCompleter jobAutoCompleter;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -105,6 +105,11 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListVouStatus(t);
         }).subscribe();
+        jobAutoCompleter = new JobAutoCompleter(txtJob, null, false);
+        inventoryRepo.getJob(false, Global.deptId).subscribe((t) -> {
+            jobAutoCompleter.setListObject(t);
+        });
+
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
     }
@@ -144,6 +149,10 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         return vouStatusAutoCompleter.getVouStatus() == null ? "-" : vouStatusAutoCompleter.getVouStatus().getKey().getCode();
     }
 
+    private String getJob() {
+        return jobAutoCompleter.getObject() == null ? "-" : jobAutoCompleter.getObject().getKey().getJobNo();
+    }
+
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
@@ -165,6 +174,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        filter.setJobNo(getJob());
         inventoryRepo.getStockIO(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
             calAmount();
@@ -251,6 +261,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtDep = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         txtTrader = new javax.swing.JTextField();
+        txtJob = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -394,6 +406,17 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        txtJob.setFont(Global.textFont);
+        txtJob.setName("txtUser"); // NOI18N
+        txtJob.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtJobFocusGained(evt);
+            }
+        });
+
+        jLabel14.setFont(Global.lableFont);
+        jLabel14.setText("Job");
+
         javax.swing.GroupLayout panelFilterLayout = new javax.swing.GroupLayout(panelFilter);
         panelFilter.setLayout(panelFilterLayout);
         panelFilterLayout.setHorizontalGroup(
@@ -416,7 +439,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                                 .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -432,7 +456,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                                     .addComponent(txtVouNo)
                                     .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
-                                    .addComponent(txtTrader))
+                                    .addComponent(txtTrader)
+                                    .addComponent(txtJob))
                                 .addComponent(chkDel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -488,6 +513,10 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                         .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel12)
                             .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel14)
+                            .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkDel))
                     .addComponent(jSeparator2))
@@ -708,6 +737,10 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         // TODO add your handling code here:
     }//GEN-LAST:event_txtTraderFocusGained
 
+    private void txtJobFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtJobFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtJobFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -722,6 +755,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -742,6 +776,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtDesp;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
