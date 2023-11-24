@@ -10,6 +10,7 @@ import com.acc.model.GlKey;
 import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.SelectionObserver;
+import com.h2.service.AccSettingService;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -33,6 +34,7 @@ import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
+import com.h2.service.OutputCostService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
@@ -55,6 +57,7 @@ import com.h2.service.TraderInvService;
 import com.h2.service.TransferHisService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
+import com.h2.service.WareHouseService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.OrderHis;
 import com.inventory.model.ProcessHis;
@@ -181,6 +184,13 @@ public class CloudIntegration {
     private JobService jobService;
     @Autowired
     private PatternService patternService;
+    @Autowired
+    private OutputCostService outputCostService;
+    @Autowired
+    private AccSettingService accSettingService;
+    
+    @Autowired
+    private WareHouseService warehouseService;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
@@ -639,6 +649,9 @@ public class CloudIntegration {
         downloadLabourGroup();
         downloadJob();
         downloadPattern();
+        downloadOuputStatus();
+        downloadAccSettings();
+        downloadWarehouse();
     }
 
     public void downloadPriceOption() {
@@ -907,6 +920,47 @@ public class CloudIntegration {
                 regionService.save(s);
             });
             observer.selected("download", "downloadRegion done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+    
+    public void downloadOuputStatus() {
+        String maxDate = outputCostService.getMaxDate();
+        inventoryRepo.getOutputCost(maxDate).subscribe((t) -> {
+            log.info("OuputCostlist = " + t.size());
+            observer.selected("download", "OutputCost List : " + t.size());
+            t.forEach((s) -> {
+                outputCostService.save(s);
+            });
+            observer.selected("download", "dwonloadOutputCost done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+    public void downloadAccSettings() {
+        String maxDate = accSettingService.getMaxDate();
+        inventoryRepo.getAccSetting(maxDate).subscribe((t) -> {
+            log.info("account Setting List = " + t.size());
+            observer.selected("download", "accSetting list : " + t.size());
+            t.forEach((acc) -> {
+                accSettingService.save(acc);
+            });
+            observer.selected("download", "downloadAccSetting done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+    
+    public void downloadWarehouse() {
+        String maxDate = warehouseService.getMaxDate();
+        inventoryRepo.getWarehouse(maxDate).subscribe((t) -> {
+            log.info("Warehouse List = " + t.size());
+            observer.selected("download", "WareHouse list : " + t.size());
+            t.forEach((w) -> {
+                warehouseService.save(w);
+            });
+            observer.selected("download", "downloadWarehouse done.");
         }, (e) -> {
             observer.selected("download", e.getMessage());
         });

@@ -1,13 +1,10 @@
 package com.inventory.model;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @Table(name = "output_cost")
 public class OutputCost {

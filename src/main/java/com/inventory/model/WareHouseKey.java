@@ -5,11 +5,9 @@ import jakarta.persistence.Embeddable;
 import lombok.Data;
 
 import java.io.Serializable;
-
 @Data
 @Embeddable
 public class WareHouseKey implements Serializable {
-
     @Column(name = "code")
     private String code;
     @Column(name = "comp_code")
@@ -17,10 +15,9 @@ public class WareHouseKey implements Serializable {
 
     public WareHouseKey() {
     }
-
+   
     public WareHouseKey(String code, String compCode) {
         this.code = code;
         this.compCode = compCode;
     }
-
 }

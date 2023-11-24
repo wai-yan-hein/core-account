@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Data
@@ -21,7 +22,10 @@ public class MillingUsage {
     private String unit;
     @Column(name = "loc_code")
     private String locCode;
-    private transient String locName;
-    private transient String userCode;
-    private transient String stockName;
+    @Transient
+    private String userCode;
+    @Transient
+    private String stockName;
+    @Transient
+    private String locName;
 }
