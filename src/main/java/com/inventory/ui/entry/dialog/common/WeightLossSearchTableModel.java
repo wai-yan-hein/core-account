@@ -10,7 +10,6 @@ import com.common.Util1;
 import com.inventory.model.WeightLossHis;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
