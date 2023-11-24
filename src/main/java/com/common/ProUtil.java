@@ -5,6 +5,7 @@
  */
 package com.common;
 
+import java.io.File;
 import java.util.Date;
 import javax.swing.JOptionPane;
 
@@ -90,6 +91,11 @@ public class ProUtil {
     public static final String STOCK_NO_UNIT = "stock.no.unit";
     public static final String MAX_STOCK_WEIGHT = "max.stock.weight";
     public static final String PUR_RD_DIS = "purchase.round.down.discount";
+    public static final String DECIMAL_PLACE = "decimal.palace";
+
+    public static int getDecimalPalace() {
+        return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
+    }
 
     public static boolean isPurRDDis() {
         return Util1.getBoolean(Global.hmRoleProperty.get(PUR_RD_DIS));
@@ -145,6 +151,10 @@ public class ProUtil {
 
     public static String getProperty(String key) {
         return Global.hmRoleProperty.get(key);
+    }
+
+    public static String getLogoPath() {
+        return String.format("images%s%s", File.separator, getProperty("logo.name"));
     }
 
     public static boolean isStockNoUnit() {

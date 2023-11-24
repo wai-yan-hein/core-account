@@ -36,6 +36,7 @@ import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
+import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -55,6 +56,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -367,6 +369,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableCB() {
+        tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
+        tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
         tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
         tblCash.setCellSelectionEnabled(true);
@@ -627,14 +631,18 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     String path = "temp/Ledger" + Global.macId + ".json";
                     List<Gl> list = allCashTableModel.getListVGl();
                     Util1.writeJsonFile(list, path);
+                    String logoPath = ProUtil.getLogoPath();
                     Map<String, Object> p = new HashMap();
                     p.put("p_report_name", this.getName());
-                    p.put("p_date", String.format("Between %s and %s", stDate, endDate));
+                    p.put("p_date", String.format("Between %s and %s",
+                            Util1.toDateStr(stDate, "yyyy-MM-dd", "dd/MM/yyyy"),
+                            Util1.toDateStr(endDate, "yyyy-MM-dd", "dd/MM/yyyy")));
                     p.put("p_print_date", Util1.getTodayDateTime());
                     p.put("p_comp_name", Global.companyName);
                     p.put("p_comp_address", Global.companyAddress);
                     p.put("p_comp_phone", Global.companyPhone);
                     p.put("p_currency", currency);
+                    p.put("p_logo_path", logoPath);
                     Gl vGl = opTableModel.getVGl(0);
                     double op = vGl.getDrAmt();
                     double closing = vGl.getCrAmt();

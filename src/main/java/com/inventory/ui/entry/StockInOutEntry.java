@@ -39,7 +39,6 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.Job;
 import com.inventory.model.LabourGroup;
-import com.inventory.ui.common.JobComboBoxModel;
 import com.inventory.ui.entry.dialog.StockIOMoreDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
@@ -88,7 +87,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private Mono<List<Location>> monoLoc;
     private int type;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
-    private final JobComboBoxModel jobComboBoxModel = new JobComboBoxModel();
     private StockIOMoreDialog moreDialog;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -740,10 +738,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel7 = new javax.swing.JLabel();
         txtVouType = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        cboJob = new javax.swing.JComboBox<>();
         jLabel10 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
         txtLG = new javax.swing.JTextField();
+        txtJob = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -822,13 +820,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Job");
 
-        cboJob.setFont(Global.textFont);
-        cboJob.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboJobActionPerformed(evt);
-            }
-        });
-
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Labour Group");
 
@@ -845,6 +836,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtLG.setFont(Global.textFont);
         txtLG.setName("txtRemark"); // NOI18N
 
+        txtJob.setFont(Global.textFont);
+        txtJob.setName("txtRemark"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -856,22 +850,22 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
-                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE))
+                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
-                    .addComponent(cboJob, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                    .addComponent(txtJob, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE))
+                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -881,7 +875,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE))
+                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton2)))
@@ -912,12 +906,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
-                            .addComponent(cboJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
                             .addComponent(jLabel4)
                             .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton2)
-                            .addComponent(txtLG, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(txtLG, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
 
@@ -1061,13 +1055,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         moreDialog();
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void cboJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboJobActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cboJobActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<Job> cboJob;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -1091,6 +1080,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtDesp;
     private javax.swing.JFormattedTextField txtInQty;
+    private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLG;
     private javax.swing.JFormattedTextField txtOutQty;
     private javax.swing.JTextField txtRemark;

@@ -37,7 +37,6 @@ com\user\editor\CurrencyEditor$1.class
 com\user\setup\MenuTemplateSetup$5.class
 com\inventory\ui\entry\GRNEntry.class
 com\user\setup\MenuSetup.class
-com\inventory\ui\entry\StockInOutEntry$7.class
 com\inventory\ui\entry\dialog\OPHistoryDialog$1.class
 com\inventory\ui\setup\EmployeeSetup.class
 com\inventory\ui\entry\Reports.class
@@ -453,6 +452,7 @@ com\inventory\ui\entry\SaleDynamic$24.class
 com\acc\editor\TraderCellEditor.class
 com\h2\dao\PriceOptionDaoImpl.class
 com\inventory\editor\BatchAutoCompeter$7.class
+com\inventory\ui\entry\Reports$30.class
 com\acc\setup\TraderAGroupDialog.class
 com\h2\dao\PurHisDetailDao.class
 com\inventory\editor\TraderGroupAutoCompleter$5.class
@@ -1846,6 +1846,7 @@ com\h2\dao\ProjectDaoImpl.class
 com\h2\service\ExchangeRateService.class
 com\inventory\model\WeightLossHis.class
 com\acc\entry\DrCrVoucher$5.class
+com\inventory\ui\entry\Reports$32.class
 com\inventory\ui\entry\dialog\MillingHistoryDialog$14.class
 com\inventory\ui\setup\EmployeeSetup$1.class
 com\h2\service\GlLogServiceImpl.class
@@ -2143,6 +2144,7 @@ com\inventory\ui\setup\CustomerSetup$14.class
 com\inventory\ui\entry\WeightEntry$3.class
 com\user\model\MenuTemplateKey.class
 com\inventory\ui\entry\dialog\GRNHistoryDialog$3.class
+com\user\setup\SystemProperty$14.class
 com\inventory\editor\LocationAutoCompleter$3.class
 com\user\common\RolePropertyTableModel.class
 com\h2\service\CompanyInfoServiceImpl.class
@@ -2189,6 +2191,7 @@ com\acc\setup\COAManagment$13.class
 com\acc\model\GlLogKey.class
 com\inventory\ui\entry\SaleByBatch$3.class
 com\inventory\ui\setup\dialog\WareHouseSetupDialog.class
+com\inventory\ui\entry\Reports$31.class
 com\user\model\PrivilegeCompany.class
 com\h2\dao\SaleHisDaoImpl.class
 com\inventory\editor\SaleManAutoCompleter$2.class
@@ -2600,6 +2603,7 @@ com\acc\report\excel\ExcelReport.class
 com\inventory\model\SaleDetailKey.class
 com\acc\dialog\VoucherEntryDailog$1.class
 com\inventory\ui\entry\dialog\ReturnInHistoryDialog.class
+com\user\dialog\OtherDialog.class
 com\inventory\ui\entry\dialog\OrderDetailDialog.class
 com\user\setup\MenuSetup$10.class
 com\acc\dialog\JournalEntryDialog.class

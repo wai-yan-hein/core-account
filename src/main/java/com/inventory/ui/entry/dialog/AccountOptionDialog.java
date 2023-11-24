@@ -76,13 +76,13 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     public void setObject(Object obj) {
+        this.object = obj;
         if (obj instanceof PurHis p) {
             setDepartment(p.getDeptCode());
             setCash(p.getCashAcc());
             setPurchase(p.getPurchaseAcc());
             setPayable(p.getPayableAcc());
         }
-        this.object = obj;
     }
 
     private void setPayable(String payableAcc) {

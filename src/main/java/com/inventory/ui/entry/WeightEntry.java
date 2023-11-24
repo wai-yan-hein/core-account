@@ -214,17 +214,17 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                 progress.setIndeterminate(true);
                 observer.selected("save", false);
                 his.setListDetail(getListDetail());
-                inventoryRepo.saveWeight(his).subscribe((t) -> {
+                inventoryRepo.saveWeight(his).doOnSuccess((t) -> {
                     if (print) {
-                        printWeightVoucher(his);
+                        printWeightVoucher(t);
                     } else {
                         clear(true);
                     }
-                }, (e) -> {
+                }).doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
                     observer.selected("save", false);
-                });
+                }).subscribe();
 
             }
         } catch (HeadlessException ex) {
@@ -358,7 +358,6 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         param.put("p_logo_path", logoPath);
         param.put("p_remark", p.getRemark());
         param.put("p_vou_no", p.getKey().getVouNo());
-        param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
         param.put("p_vou_date", Util1.getDate(p.getVouDate()));
         param.put("p_vou_time", Util1.getTime(p.getVouDate()));
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
