@@ -111,3 +111,554 @@
 2023-11-25T12:29:16.283+06:30  INFO 15500 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2023-11-25T12:29:16.290+06:30  INFO 15500 --- [SpringApplicationShutdownHook] org.hibernate.orm.connections.pooling    : HHH10001008: Cleaning up connection pool [jdbc:h2:file:./data/database]
 2023-11-25T12:29:16.303+06:30  INFO 15500 --- [SpringApplicationShutdownHook] o.s.j.d.e.EmbeddedDatabaseFactory        : Shutting down embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false'
+2023-11-25T12:30:42.301+06:30  INFO 21316 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 21316 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T12:30:42.310+06:30  INFO 21316 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T12:30:47.730+06:30  INFO 21316 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T12:30:48.739+06:30  INFO 21316 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 996 ms. Found 1 JPA repository interfaces.
+2023-11-25T12:35:18.022+06:30  INFO 21124 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 21124 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T12:35:18.034+06:30  INFO 21124 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T12:35:23.194+06:30  INFO 21124 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T12:35:24.193+06:30  INFO 21124 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 982 ms. Found 1 JPA repository interfaces.
+2023-11-25T12:38:33.360+06:30  INFO 15344 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 15344 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T12:38:33.371+06:30  INFO 15344 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T12:38:38.373+06:30  INFO 15344 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T12:38:39.467+06:30  INFO 15344 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1079 ms. Found 1 JPA repository interfaces.
+2023-11-25T12:45:37.284+06:30  INFO 23404 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 23404 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T12:45:37.293+06:30  INFO 23404 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T12:45:42.813+06:30  INFO 23404 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T12:45:43.876+06:30  INFO 23404 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1042 ms. Found 1 JPA repository interfaces.
+2023-11-25T12:45:45.121+06:30  INFO 23404 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T12:45:45.574+06:30  INFO 23404 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:8206e367-ff67-4488-99c8-f0bb2bf319cc user=SA
+2023-11-25T12:45:45.577+06:30  INFO 23404 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T12:45:45.738+06:30  INFO 23404 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T12:45:45.851+06:30  INFO 23404 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T12:45:45.855+06:30  INFO 23404 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T12:45:46.551+06:30  INFO 23404 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T12:45:52.776+06:30  INFO 23404 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T12:45:53.076+06:30  INFO 23404 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T12:45:54.483+06:30  INFO 23404 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 18.313 seconds (process running for 20.911)
+2023-11-25T12:45:54.497+06:30  INFO 23404 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T12:45:54.501+06:30  INFO 23404 --- [main] com.Tray                                 : Tray started.
+2023-11-25T12:45:55.208+06:30  INFO 23404 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T12:45:59.198+06:30  INFO 23404 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTI5NTgsImV4cCI6MTcwMzQ4NDk1OH0.PWwtvUsvZ62WIGpRhgDC9aZExUNduHSWdYpI0xBN9w4
+2023-11-25T12:46:01.538+06:30  INFO 23404 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T12:46:02.306+06:30  INFO 23404 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T12:46:12.422+06:30  INFO 23404 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T12:46:12.456+06:30 ERROR 23404 --- [reactor-http-nio-5] com.repo.AccountRepo                     : getDate : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:46:12.463+06:30 ERROR 23404 --- [reactor-http-nio-5] com.SSEListener                          : startAccount : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:46:26.406+06:30 ERROR 23404 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:46:44.202+06:30 ERROR 23404 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:46:47.180+06:30 ERROR 23404 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:47:05.275+06:30  INFO 23404 --- [reactor-http-nio-2] com.user.setup.MenuSetup                 : "sent"
+2023-11-25T12:47:05.303+06:30  INFO 23404 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-MENU
+2023-11-25T12:47:08.458+06:30 ERROR 23404 --- [reactor-http-nio-5] com.repo.AccountRepo                     : getCOAByGroup : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:47:08.461+06:30 ERROR 23404 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T12:47:08.881+06:30  INFO 23404 --- [reactor-http-nio-3] com.common.RowHeader                     : tblCustomer00
+2023-11-25T13:08:32.511+06:30  INFO 21408 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 21408 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T13:08:32.523+06:30  INFO 21408 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T13:08:37.528+06:30  INFO 21408 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T13:08:38.482+06:30  INFO 21408 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 940 ms. Found 1 JPA repository interfaces.
+2023-11-25T13:08:39.464+06:30  INFO 21408 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T13:08:39.820+06:30  INFO 21408 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:83e823d3-e2b7-43e3-abb5-64e9dc25e6bb user=SA
+2023-11-25T13:08:39.823+06:30  INFO 21408 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T13:08:39.927+06:30  INFO 21408 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T13:08:40.024+06:30  INFO 21408 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T13:08:40.028+06:30  INFO 21408 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T13:08:40.523+06:30  INFO 21408 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T13:08:44.525+06:30  INFO 21408 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T13:08:44.776+06:30  INFO 21408 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T13:08:45.690+06:30  INFO 21408 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 13.991 seconds (process running for 15.919)
+2023-11-25T13:08:45.698+06:30  INFO 21408 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T13:08:45.700+06:30  INFO 21408 --- [main] com.Tray                                 : Tray started.
+2023-11-25T13:08:46.369+06:30  INFO 21408 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T13:08:47.726+06:30  INFO 21408 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTQzMjcsImV4cCI6MTcwMzQ4NjMyN30.v2TBt_Hm7_uhvlyr3dXewY3z0rm8uJIcqC9JolDN4Yk
+2023-11-25T13:08:49.710+06:30  INFO 21408 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T13:08:49.951+06:30  INFO 21408 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T13:09:24.561+06:30  INFO 21408 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T13:09:24.590+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : getDate : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:24.597+06:30 ERROR 21408 --- [reactor-http-nio-5] com.SSEListener                          : startAccount : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.135+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findDepartment : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.138+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : getDepartment : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.135+06:30 ERROR 21408 --- [reactor-http-nio-2] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientRequestException: Connection refused: no further information: /127.0.0.1:8077
+Caused by: org.springframework.web.reactive.function.client.WebClientRequestException: Connection refused: no further information: /127.0.0.1:8077
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to POST http://127.0.0.1:8077/account/findDepartment [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:326) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:211) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:471) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:615) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:871) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:336) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1717) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:192) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:162) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.fail(AbstractPool.java:475) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.SimpleDequePool.lambda$drainLoop$9(SimpleDequePool.java:433) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.FluxDoOnEach$DoOnEachSubscriber.onError(FluxDoOnEach.java:186) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$PooledConnectionAllocator$PooledConnectionInitializer.onError(DefaultPooledConnectionProvider.java:560) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:106) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators.error(Operators.java:198) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoError.subscribe(MonoError.java:53) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.tryFailure(TransportConnector.java:576) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.setFailure(TransportConnector.java:522) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.transport.TransportConnector.lambda$doConnect$7(TransportConnector.java:261) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.setFailure0(DefaultPromise.java:629) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.tryFailure(DefaultPromise.java:118) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise(AbstractNioChannel.java:321) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:337) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: no further information: /127.0.0.1:8077
+Caused by: java.net.ConnectException: Connection refused: no further information
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682) ~[na:na]
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973) ~[na:na]
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:337) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T13:09:29.176+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.183+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.188+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.196+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.204+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.210+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.219+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.225+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.231+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.238+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.243+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.250+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.256+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.263+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.271+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.278+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.286+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.293+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:29.301+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.277+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findDepartment : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.279+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : getDepartment : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.290+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.278+06:30 ERROR 21408 --- [reactor-http-nio-5] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientRequestException: Connection refused: no further information: /127.0.0.1:8077
+Caused by: org.springframework.web.reactive.function.client.WebClientRequestException: Connection refused: no further information: /127.0.0.1:8077
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to POST http://127.0.0.1:8077/account/findDepartment [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:326) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:211) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:471) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:615) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:871) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:336) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1717) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:192) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:162) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.fail(AbstractPool.java:475) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.SimpleDequePool.lambda$drainLoop$9(SimpleDequePool.java:433) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.FluxDoOnEach$DoOnEachSubscriber.onError(FluxDoOnEach.java:186) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$PooledConnectionAllocator$PooledConnectionInitializer.onError(DefaultPooledConnectionProvider.java:560) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:106) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators.error(Operators.java:198) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoError.subscribe(MonoError.java:53) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.tryFailure(TransportConnector.java:576) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.setFailure(TransportConnector.java:522) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.transport.TransportConnector.lambda$doConnect$7(TransportConnector.java:261) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.setFailure0(DefaultPromise.java:629) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.tryFailure(DefaultPromise.java:118) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise(AbstractNioChannel.java:321) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:337) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: no further information: /127.0.0.1:8077
+Caused by: java.net.ConnectException: Connection refused: no further information
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682) ~[na:na]
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973) ~[na:na]
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:337) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T13:09:39.300+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.309+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.319+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.327+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.333+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.338+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.343+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.348+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.353+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.359+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.364+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.369+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.373+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.379+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.384+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.389+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.393+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:39.397+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.705+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findDepartment : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.707+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : getDepartment : Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.706+06:30 ERROR 21408 --- [reactor-http-nio-8] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientRequestException: Connection refused: no further information: /127.0.0.1:8077
+Caused by: org.springframework.web.reactive.function.client.WebClientRequestException: Connection refused: no further information: /127.0.0.1:8077
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to POST http://127.0.0.1:8077/account/findDepartment [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:326) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:211) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:471) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:615) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:871) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:336) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1717) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:192) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:162) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.fail(AbstractPool.java:475) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.SimpleDequePool.lambda$drainLoop$9(SimpleDequePool.java:433) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.FluxDoOnEach$DoOnEachSubscriber.onError(FluxDoOnEach.java:186) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$PooledConnectionAllocator$PooledConnectionInitializer.onError(DefaultPooledConnectionProvider.java:560) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:106) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators.error(Operators.java:198) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoError.subscribe(MonoError.java:53) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.tryFailure(TransportConnector.java:576) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.setFailure(TransportConnector.java:522) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.transport.TransportConnector.lambda$doConnect$7(TransportConnector.java:261) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.setFailure0(DefaultPromise.java:629) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.DefaultPromise.tryFailure(DefaultPromise.java:118) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise(AbstractNioChannel.java:321) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:337) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: no further information: /127.0.0.1:8077
+Caused by: java.net.ConnectException: Connection refused: no further information
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682) ~[na:na]
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973) ~[na:na]
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:337) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T13:09:54.717+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.728+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.738+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.746+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.753+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.759+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.767+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.771+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.777+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.782+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.788+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.793+06:30 ERROR 21408 --- [reactor-http-nio-5] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.799+06:30 ERROR 21408 --- [reactor-http-nio-6] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.804+06:30 ERROR 21408 --- [reactor-http-nio-7] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.809+06:30 ERROR 21408 --- [reactor-http-nio-8] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.814+06:30 ERROR 21408 --- [reactor-http-nio-1] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.819+06:30 ERROR 21408 --- [reactor-http-nio-2] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.825+06:30 ERROR 21408 --- [reactor-http-nio-3] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T13:09:54.830+06:30 ERROR 21408 --- [reactor-http-nio-4] com.repo.AccountRepo                     : findCOA :Connection refused: no further information: /127.0.0.1:8077
+2023-11-25T14:03:31.727+06:30  WARN 21408 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=37m21s476ms474µs300ns).
+2023-11-25T14:08:24.259+06:30  INFO 13552 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 13552 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:08:24.267+06:30  INFO 13552 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:08:28.584+06:30  INFO 13552 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:08:29.719+06:30  INFO 13552 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1123 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:08:30.600+06:30  INFO 13552 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:08:30.984+06:30  INFO 13552 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:da93a1cd-13c7-45ca-a10a-3d8da2313cb6 user=SA
+2023-11-25T14:08:30.987+06:30  INFO 13552 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:08:31.075+06:30  INFO 13552 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:08:31.150+06:30  INFO 13552 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:08:31.153+06:30  INFO 13552 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:08:31.564+06:30  INFO 13552 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:08:35.151+06:30  INFO 13552 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:08:35.349+06:30  INFO 13552 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:08:36.182+06:30  INFO 13552 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 12.546 seconds (process running for 14.076)
+2023-11-25T14:08:36.192+06:30  INFO 13552 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:08:36.195+06:30  INFO 13552 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:08:36.958+06:30  INFO 13552 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:08:38.377+06:30  INFO 13552 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTc5MTgsImV4cCI6MTcwMzQ4OTkxOH0.N1gZcDfSjIB4Vl8r-c7SvYa6AubMS8ITYUzFJKUSjRk
+2023-11-25T14:08:40.718+06:30  INFO 13552 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:08:40.976+06:30  INFO 13552 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:08:51.810+06:30  INFO 13552 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T14:09:25.405+06:30  INFO 13552 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:09:25.469+06:30  INFO 13552 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2023-11-25T14:09:25.473+06:30  INFO 13552 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2023-11-25T14:14:57.684+06:30  INFO 11080 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 11080 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:14:57.695+06:30  INFO 11080 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:15:02.807+06:30  INFO 11080 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:15:03.814+06:30  INFO 11080 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 991 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:15:04.771+06:30  INFO 11080 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:15:05.225+06:30  INFO 11080 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:b103de79-3f24-4f59-965a-6b801619fb00 user=SA
+2023-11-25T14:15:05.229+06:30  INFO 11080 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:15:05.330+06:30  INFO 11080 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:15:05.582+06:30  INFO 11080 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:15:05.586+06:30  INFO 11080 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:15:06.655+06:30  INFO 11080 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:15:16.260+06:30  INFO 11080 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:15:16.550+06:30  INFO 11080 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:15:17.779+06:30  INFO 11080 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 20.958 seconds (process running for 23.237)
+2023-11-25T14:15:17.793+06:30  INFO 11080 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:15:17.796+06:30  INFO 11080 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:15:18.914+06:30  INFO 11080 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:15:20.710+06:30  INFO 11080 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTgzMjAsImV4cCI6MTcwMzQ5MDMyMH0.C4UVYaEjbtTjt5mvavhsXD91n6g-AfgiNXs9xUEIxoQ
+2023-11-25T14:15:25.218+06:30  INFO 11080 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:15:25.925+06:30  INFO 11080 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:15:38.591+06:30  INFO 11080 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T14:15:42.557+06:30 ERROR 11080 --- [reactor-http-nio-4] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: java.lang.NullPointerException: Cannot invoke "com.acc.editor.COA3AutoCompleter.setCoa(com.acc.model.ChartOfAccount)" because "this.empCompleter" is null
+Caused by: java.lang.NullPointerException: Cannot invoke "com.acc.editor.COA3AutoCompleter.setCoa(com.acc.model.ChartOfAccount)" because "this.empCompleter" is null
+	at com.user.setup.SystemProperty.lambda$initCombo$29(SystemProperty.java:485) ~[classes/:na]
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onComplete(MonoPeekTerminal.java:289) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2205) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondComplete(MonoFlatMap.java:250) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.MonoFlatMap$FlatMapInner.onComplete(MonoFlatMap.java:324) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.Operators$MultiSubscriptionSubscriber.onComplete(Operators.java:2205) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxOnAssembly$OnAssemblySubscriber.onComplete(FluxOnAssembly.java:549) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.onComplete(MonoFlatMap.java:189) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onComplete(FluxContextWrite.java:126) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onComplete(FluxMapFuseable.java:350) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onComplete(FluxFilterFuseable.java:391) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2072) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:145) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:260) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:444) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at reactor.netty.channel.ChannelOperations.terminate(ChannelOperations.java:498) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at reactor.netty.http.client.HttpClientOperations.onInboundNext(HttpClientOperations.java:753) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+	at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:114) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:436) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:346) ~[netty-codec-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:318) ~[netty-codec-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:251) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:442) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T14:15:50.860+06:30  INFO 11080 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:15:50.934+06:30  INFO 11080 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2023-11-25T14:15:50.935+06:30  INFO 11080 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2023-11-25T14:18:11.167+06:30  INFO 10808 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 10808 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:18:11.177+06:30  INFO 10808 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:18:17.129+06:30  INFO 10808 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:18:18.424+06:30  INFO 10808 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1279 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:18:19.581+06:30  INFO 10808 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:18:20.092+06:30  INFO 10808 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:8d04fedf-bf23-4623-bfc9-2911281f7e9f user=SA
+2023-11-25T14:18:20.096+06:30  INFO 10808 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:18:20.214+06:30  INFO 10808 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:18:20.340+06:30  INFO 10808 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:18:20.347+06:30  INFO 10808 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:18:21.036+06:30  INFO 10808 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:18:31.173+06:30  INFO 10808 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:18:31.935+06:30  INFO 10808 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:18:33.927+06:30  INFO 10808 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 23.475 seconds (process running for 25.339)
+2023-11-25T14:18:33.955+06:30  INFO 10808 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:18:33.960+06:30  INFO 10808 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:18:35.391+06:30  INFO 10808 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:18:37.610+06:30  INFO 10808 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTg1MTcsImV4cCI6MTcwMzQ5MDUxN30.cCXHXS4REZrUazYvIxm8bF7e2H2oD716G8dFel4nYMs
+2023-11-25T14:18:41.069+06:30  INFO 10808 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:18:41.428+06:30  INFO 10808 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:19:23.235+06:30  INFO 10808 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T14:19:33.483+06:30  INFO 10808 --- [reactor-http-nio-5] com.user.setup.SystemProperty            : "sent"
+2023-11-25T14:19:33.487+06:30  INFO 10808 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-SYSTEM_PROPERTY
+2023-11-25T14:19:41.726+06:30  INFO 10808 --- [reactor-http-nio-6] com.common.RowHeader                     : tblCustomer00
+2023-11-25T14:19:55.755+06:30  INFO 10808 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:19:55.812+06:30  INFO 10808 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2023-11-25T14:19:55.814+06:30  INFO 10808 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2023-11-25T14:22:23.910+06:30  INFO 19560 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 19560 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:22:23.917+06:30  INFO 19560 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:22:28.331+06:30  INFO 19560 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:22:29.252+06:30  INFO 19560 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 905 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:22:30.071+06:30  INFO 19560 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:22:30.431+06:30  INFO 19560 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:010fc7b7-346f-4628-995e-1fd0a4ec2986 user=SA
+2023-11-25T14:22:30.434+06:30  INFO 19560 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:22:30.524+06:30  INFO 19560 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:22:30.598+06:30  INFO 19560 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:22:30.601+06:30  INFO 19560 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:22:31.037+06:30  INFO 19560 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:22:34.966+06:30  INFO 19560 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:22:35.164+06:30  INFO 19560 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:22:36.030+06:30  INFO 19560 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 12.813 seconds (process running for 14.422)
+2023-11-25T14:22:36.040+06:30  INFO 19560 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:22:36.043+06:30  INFO 19560 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:22:36.648+06:30  INFO 19560 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:22:37.942+06:30  INFO 19560 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTg3NTcsImV4cCI6MTcwMzQ5MDc1N30.Rf1Omt826tj6UDwiHDPs4QCNqoFBTrD4U0yYRHROVhY
+2023-11-25T14:22:39.935+06:30  INFO 19560 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:22:40.086+06:30  INFO 19560 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:23:03.748+06:30  INFO 19560 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T14:23:07.399+06:30  INFO 19560 --- [reactor-http-nio-6] com.common.RowHeader                     : tblCustomer00
+2023-11-25T14:29:15.093+06:30  INFO 7752 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 7752 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:29:15.103+06:30  INFO 7752 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:29:19.332+06:30  INFO 7752 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:29:20.215+06:30  INFO 7752 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 871 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:29:21.048+06:30  INFO 7752 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:29:21.434+06:30  INFO 7752 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:ca0e0b01-fc18-464a-a1f1-266bbb66ed18 user=SA
+2023-11-25T14:29:21.437+06:30  INFO 7752 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:29:21.535+06:30  INFO 7752 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:29:21.613+06:30  INFO 7752 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:29:21.616+06:30  INFO 7752 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:29:22.060+06:30  INFO 7752 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:29:26.065+06:30  INFO 7752 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:29:26.267+06:30  INFO 7752 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:29:27.109+06:30  INFO 7752 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 12.686 seconds (process running for 14.194)
+2023-11-25T14:29:27.123+06:30  INFO 7752 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:29:27.126+06:30  INFO 7752 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:29:27.806+06:30  INFO 7752 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:29:29.205+06:30  INFO 7752 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTkxNjksImV4cCI6MTcwMzQ5MTE2OX0.DqWw3EZvFxokWlse9O1fXN-27ZHjET6Ha2R5ZTMkuds
+2023-11-25T14:29:31.150+06:30  INFO 7752 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:29:31.299+06:30  INFO 7752 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
