@@ -123,7 +123,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
@@ -521,6 +520,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 param.put("p_vou_no", his.getKey().getVouNo());
                 param.put("p_vou_date", Util1.toDateStr(his.getVouDate(), Global.dateFormat));
                 param.put("p_job_no", milling.getJobNo());
+                param.put("p_sub_report_dir", "report/");
                 if (!listRaw.isEmpty()) {
                     MillingRawDetail r = listRaw.get(0);
                     param.put("p_raw_name", r.getStockName());
