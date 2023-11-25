@@ -550,6 +550,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             io.setRemark(txtRemark.getText());
             io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             io.setVouStatusCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
+            LabourGroup lg = labourGroupAutoCompleter.getObject();
+            if (lg != null) {
+                io.setLabourGroupCode(lg.getKey() == null ? null : lg.getKey().getCode());
+            }
+            Job job = jobAutoCompleter.getObject();
+            if (job != null) {
+                io.setJobCode(job.getKey() == null ? null : job.getKey().getJobNo());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 StockIOKey key = new StockIOKey();
                 key.setCompCode(Global.compCode);
@@ -560,14 +568,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 io.setCreatedDate(LocalDateTime.now());
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
-                LabourGroup lg = labourGroupAutoCompleter.getObject();
-                if (lg != null) {
-                    io.setLabourGroupCode(lg.getKey() == null ? null : lg.getKey().getCode());
-                }
-                Job job = jobAutoCompleter.getObject();
-                if (job != null) {
-                    io.setJobCode(job.getKey() == null ? null : job.getKey().getJobNo());
-                }
+//                LabourGroup lg = labourGroupAutoCompleter.getObject();
+//                if (lg != null) {
+//                    io.setLabourGroupCode(lg.getKey() == null ? null : lg.getKey().getCode());
+//                }
+//                Job job = jobAutoCompleter.getObject();
+//                if (job != null) {
+//                    io.setJobCode(job.getKey() == null ? null : job.getKey().getJobNo());
+//                }
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
             }

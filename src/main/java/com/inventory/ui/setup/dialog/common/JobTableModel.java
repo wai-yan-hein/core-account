@@ -56,7 +56,7 @@ public class JobTableModel extends AbstractTableModel {
         Job job = listVou.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                job.getKey().getJobNo();
+                job.getKey() == null ? null : job.getKey().getJobNo();
             case 1 ->
                 job.getJobName();
             default ->

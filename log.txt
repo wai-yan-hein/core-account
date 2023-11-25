@@ -854,3 +854,309 @@ Original Stack Trace:
 2023-11-25T14:56:01.634+06:30  INFO 18180 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2023-11-25T14:56:01.762+06:30  INFO 18180 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2023-11-25T14:56:01.777+06:30  INFO 18180 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2023-11-25T15:35:55.151+06:30  INFO 3892 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 3892 (D:\CoreValue\Projects\core-account\target\classes started by Athu Sint in D:\CoreValue\Projects\core-account)
+2023-11-25T15:35:55.160+06:30  INFO 3892 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T15:35:59.083+06:30  INFO 3892 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T15:35:59.981+06:30  INFO 3892 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 883 ms. Found 1 JPA repository interfaces.
+2023-11-25T15:36:00.582+06:30  INFO 3892 --- [main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2023-11-25T15:36:01.039+06:30  INFO 3892 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T15:36:01.145+06:30  INFO 3892 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T15:36:01.148+06:30  INFO 3892 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T15:36:03.301+06:30  INFO 3892 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T15:36:03.319+06:30  WARN 3892 --- [main] org.hibernate.orm.connections.pooling    : HHH10001002: Using built-in connection pool (not intended for production use)
+2023-11-25T15:36:03.337+06:30  INFO 3892 --- [main] org.hibernate.orm.connections.pooling    : HHH10001005: Loaded JDBC driver class: org.h2.Driver
+2023-11-25T15:36:03.337+06:30  INFO 3892 --- [main] org.hibernate.orm.connections.pooling    : HHH10001012: Connecting with JDBC URL [jdbc:h2:file:./data/database]
+2023-11-25T15:36:03.338+06:30  INFO 3892 --- [main] org.hibernate.orm.connections.pooling    : HHH10001001: Connection properties: {password=****, user=root}
+2023-11-25T15:36:03.338+06:30  INFO 3892 --- [main] org.hibernate.orm.connections.pooling    : HHH10001003: Autocommit mode: false
+2023-11-25T15:36:03.340+06:30  INFO 3892 --- [main] org.hibernate.orm.connections.pooling    : HHH10001115: Connection pool size: 20 (min=1)
+2023-11-25T15:36:07.027+06:30  INFO 3892 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T15:36:07.051+06:30  INFO 3892 --- [main] org.hibernate.orm.connections.access     : HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@7ed06e33] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2023-11-25T15:36:07.184+06:30  INFO 3892 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T15:36:08.068+06:30  INFO 3892 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 13.593 seconds (process running for 15.045)
+2023-11-25T15:36:08.079+06:30  INFO 3892 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T15:36:08.084+06:30  INFO 3892 --- [main] com.Tray                                 : Tray started.
+2023-11-25T15:36:08.700+06:30  INFO 3892 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T15:36:09.835+06:30  INFO 3892 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwZ3dodDAwd2JjNnVsYyIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA5MDMxNjksImV4cCI6MTcwMzQ5NTE2OX0.hZHKNkQpRx21tF4yVk5jq7I3PcQNF0CqxZxaSm-mIIc
+2023-11-25T15:36:12.132+06:30  INFO 3892 --- [main] com.ui.LoginDialog                       : serialNo : PGWHT00WBC6ULC
+2023-11-25T15:36:12.882+06:30  INFO 3892 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T15:36:13.912+06:30  INFO 3892 --- [main] com.CloudIntegration                     : date lock time : 1998-10-07 00:00:00
+2023-11-25T15:36:13.945+06:30  INFO 3892 --- [main] com.h2.dao.OrderStatusDaoImpl            : 2023-09-23 11:49:44
+2023-11-25T15:36:14.110+06:30  INFO 3892 --- [main] com.CloudIntegration                     : downloadStockTime :  2023-11-22 14:52:14
+2023-11-25T15:36:14.343+06:30  INFO 3892 --- [reactor-http-nio-8] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T15:36:17.335+06:30  INFO 3892 --- [reactor-http-nio-3] com.CloudIntegration                     : job = 0
+2023-11-25T15:36:17.393+06:30  INFO 3892 --- [reactor-http-nio-1] com.CloudIntegration                     : stock criteria = 0
+2023-11-25T15:36:17.418+06:30  INFO 3892 --- [reactor-http-nio-4] com.CloudIntegration                     : pattern = 0
+2023-11-25T15:36:17.457+06:30  INFO 3892 --- [reactor-http-nio-7] com.CloudIntegration                     : stock formula qty = 0
+2023-11-25T15:36:17.480+06:30  INFO 3892 --- [reactor-http-nio-6] com.CloudIntegration                     : stock formula price = 0
+2023-11-25T15:36:17.490+06:30  INFO 3892 --- [reactor-http-nio-5] com.CloudIntegration                     : stock formula = 0
+2023-11-25T15:36:17.491+06:30  INFO 3892 --- [reactor-http-nio-8] com.CloudIntegration                     : stock formula gd = 0
+2023-11-25T15:36:17.572+06:30  INFO 3892 --- [reactor-http-nio-2] com.CloudIntegration                     : labour group = 0
+2023-11-25T15:36:17.639+06:30  INFO 3892 --- [reactor-http-nio-5] com.CloudIntegration                     : OuputCostlist = 0
+2023-11-25T15:36:17.651+06:30  INFO 3892 --- [reactor-http-nio-7] com.CloudIntegration                     : account Setting List = 0
+2023-11-25T15:36:17.657+06:30  INFO 3892 --- [reactor-http-nio-3] com.CloudIntegration                     : Warehouse List = 0
+2023-11-25T15:36:25.477+06:30  INFO 3892 --- [taskExecutor-1] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T15:36:29.405+06:30  INFO 3892 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T15:36:29.406+06:30  INFO 3892 --- [AWT-EventQueue-0] com.common.RowHeader                     : null11
+2023-11-25T15:37:08.061+06:30  INFO 3892 --- [reactor-http-nio-4] com.common.RowHeader                     : null60
+2023-11-25T15:37:08.061+06:30  INFO 3892 --- [reactor-http-nio-4] com.common.RowHeader                     : null71
+2023-11-25T15:39:43.512+06:30  INFO 7144 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 7144 (D:\CoreValue\Projects\core-account\target\classes started by Athu Sint in D:\CoreValue\Projects\core-account)
+2023-11-25T15:39:43.523+06:30  INFO 7144 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T15:39:48.222+06:30  INFO 7144 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T15:39:49.159+06:30  INFO 7144 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 925 ms. Found 1 JPA repository interfaces.
+2023-11-25T15:39:49.760+06:30  INFO 7144 --- [main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2023-11-25T15:39:50.174+06:30  INFO 7144 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T15:39:50.254+06:30  INFO 7144 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T15:39:50.258+06:30  INFO 7144 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T15:39:52.700+06:30  INFO 7144 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T15:39:52.716+06:30  WARN 7144 --- [main] org.hibernate.orm.connections.pooling    : HHH10001002: Using built-in connection pool (not intended for production use)
+2023-11-25T15:39:52.733+06:30  INFO 7144 --- [main] org.hibernate.orm.connections.pooling    : HHH10001005: Loaded JDBC driver class: org.h2.Driver
+2023-11-25T15:39:52.733+06:30  INFO 7144 --- [main] org.hibernate.orm.connections.pooling    : HHH10001012: Connecting with JDBC URL [jdbc:h2:file:./data/database]
+2023-11-25T15:39:52.734+06:30  INFO 7144 --- [main] org.hibernate.orm.connections.pooling    : HHH10001001: Connection properties: {password=****, user=root}
+2023-11-25T15:39:52.734+06:30  INFO 7144 --- [main] org.hibernate.orm.connections.pooling    : HHH10001003: Autocommit mode: false
+2023-11-25T15:39:52.737+06:30  INFO 7144 --- [main] org.hibernate.orm.connections.pooling    : HHH10001115: Connection pool size: 20 (min=1)
+2023-11-25T15:39:58.084+06:30  INFO 7144 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T15:39:58.194+06:30  INFO 7144 --- [main] org.hibernate.orm.connections.access     : HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@28fcb58a] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2023-11-25T15:39:58.326+06:30  INFO 7144 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T15:39:59.819+06:30  INFO 7144 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 17.12 seconds (process running for 18.874)
+2023-11-25T15:39:59.835+06:30  INFO 7144 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T15:39:59.841+06:30  INFO 7144 --- [main] com.Tray                                 : Tray started.
+2023-11-25T15:40:00.710+06:30  INFO 7144 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T15:40:02.077+06:30  INFO 7144 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwZ3dodDAwd2JjNnVsYyIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA5MDM0MDEsImV4cCI6MTcwMzQ5NTQwMX0.ibRw5NuyNIT5hk8t0jPkTjb1JNk_QLH3bQP3zjgG7xA
+2023-11-25T15:40:05.041+06:30  INFO 7144 --- [main] com.ui.LoginDialog                       : serialNo : PGWHT00WBC6ULC
+2023-11-25T15:40:05.810+06:30  INFO 7144 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T15:40:06.610+06:30  INFO 7144 --- [main] com.CloudIntegration                     : date lock time : 1998-10-07 00:00:00
+2023-11-25T15:40:06.650+06:30  INFO 7144 --- [main] com.h2.dao.OrderStatusDaoImpl            : 2023-09-23 11:49:44
+2023-11-25T15:40:06.766+06:30  INFO 7144 --- [main] com.CloudIntegration                     : downloadStockTime :  2023-11-22 14:52:14
+2023-11-25T15:40:06.774+06:30  INFO 7144 --- [reactor-http-nio-2] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T15:40:11.867+06:30 ERROR 7144 --- [parallel-5] com.repo.InventoryRepo                   : error :Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+2023-11-25T15:40:11.867+06:30 ERROR 7144 --- [parallel-3] com.repo.InventoryRepo                   : error :Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+2023-11-25T15:40:11.867+06:30 ERROR 7144 --- [parallel-4] com.repo.InventoryRepo                   : error :Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+2023-11-25T15:40:13.432+06:30  INFO 7144 --- [taskExecutor-1] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T15:40:17.461+06:30  INFO 7144 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T15:40:17.462+06:30  INFO 7144 --- [AWT-EventQueue-0] com.common.RowHeader                     : null11
+2023-11-25T15:40:18.431+06:30 ERROR 7144 --- [parallel-2] com.SSEListener                          : startInventory : Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+2023-11-25T15:40:28.930+06:30 ERROR 7144 --- [parallel-6] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientRequestException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+Caused by: org.springframework.web.reactive.function.client.WebClientRequestException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to POST http://127.0.0.1:8078/stockio/getStockIO [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:326) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:211) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:471) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:615) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:871) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:336) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1717) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:192) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:162) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.run(AbstractPool.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.5.11.jar:3.5.11]
+		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+		at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: reactor.netty.internal.shaded.reactor.pool.PoolAcquireTimeoutException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+	at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.run(AbstractPool.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.5.11.jar:3.5.11]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T15:40:47.202+06:30 ERROR 7144 --- [parallel-3] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientRequestException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+Caused by: org.springframework.web.reactive.function.client.WebClientRequestException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to POST http://127.0.0.1:8078/stockio/getStockIO [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:326) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:211) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:471) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:615) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:871) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:336) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1717) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:192) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:162) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.run(AbstractPool.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.5.11.jar:3.5.11]
+		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+		at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: reactor.netty.internal.shaded.reactor.pool.PoolAcquireTimeoutException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+	at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.run(AbstractPool.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.5.11.jar:3.5.11]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T15:41:03.473+06:30  INFO 7144 --- [reactor-http-nio-5] com.CloudIntegration                     : job = 0
+2023-11-25T15:41:03.475+06:30  INFO 7144 --- [reactor-http-nio-8] com.CloudIntegration                     : stock formula price = 0
+2023-11-25T15:41:03.570+06:30  INFO 7144 --- [reactor-http-nio-6] com.CloudIntegration                     : pattern = 0
+2023-11-25T15:41:03.588+06:30  INFO 7144 --- [reactor-http-nio-1] com.CloudIntegration                     : stock formula qty = 0
+2023-11-25T15:41:03.659+06:30  INFO 7144 --- [reactor-http-nio-4] com.CloudIntegration                     : labour group = 0
+2023-11-25T15:41:03.660+06:30  INFO 7144 --- [reactor-http-nio-7] com.CloudIntegration                     : stock formula = 0
+2023-11-25T15:41:03.694+06:30  INFO 7144 --- [reactor-http-nio-3] com.CloudIntegration                     : stock criteria = 0
+2023-11-25T15:41:03.721+06:30  INFO 7144 --- [reactor-http-nio-2] com.CloudIntegration                     : stock formula gd = 0
+2023-11-25T15:41:14.593+06:30 ERROR 7144 --- [parallel-8] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientRequestException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+Caused by: org.springframework.web.reactive.function.client.WebClientRequestException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to POST http://127.0.0.1:8078/stockio/getStockIO [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4495) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:204) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:225) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:274) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:326) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:211) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:471) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:615) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:871) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:336) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1717) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:192) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:201) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:162) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.run(AbstractPool.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.5.11.jar:3.5.11]
+		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+		at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: reactor.netty.internal.shaded.reactor.pool.PoolAcquireTimeoutException: Pool#acquire(Duration) has been pending for more than the configured timeout of 5000ms
+	at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.run(AbstractPool.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.5.11.jar:3.5.11]
+	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.5.11.jar:3.5.11]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T15:41:14.691+06:30  INFO 7144 --- [reactor-http-nio-4] com.common.RowHeader                     : null60
+2023-11-25T15:41:14.692+06:30  INFO 7144 --- [reactor-http-nio-4] com.common.RowHeader                     : null71
+2023-11-25T15:41:31.219+06:30  INFO 7144 --- [reactor-http-nio-5] com.common.RowHeader                     : null70
+2023-11-25T15:41:31.219+06:30  INFO 7144 --- [reactor-http-nio-5] com.common.RowHeader                     : null11
+2023-11-25T15:41:36.633+06:30  INFO 7144 --- [reactor-http-nio-6] com.common.RowHeader                     : null60
+2023-11-25T15:41:36.634+06:30  INFO 7144 --- [reactor-http-nio-6] com.common.RowHeader                     : null71
+2023-11-25T15:52:53.221+06:30  INFO 7760 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 7760 (D:\CoreValue\Projects\core-account\target\classes started by Athu Sint in D:\CoreValue\Projects\core-account)
+2023-11-25T15:52:53.229+06:30  INFO 7760 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T15:52:57.263+06:30  INFO 7760 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T15:52:58.174+06:30  INFO 7760 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 895 ms. Found 1 JPA repository interfaces.
+2023-11-25T15:52:58.796+06:30  INFO 7760 --- [main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2023-11-25T15:52:59.227+06:30  INFO 7760 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T15:52:59.398+06:30  INFO 7760 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T15:52:59.402+06:30  INFO 7760 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T15:53:01.591+06:30  INFO 7760 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T15:53:01.611+06:30  WARN 7760 --- [main] org.hibernate.orm.connections.pooling    : HHH10001002: Using built-in connection pool (not intended for production use)
+2023-11-25T15:53:01.627+06:30  INFO 7760 --- [main] org.hibernate.orm.connections.pooling    : HHH10001005: Loaded JDBC driver class: org.h2.Driver
+2023-11-25T15:53:01.627+06:30  INFO 7760 --- [main] org.hibernate.orm.connections.pooling    : HHH10001012: Connecting with JDBC URL [jdbc:h2:file:./data/database]
+2023-11-25T15:53:01.628+06:30  INFO 7760 --- [main] org.hibernate.orm.connections.pooling    : HHH10001001: Connection properties: {password=****, user=root}
+2023-11-25T15:53:01.628+06:30  INFO 7760 --- [main] org.hibernate.orm.connections.pooling    : HHH10001003: Autocommit mode: false
+2023-11-25T15:53:01.631+06:30  INFO 7760 --- [main] org.hibernate.orm.connections.pooling    : HHH10001115: Connection pool size: 20 (min=1)
+2023-11-25T15:53:05.353+06:30  INFO 7760 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T15:53:05.376+06:30  INFO 7760 --- [main] org.hibernate.orm.connections.access     : HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@43e9ca4b] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2023-11-25T15:53:05.460+06:30  INFO 7760 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T15:53:06.424+06:30  INFO 7760 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 13.867 seconds (process running for 15.292)
+2023-11-25T15:53:06.434+06:30  INFO 7760 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T15:53:06.439+06:30  INFO 7760 --- [main] com.Tray                                 : Tray started.
+2023-11-25T15:53:07.054+06:30  INFO 7760 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T15:53:08.049+06:30  INFO 7760 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwZ3dodDAwd2JjNnVsYyIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA5MDQxODcsImV4cCI6MTcwMzQ5NjE4N30.rYUrD4vnTHOUV4rS2MfCeahtFSJdwIuLmHxwSIesDi8
+2023-11-25T15:53:09.881+06:30  INFO 7760 --- [main] com.ui.LoginDialog                       : serialNo : PGWHT00WBC6ULC
+2023-11-25T15:53:10.395+06:30  INFO 7760 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T15:53:11.199+06:30  INFO 7760 --- [main] com.CloudIntegration                     : date lock time : 1998-10-07 00:00:00
+2023-11-25T15:53:11.233+06:30  INFO 7760 --- [main] com.h2.dao.OrderStatusDaoImpl            : 2023-09-23 11:49:44
+2023-11-25T15:53:11.359+06:30  INFO 7760 --- [main] com.CloudIntegration                     : downloadStockTime :  2023-11-22 14:52:14
+2023-11-25T15:53:11.522+06:30  INFO 7760 --- [reactor-http-nio-1] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T15:53:11.927+06:30  INFO 7760 --- [reactor-http-nio-4] com.CloudIntegration                     : OuputCostlist = 0
+2023-11-25T15:53:12.207+06:30  INFO 7760 --- [reactor-http-nio-2] com.CloudIntegration                     : stock criteria = 0
+2023-11-25T15:53:12.209+06:30  INFO 7760 --- [reactor-http-nio-7] com.CloudIntegration                     : stock formula price = 0
+2023-11-25T15:53:12.217+06:30  INFO 7760 --- [reactor-http-nio-3] com.CloudIntegration                     : labour group = 0
+2023-11-25T15:53:12.304+06:30  INFO 7760 --- [reactor-http-nio-6] com.CloudIntegration                     : stock formula = 0
+2023-11-25T15:53:12.357+06:30  INFO 7760 --- [reactor-http-nio-4] com.CloudIntegration                     : account Setting List = 0
+2023-11-25T15:53:12.403+06:30  INFO 7760 --- [reactor-http-nio-4] com.CloudIntegration                     : job = 0
+2023-11-25T15:53:12.424+06:30  INFO 7760 --- [reactor-http-nio-5] com.CloudIntegration                     : pattern = 0
+2023-11-25T15:53:12.435+06:30  INFO 7760 --- [reactor-http-nio-8] com.CloudIntegration                     : stock formula qty = 0
+2023-11-25T15:53:12.446+06:30  INFO 7760 --- [reactor-http-nio-1] com.CloudIntegration                     : stock formula gd = 0
+2023-11-25T15:53:12.517+06:30  INFO 7760 --- [reactor-http-nio-2] com.CloudIntegration                     : Warehouse List = 0
+2023-11-25T15:53:25.236+06:30  INFO 7760 --- [taskExecutor-1] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T15:53:28.189+06:30  INFO 7760 --- [AWT-EventQueue-0] com.inventory.ui.entry.OrderDynamic      : change.
+2023-11-25T15:53:28.276+06:30  INFO 7760 --- [AWT-EventQueue-0] com.inventory.ui.entry.OrderDynamic      : change.
+2023-11-25T15:53:28.281+06:30  INFO 7760 --- [AWT-EventQueue-0] com.inventory.ui.entry.OrderDynamic      : change.
+2023-11-25T15:53:30.740+06:30  INFO 7760 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T15:53:30.740+06:30  INFO 7760 --- [AWT-EventQueue-0] com.common.RowHeader                     : null11
