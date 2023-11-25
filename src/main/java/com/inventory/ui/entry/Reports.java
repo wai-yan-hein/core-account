@@ -254,7 +254,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             currencyAutoCompleter.setCurrency(c);
         }).subscribe();
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vouStatusAutoCompleter.setListVouStatus(t);
+            vouStatusAutoCompleter.setListData(t);
         }).subscribe();
         inventoryRepo.getWareHouse().doOnSuccess((t) -> {
             wareHouseAutoCompleter.setListObject(t);

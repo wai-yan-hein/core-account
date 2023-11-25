@@ -198,9 +198,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private void initData() {
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vouStatusAutoCompleter.setListVouStatus(t);
+            vouStatusAutoCompleter.setListData(t);
         }).subscribe();
-
         inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new LabourGroup());

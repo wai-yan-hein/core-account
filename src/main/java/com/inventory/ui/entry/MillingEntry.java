@@ -6,6 +6,7 @@
 package com.inventory.ui.entry;
 
 import com.common.ColumnColorCellRenderer;
+import com.common.ComponentUtil;
 import com.common.CustomTableCellRenderer;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
@@ -33,12 +34,12 @@ import com.inventory.model.VouStatus;
 import com.inventory.ui.common.MillingExpenseTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.MillingOutTableModel;
-import com.inventory.ui.common.ProcessTypeComboBoxModel;
 import com.inventory.ui.entry.dialog.MillingHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Job;
 import com.inventory.model.MessageType;
 import com.inventory.model.MillingUsage;
@@ -98,7 +99,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private final MillingRawTableModel millingRawTableModel = new MillingRawTableModel();
     private final MillingExpenseTableModel milingExpenseTableModel = new MillingExpenseTableModel();
     private MillingHistoryDialog dialog;
-    private ProcessTypeComboBoxModel vouStatusTableModel = new ProcessTypeComboBoxModel();
     private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
@@ -106,6 +106,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private TraderAutoCompleter traderAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
+    private VouStatusAutoCompleter vouStatusAutoCompleter;
     private SelectionObserver observer;
     private MillingHis milling = new MillingHis();
     private JProgressBar progress;
@@ -250,6 +251,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     public void initMain() {
         initCombo();
+        initData();
         initRawTable();
         initOutputTable();
         initExpenseTable();
@@ -363,20 +365,27 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
-            currAutoCompleter.setCurrency(c);
-        });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouStatus, null, false);
+        vouStatusAutoCompleter.setObserver(this);;
+    }
+
+    private void initData() {
+        userRepo.getCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setListCurrency(t);
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
+            currAutoCompleter.setCurrency(c);
+        }).subscribe();
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
         }).subscribe();
-        getVouStatus();
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListData(t);
+        }).subscribe();
     }
 
     private void initKeyListener() {
@@ -400,6 +409,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setLocation(t);
         }).subscribe();
+        vouStatusAutoCompleter.setVoucher(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
@@ -434,7 +444,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtEffQty.setValue(null);
         txtEffWt.setValue(null);
         txtJob.setText(null);
-        cboProcessType.repaint();
     }
 
     public void saveSale(boolean print) {
@@ -519,14 +528,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 param.put("p_logo_path", logoPath);
                 param.put("p_vou_no", his.getKey().getVouNo());
                 param.put("p_vou_date", Util1.toDateStr(his.getVouDate(), Global.dateFormat));
-                param.put("p_job_no", milling.getJobNo());
+                param.put("p_job_no", his.getJobNo());
                 param.put("p_sub_report_dir", "report/");
-                if (!listRaw.isEmpty()) {
-                    MillingRawDetail r = listRaw.get(0);
-                    param.put("p_raw_name", r.getStockName());
-                    param.put("p_raw_qty", r.getQty());
-                    param.put("p_raw_unit_name", r.getUnitName());
-                }
+                double ttlQty = listRaw.stream().mapToDouble((t) -> t.getQty()).sum();
+                param.put("p_raw_qty", ttlQty);
                 String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode n1 = mapper.readTree(Util1.gson.toJson(listOutput));
@@ -559,7 +564,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtCus.requestFocus();
-        } else if ((VouStatus) cboProcessType.getSelectedItem() == null) {
+        } else if (vouStatusAutoCompleter.getVouStatus() == null) {
             JOptionPane.showMessageDialog(this, "You must choose process type.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             status = false;
@@ -589,8 +594,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             milling.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             milling.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            VouStatus v = (VouStatus) cboProcessType.getSelectedItem();
-            milling.setVouStatusId(v.getKey().getCode());
+            VouStatus v = vouStatusAutoCompleter.getVouStatus();
+            milling.setVouStatusId(v.getKey() == null ? null : v.getKey().getCode());
             milling.setLoadQty(Util1.getDouble(txtLoadQty.getValue()));
             milling.setLoadWeight(Util1.getDouble(txtLoadWeight.getValue()));
             milling.setLoadAmount(Util1.getDouble(txtLoadAmt.getValue()));
@@ -731,7 +736,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     .mapToDouble((t) -> t.getAmount())
                     .sum();
             double amt = costAmt - knowAmt;
-            if (listOutDetail != null && listOutDetail.size() > 0) {
+            if (listOutDetail != null && !listOutDetail.isEmpty()) {
                 MillingOutDetail mod = listOutDetail.get(0);
                 double qty = Util1.getDouble(mod.getQty());
                 if (qty > 0) {
@@ -866,8 +871,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
             inventoryRepo.findVouStatus(milling.getVouStatusId()).doOnSuccess(t1 -> {
-                vouStatusTableModel.setSelectedItem(t1);
-                cboProcessType.repaint();
+                vouStatusAutoCompleter.setVoucher(t1);
             }).subscribe();
             //detail
             String vouNo = sh.getKey().getVouNo();
@@ -881,18 +885,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void disableForm(boolean status) {
-        tblRaw.setEnabled(status);
-        tblExpense.setEnabled(status);
-        tblOutput.setEnabled(status);
-        panelSale.setEnabled(status);
-        txtSaleDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtReference.setEnabled(status);
-        txtProjectNo.setEnabled(status);
-        txtLocation.setEnabled(status);
-        cboProcessType.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -964,7 +957,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtProjectNo = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
-        cboProcessType = new javax.swing.JComboBox<>();
         btnTransfer = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
@@ -972,6 +964,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         addExpense1 = new javax.swing.JButton();
         txtJob = new javax.swing.JTextField();
         jLabel25 = new javax.swing.JLabel();
+        txtVouStatus = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRaw = new javax.swing.JTable();
@@ -1128,8 +1121,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
-        cboProcessType.setFont(Global.textFont);
-
         btnTransfer.setFont(Global.lableFont);
         btnTransfer.setText("Job");
         btnTransfer.setInheritsPopupMenu(true);
@@ -1176,6 +1167,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel25.setFont(Global.lableFont);
         jLabel25.setText("Job");
 
+        txtVouStatus.setFont(Global.textFont);
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1184,60 +1177,64 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 .addContainerGap()
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4))
+                        .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelSaleLayout.createSequentialGroup()
-                                .addComponent(jLabel10)
-                                .addGap(12, 12, 12)
-                                .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addComponent(jLabel15)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 254, Short.MAX_VALUE)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnTransfer, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(addExpense1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addGap(906, 906, 906)
-                        .addComponent(jLabel25)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelSaleLayout.createSequentialGroup()
+                                .addGap(906, 906, 906)
+                                .addComponent(jLabel25))
+                            .addGroup(panelSaleLayout.createSequentialGroup()
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel4))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(panelSaleLayout.createSequentialGroup()
+                                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(panelSaleLayout.createSequentialGroup()
+                                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addGroup(panelSaleLayout.createSequentialGroup()
+                                        .addComponent(jLabel10)
+                                        .addGap(12, 12, 12)
+                                        .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(panelSaleLayout.createSequentialGroup()
+                                        .addComponent(jLabel15)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(txtVouStatus)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelSaleLayout.createSequentialGroup()
+                                .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 121, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelSaleLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(btnTransfer, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
         );
 
@@ -1267,13 +1264,13 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton2)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel9)
                         .addComponent(jLabel15)
-                        .addComponent(jButton2)
-                        .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnTransfer)))
+                        .addComponent(btnTransfer)
+                        .addComponent(txtVouStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1880,7 +1877,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addExpense1;
     private javax.swing.JButton btnTransfer;
-    private javax.swing.JComboBox<VouStatus> cboProcessType;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -1937,6 +1933,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JTextField txtRemark;
     private com.toedter.calendar.JDateChooser txtSaleDate;
     private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouStatus;
     private javax.swing.JFormattedTextField txtWtLoss;
     // End of variables declaration//GEN-END:variables
 
@@ -1967,6 +1964,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     @Override
     public void refresh() {
+        initData();
     }
 
     @Override
@@ -2000,18 +1998,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         jobSearchDialog.search();
     }
 
-    private void getVouStatus() {
-        inventoryRepo.getVoucherStatus().subscribe((t) -> {
-            vouStatusTableModel.setData(t);
-            cboProcessType.setModel(vouStatusTableModel);
-        });
-    }
-
     private void vouStatusSetup() {
         VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
         vsDialog.setIconImage(icon);
         vsDialog.setInventoryRepo(inventoryRepo);
-        vsDialog.setListVou(vouStatusTableModel.getData());
+        vsDialog.setListVou(vouStatusAutoCompleter.getListData());
         vsDialog.initMain();
         vsDialog.setSize(Global.width / 2, Global.height / 2);
         vsDialog.setLocationRelativeTo(null);
