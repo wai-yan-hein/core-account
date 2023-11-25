@@ -1,0 +1,113 @@
+2023-11-25T11:36:52.469+06:30  INFO 16552 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 16552 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T11:36:52.479+06:30  INFO 16552 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T11:36:57.392+06:30  INFO 16552 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T11:36:58.449+06:30  INFO 16552 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1045 ms. Found 1 JPA repository interfaces.
+2023-11-25T11:36:59.138+06:30  INFO 16552 --- [main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2023-11-25T11:36:59.687+06:30  INFO 16552 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T11:36:59.814+06:30  INFO 16552 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T11:36:59.817+06:30  INFO 16552 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T11:37:02.865+06:30  INFO 16552 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T11:37:02.893+06:30  WARN 16552 --- [main] org.hibernate.orm.connections.pooling    : HHH10001002: Using built-in connection pool (not intended for production use)
+2023-11-25T11:37:02.917+06:30  INFO 16552 --- [main] org.hibernate.orm.connections.pooling    : HHH10001005: Loaded JDBC driver class: org.h2.Driver
+2023-11-25T11:37:02.918+06:30  INFO 16552 --- [main] org.hibernate.orm.connections.pooling    : HHH10001012: Connecting with JDBC URL [jdbc:h2:file:./data/database]
+2023-11-25T11:37:02.918+06:30  INFO 16552 --- [main] org.hibernate.orm.connections.pooling    : HHH10001001: Connection properties: {password=****, user=root}
+2023-11-25T11:37:02.918+06:30  INFO 16552 --- [main] org.hibernate.orm.connections.pooling    : HHH10001003: Autocommit mode: false
+2023-11-25T11:37:02.923+06:30  INFO 16552 --- [main] org.hibernate.orm.connections.pooling    : HHH10001115: Connection pool size: 20 (min=1)
+2023-11-25T11:37:06.799+06:30  INFO 16552 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T11:37:06.831+06:30  INFO 16552 --- [main] org.hibernate.orm.connections.access     : HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@122e623a] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2023-11-25T11:37:07.137+06:30  INFO 16552 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T11:37:08.023+06:30  INFO 16552 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 16.389 seconds (process running for 18.373)
+2023-11-25T11:37:08.033+06:30  INFO 16552 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T11:37:08.040+06:30  INFO 16552 --- [main] com.Tray                                 : Tray started.
+2023-11-25T11:37:08.678+06:30  INFO 16552 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T11:37:10.336+06:30  INFO 16552 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4ODg4MzAsImV4cCI6MTcwMzQ4MDgzMH0.IetbTURx_2464SplJ-75s4mEShhNPPr0IRvItoc7PX4
+2023-11-25T11:37:12.204+06:30  INFO 16552 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T11:37:12.902+06:30  INFO 16552 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T11:37:13.366+06:30  INFO 16552 --- [main] com.CloudIntegration                     : date lock time : 1998-10-07 00:00:00
+2023-11-25T11:37:13.388+06:30  INFO 16552 --- [main] com.h2.dao.OrderStatusDaoImpl            : null
+2023-11-25T11:37:13.452+06:30  INFO 16552 --- [main] com.CloudIntegration                     : downloadStockTime :  1998-10-07 00:00:00
+2023-11-25T11:37:13.629+06:30  INFO 16552 --- [reactor-http-nio-2] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T11:37:13.813+06:30  INFO 16552 --- [reactor-http-nio-6] com.CloudIntegration                     : pattern = 42
+2023-11-25T11:37:13.860+06:30  INFO 16552 --- [reactor-http-nio-7] com.CloudIntegration                     : OuputCostlist = 0
+2023-11-25T11:37:13.878+06:30  INFO 16552 --- [reactor-http-nio-4] com.CloudIntegration                     : labour group = 8
+2023-11-25T11:37:13.887+06:30  INFO 16552 --- [reactor-http-nio-7] com.CloudIntegration                     : stock formula = 20
+2023-11-25T11:37:13.916+06:30  INFO 16552 --- [reactor-http-nio-4] com.CloudIntegration                     : account Setting List = 4
+2023-11-25T11:37:14.117+06:30  INFO 16552 --- [reactor-http-nio-1] com.CloudIntegration                     : stock formula qty = 19
+2023-11-25T11:37:14.161+06:30  INFO 16552 --- [reactor-http-nio-2] com.CloudIntegration                     : stock formula gd = 175
+2023-11-25T11:37:14.370+06:30  INFO 16552 --- [reactor-http-nio-8] com.CloudIntegration                     : stock formula price = 99
+2023-11-25T11:37:14.622+06:30  INFO 16552 --- [reactor-http-nio-3] com.CloudIntegration                     : stock criteria = 7
+2023-11-25T11:37:16.199+06:30  INFO 16552 --- [reactor-http-nio-5] com.CloudIntegration                     : Warehouse List = 0
+2023-11-25T11:37:16.214+06:30  INFO 16552 --- [reactor-http-nio-5] com.CloudIntegration                     : job = 29
+2023-11-25T11:37:46.459+06:30  INFO 16552 --- [taskExecutor-1] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T11:39:16.453+06:30  INFO 16552 --- [AWT-EventQueue-0] com.common.RowHeader                     : null00
+2023-11-25T11:39:16.704+06:30  INFO 16552 --- [reactor-http-nio-7] com.common.RowHeader                     : null11
+2023-11-25T11:39:16.705+06:30  INFO 16552 --- [reactor-http-nio-7] com.common.RowHeader                     : null21
+2023-11-25T11:53:38.710+06:30  INFO 16552 --- [reactor-http-nio-6] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T11:53:39.665+06:30  INFO 16552 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T11:53:39.669+06:30  INFO 16552 --- [SpringApplicationShutdownHook] org.hibernate.orm.connections.pooling    : HHH10001008: Cleaning up connection pool [jdbc:h2:file:./data/database]
+2023-11-25T11:53:39.676+06:30  INFO 16552 --- [SpringApplicationShutdownHook] o.s.j.d.e.EmbeddedDatabaseFactory        : Shutting down embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false'
+2023-11-25T11:55:21.010+06:30  INFO 15500 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 15500 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T11:55:21.021+06:30  INFO 15500 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T11:55:26.237+06:30  INFO 15500 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T11:55:27.264+06:30  INFO 15500 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1009 ms. Found 1 JPA repository interfaces.
+2023-11-25T11:55:27.887+06:30  INFO 15500 --- [main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2023-11-25T11:55:28.401+06:30  INFO 15500 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T11:55:28.518+06:30  INFO 15500 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T11:55:28.520+06:30  INFO 15500 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T11:55:31.765+06:30  INFO 15500 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T11:55:31.798+06:30  WARN 15500 --- [main] org.hibernate.orm.connections.pooling    : HHH10001002: Using built-in connection pool (not intended for production use)
+2023-11-25T11:55:31.822+06:30  INFO 15500 --- [main] org.hibernate.orm.connections.pooling    : HHH10001005: Loaded JDBC driver class: org.h2.Driver
+2023-11-25T11:55:31.823+06:30  INFO 15500 --- [main] org.hibernate.orm.connections.pooling    : HHH10001012: Connecting with JDBC URL [jdbc:h2:file:./data/database]
+2023-11-25T11:55:31.823+06:30  INFO 15500 --- [main] org.hibernate.orm.connections.pooling    : HHH10001001: Connection properties: {password=****, user=root}
+2023-11-25T11:55:31.824+06:30  INFO 15500 --- [main] org.hibernate.orm.connections.pooling    : HHH10001003: Autocommit mode: false
+2023-11-25T11:55:31.830+06:30  INFO 15500 --- [main] org.hibernate.orm.connections.pooling    : HHH10001115: Connection pool size: 20 (min=1)
+2023-11-25T11:55:35.965+06:30  INFO 15500 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T11:55:36.006+06:30  INFO 15500 --- [main] org.hibernate.orm.connections.access     : HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@24e82729] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2023-11-25T11:55:36.091+06:30  INFO 15500 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T11:55:37.075+06:30  INFO 15500 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 16.935 seconds (process running for 19.104)
+2023-11-25T11:55:37.091+06:30  INFO 15500 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T11:55:37.096+06:30  INFO 15500 --- [main] com.Tray                                 : Tray started.
+2023-11-25T11:55:37.740+06:30  INFO 15500 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T11:55:39.240+06:30  INFO 15500 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4ODk5MzksImV4cCI6MTcwMzQ4MTkzOX0.sGz61x_QsF9NuVxUUiUZUGxerDOUBFn_VSgCb3in21Y
+2023-11-25T11:55:41.151+06:30  INFO 15500 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T11:55:41.747+06:30  INFO 15500 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T11:55:42.398+06:30  INFO 15500 --- [main] com.CloudIntegration                     : date lock time : 1998-10-07 00:00:00
+2023-11-25T11:55:42.424+06:30  INFO 15500 --- [main] com.h2.dao.OrderStatusDaoImpl            : 2023-09-23 11:49:44
+2023-11-25T11:55:42.491+06:30  INFO 15500 --- [main] com.CloudIntegration                     : downloadStockTime :  2023-11-25 12:06:10
+2023-11-25T11:55:42.598+06:30  INFO 15500 --- [reactor-http-nio-2] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T11:55:42.730+06:30  INFO 15500 --- [reactor-http-nio-1] com.CloudIntegration                     : stock formula qty = 0
+2023-11-25T11:55:42.755+06:30  INFO 15500 --- [reactor-http-nio-7] com.CloudIntegration                     : stock formula = 0
+2023-11-25T11:55:42.760+06:30  INFO 15500 --- [reactor-http-nio-8] com.CloudIntegration                     : stock formula price = 0
+2023-11-25T11:55:42.761+06:30  INFO 15500 --- [reactor-http-nio-5] com.CloudIntegration                     : account Setting List = 0
+2023-11-25T11:55:42.769+06:30  INFO 15500 --- [reactor-http-nio-3] com.CloudIntegration                     : stock criteria = 0
+2023-11-25T11:55:42.783+06:30  INFO 15500 --- [reactor-http-nio-6] com.CloudIntegration                     : pattern = 0
+2023-11-25T11:55:42.790+06:30  INFO 15500 --- [reactor-http-nio-3] com.CloudIntegration                     : OuputCostlist = 0
+2023-11-25T11:55:42.794+06:30  INFO 15500 --- [reactor-http-nio-5] com.CloudIntegration                     : job = 1
+2023-11-25T11:55:42.794+06:30  INFO 15500 --- [reactor-http-nio-4] com.CloudIntegration                     : Warehouse List = 0
+2023-11-25T11:55:42.823+06:30  INFO 15500 --- [reactor-http-nio-4] com.CloudIntegration                     : labour group = 0
+2023-11-25T11:55:42.831+06:30  INFO 15500 --- [reactor-http-nio-2] com.CloudIntegration                     : stock formula gd = 0
+2023-11-25T11:55:48.639+06:30  INFO 15500 --- [taskExecutor-1] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T11:56:42.080+06:30  INFO 15500 --- [reactor-http-nio-6] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T11:56:42.100+06:30  INFO 15500 --- [reactor-http-nio-4] com.SSEListener                          : DOWNLOAD-JOB
+2023-11-25T11:56:42.240+06:30  INFO 15500 --- [reactor-http-nio-6] com.CloudIntegration                     : job = 1
+2023-11-25T11:58:57.510+06:30  INFO 15500 --- [reactor-http-nio-8] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T11:58:57.519+06:30  INFO 15500 --- [reactor-http-nio-4] com.SSEListener                          : DOWNLOAD-JOB
+2023-11-25T11:58:57.643+06:30  INFO 15500 --- [reactor-http-nio-8] com.CloudIntegration                     : job = 1
+2023-11-25T12:01:03.452+06:30  INFO 15500 --- [reactor-http-nio-2] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:01:03.456+06:30  INFO 15500 --- [reactor-http-nio-4] com.SSEListener                          : DOWNLOAD-JOB
+2023-11-25T12:01:03.628+06:30  INFO 15500 --- [reactor-http-nio-2] com.CloudIntegration                     : job = 1
+2023-11-25T12:03:26.677+06:30  INFO 15500 --- [reactor-http-nio-4] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:03:26.680+06:30  INFO 15500 --- [reactor-http-nio-4] com.SSEListener                          : DOWNLOAD-JOB
+2023-11-25T12:03:26.798+06:30  INFO 15500 --- [reactor-http-nio-4] com.CloudIntegration                     : job = 1
+2023-11-25T12:04:26.383+06:30  INFO 15500 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T12:04:26.384+06:30  INFO 15500 --- [AWT-EventQueue-0] com.common.RowHeader                     : null11
+2023-11-25T12:04:39.820+06:30  INFO 15500 --- [reactor-http-nio-6] com.common.RowHeader                     : null10
+2023-11-25T12:04:39.820+06:30  INFO 15500 --- [reactor-http-nio-6] com.common.RowHeader                     : null21
+2023-11-25T12:15:36.508+06:30  INFO 15500 --- [reactor-http-nio-8] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:23:23.110+06:30  INFO 15500 --- [reactor-http-nio-2] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:24:01.636+06:30  INFO 15500 --- [reactor-http-nio-4] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:25:48.415+06:30  INFO 15500 --- [reactor-http-nio-6] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:26:33.557+06:30  INFO 15500 --- [reactor-http-nio-8] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:29:16.283+06:30  INFO 15500 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T12:29:16.290+06:30  INFO 15500 --- [SpringApplicationShutdownHook] org.hibernate.orm.connections.pooling    : HHH10001008: Cleaning up connection pool [jdbc:h2:file:./data/database]
+2023-11-25T12:29:16.303+06:30  INFO 15500 --- [SpringApplicationShutdownHook] o.s.j.d.e.EmbeddedDatabaseFactory        : Shutting down embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false'
