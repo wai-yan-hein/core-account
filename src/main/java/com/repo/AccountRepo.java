@@ -507,6 +507,9 @@ public class AccountRepo {
     }
 
     public Mono<ChartOfAccount> findCOA(String coaCode) {
+        if (Util1.isNullOrEmpty(coaCode)) {
+            return Mono.empty();
+        }
         COAKey key = new COAKey();
         key.setCoaCode(coaCode);
         key.setCompCode(Global.compCode);

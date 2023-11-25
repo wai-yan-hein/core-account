@@ -425,6 +425,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtOutQty.setValue(0.0);
         vouStatusAutoCompleter.setVoucher(null);
         labourGroupAutoCompleter.setObject(null);
+        jobAutoCompleter.setObject(null);
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);

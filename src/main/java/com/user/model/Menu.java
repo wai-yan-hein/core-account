@@ -4,7 +4,6 @@
  */
 package com.user.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -45,6 +44,8 @@ public class Menu {
     private Integer orderBy;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
+    @Column(name = "menu_version")
+    private int menuVersion;
     @Transient
     private List<Menu> child;
 
