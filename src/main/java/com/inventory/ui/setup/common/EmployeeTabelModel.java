@@ -19,7 +19,7 @@ public class EmployeeTabelModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(EmployeeTabelModel.class);
     private List<Trader> listEmployee = new ArrayList();
-    private String[] columnNames = {"No.", "Code", "Name", "Active"};
+    private String[] columnNames = {"Code", "Employee Name", "Active"};
 
     @Override
     public String getColumnName(int column) {
@@ -34,7 +34,7 @@ public class EmployeeTabelModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3 ->
+            case 2 ->
                 Boolean.class;
             default ->
                 String.class;
@@ -49,12 +49,10 @@ public class EmployeeTabelModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    String.valueOf(row + 1 + ". ");
-                case 1 ->
                     customer.getUserCode();
-                case 2 ->
+                case 1 ->
                     customer.getTraderName();
-                case 3 ->
+                case 2 ->
                     customer.isActive();
                 default ->
                     null;
@@ -74,7 +72,7 @@ public class EmployeeTabelModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (listEmployee== null) {
+        if (listEmployee == null) {
             return 0;
         }
         return listEmployee.size();

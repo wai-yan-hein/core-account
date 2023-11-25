@@ -200,7 +200,6 @@ public class CoreAccountApplication {
             UIManager.put("TextComponent.arc", 20);
             UIManager.put("TabbedPane.showTabSeparators", true);
             UIManager.put("TableHeader.foreground", Color.WHITE);
-            UIManager.put("TextField.foreground", Color.WHITE);
             UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
             Util1.DARK_MODE = darkMode;
             log.info("theme end.");

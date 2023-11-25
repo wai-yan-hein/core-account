@@ -86,7 +86,7 @@ public class AccountRepo {
                 .bodyToMono(DepartmentA.class)
                 .onErrorResume((e) -> {
                     log.error("findDepartment : " + e.getMessage());
-                    return Mono.error(e);
+                    return Mono.empty();
                 });
     }
 
