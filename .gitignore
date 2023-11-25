@@ -35,3 +35,4 @@ build/
 /config/
 /data/
 /target/
+/token/
