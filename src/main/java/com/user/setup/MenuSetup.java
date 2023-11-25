@@ -39,8 +39,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
@@ -247,6 +245,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
             int count = selectNode.getChildCount();
             menu.setOrderBy(count);
+            menu.setMenuVersion(Util1.getInteger(txtVersion.getText()));
             DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(menu);
             model.insertNodeInto(newNode, selectNode, count);
@@ -401,6 +400,8 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuClass = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         txtMenuMM = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtVersion = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -492,6 +493,16 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             }
         });
 
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Version");
+
+        txtVersion.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtVersion.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtVersionFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -508,13 +519,18 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                     .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtMenuUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                    .addComponent(txtMenuUrl)
                     .addComponent(txtMenuName)
-                    .addComponent(txtOrder)
-                    .addComponent(txtAccount, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                    .addComponent(txtMenuType, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                    .addComponent(txtMenuClass, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                    .addComponent(txtMenuMM))
+                    .addComponent(txtAccount)
+                    .addComponent(txtMenuType)
+                    .addComponent(txtMenuClass)
+                    .addComponent(txtMenuMM)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtOrder)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtVersion)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -547,7 +563,10 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
-                    .addComponent(txtOrder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtOrder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel8)
+                        .addComponent(txtVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(82, Short.MAX_VALUE))
         );
 
@@ -611,6 +630,10 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         removeSpace();
     }//GEN-LAST:event_txtMenuUrlActionPerformed
 
+    private void txtVersionFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVersionFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVersionFocusGained
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -620,6 +643,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree treeCOA;
@@ -630,6 +654,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private javax.swing.JTextField txtMenuType;
     private javax.swing.JTextField txtMenuUrl;
     private javax.swing.JFormattedTextField txtOrder;
+    private javax.swing.JFormattedTextField txtVersion;
     // End of variables declaration//GEN-END:variables
 
     @Override

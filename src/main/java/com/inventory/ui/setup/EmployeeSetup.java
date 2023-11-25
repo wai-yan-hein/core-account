@@ -286,9 +286,9 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
             observer.selected("save", false);
             inventoryRepo.saveTrader(employee).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    employeeTabelModel.setEmployee(selectRow, employee);
+                    employeeTabelModel.setEmployee(selectRow, t);
                 } else {
-                    employeeTabelModel.addEmployee(employee);
+                    employeeTabelModel.addEmployee(t);
                 }
                 clear();
                 sendMessage(t.getTraderName());

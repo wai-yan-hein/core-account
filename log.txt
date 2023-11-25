@@ -662,3 +662,195 @@ Caused by: java.lang.NullPointerException: Cannot invoke "com.acc.editor.COA3Aut
 2023-11-25T14:29:29.205+06:30  INFO 7752 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTkxNjksImV4cCI6MTcwMzQ5MTE2OX0.DqWw3EZvFxokWlse9O1fXN-27ZHjET6Ha2R5ZTMkuds
 2023-11-25T14:29:31.150+06:30  INFO 7752 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
 2023-11-25T14:29:31.299+06:30  INFO 7752 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:42:39.410+06:30  INFO 16800 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 16800 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:42:39.420+06:30  INFO 16800 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:42:43.604+06:30  INFO 16800 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:42:44.519+06:30  INFO 16800 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 902 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:42:45.315+06:30  INFO 16800 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:42:45.660+06:30  INFO 16800 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:3291733d-ed06-4da9-b1fa-013d5466f861 user=SA
+2023-11-25T14:42:45.664+06:30  INFO 16800 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:42:45.746+06:30  INFO 16800 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:42:45.816+06:30  INFO 16800 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:42:45.819+06:30  INFO 16800 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:42:46.201+06:30  INFO 16800 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:42:49.808+06:30  INFO 16800 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:42:49.992+06:30  INFO 16800 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:42:50.823+06:30  INFO 16800 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 12.086 seconds (process running for 13.841)
+2023-11-25T14:42:50.833+06:30  INFO 16800 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:42:50.836+06:30  INFO 16800 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:42:51.548+06:30  INFO 16800 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:42:52.810+06:30  INFO 16800 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA4OTk5NzIsImV4cCI6MTcwMzQ5MTk3Mn0.EhfsyQcWsvwLTuPEtLzWYIx-yoW3Pyq3Otdptyy6f78
+2023-11-25T14:42:54.906+06:30  INFO 16800 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:42:55.098+06:30  INFO 16800 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:44:09.641+06:30  INFO 16800 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T14:44:23.870+06:30  INFO 16800 --- [reactor-http-nio-6] com.common.RowHeader                     : tblCustomer00
+2023-11-25T14:44:40.261+06:30  INFO 16800 --- [reactor-http-nio-1] com.common.RowHeader                     : tblCustomer01
+2023-11-25T14:44:40.262+06:30  INFO 16800 --- [reactor-http-nio-1] com.common.RowHeader                     : tblCustomer10
+2023-11-25T14:44:40.340+06:30  INFO 16800 --- [reactor-http-nio-1] com.inventory.ui.setup.EmployeeSetup     : "sent"
+2023-11-25T14:44:40.356+06:30  INFO 16800 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-TRADER_INV
+2023-11-25T14:44:40.370+06:30  INFO 16800 --- [reactor-http-nio-1] com.inventory.ui.setup.EmployeeSetup     : "sent"
+2023-11-25T14:44:40.792+06:30  INFO 16800 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-TRADER_ACC
+2023-11-25T14:44:41.390+06:30 ERROR 16800 --- [reactor-http-nio-2] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientResponseException$BadRequest: 400 Bad Request from GET http://127.0.0.1:8079/user/findCountry?id
+Caused by: org.springframework.web.reactive.function.client.WebClientResponseException$BadRequest: 400 Bad Request from GET http://127.0.0.1:8079/user/findCountry?id
+	at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:307) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ 400 BAD_REQUEST from GET http://127.0.0.1/user/findCountry [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:307) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at org.springframework.web.reactive.function.client.DefaultClientResponse.lambda$createException$1(DefaultClientResponse.java:214) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.FluxMap$MapSubscriber.onNext(FluxMap.java:106) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorReturn$ReturnSubscriber.onNext(FluxOnErrorReturn.java:162) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:122) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.onNext(FluxMapFuseable.java:129) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:299) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:337) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2071) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:145) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:260) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:444) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.channel.ChannelOperations.terminate(ChannelOperations.java:498) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.http.client.HttpClientOperations.onInboundNext(HttpClientOperations.java:753) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:114) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:436) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:346) ~[netty-codec-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:318) ~[netty-codec-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:251) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:442) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T14:44:43.086+06:30  INFO 16800 --- [AWT-EventQueue-0] com.common.RowHeader                     : tblCustomer10
+2023-11-25T14:44:49.504+06:30 ERROR 16800 --- [reactor-http-nio-4] reactor.core.publisher.Operators         : Operator called default onErrorDropped
+
+reactor.core.Exceptions$ErrorCallbackNotImplemented: org.springframework.web.reactive.function.client.WebClientResponseException$BadRequest: 400 Bad Request from GET http://127.0.0.1:8079/user/findCountry?id
+Caused by: org.springframework.web.reactive.function.client.WebClientResponseException$BadRequest: 400 Bad Request from GET http://127.0.0.1:8079/user/findCountry?id
+	at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:307) ~[spring-webflux-6.0.13.jar:6.0.13]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ 400 BAD_REQUEST from GET http://127.0.0.1/user/findCountry [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:307) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at org.springframework.web.reactive.function.client.DefaultClientResponse.lambda$createException$1(DefaultClientResponse.java:214) ~[spring-webflux-6.0.13.jar:6.0.13]
+		at reactor.core.publisher.FluxMap$MapSubscriber.onNext(FluxMap.java:106) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxOnErrorReturn$ReturnSubscriber.onNext(FluxOnErrorReturn.java:162) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxDefaultIfEmpty$DefaultIfEmptySubscriber.onNext(FluxDefaultIfEmpty.java:122) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableSubscriber.onNext(FluxMapFuseable.java:129) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.onNext(FluxMapFuseable.java:299) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.onNext(FluxFilterFuseable.java:337) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.Operators$BaseFluxToMonoOperator.completePossiblyEmpty(Operators.java:2071) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.MonoCollect$CollectSubscriber.onComplete(MonoCollect.java:145) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onComplete(FluxPeek.java:260) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.core.publisher.FluxMap$MapSubscriber.onComplete(FluxMap.java:144) ~[reactor-core-3.5.11.jar:3.5.11]
+		at reactor.netty.channel.FluxReceive.onInboundComplete(FluxReceive.java:413) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.channel.ChannelOperations.onInboundComplete(ChannelOperations.java:444) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.channel.ChannelOperations.terminate(ChannelOperations.java:498) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at reactor.netty.http.client.HttpClientOperations.onInboundNext(HttpClientOperations.java:753) ~[reactor-netty-http-1.1.12.jar:1.1.12]
+		at reactor.netty.channel.ChannelOperationsHandler.channelRead(ChannelOperationsHandler.java:114) ~[reactor-netty-core-1.1.12.jar:1.1.12]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.CombinedChannelDuplexHandler$DelegatingChannelHandlerContext.fireChannelRead(CombinedChannelDuplexHandler.java:436) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:346) ~[netty-codec-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:318) ~[netty-codec-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.CombinedChannelDuplexHandler.channelRead(CombinedChannelDuplexHandler.java:251) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:442) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.100.Final.jar:4.1.100.Final]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2023-11-25T14:47:50.095+06:30  INFO 16800 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:47:50.134+06:30  INFO 16800 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2023-11-25T14:47:50.137+06:30  INFO 16800 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2023-11-25T14:52:23.437+06:30  INFO 18180 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 21 with PID 18180 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-11-25T14:52:23.446+06:30  INFO 18180 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-11-25T14:52:28.178+06:30  INFO 18180 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2023-11-25T14:52:29.261+06:30  INFO 18180 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1071 ms. Found 1 JPA repository interfaces.
+2023-11-25T14:52:30.244+06:30  INFO 18180 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2023-11-25T14:52:30.645+06:30  INFO 18180 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:9ab39190-519e-4e93-a824-b03f139a31e1 user=SA
+2023-11-25T14:52:30.650+06:30  INFO 18180 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2023-11-25T14:52:30.766+06:30  INFO 18180 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2023-11-25T14:52:30.875+06:30  INFO 18180 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.2.13.Final
+2023-11-25T14:52:30.878+06:30  INFO 18180 --- [main] org.hibernate.cfg.Environment            : HHH000406: Using bytecode reflection optimizer
+2023-11-25T14:52:31.439+06:30  INFO 18180 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2023-11-25T14:52:37.508+06:30  INFO 18180 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2023-11-25T14:52:37.762+06:30  INFO 18180 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:52:38.863+06:30  INFO 18180 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 16.085 seconds (process running for 17.809)
+2023-11-25T14:52:38.882+06:30  INFO 18180 --- [main] com.CoreAccountApplication               : end context.
+2023-11-25T14:52:38.886+06:30  INFO 18180 --- [main] com.Tray                                 : Tray started.
+2023-11-25T14:52:39.944+06:30  INFO 18180 --- [main] com.config.WebFlexConfig                 : getToken.
+2023-11-25T14:52:41.310+06:30  INFO 18180 --- [reactor-http-nio-2] com.config.WebFlexConfig                 : New Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsMWhmOWI4MGJqdiIsImF1dGgiOiJST0xFX1VTRVIiLCJpYXQiOjE3MDA5MDA1NjEsImV4cCI6MTcwMzQ5MjU2MX0.WT5os01_-RLcQG-3A_hiLxlBtb-XVGMEc1OxAVqR_7s
+2023-11-25T14:52:43.802+06:30  INFO 18180 --- [main] com.ui.LoginDialog                       : serialNo : L1HF9B80BJV
+2023-11-25T14:52:44.010+06:30  INFO 18180 --- [reactor-http-nio-3] com.ui.LoginDialog                       : machine info update.
+2023-11-25T14:52:51.888+06:30  INFO 18180 --- [reactor-http-nio-5] com.common.DateLockUtil                  : initLockDate.
+2023-11-25T14:52:55.644+06:30  INFO 18180 --- [reactor-http-nio-6] com.common.RowHeader                     : tblCustomer00
+2023-11-25T14:54:00.534+06:30  INFO 18180 --- [reactor-http-nio-8] com.common.RowHeader                     : tblCustomer10
+2023-11-25T14:54:00.537+06:30  INFO 18180 --- [reactor-http-nio-8] com.common.RowHeader                     : tblCustomer10
+2023-11-25T14:54:00.579+06:30  INFO 18180 --- [reactor-http-nio-8] com.inventory.ui.setup.EmployeeSetup     : "sent"
+2023-11-25T14:54:00.585+06:30  INFO 18180 --- [reactor-http-nio-8] com.inventory.ui.setup.EmployeeSetup     : "sent"
+2023-11-25T14:54:00.595+06:30  INFO 18180 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-TRADER_ACC
+2023-11-25T14:54:00.977+06:30  INFO 18180 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-TRADER_INV
+2023-11-25T14:54:06.833+06:30  INFO 18180 --- [AWT-EventQueue-0] com.common.RowHeader                     : tblCustomer10
+2023-11-25T14:54:22.462+06:30  INFO 18180 --- [reactor-http-nio-2] com.common.RowHeader                     : tblCustomer11
+2023-11-25T14:54:22.467+06:30  INFO 18180 --- [reactor-http-nio-2] com.common.RowHeader                     : tblCustomer20
+2023-11-25T14:54:22.499+06:30  INFO 18180 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-TRADER_ACC
+2023-11-25T14:54:22.500+06:30  INFO 18180 --- [reactor-http-nio-2] com.inventory.ui.setup.EmployeeSetup     : "sent"
+2023-11-25T14:54:22.507+06:30  INFO 18180 --- [reactor-http-nio-2] com.inventory.ui.setup.EmployeeSetup     : "sent"
+2023-11-25T14:54:22.542+06:30  INFO 18180 --- [reactor-http-nio-5] com.SSEListener                          : DOWNLOAD-TRADER_INV
+2023-11-25T14:54:25.509+06:30  INFO 18180 --- [AWT-EventQueue-0] com.common.RowHeader                     : tblCustomer20
+2023-11-25T14:55:20.044+06:30  INFO 18180 --- [AWT-EventQueue-0] com.common.RowHeader                     : tblCustomer20
+2023-11-25T14:55:30.007+06:30  INFO 18180 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T14:55:30.008+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.entry.AllCash                    : start date : 2023-11-25
+2023-11-25T14:55:30.008+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.entry.AllCash                    : end date : 2023-11-25
+2023-11-25T14:55:30.073+06:30  INFO 18180 --- [reactor-http-nio-7] com.common.RowHeader                     : null00
+2023-11-25T14:55:30.074+06:30  INFO 18180 --- [reactor-http-nio-7] com.common.RowHeader                     : null01
+2023-11-25T14:55:42.802+06:30  INFO 18180 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T14:55:42.803+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.entry.AllCash                    : start date : 2023-11-19
+2023-11-25T14:55:42.803+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.entry.AllCash                    : end date : 2023-11-19
+2023-11-25T14:55:42.827+06:30  INFO 18180 --- [reactor-http-nio-3] com.common.RowHeader                     : null00
+2023-11-25T14:55:42.827+06:30  INFO 18180 --- [reactor-http-nio-3] com.common.RowHeader                     : null01
+2023-11-25T14:55:46.645+06:30  INFO 18180 --- [AWT-EventQueue-0] com.common.RowHeader                     : null10
+2023-11-25T14:55:46.645+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.entry.AllCash                    : start date : 2023-10-01
+2023-11-25T14:55:46.645+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.entry.AllCash                    : end date : 2023-11-25
+2023-11-25T14:55:46.658+06:30  INFO 18180 --- [AWT-EventQueue-0] com.acc.dialog.DatePickerDialog          : WINDOW CLOSED.
+2023-11-25T14:55:46.685+06:30  INFO 18180 --- [reactor-http-nio-3] com.common.RowHeader                     : null00
+2023-11-25T14:55:46.690+06:30  INFO 18180 --- [reactor-http-nio-3] com.common.RowHeader                     : null271
+2023-11-25T14:56:01.634+06:30  INFO 18180 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T14:56:01.762+06:30  INFO 18180 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2023-11-25T14:56:01.777+06:30  INFO 18180 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
