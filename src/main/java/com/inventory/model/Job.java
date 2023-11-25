@@ -50,4 +50,10 @@ public class Job {
     public Job() {
     }
 
+    public Job(String code, String name) {
+        this.key = new JobKey();
+        this.key.setJobNo(code);
+        this.jobName = name;
+    }
+
 }
