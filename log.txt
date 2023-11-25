@@ -103,3 +103,11 @@
 2023-11-25T12:04:26.384+06:30  INFO 15500 --- [AWT-EventQueue-0] com.common.RowHeader                     : null11
 2023-11-25T12:04:39.820+06:30  INFO 15500 --- [reactor-http-nio-6] com.common.RowHeader                     : null10
 2023-11-25T12:04:39.820+06:30  INFO 15500 --- [reactor-http-nio-6] com.common.RowHeader                     : null21
+2023-11-25T12:15:36.508+06:30  INFO 15500 --- [reactor-http-nio-8] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:23:23.110+06:30  INFO 15500 --- [reactor-http-nio-2] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:24:01.636+06:30  INFO 15500 --- [reactor-http-nio-4] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:25:48.415+06:30  INFO 15500 --- [reactor-http-nio-6] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:26:33.557+06:30  INFO 15500 --- [reactor-http-nio-8] com.inventory.ui.entry.MillingEntry      : "sent"
+2023-11-25T12:29:16.283+06:30  INFO 15500 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2023-11-25T12:29:16.290+06:30  INFO 15500 --- [SpringApplicationShutdownHook] org.hibernate.orm.connections.pooling    : HHH10001008: Cleaning up connection pool [jdbc:h2:file:./data/database]
+2023-11-25T12:29:16.303+06:30  INFO 15500 --- [SpringApplicationShutdownHook] o.s.j.d.e.EmbeddedDatabaseFactory        : Shutting down embedded database: url='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false'
