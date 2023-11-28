@@ -104,7 +104,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         });
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, true);
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vouStatusAutoCompleter.setListVouStatus(t);
+            vouStatusAutoCompleter.setListData(t);
         }).subscribe();
         jobAutoCompleter = new JobAutoCompleter(txtJob, null, true);
         inventoryRepo.getJob(false, Global.deptId).subscribe((t) -> {

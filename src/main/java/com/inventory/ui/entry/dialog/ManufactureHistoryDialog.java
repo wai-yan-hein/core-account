@@ -123,7 +123,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, null, true);
         vouStatusAutoCompleter.setObserver(this);
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vouStatusAutoCompleter.setListVouStatus(t);
+            vouStatusAutoCompleter.setListData(t);
         }).subscribe();
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
