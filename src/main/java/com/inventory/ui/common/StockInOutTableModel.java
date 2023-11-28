@@ -135,22 +135,22 @@ public class StockInOutTableModel extends AbstractTableModel {
                     return io.getLocName();
                 }
                 case 3 -> {
-                    return Util1.getFloat(io.getInQty()) == 0 ? null : Util1.getFloat(io.getInQty());
+                    return Util1.getDouble(io.getInQty()) == 0 ? null : Util1.getDouble(io.getInQty());
                 }
                 case 4 -> {
                     return io.getInUnitCode();
                 }
                 case 5 -> {
-                    return Util1.getFloat(io.getOutQty()) == 0 ? null : Util1.getFloat(io.getOutQty());
+                    return Util1.getDouble(io.getOutQty()) == 0 ? null : Util1.getDouble(io.getOutQty());
                 }
                 case 6 -> {
                     return io.getOutUnitCode();
                 }
                 case 7 -> {
-                    return Util1.getFloat(io.getCostPrice()) == 0 ? null : Util1.getFloat(io.getCostPrice());
+                    return Util1.getDouble(io.getCostPrice()) == 0 ? null : Util1.getDouble(io.getCostPrice());
                 }
                 case 8 -> {
-                    double amt = Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
+                    double amt = Util1.getDouble(io.getCostPrice()) * (Util1.getDouble(io.getInQty()) + Util1.getDouble(io.getOutQty()));
                     return amt == 0 ? null : amt;
                 }
 
@@ -166,7 +166,7 @@ public class StockInOutTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 3, 5, 7, 8 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -204,7 +204,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
                     case 3 -> {
                         if (Util1.isNumber(value)) {
-                            io.setInQty(Util1.getFloat(value));
+                            io.setInQty(Util1.getDouble(value));
                             io.setOutQty(0);
                             io.setOutUnitCode(null);
                             if (io.getInUnitCode() != null) {
@@ -229,7 +229,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         if (Util1.isNumber(value)) {
-                            io.setOutQty(Util1.getFloat(value));
+                            io.setOutQty(Util1.getDouble(value));
                             io.setInQty(0);
                             io.setInUnitCode(null);
                             if (io.getOutUnitCode() != null) {
@@ -252,13 +252,13 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
                     case 7 -> {
                         if (Util1.isNumber(value)) {
-                            io.setCostPrice(Util1.getFloat(value));
+                            io.setCostPrice(Util1.getDouble(value));
                         }
                     }
                 }
             }
             if (column != 7) {
-                if (Util1.getFloat(io.getCostPrice()) == 0) {
+                if (Util1.getDouble(io.getCostPrice()) == 0) {
                     String stockCode = io.getStockCode();
                     if (stockCode != null) {
                         if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
@@ -310,7 +310,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     String input = JOptionPane.showInputDialog("Enter Qty.");
                     if (Util1.getDouble(input) > 0) {
                         double totalPrice = 0.0f;
-                        double qty = Util1.getFloat(input);
+                        double qty = Util1.getDouble(input);
                         for (Pattern p : t) {
                             StockInOutDetail io = new StockInOutDetail();
                             io.setUserCode(p.getUserCode());
@@ -321,14 +321,14 @@ public class StockInOutTableModel extends AbstractTableModel {
                                 io.setOutQty(qty * p.getQty());
                                 io.setOutUnitCode(p.getUnitCode());
                             }
-                            double pPrice = Util1.getFloat(p.getPrice());
+                            double pPrice = Util1.getDouble(p.getPrice());
                             io.setCostPrice(pPrice);
                             io.setStockCode(p.getKey().getStockCode());
                             io.setLocCode(p.getLocCode());
                             io.setLocName(p.getLocName());
                             io.setStockName(p.getStockName());
                             addStockIO(io);
-                            totalPrice += Util1.getFloat(p.getAmount());
+                            totalPrice += Util1.getDouble(p.getAmount());
                         }
                         if (explode) {
                             iod.setOutQty(qty);
@@ -375,29 +375,28 @@ public class StockInOutTableModel extends AbstractTableModel {
     }
 
     public boolean isValidEntry() {
-        boolean status = true;
         for (StockInOutDetail od : listStock) {
-            od.setCostPrice(Util1.getFloat(od.getCostPrice()));
+            od.setCostPrice(Util1.getDouble(od.getCostPrice()));
             if (od.getStockCode() != null) {
                 if (od.getLocCode() == null) {
-                    status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     parent.requestFocus();
-                } else if (od.getInUnitCode() == null && od.getOutUnitCode() == null) {
-                    status = false;
+                    return false;
+                } else if (Util1.isNullOrEmpty(od.getInUnitCode()) && Util1.isNullOrEmpty(od.getOutUnitCode())) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
                     parent.requestFocus();
-                } else if (Util1.getFloat(od.getInQty()) <= 0 && Util1.getFloat(od.getOutQty()) <= 0) {
+                    return false;
+                } else if (Util1.getDouble(od.getInQty()) <= 0 && Util1.getDouble(od.getOutQty()) <= 0) {
                     if (negative) {
                         return true;
                     }
-                    status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
                     parent.requestFocus();
+                    return false;
                 }
             }
         }
-        return status;
+        return true;
 
     }
 

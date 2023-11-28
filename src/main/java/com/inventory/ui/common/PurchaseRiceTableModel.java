@@ -337,7 +337,7 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                             LandingHisQty obj = t.get(0);
                             double percent = obj.getPercent();
                             double percentAllow = obj.getPercentAllow();
-                            if (percent >= percentAllow) {
+                            if (percent > percentAllow) {
                                 double qty = obj.getQty();
                                 double diff = percent - percentAllow;
                                 double lossQty = diff * qty * purQty / stockQty;
