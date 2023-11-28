@@ -23,8 +23,8 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
     @Override
     public List<Job> findAll(String compCode, Boolean isFinished, int deptId) {
         String hsql = "select o from Job o where o.key.compCode = '" + compCode + "' and o.deleted =false";
-        if (isFinished) {
-            hsql += " and o.finished = true";
+        if (!isFinished) {
+            hsql += " and o.finished = false";
         }
         if (deptId != 0) {
             hsql += " and o.deptId =" + deptId;
