@@ -418,6 +418,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private void clear() {
         disableForm(true);
         assignDefaultValue();
+        txtSaleDate.setDate(Util1.getTodayDate());
         millingOutTableModel.removeListDetail();
         millingOutTableModel.clearDelList();
         millingRawTableModel.removeListDetail();
@@ -1727,8 +1728,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void setMillingDetail(Job oh) {
-        millingRawTableModel.clear();
-        millingOutTableModel.clear();
+        clear();
         if (oh != null) {
             progress.setIndeterminate(true);
             String jobNo = oh.getKey().getJobNo();
