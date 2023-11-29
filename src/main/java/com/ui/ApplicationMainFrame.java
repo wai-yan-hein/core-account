@@ -8,6 +8,7 @@ package com.ui;
 import com.CloudIntegration;
 import com.CoreAccountApplication;
 import com.H2Repo;
+import com.IconManager;
 import com.SSEListener;
 import com.repo.AccountRepo;
 import com.acc.entry.AllCash;
@@ -33,8 +34,8 @@ import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.common.YNOptionPane;
+import com.dms.CoreDrive;
 import com.h2.dao.DateFilterRepo;
-import com.inventory.model.ReorderLevel;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -90,6 +91,7 @@ import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
+import com.repo.DMSRepo;
 import com.repo.HMSRepo;
 import com.ui.management.StockBalance;
 import com.ui.management.StockPayable;
@@ -106,6 +108,7 @@ import com.user.setup.ProjectSetup;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.Duration;
@@ -113,6 +116,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -139,6 +144,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private HMSRepo hmsRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private DMSRepo dmsRepo;
     @Autowired
     private String getToken;
     @Autowired
@@ -192,8 +199,35 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         initComponents();
         initKeyFoucsManager();
         initPopup();
+        initIcon();
         //addMouseAndKeyboardListeners();
         //startInactivityTimer();
+    }
+
+    private void initIcon() {
+        File file = new File("images/icons");
+        File[] listFile = file.listFiles();
+
+        if (listFile != null) {
+            for (File f : listFile) {
+                if (f.isFile() && isImageFile(f)) {
+                    String[] name = f.getName().split("\\.");
+                    String filePath = f.getAbsolutePath();
+                    ImageIcon icon = new ImageIcon(filePath);
+                    IconManager.put(name[0], icon);
+                }
+            }
+        }
+    }
+
+    private boolean isImageFile(File file) {
+        String name = file.getName();
+        int lastDotIndex = name.lastIndexOf(".");
+        if (lastDotIndex > 0) {
+            String extension = name.substring(lastDotIndex + 1).toLowerCase();
+            return extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg") || extension.equals("gif");
+        }
+        return false;
     }
 
     private void exitProgram() {
@@ -626,6 +660,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 projectSetup.setUserRepo(userRepo);
                 projectSetup.initMain();
                 return projectSetup;
+            }
+            case "Core Drive" -> {
+                CoreDrive drive = new CoreDrive();
+                drive.setProgress(progress);
+                drive.setObserver(this);
+                drive.setDmsRepo(dmsRepo);
+                drive.initMain();
+                return drive;
             }
             case "Pattern Setup" -> {
                 PatternSetup patternSetup = new PatternSetup();
