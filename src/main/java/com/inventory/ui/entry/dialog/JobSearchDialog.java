@@ -4,9 +4,11 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.Job;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.JobSearchTableModel;
@@ -31,22 +33,22 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JobSearchDialog extends javax.swing.JDialog {
-
+    
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private JobSearchTableModel tableModel = new JobSearchTableModel();
     private DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -60,12 +62,14 @@ public class JobSearchDialog extends javax.swing.JDialog {
         super(parent, true);
         initComponents();
     }
-
+    
     public void initMain() {
         initCombo();
         initTable();
+        fromDate.setDate(Util1.getTodayDate());
+        toDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initCombo() {
         cboDep.setModel(departmentComboBoxModel);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
@@ -77,12 +81,16 @@ public class JobSearchDialog extends javax.swing.JDialog {
             cboDep.repaint();
         }).block();
     }
-
+    
     public void search() {
         progress.setIndeterminate(true);
         DepartmentUser d = (DepartmentUser) cboDep.getSelectedItem();
-        int deptId = d.getKey() == null ? Global.deptId:d.getKey().getDeptId();
-        inventoryRepo.getJob(false,deptId).subscribe((t) -> {
+        int deptId = d.getKey() == null ? Global.deptId : d.getKey().getDeptId();
+        FilterObject filterObject = new FilterObject(Global.compCode, deptId);
+        filterObject.setFinished(chkFinished.isSelected());
+        filterObject.setFromDate(Util1.toDateStr(fromDate.getDate(), "yyyy-MM-dd"));
+        filterObject.setToDate(Util1.toDateStr(toDate.getDate(), "yyyy-MM-dd"));
+        inventoryRepo.getJob(filterObject).subscribe((t) -> {
             tableModel.setListDetail(t);
             lblRecord.setText(String.valueOf(t.size()));
             txtFilter.requestFocus();
@@ -94,7 +102,7 @@ public class JobSearchDialog extends javax.swing.JDialog {
             setVisible(true);
         });
     }
-
+    
     private void initTable() {
         tblBatch.setModel(tableModel);
         tblBatch.getTableHeader().setFont(Global.tblHeaderFont);
@@ -113,15 +121,15 @@ public class JobSearchDialog extends javax.swing.JDialog {
         tblBatch.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, "enter");
         tblBatch.getActionMap().put("enter", new EnterAction());
     }
-
+    
     private class EnterAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             select();
         }
     }
-
+    
     private void select() {
         int row = tblBatch.convertRowIndexToModel(tblBatch.getSelectedRow());
         if (row >= 0) {
@@ -162,6 +170,11 @@ public class JobSearchDialog extends javax.swing.JDialog {
         txtFilter = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         cboDep = new javax.swing.JComboBox<>();
+        toDate = new com.toedter.calendar.JDateChooser();
+        fromDate = new com.toedter.calendar.JDateChooser();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        chkFinished = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         jButton2 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
@@ -218,6 +231,38 @@ public class JobSearchDialog extends javax.swing.JDialog {
 
         cboDep.setFont(Global.textFont);
 
+        toDate.setDateFormatString("dd/MM/yyyy");
+        toDate.setFont(Global.textFont);
+        toDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                toDateFocusGained(evt);
+            }
+        });
+        toDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                toDatePropertyChange(evt);
+            }
+        });
+
+        fromDate.setDateFormatString("dd/MM/yyyy");
+        fromDate.setFont(Global.textFont);
+        fromDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                fromDateFocusGained(evt);
+            }
+        });
+        fromDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                fromDatePropertyChange(evt);
+            }
+        });
+
+        jLabel4.setText("From Date");
+
+        jLabel5.setText("To Date");
+
+        chkFinished.setText("Finished");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -226,11 +271,21 @@ public class JobSearchDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter)
-                    .addComponent(cboDep, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkFinished, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(cboDep, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(fromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(toDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -240,10 +295,18 @@ public class JobSearchDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cboDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtFilter)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fromDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(toDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(chkFinished)
                 .addContainerGap())
         );
 
@@ -282,7 +345,7 @@ public class JobSearchDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+                .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 16, Short.MAX_VALUE)
                 .addGap(188, 188, 188)
                 .addComponent(jButton3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -315,7 +378,7 @@ public class JobSearchDialog extends javax.swing.JDialog {
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -326,7 +389,7 @@ public class JobSearchDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 353, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -375,24 +438,45 @@ public class JobSearchDialog extends javax.swing.JDialog {
         search();
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void toDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_toDateFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_toDateFocusGained
+
+    private void toDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_toDatePropertyChange
+
+    }//GEN-LAST:event_toDatePropertyChange
+
+    private void fromDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_fromDateFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_fromDateFocusGained
+
+    private void fromDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_fromDatePropertyChange
+        // TODO add your handling code here:
+    }//GEN-LAST:event_fromDatePropertyChange
+
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<DepartmentUser> cboDep;
+    private javax.swing.JCheckBox chkFinished;
+    private com.toedter.calendar.JDateChooser fromDate;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblBatch;
+    private com.toedter.calendar.JDateChooser toDate;
     private javax.swing.JTextField txtFilter;
     // End of variables declaration//GEN-END:variables
 }

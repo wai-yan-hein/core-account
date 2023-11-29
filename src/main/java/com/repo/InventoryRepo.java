@@ -1507,16 +1507,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Job>> getJob(boolean isFinished, int deptId) {
+    public Mono<List<Job>> getJob(FilterObject filterObject) {
 //        if (localDatabase) {
 //            return h2Repo.getJob(isFinished, deptId);
 //        }
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getJob")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("finished", isFinished)
-                .queryParam("deptId", deptId)
-                .build())
+        return inventoryApi.post()
+                .uri("/setup/getJob")
+                .body(Mono.just(filterObject), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(Job.class)
                 .collectList()

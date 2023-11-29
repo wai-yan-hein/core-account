@@ -210,12 +210,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
         }).subscribe();
 
-        inventoryRepo.getJob(false, Global.deptId).doOnSuccess((t) -> {
-            if (t != null) {
-                t.add(new Job());
-                jobAutoCompleter.setListObject(t);
-            }
-        }).subscribe();
+//        inventoryRepo.getJob(false, Global.deptId).doOnSuccess((t) -> {
+//            if (t != null) {
+//                t.add(new Job());
+//                jobAutoCompleter.setListObject(t);
+//            }
+//        }).subscribe();
     }
 
     private void initModel() {
