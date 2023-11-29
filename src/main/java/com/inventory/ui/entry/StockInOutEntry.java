@@ -40,6 +40,7 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.Job;
 import com.inventory.model.LabourGroup;
+import com.inventory.ui.common.StockInOutPaddyTableModel;
 import com.inventory.ui.entry.dialog.StockIOMoreDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
@@ -76,8 +77,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public static final int IO = 1;
     public static final int IO_W = 2;
+    public static final int IO_PADDY = 3;
     private final StockInOutTableModel outTableModel = new StockInOutTableModel();
     private final StockInOutWeightTableModel weightTableModel = new StockInOutWeightTableModel();
+    private final StockInOutPaddyTableModel paddyTableModel = new StockInOutPaddyTableModel();
     private StockIOHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -223,6 +226,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             case IO_W -> {
                 initStockIOWeight();
             }
+            case IO_PADDY -> {
+                initStockIOPaddy();
+            }
         }
     }
 
@@ -293,6 +299,42 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         });
         tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+    }
+
+    private void initStockIOPaddy() {
+        paddyTableModel.setVouDate(txtDate);
+        paddyTableModel.setInventoryRepo(inventoryRepo);
+        paddyTableModel.setLblRec(lblRec);
+        paddyTableModel.addNewRow();
+        paddyTableModel.setParent(tblStock);
+        paddyTableModel.setObserver(this);
+        tblStock.setModel(paddyTableModel);
+        monoLoc = inventoryRepo.getLocation();
+        tblStock.getColumnModel().getColumn(0).setPreferredWidth(80);//code
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//name
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(50);//location
+        tblStock.getColumnModel().getColumn(3).setPreferredWidth(50);//Moisture
+        tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);//Rice
+        tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);//weight
+        tblStock.getColumnModel().getColumn(6).setPreferredWidth(50);//inqty
+        tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);//out qty
+        tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);//cost
+        tblStock.getColumnModel().getColumn(9).setPreferredWidth(80);//amt
+        tblStock.getColumnModel().getColumn(10).setPreferredWidth(80);//total weight
+
+        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.subscribe((t) -> {
+            tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
+        tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+//        inventoryRepo.getStockUnit().subscribe((t) -> {
+//            tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+//            tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+//            tblStock.getColumnModel().getColumn(8).setCellEditor(new StockUnitEditor(t));
+//        });
+        tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
     }
 
     private void initTable() {
@@ -462,6 +504,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             case IO_W -> {
                 weightTableModel.delete(row);
             }
+            case IO_PADDY -> {
+                paddyTableModel.delete(row);
+            }
         }
     }
 
@@ -472,6 +517,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 return weightTableModel.isValidEntry();
+            }
+            case IO_PADDY -> {
+                return paddyTableModel.isValidEntry();
             }
             default -> {
                 return false;
@@ -489,6 +537,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 weightTableModel.clear();
                 weightTableModel.addNewRow();
             }
+            case IO_PADDY -> {
+                paddyTableModel.clear();
+                paddyTableModel.addNewRow();
+            }
         }
     }
 
@@ -499,6 +551,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 return weightTableModel.getListStock();
+            }
+            case IO_PADDY -> {
+                return paddyTableModel.getListStock();
             }
         }
         return null;
@@ -511,6 +566,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 return weightTableModel.getDeleteList();
+            }
+            case IO_PADDY -> {
+                return paddyTableModel.getDeleteList();
             }
         }
         return null;
@@ -650,6 +708,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             case IO_W -> {
                 weightTableModel.setListStock(list);
                 weightTableModel.addNewRow();
+            }
+            case IO_PADDY -> {
+                paddyTableModel.setListStock(list);
+                paddyTableModel.addNewRow();
             }
         }
     }

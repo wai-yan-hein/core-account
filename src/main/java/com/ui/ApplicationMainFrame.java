@@ -34,7 +34,6 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.common.YNOptionPane;
 import com.h2.dao.DateFilterRepo;
-import com.inventory.model.ReorderLevel;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -474,8 +473,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 retOut.initMain();
                 return retOut;
             }
-            case "Stock In/Out", "Stock In/Out By Weight" -> {
-                int type = menuName.equals("Stock In/Out") ? StockInOutEntry.IO : StockInOutEntry.IO_W;
+            case "Stock In/Out", "Stock In/Out By Weight", "Stock In/Out Paddy" -> {
+                int type = getStockIOType(menuName);
                 StockInOutEntry io = new StockInOutEntry(type);
                 io.setName(menuName);
                 io.setObserver(this);
@@ -1038,6 +1037,19 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 PurchaseDynamic.EXPORT;
             case "Purchase Paddy" ->
                 PurchaseDynamic.PADDY;
+            default ->
+                0;
+        };
+    }
+
+    private int getStockIOType(String menuName) {
+        return switch (menuName) {
+            case "Stock In/Out" ->
+                StockInOutEntry.IO;
+            case "Stock In/Out By Weight" ->
+                StockInOutEntry.IO_W;
+            case "Stock In/Out Paddy" ->
+                StockInOutEntry.IO_PADDY;
             default ->
                 0;
         };
