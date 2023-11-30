@@ -100,7 +100,7 @@ public class ProcessHisServiceImpl implements ProcessHisService {
         String locCode = Util1.isNull(filter.getLocCode(), "-");
         Integer deptId = filter.getDeptId();
         boolean deleted = filter.isDeleted();
-        boolean finished = filter.isFinished();
+        boolean finished = filter.getFinished();
         String processNo = Util1.isNull(filter.getProcessNo(), "-");
         String pt = filter.getVouStatus();
         return dao.search(fromDate, toDate, vouNo, processNo, remark, stockCode, pt, locCode, finished, deleted, compCode, deptId);

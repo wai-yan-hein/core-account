@@ -1508,9 +1508,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<Job>> getJob(FilterObject filterObject) {
-//        if (localDatabase) {
-//            return h2Repo.getJob(isFinished, deptId);
-//        }
+        if (localDatabase) {
+            return h2Repo.getJob(filterObject);
+        }
         return inventoryApi.post()
                 .uri("/setup/getJob")
                 .body(Mono.just(filterObject), FilterObject.class)
