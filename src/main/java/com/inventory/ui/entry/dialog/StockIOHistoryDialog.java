@@ -19,6 +19,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
+import com.inventory.model.Job;
 import com.user.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.VStockIO;
@@ -58,32 +59,41 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private JobSearchDialog jobSearchDialog;
-
+    private Job job;
+    
+    public Job getJob() {
+        return job;
+    }
+    
+    public void setJob(Job job) {
+        this.job = job;
+    }
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public StockIOHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
     }
-
+    
     public void initMain() {
         ComponentUtil.addFocusListener(panelFilter);
         initTableVoucher();
         setTodayDate();
         initCombo();
     }
-
+    
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
         userRepo.getAppUser().doOnSuccess((t) -> {
@@ -104,11 +114,11 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListData(t);
         }).subscribe();
-
+        
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
     }
-
+    
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
@@ -124,30 +134,30 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-
+    
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
-
+    
     private String getUserCode() {
         return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-
+    
     private String getLocCode() {
         return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-
+    
     private String getVouStatus() {
         return vouStatusAutoCompleter.getVouStatus() == null ? "-" : vouStatusAutoCompleter.getVouStatus().getKey().getCode();
     }
-
+    
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
-
+    
     public void search() {
         progess.setIndeterminate(true);
         txtTotalRecord.setValue(0);
@@ -165,7 +175,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-//        filter.setJobNo(getJob());
+        if (getJob() != null) {
+            filter.setJobNo(getJob().getKey().getJobNo());
+        }
         inventoryRepo.getStockIO(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
             calAmount();
@@ -177,13 +189,13 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             setVisible(true);
         }).subscribe();
     }
-
+    
     private void calAmount() {
         List<VStockIO> listIO = tableModel.getListDetail();
         txtTotalRecord.setValue(listIO.size());
         tblVoucher.requestFocus();
     }
-
+    
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
@@ -195,7 +207,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -204,7 +216,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtVouNo.addKeyListener(this);
         txtUser.addKeyListener(this);
     }
-
+    
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -212,10 +224,12 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtVouNo.setText(null);
         txtDesp.setText(null);
         txtRemark.setText(null);
+        txtJob.setText(null);
+        setJob(null);
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
     }
-
+    
     public void jobDialog() {
         if (jobSearchDialog == null) {
             jobSearchDialog = new JobSearchDialog(Global.parentForm);
@@ -808,18 +822,29 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        switch (source.toString()) {
+            case "Job" -> {
+                if (selectObj instanceof Job v) {
+                    inventoryRepo.findJob(v.getKey().getJobNo()).subscribe((t) -> {
+                        setJob(t);
+                        txtJob.setText(t.getJobName());
+                    });
+                }
+            }
+            case "Select" -> {
+            }
+        }
     }
 }
