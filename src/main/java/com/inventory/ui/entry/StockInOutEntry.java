@@ -322,9 +322,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);//weight
         tblStock.getColumnModel().getColumn(6).setPreferredWidth(50);//inqty
         tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);//out qty
-        tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);//cost
-        tblStock.getColumnModel().getColumn(9).setPreferredWidth(80);//amt
-        tblStock.getColumnModel().getColumn(10).setPreferredWidth(80);//total weight
+        tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);//bag
+        tblStock.getColumnModel().getColumn(9).setPreferredWidth(50);//cost
+        tblStock.getColumnModel().getColumn(10).setPreferredWidth(80);//amt
+        tblStock.getColumnModel().getColumn(11).setPreferredWidth(80);//total weight
 
         tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
@@ -332,13 +333,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         });
         tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-//        inventoryRepo.getStockUnit().subscribe((t) -> {
-//            tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
-//            tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
-//            tblStock.getColumnModel().getColumn(8).setCellEditor(new StockUnitEditor(t));
-//        });
+        tblStock.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblStock.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
     }
 
     private void initTable() {

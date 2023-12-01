@@ -38,6 +38,12 @@ public class TransferHisDetail {
     private String weightUnit;
     @Column(name = "total_weight")
     private double totalWeight;
+    @Column(name = "wet")
+    private double wet;
+    @Column(name = "rice")
+    private double rice;
+    @Column(name = "bag")
+    private double bag;
     @Transient
     private String userCode;
     @Transient
