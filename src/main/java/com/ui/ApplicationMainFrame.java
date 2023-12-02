@@ -537,7 +537,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 setup.initMain();
                 return setup;
             }
-            case "Stock Opening", "Stock Opening Payable" -> {
+            case "Stock Opening", "Stock Opening Payable", "Stock Opening Paddy" -> {
                 int type = getOpeningType(menuName);
                 OpeningSetup openingSetup = new OpeningSetup(type);
                 openingSetup.setInventoryRepo(inventoryRepo);
