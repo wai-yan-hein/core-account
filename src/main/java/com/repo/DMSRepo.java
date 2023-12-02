@@ -4,20 +4,24 @@
  */
 package com.repo;
 
-import com.IconManager;
 import com.common.Util1;
 import com.dms.model.CVFile;
+import com.dms.model.CVFileResponse;
 import com.dms.model.FileObject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -90,4 +94,24 @@ public class DMSRepo {
             return null; // Handle the exception as needed
         }
     }
+
+    public Mono<CVFileResponse> createFolder(FileObject obj) {
+        return dmsApi.post()
+                .uri("/file/createFolder")
+                .body(Mono.just(obj), FileObject.class)
+                .retrieve()
+                .bodyToMono(CVFileResponse.class);
+
+    }
+
+    public Mono<CVFileResponse> createFile(String parentId, Path filePath) {
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("file", new FileSystemResource(filePath));
+        return dmsApi.post()
+                .uri(uriBuilder -> uriBuilder.path("/file/upload").queryParam("parentId", parentId).build())
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .retrieve()
+                .bodyToMono(CVFileResponse.class);
+    }
+
 }

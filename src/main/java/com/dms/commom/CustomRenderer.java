@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CustomRenderer extends DefaultTreeCellRenderer {
 
-    private final Icon leafIcon = UIManager.getIcon("Tree.leafIcon");
+    private final Icon leafIcon = UIManager.getIcon("Tree.closedIcon");
     private final Icon openIcon = UIManager.getIcon("Tree.openIcon");
     private final Icon closedIcon = UIManager.getIcon("Tree.closedIcon");
 

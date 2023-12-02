@@ -6,13 +6,13 @@
 package com.dms.commom;
 
 import com.common.Global;
+import com.common.Util1;
 import com.dms.model.CVFile;
 import com.repo.DMSRepo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.table.AbstractTableModel;
@@ -70,7 +70,10 @@ public class CVFileTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return getFileIcon(his.getFileExtension());
+                        if (his.isFile()) {
+                            return getFileIcon(his.getFileExtension());
+                        }
+                        return getFileIcon("folder");
                     }
                     case 1 -> {
                         //date
@@ -80,12 +83,11 @@ public class CVFileTableModel extends AbstractTableModel {
                         return Global.hmUser.get(his.getCreatedBy());
                     }
                     case 3 -> {
-                        return null;
+                        return Util1.toDateStr(his.getUpdatedDate(), "dd/MM/yyyy hh:mm:ss a");
                     }
                     case 4 -> {
-                        return his.getFileSize();
+                        return Util1.bytesToSize(his.getFileSize());
                     }
-
                 }
             }
         } catch (Exception ex) {
@@ -112,8 +114,9 @@ public class CVFileTableModel extends AbstractTableModel {
         return null;
     }
 
-    public void addObject(CVFile t) {
-        listDetail.add(t);
+    public void addObjectFirst(CVFile t) {
+        listDetail.add(0, t);
+        fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
     }
 
     public int getSize() {
@@ -125,10 +128,9 @@ public class CVFileTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    private ImageIcon getFileIcon(String extension) {
+    public ImageIcon getFileIcon(String extension) {
         if (extension == null) {
-            return (ImageIcon) UIManager.getIcon("Tree.leafIcon");
-
+            return null;
         }
         if (hmIcon.containsKey(extension)) {
             return hmIcon.get(extension);
