@@ -311,7 +311,7 @@ public class H2Repo {
     private AccSettingService accSettingService;
     @Autowired
     private WareHouseService wareHouseService;
-    
+
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
     }
@@ -1056,42 +1056,42 @@ public class H2Repo {
         return stockFormulaService.save(t);
     }
 
-    public Mono<List<Job>> getJob(boolean finished, int deptId) {
-        return Mono.just(jobService.findAll(Global.compCode, finished, deptId));
+    public Mono<List<Job>> getJob(FilterObject filterObject) {
+        return Mono.just(jobService.findAll(filterObject));
     }
 
     public Mono<Job> find(JobKey key) {
         return Mono.just(jobService.findById(key));
     }
-    
+
     public OutputCost save(OutputCost s) {
         return outputCostService.save(s);
     }
-    
+
     public Mono<List<OutputCost>> getOutputCost() {
         return Mono.just(outputCostService.findAll(Global.compCode));
     }
-    
+
     public boolean delete(OutputCostKey key) {
         return outputCostService.delete(key);
     }
-    
+
     public AccSetting save(AccSetting acc) {
         return accSettingService.save(acc);
     }
-    
+
     public Mono<List<AccSetting>> getAccSetting() {
         return Mono.just(accSettingService.findAll(Global.compCode));
     }
-    
+
     public Mono<List<WareHouse>> getWarehouse() {
         return Mono.just(wareHouseService.findAll(Global.compCode));
     }
-    
+
     public WareHouse save(WareHouse w) {
         return wareHouseService.save(w);
     }
-    
+
     public Mono<WareHouse> find(WareHouseKey key) {
         return Mono.just(wareHouseService.findById(key));
     }

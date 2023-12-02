@@ -116,7 +116,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
@@ -687,8 +686,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 reorderLevel.initMain();
                 return reorderLevel;
             }
-            case "Transfer" -> {
-                Transfer transfer = new Transfer();
+            case "Transfer", "Transfer Paddy" -> {
+                int type = getTransferType(menuName);
+                Transfer transfer = new Transfer(type);
                 transfer.setName(menuName);
                 transfer.setObserver(this);
                 transfer.setProgress(progress);
@@ -1064,6 +1064,19 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 OpeningSetup.STKOPENING;
             case "Stock Opening Payable" ->
                 OpeningSetup.STKOPENINGPAYABLE;
+            case "Stock Opening Paddy" ->
+                OpeningSetup.STKOPENINGPADDY;
+            default ->
+                0;
+        };
+    }
+
+    private int getTransferType(String menuName) {
+        return switch (menuName) {
+            case "Transfer" ->
+                Transfer.TRAN;
+            case "Transfer Paddy" ->
+                Transfer.TRAN_PADDY;
             default ->
                 0;
         };

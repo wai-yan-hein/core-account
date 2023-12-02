@@ -14,7 +14,6 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.JobAutoCompleter;
 import com.user.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -42,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyListener {
+public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
 
     /**
      * Creates new form SaleVouSearchDialog
@@ -59,7 +58,16 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
-    private JobAutoCompleter jobAutoCompleter;
+    private JobSearchDialog jobSearchDialog;
+    private Job job;
+    
+    public Job getJob() {
+        return job;
+    }
+    
+    public void setJob(Job job) {
+        this.job = job;
+    }
     
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -106,10 +114,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListData(t);
         }).subscribe();
-        jobAutoCompleter = new JobAutoCompleter(txtJob, null, true);
-//        inventoryRepo.getJob(false, Global.deptId).subscribe((t) -> {
-//            jobAutoCompleter.setListObject(t);
-//        });
         
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
@@ -150,10 +154,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         return vouStatusAutoCompleter.getVouStatus() == null ? "-" : vouStatusAutoCompleter.getVouStatus().getKey().getCode();
     }
     
-    private String getJob() {
-        return jobAutoCompleter.getObject() == null ? "-" : jobAutoCompleter.getObject().getKey().getJobNo();
-    }
-    
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
@@ -175,7 +175,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-        filter.setJobNo(getJob());
+        if (getJob() != null) {
+            filter.setJobNo(getJob().getKey().getJobNo());
+        }
         inventoryRepo.getStockIO(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
             calAmount();
@@ -222,9 +224,23 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtVouNo.setText(null);
         txtDesp.setText(null);
         txtRemark.setText(null);
+        txtJob.setText(null);
+        setJob(null);
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
-        jobAutoCompleter.setObject(new Job("-", "All"));
+    }
+    
+    public void jobDialog() {
+        if (jobSearchDialog == null) {
+            jobSearchDialog = new JobSearchDialog(Global.parentForm);
+            jobSearchDialog.setInventoryRepo(inventoryRepo);
+            jobSearchDialog.setUserRepo(userRepo);
+            jobSearchDialog.setObserver(this);
+            jobSearchDialog.initMain();
+            jobSearchDialog.setSize(Global.width - 20, Global.height - 20);
+            jobSearchDialog.setLocationRelativeTo(null);
+        }
+        jobSearchDialog.search();
     }
 
     /**
@@ -408,11 +424,17 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        txtJob.setEditable(false);
         txtJob.setFont(Global.textFont);
         txtJob.setName("txtUser"); // NOI18N
         txtJob.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtJobFocusGained(evt);
+            }
+        });
+        txtJob.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtJobMouseClicked(evt);
             }
         });
 
@@ -743,10 +765,16 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         // TODO add your handling code here:
     }//GEN-LAST:event_txtJobFocusGained
 
+    private void txtJobMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtJobMouseClicked
+        if (evt.getClickCount() > 1) {
+            jobDialog();
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtJobMouseClicked
+
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
@@ -802,5 +830,21 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     @Override
     public void keyReleased(KeyEvent e) {
         
+    }
+    
+    @Override
+    public void selected(Object source, Object selectObj) {
+        switch (source.toString()) {
+            case "Job" -> {
+                if (selectObj instanceof Job v) {
+                    inventoryRepo.findJob(v.getKey().getJobNo()).subscribe((t) -> {
+                        setJob(t);
+                        txtJob.setText(t.getJobName());
+                    });
+                }
+            }
+            case "Select" -> {
+            }
+        }
     }
 }

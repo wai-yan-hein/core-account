@@ -151,10 +151,10 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        //{"Stock Code", "Stock Name", "Location", "Weight", "Weight Unit", "In-Qty", "In-Unit", 
-        //"Out-Qty", "Out-Unit", "Cost Price", "Amount", "Total Weight"};
+//        "Stock Code", "Stock Name", "Location", "Moisture", "Hard Rice", "Weight",
+//        "In-Qty", "Out-Qty", "Bag", "Cost Price", "Amount", "Total Weight"
         return switch (column) {
-            case 3, 5, 7, 8, 9, 10, 11 ->
+            case 3, 4, 5, 6, 7, 8, 9, 10, 11 ->
                 Double.class;
             default ->
                 String.class;
@@ -203,12 +203,14 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                         double wet = Util1.getDouble(value);
                         if (wet > 0) {
                             io.setWet(wet);
+                            setSelection(row, 4);
                         }
                     }
                     case 4 -> {
                         double rice = Util1.getDouble(value);
                         if (rice > 0) {
                             io.setRice(rice);
+                            setSelection(row, 5);
                         }
                     }
                     case 5 -> {
@@ -220,6 +222,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                             } else if (io.getOutQty() > 0) {
                                 io.setTotalWeight(wt * io.getOutQty());
                             }
+                            setSelection(row, 6);
                         }
 
                     }
@@ -250,6 +253,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                         double bag = Util1.getDouble(value);
                         if (bag > 0) {
                             io.setBag(bag);
+                            setSelection(row, 9);
                         }
                     }
                     case 9 -> {

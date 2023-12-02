@@ -64,6 +64,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     public static final int STKOPENING = 1;
     public static final int STKOPENINGPAYABLE = 2;
+    public static final int STKOPENINGPADDY = 2;
     private final int type;
     private final OpeningTableModel openingTableModel = new OpeningTableModel();
     private LocationAutoCompleter locationAutoCompleter;

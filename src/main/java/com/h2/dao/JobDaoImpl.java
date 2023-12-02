@@ -1,12 +1,15 @@
 package com.h2.dao;
 
+import com.common.FilterObject;
 import com.common.Util1;
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
+import java.sql.ResultSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -21,15 +24,47 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
     }
 
     @Override
-    public List<Job> findAll(String compCode, Boolean isFinished, int deptId) {
-        String hsql = "select o from Job o where o.key.compCode = '" + compCode + "' and o.deleted =false";
-        if (!isFinished) {
-            hsql += " and o.finished = false";
+    public List<Job> findAll(FilterObject filterObject) {
+        String compCode = filterObject.getCompCode();
+        Integer deptId = filterObject.getDeptId();
+        String fromDate = filterObject.getFromDate();
+        String toDate = filterObject.getToDate();
+        Boolean finished = filterObject.getFinished();
+        List<Job> jList = new ArrayList<>();
+        String whereClause = "";
+        if (finished != null) {
+            whereClause += " and finished = " + finished;
         }
-        if (deptId != 0) {
-            hsql += " and o.deptId =" + deptId;
+        if (!fromDate.isEmpty() && !toDate.isEmpty()) {
+            whereClause += " and start_date between '" + fromDate + "' and '" + toDate + "'"
+                    + "and end_date between '" + fromDate + "' and '" + toDate + "'";
         }
-        return findHSQL(hsql);
+        String sql = """ 
+                select * from Job
+                where deleted = false
+                and dept_id = ?
+                and comp_code = ?
+                """ + whereClause;
+        ResultSet rs = getResult(sql, deptId, compCode);
+
+        if (rs != null) {
+            try {
+                while (rs.next()) {
+                    Job job = new Job();
+                    JobKey jKey = new JobKey();
+                    jKey.setJobNo(rs.getString("job_no"));
+                    jKey.setCompCode(rs.getString("comp_code"));
+                    job.setKey(jKey);
+                    job.setJobName(rs.getString("job_name"));
+                    job.setStartDate(rs.getDate("start_date"));
+                    job.setEndDate(rs.getDate("end_date"));
+                    jList.add(job);
+                }
+            } catch (Exception e) {
+                log.info(e.getMessage());
+            }
+        }
+        return jList;
     }
 
     @Override
