@@ -9,7 +9,7 @@ public class FileObject {
 
     private String parentId;
     private String folderName;
-    private String totalSpace;
-    private String usedSpace;
-    private String freeSpace;
+    private Long totalSpace;
+    private Long usedSpace;
+    private Long freeSpace;
 }

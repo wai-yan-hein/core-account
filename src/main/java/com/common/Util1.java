@@ -1295,4 +1295,23 @@ public class Util1 {
         String formattedTime = time.format(formatter);
         return formattedTime;
     }
+
+    public static String bytesToSize(Long bytes) {
+        if (bytes == null) {
+            return "";
+        }
+        if (bytes < 1024) {
+            return bytes + " Bytes";
+        } else if (bytes < 1024 * 1024) {
+            double kilobytes = bytes / 1024.0;
+            return String.format("%.2f", kilobytes) + " KB";
+        } else if (bytes < 1024 * 1024 * 1024) {
+            double megabytes = bytes / (1024.0 * 1024.0);
+            return String.format("%.2f", megabytes) + " MB";
+        } else {
+            double gigabytes = bytes / (1024.0 * 1024.0 * 1024.0);
+            return String.format("%.2f", gigabytes) + " GB";
+        }
+    }
+
 }
