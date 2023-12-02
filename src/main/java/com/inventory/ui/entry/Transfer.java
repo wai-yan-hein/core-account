@@ -31,6 +31,8 @@ import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.LabourGroup;
+import com.inventory.model.THDetailKey;
+import com.inventory.model.TransferHisDetail;
 import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.inventory.ui.common.TransferPaddingTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -43,6 +45,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -315,6 +318,30 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
     }
 
+    private List<TransferHisDetail> getListDetail() {
+        switch (type) {
+            case TRAN -> {
+                return tranTableModel.getListTransfer();
+            }
+            case TRAN_PADDY -> {
+                return tranPaddingTableModel.getListTransfer();
+            }
+        }
+        return null;
+    }
+
+    private List<THDetailKey> getDeleteList() {
+        switch (type) {
+            case TRAN -> {
+                return tranTableModel.getDeleteList();
+            }
+            case TRAN_PADDY -> {
+                return tranPaddingTableModel.getDeleteList();
+            }
+        }
+        return null;
+    }
+
     public boolean saveVoucher(boolean print) {
         boolean status = false;
         if (isValidEntry() && isValidDetail()) {
@@ -325,8 +352,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            io.setListTD(tranTableModel.getListTransfer());
-            io.setDelList(tranTableModel.getDeleteList());
+            io.setListTD(getListDetail());
+            io.setDelList(getDeleteList());
             inventoryRepo.save(io)
                     .subscribe((t) -> {
                         clear();
