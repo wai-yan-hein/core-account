@@ -37,4 +37,5 @@ build/
 /data/
 /target/
 /token/
+/update/
 log.txt
