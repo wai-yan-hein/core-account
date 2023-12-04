@@ -21,17 +21,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
+@Slf4j
 public class TransferPaddingTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(TransferPaddingTableModel.class);
-    private String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Moisture", "Head Rice", "Weight", "Qty", "Bag"};
+    private String[] columnNames = {"Stock Code", "Stock Name", "Moisture", "Head Rice", "Weight", "Qty", "Bag", "Price", "Amount"};
     private JTable parent;
     private List<TransferHisDetail> listTransfer = new ArrayList();
     private List<THDetailKey> deleteList = new ArrayList();
@@ -120,23 +119,25 @@ public class TransferPaddingTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-
-                    return io.getRelName();
-                }
-                case 3 -> {
                     return Util1.toNull(io.getWet());
                 }
-                case 4 -> {
+                case 3 -> {
                     return Util1.toNull(io.getRice());
                 }
-                case 5 -> {
+                case 4 -> {
                     return Util1.toNull(io.getWeight());
                 }
-                case 6 -> {
+                case 5 -> {
                     return Util1.toNull(io.getQty());
                 }
-                case 7 -> {
+                case 6 -> {
                     return Util1.toNull(io.getBag());
+                }
+                case 7 -> {
+                    return Util1.toNull(io.getPrice());
+                }
+                case 8 -> {
+                    return Util1.toNull(io.getAmount());
                 }
             }
         } catch (Exception e) {
@@ -148,18 +149,17 @@ public class TransferPaddingTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-//        "Stock Code", "Stock Name", "Relation", "Moisture", "Head Rice", "Weight", "Qty", "Bag"
         return switch (column) {
-            case 3, 4, 5, 6, 7 ->
-                Double.class;
-            default ->
+            case 0, 1 ->
                 String.class;
+            default ->
+                Double.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return true; // column != 2;
+        return column != 8; // column != 2;
     }
 
     @Override
@@ -174,32 +174,32 @@ public class TransferPaddingTableModel extends AbstractTableModel {
                             io.setStockCode(s.getKey().getStockCode());
                             io.setUserCode(s.getUserCode());
                             io.setRelName(s.getRelName());
-                            io.setUnitCode(s.getPurUnitCode());
+                            io.setUnitCode("-");
                             io.setWeight(s.getWeight());
                             io.setWeightUnit(s.getWeightUnit());
-                            setColumnSelection(3);
+                            setSelection(row, 2);
                         }
                         addNewRow();
                     }
-                    case 3 -> {
+                    case 2 -> {
                         double wet = Util1.getDouble(value);
                         if (wet > 0) {
                             io.setWet(wet);
-                            parent.setColumnSelectionInterval(4, 4);
+                            setSelection(row, column + 1);
                         }
                     }
-                    case 4 -> {
+                    case 3 -> {
                         double rice = Util1.getDouble(value);
                         if (rice > 0) {
                             io.setRice(rice);
-                            parent.setColumnSelectionInterval(5, 5);
+                            setSelection(row, column + 1);
                         }
                     }
-                    case 5 -> { // weight
+                    case 4 -> { // weight
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                io.setWeight(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(6, 6);
+                            if (Util1.isPositive(Util1.getDouble(value))) {
+                                io.setWeight(Util1.getDouble(value));
+                                setSelection(row, column + 1);
                             } else {
                                 parent.setColumnSelectionInterval(column, column);
                                 JOptionPane.showMessageDialog(Global.parentForm, "Input value must be positive.");
@@ -209,28 +209,41 @@ public class TransferPaddingTableModel extends AbstractTableModel {
                             JOptionPane.showMessageDialog(Global.parentForm, "Input value must be number.");
                         }
                     }
-                    case 6 -> { // qty
+                    case 5 -> { // qty
                         if (Util1.isNumber(value)) {
-                            io.setQty(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(7, 7);
+                            io.setQty(Util1.getDouble(value));
+                            setSelection(row, column + 1);
                         }
                     }
 
-                    case 7 -> {
+                    case 6 -> {
                         double bag = Util1.getDouble(value);
                         if (bag > 0) {
                             io.setBag(bag);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
+                            setSelection(row, column + 1);
+                        }
+                    }
+                    case 7 -> {
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            io.setPrice(price);
+                            setSelection(row + 1, 0);
                         }
                     }
                 }
             }
             setRecord(listTransfer.size() - 1);
+            calAmount(io);
             fireTableRowsUpdated(row, row);
             parent.requestFocus();
         } catch (HeadlessException e) {
             log.error("setValueAt :" + e.getMessage());
         }
+    }
+
+    private void calAmount(TransferHisDetail thd) {
+        double amt = thd.getQty() * thd.getPrice();
+        thd.setAmount(amt);
     }
 
     private void setRecord(int size) {
@@ -245,20 +258,16 @@ public class TransferPaddingTableModel extends AbstractTableModel {
         this.deleteList = deleteList;
     }
 
-    private void setColumnSelection(int column) {
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(column, column);
-        parent.requestFocus();
     }
 
     public boolean isValidEntry() {
         boolean status = true;
         for (TransferHisDetail od : listTransfer) {
             if (od.getStockCode() != null) {
-                if (od.getUnitCode() == null) {
-                    status = false;
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
-                    parent.requestFocus();
-                } else if (Util1.getFloat(od.getQty()) <= 0) {
+                if (Util1.getDouble(od.getQty()) <= 0) {
                     status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
                     parent.requestFocus();
@@ -306,14 +315,13 @@ public class TransferPaddingTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = false;
         if (listTransfer.size() >= 1) {
             TransferHisDetail get = listTransfer.get(listTransfer.size() - 1);
-            if (get.getUnitCode() == null) {
-                status = true;
+            if (get.getStockCode()== null) {
+                return true;
             }
         }
-        return status;
+        return false;
     }
 
     public void clear() {

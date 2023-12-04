@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
-import com.user.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.ProUtil;
@@ -56,7 +56,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
-    private DepartmentAutoCompleter departmentAutoCompleter;
+    private DepartmentUserAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
@@ -105,7 +105,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

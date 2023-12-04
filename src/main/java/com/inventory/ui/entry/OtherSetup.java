@@ -5,10 +5,8 @@
  */
 package com.inventory.ui.entry;
 
-import com.common.FilterObject;
 import com.repo.AccountRepo;
 import com.common.Global;
-import com.inventory.ui.setup.dialog.JobSetupDialog;
 import com.inventory.ui.setup.dialog.LabourGroupSetupDialog;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
@@ -41,7 +39,6 @@ public class OtherSetup extends javax.swing.JPanel {
     private VouStatusSetupDialog vsDialog;
     private OrderStatusSetupDialog osDialog;
     private LabourGroupSetupDialog lgDialog;
-    private JobSetupDialog jDialog;
     private WareHouseSetupDialog wareHouseSetupDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
@@ -160,29 +157,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     }
 
-    private void jobSetup() {
-        if (jDialog == null) {
-            jDialog = new JobSetupDialog();
-            jDialog.setIconImage(icon);
-            jDialog.setUserRepo(userRepo);
-            jDialog.setInventoryRepo(inventoryRepo);
-            jDialog.initMain();
-            jDialog.setSize(Global.width / 2, Global.height / 2);
-            jDialog.setLocationRelativeTo(null);
-        }
-        FilterObject filterObject = new FilterObject(Global.compCode, Global.deptId);
-        filterObject.setFinished(null);
-        filterObject.setFromDate("");
-        filterObject.setToDate("");
-        inventoryRepo.getJob(filterObject).doOnSuccess((t) -> {
-            if (t != null) {
-                jDialog.setListVou(t);
-            }
-        }).doOnTerminate(() -> {
-            jDialog.setVisible(true);
-        }).subscribe();
-
-    }
+ 
 
     private void relationSetup() {
         if (relationSetupDialog == null) {
@@ -234,7 +209,6 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton4 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
-        jButton9 = new javax.swing.JButton();
         jButton10 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         btnLocation = new javax.swing.JButton();
@@ -290,14 +264,6 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
-        jButton9.setFont(Global.lableFont);
-        jButton9.setText("Job Setup");
-        jButton9.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton9ActionPerformed(evt);
-            }
-        });
-
         jButton10.setFont(Global.lableFont);
         jButton10.setText("Order Status");
         jButton10.addActionListener(new java.awt.event.ActionListener() {
@@ -323,23 +289,18 @@ public class OtherSetup extends javax.swing.JPanel {
                         .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jButton4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnRegion, jButton10, jButton4, jButton5, jButton6, jButton7, jButton8, jButton9});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnRegion, jButton10, jButton4, jButton5, jButton6, jButton7, jButton8});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnRegion, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -449,10 +410,6 @@ public class OtherSetup extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton8ActionPerformed
 
-    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-        jobSetup();        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton9ActionPerformed
-
     private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
         orderStatusSetup();        // TODO add your handling code here:
     }//GEN-LAST:event_jButton10ActionPerformed
@@ -472,7 +429,6 @@ public class OtherSetup extends javax.swing.JPanel {
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
-    private javax.swing.JButton jButton9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JButton tbnWH;

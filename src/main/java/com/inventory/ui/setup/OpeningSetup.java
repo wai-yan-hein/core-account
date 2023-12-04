@@ -148,14 +148,17 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void initTextBoxFormat() {
         txtQty.setFormatterFactory(Util1.getDecimalFormat());
         txtAmount.setFormatterFactory(Util1.getDecimalFormat());
-        if (type == 1) {
-            jLabel9.setVisible(false);
-            txtCus.setVisible(false);
-        } else {
-            jLabel9.setVisible(true);
-            txtCus.setVisible(true);
-            txtCus.addFocusListener(fa);
+        switch (type) {
+            case 1, 3 -> {
+                lblCusName.setVisible(false);
+                txtCus.setVisible(false);
+            }
+            default -> {
+                lblCusName.setVisible(true);
+                txtCus.setVisible(true);
+            }
         }
+
     }
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -207,7 +210,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         openingTableModel.setParent(tblOpening);
         openingTableModel.addNewRow();
         tblOpening.setModel(openingTableModel);
-        tblOpening.setFont(Global.textFont);
         tblOpening.setCellSelectionEnabled(true);
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(50);//code
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
@@ -235,7 +237,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         openingPaddyTableModel.setParent(tblOpening);
         openingPaddyTableModel.addNewRow();
         tblOpening.setModel(openingPaddyTableModel);
-        tblOpening.setFont(Global.textFont);
         tblOpening.setCellSelectionEnabled(true);
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(50);//code
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
@@ -258,7 +259,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initTable() {
+        tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
         tblOpening.setRowHeight(Global.tblRowHeight);
+        tblOpening.setFont(Global.textFont);
         tblOpening.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOpening.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -396,7 +399,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             txtOPDate.requestFocus();
             return false;
-        } else if (type == STKOPENINGPAYABLE || type == STKOPENINGPADDY) {
+        } else if (type == STKOPENINGPAYABLE) {
             if (traderAutoCompleter.getTrader() == null) {
                 JOptionPane.showMessageDialog(this, "Invalid Trader");
                 txtLocation.requestFocus();
@@ -548,13 +551,13 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void calculatAmount() {
-        float ttlQty = 0.0f;
-        float ttlAmt = 0.0f;
-        List<OPHisDetail> listDetail = openingTableModel.getListDetail();
+        double ttlQty = 0.0;
+        double ttlAmt = 0.0;
+        List<OPHisDetail> listDetail = getListDetail();
         if (!listDetail.isEmpty()) {
             for (OPHisDetail op : listDetail) {
-                ttlQty += Util1.getFloat(op.getQty());
-                ttlAmt += Util1.getFloat(op.getAmount());
+                ttlQty += Util1.getDouble(op.getQty());
+                ttlAmt += Util1.getDouble(op.getAmount());
             }
         }
         txtQty.setValue(ttlQty);
@@ -643,8 +646,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 //                    Stock s = hm.get(stockCode.toLowerCase());
 //                    if (s != null) {
 //                        op.setStockCode(s.getKey().getStockCode());
-//                        op.setQty(Util1.getFloat(qty));
-//                        op.setPrice(Util1.getFloat(price));
+//                        op.setQty(Util1.getDouble(qty));
+//                        op.setPrice(Util1.getDouble(price));
 //                        op.setAmount(op.getQty() * op.getPrice());
 //                        op.setUnitCode("pcs");
 //                        if (op.getQty() != 0) {
@@ -692,7 +695,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         jLabel8 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
+        lblCusName = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
         scroll = new javax.swing.JScrollPane();
         tblOpening = new javax.swing.JTable();
@@ -746,8 +749,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         lblStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblStatus.setText("NEW");
 
-        jLabel9.setFont(Global.lableFont);
-        jLabel9.setText("Customer");
+        lblCusName.setFont(Global.lableFont);
+        lblCusName.setText("Customer");
 
         txtCus.setFont(Global.textFont);
         txtCus.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -790,7 +793,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel9)
+                        .addComponent(lblCusName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -806,7 +809,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtLocation, txtOPDate, txtRemark, txtVouNo});
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel8, jLabel9});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel8, lblCusName});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -827,7 +830,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel9))
+                                .addComponent(lblCusName))
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel4)
@@ -1016,8 +1019,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblCusName;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;

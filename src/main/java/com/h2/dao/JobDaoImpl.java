@@ -5,6 +5,7 @@ import com.common.Util1;
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -58,9 +59,11 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
                     job.setJobName(rs.getString("job_name"));
                     job.setStartDate(rs.getDate("start_date"));
                     job.setEndDate(rs.getDate("end_date"));
+                    job.setDeptId(rs.getInt("dept_id"));
+                    job.setCreatedBy(rs.getString("created_by"));
                     jList.add(job);
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 log.info(e.getMessage());
             }
         }

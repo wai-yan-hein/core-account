@@ -16,7 +16,7 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.BatchAutoCompeter;
-import com.user.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -64,7 +64,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private SaleManAutoCompleter saleManAutoCompleter;
-    private DepartmentAutoCompleter departmentAutoCompleter;
+    private DepartmentUserAutoCompleter departmentAutoCompleter;
     private BatchAutoCompeter batchAutoCompeter;
     private ProjectAutoCompleter projectAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
@@ -158,7 +158,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             log.error(e.getMessage());
         });
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

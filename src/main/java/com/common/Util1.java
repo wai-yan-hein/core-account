@@ -61,6 +61,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Type;
 import java.math.RoundingMode;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
 
 /**
  * @author WSwe
@@ -318,7 +324,7 @@ public class Util1 {
         try {
             strDate = formatter.format(date);
         } catch (Exception ex) {
-            System.out.println("toDateStr Error : " + ex.getMessage());
+            log.info("toDateStr Error : " + ex.getMessage());
         }
 
         return strDate;
@@ -728,7 +734,7 @@ public class Util1 {
             InetAddress address = InetAddress.getByName(hostName);
             return address.getHostAddress();
         } catch (UnknownHostException e) {
-            System.out.println("Unable to resolve hostname: " + hostName);
+            log.info("Unable to resolve hostname: " + hostName);
         }
         return "127.0.0.1";
     }
@@ -944,7 +950,7 @@ public class Util1 {
             ProcessBuilder builder = new ProcessBuilder("taskkill", "/PID", Long.toString(pid));
             Process process = builder.start();
             int exitCode = process.waitFor();
-            System.out.println("Process exited with code " + exitCode);
+            log.info("Process exited with code " + exitCode);
             // Wait for the "kill" command to finish executing
         } catch (IOException | InterruptedException | NumberFormatException e) {
             log.error(e.getMessage());
@@ -1311,6 +1317,39 @@ public class Util1 {
         } else {
             double gigabytes = bytes / (1024.0 * 1024.0 * 1024.0);
             return String.format("%.2f", gigabytes) + " GB";
+        }
+    }
+
+    public static void updateFile(String updatePath, String downloadPath) throws IOException {
+        Path updateFile = Paths.get(updatePath);
+        Path downloadFile = Paths.get(downloadPath);
+
+        // Check if the update file exists
+        if (!Files.exists(updateFile)) {
+            log.info("Update file does not exist.");
+            return;
+        }
+
+        // Check if the download file exists
+        if (!Files.exists(downloadFile)) {
+            log.info("Download file does not exist. Copying update file.");
+            return;
+        }
+
+        // Compare modification timestamps
+        FileTime updateModifiedTime = Files.getLastModifiedTime(updateFile);
+        FileTime downloadModifiedTime = Files.getLastModifiedTime(downloadFile);
+
+        if (updateModifiedTime.compareTo(downloadModifiedTime) > 0) {
+            log.info("Update file is newer. Replacing download file.");
+            try (FileChannel sourceChannel = FileChannel.open(updateFile, StandardOpenOption.READ); FileChannel destinationChannel = FileChannel.open(downloadFile, StandardOpenOption.WRITE)) {
+                destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+                log.info("Update file replaced successfully.");
+            } catch (IOException e) {
+                log.info("updateFile : " + e.getMessage());
+            }
+        } else {
+            log.info("Update file is not newer. No action needed.");
         }
     }
 

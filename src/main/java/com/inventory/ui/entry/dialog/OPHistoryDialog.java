@@ -13,7 +13,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.user.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -48,7 +48,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     private AppUserAutoCompleter appUserAutoCompleter;
     private SelectionObserver observer;
     private StockAutoCompleter stockAutoCompleter;
-    private DepartmentAutoCompleter departmentAutoCompleter;
+    private DepartmentUserAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private final int type;
@@ -105,7 +105,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
             locationAutoCompleter.setListLocation(t);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

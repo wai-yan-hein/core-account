@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StockInOutPaddyTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Stock Code", "Stock Name", "Location", "Moisture", "Hard Rice", "Weight",
-        "In-Qty", "Out-Qty", "Bag", "Cost Price", "Amount", "Total Weight"};
+        "In-Qty", "Out-Qty", "Bag", "Price", "Amount"};
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
     private List<StockInOutKey> deleteList = new ArrayList();
@@ -41,11 +41,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-    private boolean negative = false;
 
-    public void setNegative(boolean negative) {
-        this.negative = negative;
-    }
 
     public void setLblRec(JLabel lblRec) {
         this.lblRec = lblRec;
@@ -138,10 +134,6 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     double amt = Util1.getDouble(io.getCostPrice()) * (Util1.getDouble(io.getInQty()) + Util1.getDouble(io.getOutQty()));
                     return amt == 0 ? null : amt;
                 }
-                case 11 -> {
-                    return Util1.toNull(io.getTotalWeight());
-                }
-
             }
         } catch (Exception e) {
             log.error("getValueAt: " + e.getMessage());
@@ -154,7 +146,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
 //        "Stock Code", "Stock Name", "Location", "Moisture", "Hard Rice", "Weight",
 //        "In-Qty", "Out-Qty", "Bag", "Cost Price", "Amount", "Total Weight"
         return switch (column) {
-            case 3, 4, 5, 6, 7, 8, 9, 10, 11 ->
+            case 3, 4, 5, 6, 7, 8, 9, 10 ->
                 Double.class;
             default ->
                 String.class;
@@ -164,7 +156,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 10, 11 ->
+            case 10 ->
                 false;
             default ->
                 true;
@@ -183,10 +175,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                             io.setStockName(s.getStockName());
                             io.setUserCode(s.getUserCode());
                             io.setCostPrice(0.0f);
-                            io.setInUnitCode(s.getPurUnitCode());
-                            io.setOutUnitCode(s.getPurUnitCode());
                             io.setWeight(s.getWeight());
-                            io.setWeightUnit(s.getWeightUnit());
                             assignDefaultLocation(io, row);
                             genPattern(s, io, row);
 
@@ -265,21 +254,6 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     }
                 }
             }
-            if (column != 9) {
-                if (Util1.getDouble(io.getCostPrice()) == 0) {
-                    String stockCode = io.getStockCode();
-                    if (stockCode != null) {
-                        if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
-                            String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
-                            String vouDateStr = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
-                            inventoryRepo.getPrice(stockCode, vouDateStr, unit).doOnSuccess((t) -> {
-                                io.setCostPrice(t.getAmount());
-                                fireTableRowsUpdated(row, row);
-                            }).subscribe();
-                        }
-                    }
-                }
-            }
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
             setRecord(listStock.size() - 1);
             calWeight(io);
@@ -296,10 +270,13 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
             io.setLocCode(up.getLocCode());
             io.setLocName(up.getLocName());
         } else {
-            inventoryRepo.getDefaultLocation().subscribe((l) -> {
-                io.setLocCode(l.getKey().getLocCode());
-                io.setLocName(l.getLocName());
-            });
+            inventoryRepo.getDefaultLocation().doOnSuccess((l) -> {
+                if (l != null) {
+                    io.setLocCode(l.getKey().getLocCode());
+                    io.setLocName(l.getLocName());
+                    fireTableRowsUpdated(row, row);
+                }
+            }).subscribe();
         }
 
     }
@@ -386,33 +363,21 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
     }
 
     public boolean isValidEntry() {
-        boolean status = true;
         for (StockInOutDetail od : listStock) {
             od.setCostPrice(Util1.getDouble(od.getCostPrice()));
             if (od.getStockCode() != null) {
                 if (od.getLocCode() == null) {
-                    status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     parent.requestFocus();
-                } else if (Util1.getDouble(od.getWet()) <= 0) {
-                    status = false;
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid moisturer value.");
-                    parent.requestFocus();
-                } else if (Util1.getDouble(od.getRice()) <= 0) {
-                    status = false;
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid rice value.");
-                    parent.requestFocus();
+                    return false;
                 } else if (Util1.getDouble(od.getInQty()) <= 0 && Util1.getDouble(od.getOutQty()) <= 0) {
-                    if (negative) {
-                        return true;
-                    }
-                    status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
                     parent.requestFocus();
+                    return false;
                 }
             }
         }
-        return status;
+        return true;
 
     }
 

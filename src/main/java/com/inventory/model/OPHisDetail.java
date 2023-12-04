@@ -32,15 +32,15 @@ public class OPHisDetail {
     @Column(name = "qty")
     private Double qty;
     @Column(name = "price")
-    private Double price;
+    private double price;
     @Column(name = "amount")
-    private Double amount;
+    private double amount;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "unit")
     private String unitCode;
     @Column(name = "weight")
-    private Double weight;
+    private double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")

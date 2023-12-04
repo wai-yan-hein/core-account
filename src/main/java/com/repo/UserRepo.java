@@ -1017,7 +1017,10 @@ public class UserRepo {
                 .build())
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .retrieve()
-                .bodyToMono(byte[].class);
+                .bodyToMono(byte[].class)
+                .doOnNext((t) -> {
+                    log.info("next");
+                });
     }
 
     public Mono<String> sendMessage(Message message) {

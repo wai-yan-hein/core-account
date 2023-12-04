@@ -18,11 +18,11 @@ public class VRoleMenuDaoImpl extends AbstractDao<String, VRoleMenu> implements 
         String sql = """
                 select o.menu_code,o.role_code,o.comp_code,o.allow,
                 o.menu_name,o.menu_url,o.menu_type,o.menu_class,
-                o.account,o.parent_menu_code,o.order_by
+                o.account,o.parent_menu_code,o.order_by,o.menu_version
                 from(
                 select p.menu_code,p.role_code,p.comp_code,p.allow,
                 m.menu_name,m.menu_url,m.menu_type,m.menu_class,
-                m.account,m.parent_menu_code,m.order_by
+                m.account,m.parent_menu_code,m.order_by,m.menu_version
                 from privilege_menu p
                 join menu m on p.menu_code=m.menu_code
                 and p.comp_code=m.comp_code
@@ -51,6 +51,7 @@ public class VRoleMenuDaoImpl extends AbstractDao<String, VRoleMenu> implements 
                     vMenu.setAccount(rs.getString("account"));
                     vMenu.setParentMenuCode(rs.getString("parent_menu_code"));
                     vMenu.setOrderBy(rs.getInt("order_by"));
+                    vMenu.setMenuVersion(rs.getInt("menu_version"));
                     vList.add(vMenu);
                 }
             } catch (SQLException e) {

@@ -110,13 +110,13 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-                    return record.getWet();
+                    return Util1.toNull(record.getWet());
                 }
                 case 3 -> {
-                    return record.getRice();
+                    return Util1.toNull(record.getRice());
                 }
                 case 4 -> {
-                    return Util1.getDouble(record.getWeight()) == 0 ? null : record.getWeight();
+                    return Util1.toNull(record.getWeight());
                 }
 
                 case 5 -> {
@@ -126,16 +126,16 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
 
                 case 6 -> {
                     //bag
-                    return record.getBag();
+                    return Util1.toNull(record.getBag());
                 }
 
                 case 7 -> {
                     //price
-                    return Util1.getDouble(record.getPrice()) == 0 ? null : record.getPrice();
+                    return Util1.toNull(record.getPrice());
                 }
                 case 8 -> {
                     //amount
-                    return Util1.getDouble(record.getAmount()) == 0 ? null : record.getAmount();
+                    return Util1.toNull(record.getAmount());
                 }
                 default -> {
                     return new Object();
@@ -161,30 +161,26 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
                             record.setQty(1.0);
-                            record.setUnitCode(s.getPurUnitCode());
+                            record.setUnitCode(Util1.isNull(s.getPurUnitCode(), "-"));
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
                         }
                     }
-                    if (ProUtil.isUseWeight()) {
-                        setSelection(row, 3);
-                    } else {
-                        setSelection(row, 5);
-                    }
+                    setSelection(row, 2);
                 }
                 case 2 -> {
                     double wet = Util1.getDouble(value);
                     if (wet > 0) {
                         record.setWet(wet);
-                        parent.setColumnSelectionInterval(4, 4);
+                        setSelection(row, column + 1);
                     }
                 }
                 case 3 -> {
                     double rice = Util1.getDouble(value);
                     if (rice > 0) {
                         record.setRice(rice);
-                        parent.setColumnSelectionInterval(5, 5);
+                        setSelection(row, column + 1);
                     }
                 }
                 case 4 -> { // weight
@@ -206,32 +202,16 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
                     // Qty
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getDouble(value))) {
-                            if (ProUtil.isUseWeightPoint()) {
-                                String str = String.valueOf(value);
-                                double wt = Util1.getDouble(record.getWeight());
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                                setSelection(row, 5);
-                            } else {
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
-                            }
-
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
+                            record.setQty(Util1.getDouble(value));
+                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
                     }
-                    setSelection(row, 5);
                 }
                 case 6 -> {
                     double bag = Util1.getDouble(value);
                     if (bag > 0) {
                         record.setBag(bag);
-                        parent.setRowSelectionInterval(row + 1, row + 1);
+                        setSelection(row, column + 1);
                     }
                 }
                 case 7 -> {
@@ -278,19 +258,7 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
     }
 
     public boolean isValidEntry() {
-        boolean status = true;
-        for (OPHisDetail op : listDetail) {
-            op.setAmount(Util1.getDouble(op.getAmount()));
-            op.setPrice(Util1.getDouble(op.getPrice()));
-            op.setQty(Util1.getDouble(op.getQty()));
-            if (op.getStockCode() != null) {
-                if (op.getUnitCode() == null) {
-                    status = false;
-                    JOptionPane.showMessageDialog(parent, "Invalid Unit.");
-                }
-            }
-        }
-        return status;
+        return true;
     }
 
     public void addNewRow() {

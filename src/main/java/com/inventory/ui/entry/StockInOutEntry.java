@@ -325,7 +325,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);//bag
         tblStock.getColumnModel().getColumn(9).setPreferredWidth(50);//cost
         tblStock.getColumnModel().getColumn(10).setPreferredWidth(80);//amt
-        tblStock.getColumnModel().getColumn(11).setPreferredWidth(80);//total weight
 
         tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));

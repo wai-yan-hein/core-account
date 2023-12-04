@@ -44,6 +44,8 @@ public class TransferHisDetail {
     private double rice;
     @Column(name = "bag")
     private double bag;
+    private double price;
+    private double amount;
     @Transient
     private String userCode;
     @Transient

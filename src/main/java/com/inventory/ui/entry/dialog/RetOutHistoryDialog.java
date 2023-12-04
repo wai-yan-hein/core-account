@@ -14,7 +14,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.user.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -54,7 +54,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
-    private DepartmentAutoCompleter departmentAutoCompleter;
+    private DepartmentUserAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
@@ -120,7 +120,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

@@ -87,6 +87,7 @@ import com.inventory.ui.entry.WeightEntry;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.EmployeeSetup;
+import com.inventory.ui.setup.JobSetup;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
@@ -593,6 +594,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 outputCostSetup.setAccountRepo(accounRepo);
                 outputCostSetup.initMain();
                 return outputCostSetup;
+            }
+            case "Job" -> {
+                JobSetup setup = new JobSetup();
+                setup.setName(menuName);
+                setup.setUserRepo(userRepo);
+                setup.setInventoryRepo(inventoryRepo);
+                setup.setObserver(this);
+                setup.setProgress(progress);
+                setup.initMain();
+                return setup;
             }
             case "Other Setup" -> {
                 OtherSetupMain otherSetupMain = new OtherSetupMain();
@@ -1280,20 +1291,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                             JMenu parent = new JMenu();
                             parent.setText(menu.getMenuName());
                             parent.setFont(Global.menuFont);
-                            parent.setName(menu.getMenuClass() + ","
-                                    + Util1.isNull(menu.getAccount(), "-") + ","
-                                    + menu.getMenuName());
+                            parent.setName(getMenuName(menu));
                             //Need to add action listener
                             //====================================
                             menuBar.add(parent);
                             addChildMenu(parent, menu.getChild());
                         } else {  //No Child
+
                             JMenu jmenu = new JMenu();
                             jmenu.setText(menu.getMenuName());
                             jmenu.setFont(Global.menuFont);
-                            jmenu.setName(menu.getMenuClass() + ","
-                                    + Util1.isNull(menu.getAccount(), "-") + ","
-                                    + menu.getMenuName());
+                            jmenu.setName(getMenuName(menu));
                             //Need to add action listener
                             //====================================
                             menuBar.add(jmenu);
@@ -1302,9 +1310,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         JMenu jmenu = new JMenu();
                         jmenu.setText(menu.getMenuName());
                         jmenu.setFont(Global.menuFont);
-                        jmenu.setName(menu.getMenuClass() + ","
-                                + Util1.isNull(menu.getAccount(), "-") + ","
-                                + menu.getMenuName());
+                        jmenu.setName(getMenuName(menu));
                         //Need to add action listener
                         //====================================
                         menuBar.add(jmenu);
@@ -1315,6 +1321,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         progress.setIndeterminate(false);
         revalidate();
         repaint();
+    }
+
+    private String getMenuName(VRoleMenu menu) {
+        return menu.getMenuClass() + ","
+                + Util1.isNull(menu.getAccount(), "-") + ","
+                + menu.getMenuName() + ","
+                + menu.getMenuVersion();
     }
 
     private void addChildMenu(JMenu parent, List<VRoleMenu> listVRM) {

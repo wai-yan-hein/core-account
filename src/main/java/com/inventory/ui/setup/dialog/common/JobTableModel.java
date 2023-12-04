@@ -18,27 +18,30 @@ import javax.swing.table.AbstractTableModel;
 public class JobTableModel extends AbstractTableModel {
 
     private final String[] columnNames = {"Code", "Name"};
-    private List<Job> listVou = new ArrayList<>();
+    private List<Job> listData = new ArrayList<>();
 
     public JobTableModel() {
     }
 
-    public JobTableModel(List<Job> listVou) {
-        this.listVou = listVou;
+    public List<Job> getListData() {
+        return listData;
     }
 
-    public List<Job> getListVou() {
-        return listVou;
+    public void setListData(List<Job> listData) {
+        this.listData = listData;
+        fireTableDataChanged();
     }
 
-    public void setListVou(List<Job> listVou) {
-        this.listVou = listVou;
+ 
+
+    public void setListVou(List<Job> listData) {
+        this.listData = listData;
         fireTableDataChanged();
     }
 
     @Override
     public int getRowCount() {
-        return listVou == null ? 0 : listVou.size();
+        return listData == null ? 0 : listData.size();
     }
 
     @Override
@@ -53,7 +56,7 @@ public class JobTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Job job = listVou.get(rowIndex);
+        Job job = listData.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
                 job.getKey() == null ? null : job.getKey().getJobNo();
@@ -75,26 +78,26 @@ public class JobTableModel extends AbstractTableModel {
     }
 
     public Job getJob(int row) {
-        return listVou.get(row);
+        return listData.get(row);
     }
 
     public void setJob(Job category, int row) {
-        if (!listVou.isEmpty()) {
-            listVou.set(row, category);
+        if (!listData.isEmpty()) {
+            listData.set(row, category);
             fireTableRowsUpdated(row, row);
         }
     }
 
     public void addJob(Job item) {
-        if (!listVou.isEmpty()) {
-            listVou.add(item);
-            fireTableRowsInserted(listVou.size() - 1, listVou.size() - 1);
+        if (!listData.isEmpty()) {
+            listData.add(item);
+            fireTableRowsInserted(listData.size() - 1, listData.size() - 1);
         }
     }
 
     public void remove(int row) {
-        if (listVou.isEmpty()) {
-            listVou.remove(row);
+        if (listData.isEmpty()) {
+            listData.remove(row);
             fireTableRowsDeleted(row, row);
         }
     }

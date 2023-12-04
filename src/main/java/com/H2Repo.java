@@ -759,11 +759,11 @@ public class H2Repo {
     }
 
     public Mono<List<TraderA>> getTraderAccount() {
-        return Mono.just(traderAccService.findAll(Global.compCode));
+        return Mono.justOrEmpty(traderAccService.findAll(Global.compCode));
     }
 
     public Mono<List<TraderA>> getTrader(String str) {
-        return Mono.just(traderAccService.getTrader(str, Global.compCode));
+        return Mono.justOrEmpty(traderAccService.getTrader(str, Global.compCode));
     }
 
     public Flux<ChartOfAccount> getChartofAccount() {
@@ -779,7 +779,7 @@ public class H2Repo {
     }
 
     public Mono<List<ChartOfAccount>> getCOATree() {
-        return Mono.just(coaService.getCOATree(Global.compCode));
+        return Mono.justOrEmpty(coaService.getCOATree(Global.compCode));
     }
 
     public Flux<ChartOfAccount> getTraderCOA() {
@@ -931,19 +931,19 @@ public class H2Repo {
     }
 
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
-        return Mono.just(saleHisService.getSale(filter));
+        return Mono.justOrEmpty(saleHisService.getSale(filter));
     }
 
     public Mono<List<VOrder>> getOrderHistory(FilterObject filter) {
-        return Mono.just(orderHisService.getOrder(filter));
+        return Mono.justOrEmpty(orderHisService.getOrder(filter));
     }
 
     public Mono<List<VTransfer>> getTransferHistory(FilterObject filter) {
-        return Mono.just(transferHisService.getTransfer(filter));
+        return Mono.justOrEmpty(transferHisService.getTransfer(filter));
     }
 
     public Mono<List<ProcessHis>> getProcessHistory(FilterObject filter) {
-        return Mono.just(processHisService.getProcess(filter));
+        return Mono.justOrEmpty(processHisService.getProcess(filter));
     }
 
     public Mono<SaleHis> findSale(SaleHisKey key) {
@@ -984,7 +984,7 @@ public class H2Repo {
 
     public Mono<Boolean> deleteSale(SaleHisKey key) {
         saleHisService.delete(key);
-        return Mono.just(true);
+        return Mono.justOrEmpty(true);
     }
 
     public boolean delete(Menu obj) {
@@ -1001,7 +1001,7 @@ public class H2Repo {
 
     public Mono<Boolean> restoreSale(SaleHisKey key) {
         saleHisService.restore(key);
-        return Mono.just(true);
+        return Mono.justOrEmpty(true);
     }
 
     public List<VSale> getSaleReport(String vouNo) {
@@ -1017,15 +1017,15 @@ public class H2Repo {
         String compCode = filter.getCompCode();
         boolean active = filter.isActive();
         boolean deleted = filter.isDeleted();
-        return Mono.just(stockService.search(stockCode, typCode, catCode, brandCode, compCode, deptId, active, deleted));
+        return Mono.justOrEmpty(stockService.search(stockCode, typCode, catCode, brandCode, compCode, deptId, active, deleted));
     }
 
     public Mono<Region> find(RegionKey key) {
-        return Mono.just(regionService.findByCode(key));
+        return Mono.justOrEmpty(regionService.findByCode(key));
     }
 
     public Mono<UnitRelation> find(RelationKey key) {
-        return Mono.just(relationService.findByKey(key));
+        return Mono.justOrEmpty(relationService.findByKey(key));
     }
 
     public LabourGroup save(LabourGroup t) {
@@ -1033,19 +1033,19 @@ public class H2Repo {
     }
 
     public Mono<List<LabourGroup>> getLabourGroup() {
-        return Mono.just(labourGroupService.findAll(Global.compCode));
+        return Mono.justOrEmpty(labourGroupService.findAll(Global.compCode));
     }
 
     public Mono<List<StockFormulaPrice>> getStockFormulaPrice(String formulaCode) {
-        return Mono.just(stockFormulaService.getStockFormulaPrice(formulaCode, Global.compCode));
+        return Mono.justOrEmpty(stockFormulaService.getStockFormulaPrice(formulaCode, Global.compCode));
     }
 
     public Mono<List<StockFormulaQty>> getStockFormulaQty(String formulaCode) {
-        return Mono.just(stockFormulaService.getStockFormulaQty(formulaCode, Global.compCode));
+        return Mono.justOrEmpty(stockFormulaService.getStockFormulaQty(formulaCode, Global.compCode));
     }
 
     public Mono<List<GradeDetail>> getGradeDetail(String formulaCode, String criteriaCode) {
-        return Mono.just(stockFormulaService.getGradeDetail(formulaCode, criteriaCode, Global.compCode));
+        return Mono.justOrEmpty(stockFormulaService.getGradeDetail(formulaCode, criteriaCode, Global.compCode));
     }
 
     public StockFormulaQty save(StockFormulaQty t) {
@@ -1057,11 +1057,11 @@ public class H2Repo {
     }
 
     public Mono<List<Job>> getJob(FilterObject filterObject) {
-        return Mono.just(jobService.findAll(filterObject));
+        return Mono.justOrEmpty(jobService.findAll(filterObject));
     }
 
     public Mono<Job> find(JobKey key) {
-        return Mono.just(jobService.findById(key));
+        return Mono.justOrEmpty(jobService.findById(key));
     }
 
     public OutputCost save(OutputCost s) {
@@ -1069,7 +1069,7 @@ public class H2Repo {
     }
 
     public Mono<List<OutputCost>> getOutputCost() {
-        return Mono.just(outputCostService.findAll(Global.compCode));
+        return Mono.justOrEmpty(outputCostService.findAll(Global.compCode));
     }
 
     public boolean delete(OutputCostKey key) {
@@ -1081,11 +1081,11 @@ public class H2Repo {
     }
 
     public Mono<List<AccSetting>> getAccSetting() {
-        return Mono.just(accSettingService.findAll(Global.compCode));
+        return Mono.justOrEmpty(accSettingService.findAll(Global.compCode));
     }
 
     public Mono<List<WareHouse>> getWarehouse() {
-        return Mono.just(wareHouseService.findAll(Global.compCode));
+        return Mono.justOrEmpty(wareHouseService.findAll(Global.compCode));
     }
 
     public WareHouse save(WareHouse w) {
@@ -1093,6 +1093,6 @@ public class H2Repo {
     }
 
     public Mono<WareHouse> find(WareHouseKey key) {
-        return Mono.just(wareHouseService.findById(key));
+        return Mono.justOrEmpty(wareHouseService.findById(key));
     }
 }

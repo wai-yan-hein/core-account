@@ -761,6 +761,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="Global.textFont" type="code"/>
                     </Property>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="toolTipText" type="java.lang.String" value="Purchase Price"/>
                     <Property name="name" type="java.lang.String" value="txtWt" noResource="true"/>
                   </Properties>
