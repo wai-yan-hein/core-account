@@ -27,6 +27,8 @@ import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.OPHisDetailKey;
+import com.inventory.ui.common.OpeningPaddyTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
@@ -64,9 +66,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     public static final int STKOPENING = 1;
     public static final int STKOPENINGPAYABLE = 2;
-    public static final int STKOPENINGPADDY = 2;
+    public static final int STKOPENINGPADDY = 3;
     private final int type;
     private final OpeningTableModel openingTableModel = new OpeningTableModel();
+    private final OpeningPaddyTableModel openingPaddyTableModel = new OpeningPaddyTableModel();
     private LocationAutoCompleter locationAutoCompleter;
     private CurrencyAutoCompleter currencyAAutoCompleter;
     private InventoryRepo inventoryRepo;
@@ -115,6 +118,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     public void initMain() {
         initCompleter();
         initTable();
+        initModel();
         initRowHeader();
         txtOPDate.setDate(Util1.getTodayDate());
         txtCurrency.setEnabled(ProUtil.isMultiCur());
@@ -187,15 +191,24 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         exporter.setTaskExecutor(taskExecutor);
     }
 
-    private void initTable() {
+    private void initModel() {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                initOpeningTable();
+            }
+            case STKOPENINGPADDY -> {
+                initOpeningPaddyTable();
+            }
+        }
+    }
+
+    private void initOpeningTable() {
         openingTableModel.setObserver(this);
         openingTableModel.setParent(tblOpening);
         openingTableModel.addNewRow();
         tblOpening.setModel(openingTableModel);
         tblOpening.setFont(Global.textFont);
-        tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
         tblOpening.setCellSelectionEnabled(true);
-        tblOpening.setRowHeight(Global.tblRowHeight);
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(50);//code
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
         tblOpening.getColumnModel().getColumn(2).setPreferredWidth(100);//rel
@@ -215,6 +228,37 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         });
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+    }
+
+    private void initOpeningPaddyTable() {
+        openingPaddyTableModel.setObserver(this);
+        openingPaddyTableModel.setParent(tblOpening);
+        openingPaddyTableModel.addNewRow();
+        tblOpening.setModel(openingPaddyTableModel);
+        tblOpening.setFont(Global.textFont);
+        tblOpening.setCellSelectionEnabled(true);
+        tblOpening.getColumnModel().getColumn(0).setPreferredWidth(50);//code
+        tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
+        tblOpening.getColumnModel().getColumn(2).setPreferredWidth(100);//moi
+        tblOpening.getColumnModel().getColumn(3).setPreferredWidth(50);//rice       
+        tblOpening.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
+        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//qty
+        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(50);//bag
+        tblOpening.getColumnModel().getColumn(7).setPreferredWidth(100);//price
+        tblOpening.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+
+        tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//moi
+        tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
+        tblOpening.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
+        tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
+        tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//bag
+        tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//price
+    }
+
+    private void initTable() {
+        tblOpening.setRowHeight(Global.tblRowHeight);
         tblOpening.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOpening.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -222,24 +266,73 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
+    private void clearModel() {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                openingTableModel.clear();
+                openingTableModel.addNewRow();
+            }
+            case STKOPENINGPADDY -> {
+                openingPaddyTableModel.clear();
+                openingPaddyTableModel.addNewRow();
+            }
+        }
+
+    }
+
     private void clear() {
         txtOPDate.setDate(Util1.getTodayDate());
         txtRemark.setText(null);
-        openingTableModel.clear();
-        openingTableModel.addNewRow();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         oPHis = new OPHis();
         txtVouNo.setText(null);
         progress.setIndeterminate(false);
         traderAutoCompleter.setTrader(null);
+        clearModel();
         disableForm(true);
         calculatAmount();
         observeMain();
     }
 
+    private List<OPHisDetail> getListDetail() {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                return openingTableModel.getListDetail();
+            }
+            case STKOPENINGPADDY -> {
+                return openingPaddyTableModel.getListDetail();
+            }
+        }
+        return null;
+    }
+
+    private List<OPHisDetailKey> getDeleteList() {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                return openingTableModel.getDelList();
+            }
+            case STKOPENINGPADDY -> {
+                return openingPaddyTableModel.getDelList();
+            }
+        }
+        return null;
+    }
+
+    private boolean isValidDetail() {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                return openingTableModel.isValidEntry();
+            }
+            case STKOPENINGPADDY -> {
+                return openingPaddyTableModel.isValidEntry();
+            }
+        }
+        return false;
+    }
+
     private void saveOpening() {
-        if (isValidEntry() && openingTableModel.isValidEntry()) {
+        if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtOPDate.getDate())) {
                 DateLockUtil.showMessage(this);
                 txtOPDate.requestFocus();
@@ -264,8 +357,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             oPHis.setStatus(lblStatus.getText());
             oPHis.setMacId(Global.macId);
             oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            oPHis.setDetailList(openingTableModel.getListDetail());
-            oPHis.setListDel(openingTableModel.getDelList());
+            oPHis.setDetailList(getListDetail());
+            oPHis.setListDel(getDeleteList());
             if (txtCus.isVisible()) {
                 oPHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             } else {
@@ -303,7 +396,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             txtOPDate.requestFocus();
             return false;
-        } else if (type == STKOPENINGPAYABLE) {
+        } else if (type == STKOPENINGPAYABLE || type == STKOPENINGPADDY) {
             if (traderAutoCompleter.getTrader() == null) {
                 JOptionPane.showMessageDialog(this, "Invalid Trader");
                 txtLocation.requestFocus();
@@ -376,8 +469,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     lblStatus.setForeground(Color.blue);
                     disableForm(true);
                 }
-                openingTableModel.setListDetail(t);
-                openingTableModel.addNewRow();
+                setListDetail(t);
                 calculatAmount();
                 focusOnTable();
                 progress.setIndeterminate(false);
@@ -385,6 +477,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
             });
+        }
+    }
+
+    private void setListDetail(List<OPHisDetail> list) {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                openingTableModel.setListDetail(list);
+                openingTableModel.addNewRow();
+            }
+            case STKOPENINGPADDY -> {
+                openingPaddyTableModel.setListDetail(list);
+                openingPaddyTableModel.addNewRow();
+            }
         }
     }
 

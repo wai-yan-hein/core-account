@@ -497,8 +497,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }).subscribe();
         String vouNo = io.getKey().getVouNo();
         inventoryRepo.getTransferDetail(vouNo, deptId, local).subscribe((t) -> {
-            tranTableModel.setListTransfer(t);
-            tranTableModel.addNewRow();
+            setListDetail(t);
             txtVou.setText(vouNo);
             txtDate.setDate(Util1.convertToDate(io.getVouDate()));
             txtRemark.setText(io.getRemark());
@@ -535,6 +534,19 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
 
+    }
+
+    private void setListDetail(List<TransferHisDetail> list) {
+        switch (type) {
+            case TRAN -> {
+                tranTableModel.setListTransfer(list);
+                tranTableModel.addNewRow();
+            }
+            case TRAN_PADDY -> {
+                tranPaddingTableModel.setListTransfer(list);
+                tranPaddingTableModel.addNewRow();
+            }
+        }
     }
 
     private void disableForm(boolean status) {
