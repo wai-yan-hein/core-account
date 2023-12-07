@@ -398,6 +398,11 @@ public class MillingOutTableModel extends AbstractTableModel {
         }
     }
 
+    public void remove(int row) {
+        listDetail.remove(row);
+        fireTableRowsDeleted(row, row);
+    }
+
     public void delete(int row) {
         MillingOutDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
@@ -413,7 +418,9 @@ public class MillingOutTableModel extends AbstractTableModel {
         }
         parent.requestFocus();
     }
-
+    public MillingOutDetail getObject(int row){
+        return listDetail.get(row);
+    }
     public void addObject(MillingOutDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
@@ -431,6 +438,7 @@ public class MillingOutTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 

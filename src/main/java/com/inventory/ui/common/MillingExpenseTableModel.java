@@ -279,6 +279,10 @@ public class MillingExpenseTableModel extends AbstractTableModel {
             deleteList.clear();
         }
     }
+    public void clear(){
+        listDetail.clear();
+        fireTableDataChanged();
+    }
 
     public void delete(int row) {
         MillingExpense sdh = listDetail.get(row);

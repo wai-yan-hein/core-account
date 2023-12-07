@@ -37,11 +37,11 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
             whereClause += " and finished = " + finished;
         }
         if (!fromDate.isEmpty() && !toDate.isEmpty()) {
-            whereClause += " and start_date between '" + fromDate + "' and '" + toDate + "'"
-                    + "and end_date between '" + fromDate + "' and '" + toDate + "'";
+            whereClause += " and start_date >='" + fromDate + "'\n"
+                    + "and end_date <='" + toDate + "'";
         }
         String sql = """ 
-                select * from Job
+                select * from job
                 where deleted = false
                 and dept_id = ?
                 and comp_code = ?
