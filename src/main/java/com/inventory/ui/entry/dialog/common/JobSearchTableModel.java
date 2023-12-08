@@ -77,7 +77,7 @@ public class JobSearchTableModel extends AbstractTableModel {
                         return his.getJobName();
                     }
                     case 2 -> {
-                        return Util1.toDateStr(his.getEndDate(), "dd/MM/yyyy");
+                        return Util1.toDateStr(his.getStartDate(), "dd/MM/yyyy");
                     }
                     case 3 -> {
                         return Util1.toDateStr(his.getEndDate(), "dd/MM/yyyy");

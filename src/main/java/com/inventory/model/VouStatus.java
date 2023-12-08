@@ -45,6 +45,8 @@ public class VouStatus {
     private Integer deptId;
     @Column(name = "report_name")
     private String reportName;
+    @Column(name = "mill_report_name")
+    private String millReportName;
 
     public VouStatus() {
     }

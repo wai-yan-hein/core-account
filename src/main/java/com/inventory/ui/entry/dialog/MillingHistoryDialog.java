@@ -131,14 +131,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             currAutoCompleter.setCurrency(c);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
-        
-        if (inventoryRepo.localDatabase) {
-            chkLocal.setVisible(true);
-            btnUpload.setVisible(true);
-        } else {
-            chkLocal.setVisible(false);
-            btnUpload.setVisible(false);
-        }
     }
     
     private void initTableVoucher() {
@@ -313,9 +305,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         txtCurrency = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         chkLocal = new javax.swing.JCheckBox();
-        btnUpload = new javax.swing.JButton();
-        jLabel16 = new javax.swing.JLabel();
-        txtJob = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -489,39 +478,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
-        btnUpload.setFont(Global.lableFont);
-        btnUpload.setText("Upload");
-        btnUpload.setIconTextGap(2);
-        btnUpload.setInheritsPopupMenu(true);
-        btnUpload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUploadActionPerformed(evt);
-            }
-        });
-
-        jLabel16.setFont(Global.lableFont);
-        jLabel16.setText("Job");
-
-        txtJob.setEditable(false);
-        txtJob.setFont(Global.textFont);
-        txtJob.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtJob.setName("txtJob"); // NOI18N
-        txtJob.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtJobFocusGained(evt);
-            }
-        });
-        txtJob.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                txtJobMouseClicked(evt);
-            }
-        });
-        txtJob.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtJobActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -542,41 +498,27 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtVouNo)
-                            .addComponent(txtCus)
-                            .addComponent(txtUser)
-                            .addComponent(txtRemark)
-                            .addComponent(txtStock)
-                            .addComponent(txtRef)
-                            .addComponent(txtLocation)
-                            .addComponent(txtDep)
-                            .addComponent(txtProjectNo)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(txtCurrency)
-                            .addComponent(txtJob)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnUpload)
-                        .addGap(2, 2, 2)))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtCurrency)
+                        .addComponent(txtProjectNo)
+                        .addComponent(txtDep)
+                        .addComponent(txtUser)
+                        .addComponent(txtLocation)
+                        .addComponent(txtStock)
+                        .addComponent(txtCus)
+                        .addComponent(txtRef)
+                        .addComponent(txtRemark)
+                        .addComponent(txtVouNo)
+                        .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton1))
+                .addGap(8, 8, 8))
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtFromDate, txtToDate});
-
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -586,9 +528,11 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtFromDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtToDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
@@ -631,13 +575,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(jLabel15))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel16))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnUpload)
-                                .addComponent(jButton1))
+                            .addComponent(jButton1)
                             .addComponent(chkDel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkLocal)))
@@ -792,7 +730,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -875,12 +813,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         // TODO add your handling code here:
     }//GEN-LAST:event_chkLocalActionPerformed
 
-    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        if (inventoryRepo.localDatabase) {
-            integration.uploadPurchase();
-        }
-    }//GEN-LAST:event_btnUploadActionPerformed
-
     private void chkDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkDelActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_chkDelActionPerformed
@@ -909,7 +841,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
-    private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
