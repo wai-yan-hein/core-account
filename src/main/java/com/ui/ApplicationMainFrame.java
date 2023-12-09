@@ -78,6 +78,7 @@ import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
+import com.inventory.ui.entry.StockIssRecEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
 import com.inventory.ui.entry.WeightLossEntry;
@@ -695,6 +696,26 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 payment.setProgress(progress);
                 payment.initMain();
                 return payment;
+            }
+            case "Stock Issue" -> {
+                StockIssRecEntry stockIss = new StockIssRecEntry("I");
+                stockIss.setUserRepo(userRepo);
+                stockIss.setInventoryRepo(inventoryRepo); 
+                stockIss.setName(menuName);
+                stockIss.setObserver(this);
+                stockIss.setProgress(progress);
+                stockIss.initMain();
+                return stockIss;
+            }
+            case "Stock Receive" -> {
+                StockIssRecEntry stockRec = new StockIssRecEntry("R");
+                stockRec.setUserRepo(userRepo);
+                stockRec.setInventoryRepo(inventoryRepo);  
+                stockRec.setName(menuName);
+                stockRec.setObserver(this);
+                stockRec.setProgress(progress);
+                stockRec.initMain();
+                return stockRec;
             }
             case "Milling Entry", "Milling" -> {
                 millingEntry.setName(menuName);

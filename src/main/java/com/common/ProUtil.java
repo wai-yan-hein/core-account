@@ -90,6 +90,8 @@ public class ProUtil {
     public static final String STOCK_NO_UNIT = "stock.no.unit";
     public static final String MAX_STOCK_WEIGHT = "max.stock.weight";
     public static final String PUR_RD_DIS = "purchase.round.down.discount";
+     public static final String STOCK_IR_EDIT = "stockissrec.voucher.edit";
+     public static final String STOCK_IR_VOUCHER = "StockIR.voucher";
 
     public static boolean isPurRDDis() {
         return Util1.getBoolean(Global.hmRoleProperty.get(PUR_RD_DIS));
@@ -214,6 +216,11 @@ public class ProUtil {
     public static boolean isPrint() {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }
+    
+    public static boolean isStockIREdit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_IR_EDIT));
+    }
+
 
     public static String getInvGroup() {
         return Global.hmRoleProperty.get("inventory.group");

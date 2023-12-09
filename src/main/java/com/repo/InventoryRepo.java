@@ -93,6 +93,9 @@ import com.inventory.model.StockFormulaQty;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
+import com.inventory.model.StockIssRecDetail;
+import com.inventory.model.StockIssueReceive;
+import com.inventory.model.StockIssueReceiveKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
@@ -115,6 +118,7 @@ import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
 import com.inventory.model.VStockIO;
+import com.inventory.model.VStockIssueReceive;
 import com.inventory.model.VTransfer;
 import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
@@ -4032,5 +4036,83 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+  //StockIssueReceive
+    public Mono<StockIssueReceive> saveStockIssRec(StockIssueReceive his) {
+        return inventoryApi.post()
+                .uri("stockIssRec/saveStockIssRec")
+                .body(Mono.just(his), StockIssueReceive.class)
+                .retrieve()
+                .bodyToMono(StockIssueReceive.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
+    public Mono<Boolean> delete(StockIssueReceiveKey key) {
+        return inventoryApi.post()
+                .uri("/stockIssRec/deleteStockIssRec")
+                .body(Mono.just(key), StockIssueReceiveKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> restore(StockIssueReceiveKey key) {
+        return inventoryApi.post()
+                .uri("/stockIssRec/restoreStockIssRec")
+                .body(Mono.just(key), StockIssueReceiveKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<VStockIssueReceive>> getStockIssRecHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/stockIssRec/getStockIssRecHistory")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VStockIssueReceive.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<StockIssRecDetail>> getStockIssRecDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/stockIssRec/getStockIssRecDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(StockIssRecDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<StockIssueReceive> findStockIR(String vouNo, boolean local) {
+        StockIssueReceiveKey key = new StockIssueReceiveKey();
+        key.setCompCode(Global.compCode);
+        key.setVouNo(vouNo);
+        return inventoryApi.post()
+                .uri("/stockIssRec/findStockIR")
+                .body(Mono.just(key), StockIssueReceiveKey.class)
+                .retrieve()
+                .bodyToMono(StockIssueReceive.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 }
