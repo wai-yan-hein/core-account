@@ -19,6 +19,7 @@ import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.Job;
 import com.inventory.model.MillingHis;
 import com.user.model.AppUser;
 import com.inventory.model.Stock;
@@ -44,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class MillingHistoryDialog extends javax.swing.JDialog implements KeyListener {
+public class MillingHistoryDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
 
     /**
      * Creates new form SaleVouSearchDialog
@@ -63,23 +64,33 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private CloudIntegration integration;
-
+    private JobSearchDialog jobSearchDialog;
+    private Job job;
+    
+    public Job getJob() {
+        return job;
+    }
+    
+    public void setJob(Job job) {
+        this.job = job;
+    }
+    
     public void setCloudIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public MillingHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
@@ -87,13 +98,13 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     public void initMain() {
         initCombo();
         initTableVoucher();
         setTodayDate();
     }
-
+    
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
@@ -121,7 +132,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
     }
-
+    
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
@@ -140,30 +151,30 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-
+    
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
-
+    
     private String getUserCode() {
         return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-
+    
     private String getLocCode() {
         return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-
+    
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
-
+    
     private String getCurCode() {
         return currAutoCompleter.getCurrency() == null ? Global.currency : currAutoCompleter.getCurrency().getCurCode();
     }
-
+    
     public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
@@ -180,6 +191,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setLocal(chkLocal.isSelected());
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
+        filter.setJobNo(getJob() == null ? null : getJob().getKey().getJobNo());
         filter.setCurCode(getCurCode());
         inventoryRepo.getMillingVoucher(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
@@ -188,26 +200,41 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             progess.setIndeterminate(false);
             setVisible(true);
         }).subscribe();
-
+        
     }
-
+    
+    public void jobDialog() {
+        if (jobSearchDialog == null) {
+            jobSearchDialog = new JobSearchDialog(Global.parentForm);
+            jobSearchDialog.setInventoryRepo(inventoryRepo);
+            jobSearchDialog.setUserRepo(userRepo);
+            jobSearchDialog.setObserver(this);
+            jobSearchDialog.initMain();
+            jobSearchDialog.setSize(Global.width - 20, Global.height - 20);
+            jobSearchDialog.setLocationRelativeTo(null);
+        }
+        jobSearchDialog.search();
+    }
+    
     private void calAmount() {
         List<MillingHis> list = tableModel.getListDetail();
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
-
+    
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
         txtVouNo.setText(null);
         txtRemark.setText(null);
+        txtJob.setText(null);
+        setJob(null);
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         currAutoCompleter.setCurrency(null);
     }
-
+    
     private void select() {
         try {
             int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
@@ -227,7 +254,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             log.error(e.getMessage());
         }
     }
-
+    
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -794,10 +821,23 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         select();
     }//GEN-LAST:event_btnSelectActionPerformed
 
+    private void txtJobFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtJobFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtJobFocusGained
+
+    private void txtJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtJobActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtJobActionPerformed
+
+    private void txtJobMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtJobMouseClicked
+        if (evt.getClickCount() > 1) {
+            jobDialog();
+        }
+    }//GEN-LAST:event_txtJobMouseClicked
+
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
@@ -809,6 +849,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -831,6 +872,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
     private javax.swing.JTextField txtProjectNo;
@@ -847,14 +889,30 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-
+        
     }
-
+    
+    @Override
+    public void selected(Object source, Object selectObj) {
+        switch (source.toString()) {
+            case "Job" -> {
+                if (selectObj instanceof Job v) {
+                    inventoryRepo.findJob(v.getKey().getJobNo()).subscribe((t) -> {
+                        setJob(t);
+                        txtJob.setText(t.getJobName());
+                    });
+                }
+            }
+            case "Select" -> {
+            }
+        }
+    }
+    
 }
