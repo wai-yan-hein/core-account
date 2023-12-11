@@ -12,20 +12,24 @@ import com.dms.commom.CVFileTableModel;
 import com.dms.commom.CustomRenderer;
 import com.dms.commom.FileDropHandler;
 import com.dms.commom.IconRenderer;
+import com.dms.dialog.FileRenameDialog;
 import com.dms.model.CVFile;
 import com.dms.model.FileObject;
 import com.repo.DMSRepo;
+import java.awt.Desktop;
 import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import javax.swing.DropMode;
+import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -50,7 +54,11 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     private DMSRepo dmsRepo;
     private SelectionObserver observer;
     private CVFileTableModel fileTableModel = new CVFileTableModel();
-    private JPopupMenu popupmenu;
+    private JPopupMenu newPopup;
+    private JPopupMenu morePopup;
+    private JPopupMenu trashPopup;
+    private FileRenameDialog fileRenameDialog;
+    private Map<String, ImageIcon> hmIcon = new HashMap<>();
     private CVFile lastFile;
 
     public void setObserver(SelectionObserver observer) {
@@ -73,26 +81,61 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     public void initMain() {
-        initPopup();
+        initNewPopup();
+        initMorePopup();
+        initTrashPopup();
         initTree();
         initTable();
         getHeadFolder();
         getStorageInfo();
     }
 
-    private void initPopup() {
-        popupmenu = new JPopupMenu("Edit");
-        popupmenu.setFont(Global.textFont);
+    private void initNewPopup() {
+        newPopup = new JPopupMenu("Edit");
+        newPopup.setFont(Global.textFont);
         JMenuItem folder = new JMenuItem("New Folder");
         JMenuItem file = new JMenuItem("File Upload");
         JMenuItem fu = new JMenuItem("Folder Upload");
         folder.addActionListener(menuListener);
         file.addActionListener(menuListener);
         fu.addActionListener(menuListener);
-        popupmenu.add(folder);
-        popupmenu.addSeparator();
-        popupmenu.add(file);
-        popupmenu.add(fu);
+        newPopup.add(folder);
+        newPopup.addSeparator();
+        newPopup.add(file);
+        newPopup.add(fu);
+    }
+
+    private void initMorePopup() {
+        morePopup = new JPopupMenu("More");
+        morePopup.setFont(Global.textFont);
+        JMenuItem copyLink = new JMenuItem("Copy Link");
+        JMenuItem view = new JMenuItem("View");
+        JMenuItem download = new JMenuItem("Download");
+        JMenuItem rename = new JMenuItem("Rename");
+        JMenuItem trash = new JMenuItem("Move to trash");
+        copyLink.addActionListener(menuListener);
+        view.addActionListener(menuListener);
+        download.addActionListener(menuListener);
+        rename.addActionListener(menuListener);
+        trash.addActionListener(menuListener);
+        morePopup.add(copyLink);
+        morePopup.add(view);
+        morePopup.add(download);
+        morePopup.add(rename);
+        morePopup.addSeparator();
+        morePopup.add(trash);
+    }
+
+    private void initTrashPopup() {
+        trashPopup = new JPopupMenu("Edit");
+        trashPopup.setFont(Global.textFont);
+        JMenuItem restore = new JMenuItem("Restore");
+        JMenuItem delete = new JMenuItem("Delete Forever");
+        restore.addActionListener(menuListener);
+        delete.addActionListener(menuListener);
+        trashPopup.add(restore);
+        trashPopup.addSeparator();
+        trashPopup.add(delete);
     }
     private final ActionListener menuListener = (ActionEvent evt) -> {
         if (evt.getSource() instanceof JMenuItem actionMenu) {
@@ -104,23 +147,131 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                     createFile();
                 case "Folder Upload" ->
                     createFolder();
+                case "View" ->
+                    viewFile();
+                case "Rename" ->
+                    renameFile();
+                case "Copy Link" ->
+                    copyLink();
+                case "Move to trash" ->
+                    moveToTrash();
+                case "Restore" ->
+                    restore();
+                case "Delete Forever" ->
+                    deleteForever();
+
             }
         }
     };
+
+    private void viewFile() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            String url = dmsRepo.getRootUrl() + "file/view/" + file.getFileId();
+            openWebBrowser(url);
+        }
+    }
+
+    private CVFile getSelectFile() {
+        int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
+        if (row >= 0) {
+            return fileTableModel.getFile(row);
+        }
+        return null;
+    }
+
+    private void copyLink() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            String url = dmsRepo.getRootUrl() + "file/view/" + file.getFileId();
+            Util1.copyToClipboard(url);
+        }
+    }
+
+    private void renameFile() {
+        if (fileRenameDialog == null) {
+            fileRenameDialog = new FileRenameDialog(Global.parentForm);
+            fileRenameDialog.setLocationRelativeTo(null);
+        }
+        CVFile file = getSelectFile();
+        if (file != null) {
+            String oldName = file.getFileDescription();
+            fileRenameDialog.setFileName(oldName);
+            fileRenameDialog.setVisible(true);
+            if (fileRenameDialog.isSelect()) {
+                String newName = fileRenameDialog.getFileName();
+                if (!oldName.equals(newName)) {
+                    file.setFileDescription(newName);
+                    dmsRepo.updateFile(file).doOnSuccess((t) -> {
+                        fileTableModel.setFile(t);
+                    }).subscribe();
+                }
+            }
+        }
+    }
+
+    private void moveToTrash() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            file.setDeleted(true);
+            dmsRepo.updateFile(file).doOnSuccess((t) -> {
+                fileTableModel.deleteFile(t);
+            }).subscribe();
+        }
+    }
+
+    private void restore() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            file.setDeleted(false);
+            dmsRepo.updateFile(file).doOnSuccess((t) -> {
+                fileTableModel.deleteFile(t);
+            }).subscribe();
+        }
+    }
+
+    private void deleteForever() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            file.setDeleted(false);
+            dmsRepo.deleteForever(file.getFileId()).doOnSuccess((t) -> {
+                fileTableModel.deleteFile(file);
+            }).subscribe();
+        }
+    }
+
+    private void openWebBrowser(String url) {
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                URI uri = new URI(url);
+                desktop.browse(uri);
+            } catch (IOException | URISyntaxException ex) {
+                log.error("openWebBrowser : " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Error opening web browser: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Desktop is not supported on this platform.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     private void initTree() {
         treeModel = (DefaultTreeModel) tree.getModel();
         tree.setRowHeight(Global.tblRowHeight - 2);
         tree.setFont(Global.textFont);
         tree.setCellRenderer(new CustomRenderer());
-        treeRoot = new DefaultMutableTreeNode("Drive");
+        CVFile head = new CVFile();
+        head.setFileId("head");
+        head.setFileDescription("Drive");
+        treeRoot = new DefaultMutableTreeNode(head);
     }
 
     private void initTable() {
         fileTableModel.setDmsRepo(dmsRepo);
+        fileTableModel.setTable(tblChild);
         tblChild.setModel(fileTableModel);
         tblChild.getTableHeader().setFont(Global.tblHeaderFont);
-        tblChild.setRowHeight(Global.tblRowHeight);
+        tblChild.setRowHeight(Global.tblRowHeight + 6);
         tblChild.setFont(Global.textFont);
         tblChild.setDragEnabled(true);
         tblChild.setDropMode(DropMode.INSERT_ROWS);
@@ -149,12 +300,12 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
 
     private void getStorageInfo() {
         dmsRepo.getStorageInfo().doOnSuccess((t) -> {
-            int total = Util1.getInteger(t.getTotalSpace());
-            int used = Util1.getInteger(t.getUsedSpace());
+            int total = Util1.getInteger(t.getTotalSpace() / 1024 / 1024);
+            int used = Util1.getInteger(t.getUsedSpace() / 1024 / 1024);
             proStorage.setMinimum(0);
             proStorage.setMaximum(total);
             proStorage.setValue(used);
-            lblStorage.setText(Util1.bytesToSize(t.getTotalSpace()) + " of " + Util1.bytesToSize(t.getUsedSpace()));
+            lblStorage.setText(Util1.bytesToSize(t.getUsedSpace()) + " of " + Util1.bytesToSize(t.getTotalSpace()));
         }).subscribe();
     }
 
@@ -200,10 +351,20 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         }).subscribe();
     }
 
+    private void getTrash() {
+        dmsRepo.getTrash().doOnSuccess((t) -> {
+            log.info(t.size() + "");
+            fileTableModel.setListDetail(t);
+        }).doOnTerminate(() -> {
+            lblPath.setText("Trash");
+            progress.setIndeterminate(false);
+        }).subscribe();
+    }
+
     private void setFileDetail(CVFile file) {
         if (file != null) {
             lastFile = file;
-            lblFileIcon.setIcon(fileTableModel.getFileIcon(file.getFileExtension()));
+            lblFileIcon.setIcon(getFileIcon(file.getFileExtension()));
             lblFileName.setText(file.getFileName());
             lblFileType.setText(file.isFile() ? file.getFileContent() : "Folder");
             lblFileSize.setText(Util1.bytesToSize(file.getFileSize()));
@@ -213,21 +374,39 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         }
     }
 
-    private void createFolder() {
-        if (lastFile != null) {
-            String input = JOptionPane.showInputDialog(this, "New Folder");
-            if (!Util1.isNullOrEmpty(input)) {
-                String id = lastFile.getFileId();
-                FileObject obj = new FileObject();
-                obj.setFolderName(input);
-                obj.setParentId(id);
-                progress.setIndeterminate(true);
-                dmsRepo.createFolder(obj).doOnSuccess((t) -> {
-                    fileTableModel.addObjectFirst(t.getBody());
-                }).doOnTerminate(() -> {
-                    progress.setIndeterminate(false);
-                }).subscribe();
+    public ImageIcon getFileIcon(String extension) {
+        if (extension == null) {
+            return null;
+        }
+        if (hmIcon.containsKey(extension)) {
+            return hmIcon.get(extension);
+        } else {
+            ImageIcon originalIcon = dmsRepo.getIcon(extension).block();
+            if (originalIcon != null) {
+                ImageIcon resizedIcon = new ImageIcon(originalIcon.getImage().getScaledInstance(96, 96, java.awt.Image.SCALE_SMOOTH));
+                hmIcon.put(extension, resizedIcon);
+                return resizedIcon;
+            } else {
+                return null; // Handle the case where the icon is not available
             }
+        }
+    }
+
+    private void createFolder() {
+        String input = JOptionPane.showInputDialog(this, "New Folder");
+        if (!Util1.isNullOrEmpty(input)) {
+            String id = lastFile == null ? null : lastFile.getFileId();
+            FileObject obj = new FileObject();
+            obj.setFolderName(input);
+            obj.setParentId(id);
+            progress.setIndeterminate(true);
+            dmsRepo.createFolder(obj).doOnSuccess((t) -> {
+                if (t != null) {
+                    fileTableModel.addObjectFirst(t.getBody());
+                }
+            }).doOnTerminate(() -> {
+                progress.setIndeterminate(false);
+            }).subscribe();
         }
     }
 
@@ -252,7 +431,16 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     private void setFileInfo(MouseEvent e) {
         int count = e.getClickCount();
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
-        CVFile f = fileTableModel.getSelectVou(row);
+        CVFile f = fileTableModel.getFile(row);
+        if (SwingUtilities.isRightMouseButton(e)) {
+            if (f.isDeleted()) {
+                trashPopup.show(tblChild, e.getX(), e.getY());
+                return;
+            } else {
+                morePopup.show(tblChild, e.getX(), e.getY());
+                return;
+            }
+        }
         if (count == 1) {
             setFileDetail(f);
         } else {
@@ -263,7 +451,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void showPopup(MouseEvent e) {
-        popupmenu.show(btnNew, e.getX(), e.getY());
+        newPopup.show(btnNew, e.getX(), e.getY());
     }
 
     private void observeMain() {
@@ -316,6 +504,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         proStorage = new javax.swing.JProgressBar();
         lblStorage = new javax.swing.JLabel();
         btnNew = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -323,8 +512,10 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
+        tree.setFont(Global.textFont);
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         tree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        tree.setRowHeight(Global.tblRowHeight);
         tree.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 treeMouseClicked(evt);
@@ -426,6 +617,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         lblFileName.setText("File Name");
 
         lblFileIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblFileIcon.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel4.setFont(Global.menuFont);
         jLabel4.setText("File Detail");
@@ -460,9 +652,6 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(lblFileIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton2))
@@ -488,6 +677,10 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                                     .addComponent(lblUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblCreated, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblFileIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -495,7 +688,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                 .addContainerGap()
                 .addComponent(lblFileName)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblFileIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lblFileIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -522,7 +715,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                     .addComponent(lblCreated))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addContainerGap(56, Short.MAX_VALUE))
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -568,6 +761,14 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
+        jButton1.setFont(Global.lableFont);
+        jButton1.setText("Trash");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -578,7 +779,8 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1)
-                    .addComponent(btnNew, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnNew, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -609,6 +811,8 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
                 .addContainerGap())
@@ -635,9 +839,15 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         showPopup(evt);
     }//GEN-LAST:event_btnNewMouseClicked
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        getTrash();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNew;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;

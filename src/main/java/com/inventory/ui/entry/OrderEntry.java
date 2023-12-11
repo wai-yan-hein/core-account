@@ -590,13 +590,12 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private void viewReport(byte[] t, String reportName, boolean print) {
         if (reportName != null) {
             try {
-                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                 Map<String, Object> param = new HashMap<>();
                 param.put("p_print_date", Util1.getTodayDateTime());
                 param.put("p_comp_name", Global.companyName);
                 param.put("p_comp_address", Global.companyAddress);
                 param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", logoPath);
+                param.put("p_logo_path", ProUtil.logoPath());
                 String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
                 ByteArrayInputStream stream = new ByteArrayInputStream(t);
                 JsonDataSource ds = new JsonDataSource(stream);

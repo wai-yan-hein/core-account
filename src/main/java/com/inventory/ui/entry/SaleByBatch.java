@@ -45,7 +45,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,8 +65,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
@@ -106,7 +103,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
 
     public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
@@ -137,7 +133,8 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         initDateListner();
         actionMapping();
     }
-     private void initRowHeader() {
+
+    private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblSale, 30);
         scroll.setRowHeaderView(list);
@@ -732,13 +729,12 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     private void viewReport(List<VSale> list, String reportName, boolean print) throws JRException {
         if (reportName != null) {
-            String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
             Map<String, Object> param = new HashMap<>();
             param.put("p_print_date", Util1.getTodayDateTime());
             param.put("p_comp_name", Global.companyName);
             param.put("p_comp_address", Global.companyAddress);
             param.put("p_comp_phone", Global.companyPhone);
-            param.put("p_logo_path", logoPath);
+            param.put("p_logo_path", ProUtil.logoPath());
             param.put("p_balance", balance);
             param.put("p_prv_balance", prvBal);
             String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");

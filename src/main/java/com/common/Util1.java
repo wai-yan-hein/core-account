@@ -59,7 +59,10 @@ import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -331,6 +334,9 @@ public class Util1 {
     }
 
     public static String toDateStr(LocalDateTime dateTime, String format) {
+        if (dateTime == null) {
+            return "";
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         // Format the LocalDateTime
         return dateTime.format(formatter);
@@ -1306,16 +1312,17 @@ public class Util1 {
         if (bytes == null) {
             return "";
         }
+
         if (bytes < 1024) {
             return bytes + " Bytes";
         } else if (bytes < 1024 * 1024) {
-            double kilobytes = bytes / 1024.0;
+            double kilobytes = (double) bytes / 1024;
             return String.format("%.2f", kilobytes) + " KB";
         } else if (bytes < 1024 * 1024 * 1024) {
-            double megabytes = bytes / (1024.0 * 1024.0);
+            double megabytes = (double) bytes / (1024 * 1024);
             return String.format("%.2f", megabytes) + " MB";
         } else {
-            double gigabytes = bytes / (1024.0 * 1024.0 * 1024.0);
+            double gigabytes = (double) bytes / (1024 * 1024 * 1024);
             return String.format("%.2f", gigabytes) + " GB";
         }
     }
@@ -1351,6 +1358,14 @@ public class Util1 {
         } else {
             log.info("Update file is not newer. No action needed.");
         }
+    }
+
+    public static void copyToClipboard(String text) {
+        // Create a StringSelection object with the provided text
+        StringSelection selection = new StringSelection(text);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(selection, null);
+        log.info("Text copied to clipboard: " + text);
     }
 
 }

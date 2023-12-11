@@ -344,6 +344,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     param.put("p_currency", getCurCode());
                     param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
                     param.put("p_location", txtLocation.getText());
+                    param.put("p_logo_path", ProUtil.logoPath());
                     param.put("p_divider", new BigDecimal(Util1.getFloatOne(ProUtil.getProperty(ProUtil.DIVIDER))));
                     printReport(reportUrl, reportUrl, param, excel);
                 }

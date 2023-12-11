@@ -5,8 +5,6 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.COAComboBoxModel;
-import com.acc.model.ChartOfAccount;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
@@ -64,7 +62,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,7 +119,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private TransferHistoryDialog transferHistoryDialog;
     private StockBalanceFrame stockBalanceDialog;
     private VouDiscountDialog vouDiscountDialog;
-    private COAComboBoxModel coaComboModel = new COAComboBoxModel();
 
     public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
@@ -226,7 +222,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-     private void initRowHeader() {
+
+    private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblSale, 30);
         scroll.setRowHeaderView(list);
@@ -428,10 +425,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
-        accountRepo.getCOAByHead(ProUtil.getProperty(ProUtil.INCOME)).subscribe((t) -> {
-            coaComboModel.setData(t);
-            cboAccount.setModel(coaComboModel);
-        });
     }
 
     private void initKeyListener() {
@@ -542,8 +535,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtCus.requestFocus();
         carNoAutoCompleter.setAutoText(null);
         projectAutoCompleter.setProject(null);
-        coaComboModel.setSelectedItem(null);
-        cboAccount.repaint();
     }
 
     private void clearDiscount() {
@@ -661,13 +652,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             if (vouDiscountDialog != null) {
                 saleHis.setListVouDiscount(vouDiscountDialog.getListDetail());
                 saleHis.setListDelVouDiscount(vouDiscountDialog.getListDel());
-            }
-            if (coaComboModel.getSelectedItem() instanceof ChartOfAccount c) {
-                if (c.getKey() != null) {
-                    saleHis.setAccount(c.getKey().getCoaCode());
-                } else {
-                    saleHis.setAccount(null);
-                }
             }
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
@@ -860,10 +844,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             userRepo.find(new ProjectKey(sh.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
                 projectAutoCompleter.setProject(t);
             }).subscribe();
-            accountRepo.findCOA(saleHis.getAccount()).doOnSuccess((t) -> {
-                coaComboModel.setSelectedItem(t);
-                cboAccount.repaint();
-            }).subscribe();
             String vouNo = sh.getKey().getVouNo();
             sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
             inventoryRepo.getSaleDetail(vouNo, saleHis.getDeptId(), saleHis.isLocal()).subscribe((t) -> {
@@ -982,13 +962,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private void viewReport(List<VSale> list, String reportName, boolean print) {
         try {
             if (reportName != null) {
-                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                 Map<String, Object> param = new HashMap<>();
                 param.put("p_print_date", Util1.getTodayDateTime());
                 param.put("p_comp_name", Global.companyName);
                 param.put("p_comp_address", Global.companyAddress);
                 param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", logoPath);
+                param.put("p_logo_path", ProUtil.logoPath());
                 param.put("p_balance", balance);
                 param.put("p_prv_balance", prvBal);
                 param.put("p_sub_report_dir", "report/");
@@ -1151,8 +1130,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoLabel = new javax.swing.JLabel();
         carNoLabel1 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
-        jLabel12 = new javax.swing.JLabel();
-        cboAccount = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -1333,11 +1310,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
         });
 
-        jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Account");
-
-        cboAccount.setFont(Global.textFont);
-
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1380,13 +1352,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE))
                     .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(carNoLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
+                        .addComponent(carNoLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtProjectNo)
-                            .addComponent(cboAccount, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(txtProjectNo)))
                 .addContainerGap())
         );
 
@@ -1427,9 +1395,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                         .addComponent(jLabel2))
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel9)
-                        .addComponent(jLabel12)
-                        .addComponent(cboAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel9)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2151,14 +2117,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JButton btnBatch1;
     private javax.swing.JLabel carNoLabel;
     private javax.swing.JLabel carNoLabel1;
-    private javax.swing.JComboBox<ChartOfAccount> cboAccount;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JDesktopPane deskPane;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;

@@ -98,17 +98,15 @@ public class SaleHis {
     @Column(name = "expense")
     private Double expense;
     @Column(name = "account")
-    private String account;
+    private String saleAcc;
     @Column(name = "labour_group_code")
     private String labourGroupCode;
     @Column(name = "print_count")
     private Integer printCount;
-    @Column(name = "receivable_acc")
-    private String receivableAcc;
+    @Column(name = "debtor_acc")
+    private String debtorAcc;
     @Column(name = "cash_acc")
     private String cashAcc;
-    @Column(name = "sale_acc")
-    private String saleAcc;
     @Column(name = "dept_code")
     private String deptCode;
     @Transient

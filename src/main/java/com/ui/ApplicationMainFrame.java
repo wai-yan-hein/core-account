@@ -1217,11 +1217,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void initAccSetting() {
         inventoryRepo.getAccSetting().doOnSuccess((list) -> {
-            if (list != null) {
-                list.forEach((t) -> {
-                    Global.hmAcc.put(t.getKey().getType(), t);
-                });
-            }
+            inventoryRepo.getDefaultLocation().doOnSuccess((d) -> {
+                if (list != null) {
+                    list.forEach((acc) -> {
+                        acc.setPayAcc(Util1.isNull(d.getCashAcc(), acc.getPayAcc()));
+                        acc.setDeptCode(Util1.isNull(d.getDeptCode(), acc.getDeptCode()));
+                        Global.hmAcc.put(acc.getKey().getType(), acc);
+                    });
+                }
+            }).subscribe();
+
         }).subscribe();
     }
 

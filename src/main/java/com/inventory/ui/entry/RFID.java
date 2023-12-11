@@ -35,7 +35,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,8 +52,6 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
@@ -82,7 +79,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
 
     public JProgressBar getProgress() {
         return progress;
@@ -482,13 +478,12 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void printVoucher(String vouNo) {
         inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
             try {
-                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                 Map<String, Object> param = new HashMap<>();
                 param.put("p_print_date", Util1.getTodayDateTime());
                 param.put("p_comp_name", Global.companyName);
                 param.put("p_comp_address", Global.companyAddress);
                 param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", logoPath);
+                param.put("p_logo_path", ProUtil.logoPath());
                 String reportPath = ProUtil.getReportPath() + "RFIDVoucher.jasper";
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(t));
                 JsonDataSource ds = new JsonDataSource(stream);
