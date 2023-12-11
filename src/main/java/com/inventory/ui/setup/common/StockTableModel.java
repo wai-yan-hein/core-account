@@ -10,18 +10,17 @@ import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class StockTableModel extends AbstractTableModel {
 
-    static Logger log = LoggerFactory.getLogger(StockTableModel.class.getName());
     private List<Stock> listStock = new ArrayList();
-    private String[] columnNames = {"No", "Code", "Description", "Group Name", "Cat Name", "Weight", "Active"};
+    private String[] columnNames = {"Code", "Description", "Group Name", "Cat Name", "Weight", "Active"};
     private InventoryRepo inventoryRepo;
 
     public StockTableModel() {
@@ -47,7 +46,7 @@ public class StockTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 6 -> {
+            case 5 -> {
                 return true;
             }
 
@@ -58,10 +57,10 @@ public class StockTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6 -> {
+            case 5 -> {
                 return Boolean.class;
             }
-            case 5 -> {
+            case 4 -> {
                 return Double.class;
             }
             default -> {
@@ -86,18 +85,16 @@ public class StockTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    String.valueOf(row + 1 + ". ");
-                case 1 ->
                     med.getUserCode();
-                case 2 ->
+                case 1 ->
                     med.getStockName();
-                case 3 ->
+                case 2 ->
                     med.getGroupName();
-                case 4 ->
+                case 3 ->
                     med.getCatName();
-                case 5 ->
+                case 4 ->
                     med.getWeight();
-                case 6 ->
+                case 5 ->
                     med.isActive();
                 default ->
                     null;
@@ -115,7 +112,7 @@ public class StockTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         Stock s = listStock.get(row);
         switch (column) {
-            case 6 -> {
+            case 5 -> {
                 if (value instanceof Boolean active) {
                     s.setActive(active);
                     inventoryRepo.saveStock(s);

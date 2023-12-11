@@ -104,24 +104,18 @@ import reactor.core.publisher.Mono;
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleTableModel saleTableModel = new SaleTableModel();
+
     private SaleHistoryDialog dialog;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private H2Repo h2Repo;
-    @Autowired
     private CloudIntegration integration;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private TaskExecutor taskExecutor;
     private StockBalanceFrame stockBalanceDialog;
     private OrderHistoryDialog orderDialog;
@@ -145,6 +139,30 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
     private SaleExpenseFrame saleExpenseFrame;
     private SaleWeightLossPriceDialog saleWeightLossPriceDialog;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setH2Repo(H2Repo h2Repo) {
+        this.h2Repo = h2Repo;
+    }
+
+    public void setIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;

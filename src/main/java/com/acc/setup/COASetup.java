@@ -29,14 +29,11 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class COASetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
@@ -44,10 +41,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private final COAGroupTableModel coaGroupTableModel = new COAGroupTableModel();
     private final COAGroupChildTableModel cOAGroupChildTableModel = new COAGroupChildTableModel();
     private TableFilterHeader filterHeader;
-    @Autowired
     private AccountRepo accountRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;

@@ -48,30 +48,23 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class SupplierSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
     private Trader supplier = new Trader();
     private SupplierTabelModel supplierTabelModel = new SupplierTabelModel();
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private RegionAutoCompleter regionAutoCompleter;
     private TraderGroupAutoCompleter traderGroupAutoCompleter;
@@ -81,6 +74,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
     private DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public SelectionObserver getObserver() {
         return observer;

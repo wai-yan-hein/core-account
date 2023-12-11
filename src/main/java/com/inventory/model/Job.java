@@ -42,4 +42,18 @@ public class Job {
         return jobName;
     }
 
+    public Job(JobKey key, String jobName) {
+        this.key = key;
+        this.jobName = jobName;
+    }
+
+    public Job() {
+    }
+
+    public Job(String code, String name) {
+        this.key = new JobKey();
+        this.key.setJobNo(code);
+        this.jobName = name;
+    }
+
 }

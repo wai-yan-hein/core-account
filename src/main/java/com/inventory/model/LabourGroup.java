@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "labour_group")
 public class LabourGroup {
 
-   @EmbeddedId
+    @EmbeddedId
     private LabourGroupKey key;
     @Column(name = "labour_name")
     private String labourName;
@@ -33,7 +33,7 @@ public class LabourGroup {
     private boolean active;
     @Column(name = "deleted")
     private boolean deleted;
-    @Column(name="member_count")
+    @Column(name = "member_count")
     private Integer memberCount;
 
     public LabourGroup() {

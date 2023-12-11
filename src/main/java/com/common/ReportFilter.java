@@ -91,6 +91,7 @@ public class ReportFilter {
     private boolean orderFavorite;
     private boolean deleted;
     private boolean active;
+    private String labourGroupCode;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

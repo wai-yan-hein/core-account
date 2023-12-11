@@ -28,17 +28,22 @@ import reactor.core.publisher.Mono;
  *
  * @author DELL
  */
-@Component
 @Slf4j
 public class HMSIntegration extends javax.swing.JPanel {
 
-    @Autowired
     private HMSRepo hmsRepo;
-    @Autowired
     private AccountRepo accountRepo;
     private final HMSIntegrationTableModel tableModel = new HMSIntegrationTableModel();
     private JProgressBar progress;
     private SelectionObserver observer;
+
+    public void setHmsRepo(HMSRepo hmsRepo) {
+        this.hmsRepo = hmsRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;

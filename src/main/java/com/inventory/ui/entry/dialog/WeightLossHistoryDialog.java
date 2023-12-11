@@ -13,7 +13,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.user.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.user.model.AppUser;
@@ -51,7 +51,7 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     private InventoryRepo inventoryRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
-    private DepartmentAutoCompleter departmentAutoCompleter;
+    private DepartmentUserAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
@@ -107,7 +107,7 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

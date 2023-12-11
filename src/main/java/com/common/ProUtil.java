@@ -5,6 +5,7 @@
  */
 package com.common;
 
+import java.io.File;
 import java.util.Date;
 import javax.swing.JOptionPane;
 
@@ -26,6 +27,7 @@ public class ProUtil {
     public static final String RE = "re.account";
     public static final String DEBTOR_GROUP = "debtor.group";
     public static final String DEBTOR_ACC = "debtor.account";
+    public static final String EMP_ACC = "employee.account";
     public static final String CONVERSION_ACC = "conversion.account";
     public static final String CREDITOR_GROUP = "creditor.group";
     public static final String CREDITOR_ACC = "creditor.account";
@@ -90,8 +92,12 @@ public class ProUtil {
     public static final String STOCK_NO_UNIT = "stock.no.unit";
     public static final String MAX_STOCK_WEIGHT = "max.stock.weight";
     public static final String PUR_RD_DIS = "purchase.round.down.discount";
-     public static final String STOCK_IR_EDIT = "stockissrec.voucher.edit";
-     public static final String STOCK_IR_VOUCHER = "StockIR.voucher";
+    public static final String DECIMAL_PLACE = "decimal.palace";
+    public static final String STOCK_IR_EDIT="stockir.voucher";
+
+    public static int getDecimalPalace() {
+        return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
+    }
 
     public static boolean isPurRDDis() {
         return Util1.getBoolean(Global.hmRoleProperty.get(PUR_RD_DIS));
@@ -147,6 +153,10 @@ public class ProUtil {
 
     public static String getProperty(String key) {
         return Global.hmRoleProperty.get(key);
+    }
+
+    public static String getLogoPath() {
+        return String.format("images%s%s", File.separator, getProperty("logo.name"));
     }
 
     public static boolean isStockNoUnit() {

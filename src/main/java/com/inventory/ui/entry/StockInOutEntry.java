@@ -5,8 +5,10 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
+import com.common.FilterObject;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -17,6 +19,8 @@ import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.inventory.editor.JobAutoCompleter;
+import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
@@ -37,8 +41,7 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.Job;
 import com.inventory.model.LabourGroup;
-import com.inventory.ui.common.JobComboBoxModel;
-import com.inventory.ui.common.LabourGroupComboBoxModel;
+import com.inventory.ui.common.StockInOutPaddyTableModel;
 import com.inventory.ui.entry.dialog.StockIOMoreDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
@@ -75,8 +78,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public static final int IO = 1;
     public static final int IO_W = 2;
+    public static final int IO_PADDY = 3;
     private final StockInOutTableModel outTableModel = new StockInOutTableModel();
     private final StockInOutWeightTableModel weightTableModel = new StockInOutWeightTableModel();
+    private final StockInOutPaddyTableModel paddyTableModel = new StockInOutPaddyTableModel();
     private StockIOHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -86,8 +91,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private int type;
-    private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
-    private final JobComboBoxModel jobComboBoxModel = new JobComboBoxModel();
+    private LabourGroupAutoCompleter labourGroupAutoCompleter;
+    private JobAutoCompleter jobAutoCompleter;
     private StockIOMoreDialog moreDialog;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -129,6 +134,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         initModel();
         initRowHeader();
         initCombo();
+        initData();
         clear();
     }
 
@@ -187,25 +193,31 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private void initCombo() {
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, false);
         vouStatusAutoCompleter.setVoucher(null);
-        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vouStatusAutoCompleter.setListVouStatus(t);
-        }).subscribe();
+        labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, false);
+        labourGroupAutoCompleter.setObserver(this);
+        jobAutoCompleter = new JobAutoCompleter(txtJob, null, false);
+        jobAutoCompleter.setObserver(this);
 
+    }
+
+    private void initData() {
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListData(t);
+        }).subscribe();
         inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new LabourGroup());
-                labourGroupComboBoxModel.setData(t);
-                cboLabourGroup.setModel(labourGroupComboBoxModel);
-                cboLabourGroup.setSelectedItem(null);
+                labourGroupAutoCompleter.setListObject(t);
             }
         }).subscribe();
-
-        inventoryRepo.getJob(false, Global.deptId).doOnSuccess((t) -> {
+        FilterObject filterObject = new FilterObject(Global.compCode, Global.deptId);
+        filterObject.setFinished(false);
+        filterObject.setFromDate("");
+        filterObject.setToDate("");
+        inventoryRepo.getJob(filterObject).doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new Job());
-                jobComboBoxModel.setData(t);
-                cboJob.setModel(jobComboBoxModel);
-                cboJob.setSelectedItem(null);
+                jobAutoCompleter.setListObject(t);
             }
         }).subscribe();
     }
@@ -217,6 +229,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 initStockIOWeight();
+            }
+            case IO_PADDY -> {
+                initStockIOPaddy();
             }
         }
     }
@@ -288,6 +303,41 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         });
         tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+    }
+
+    private void initStockIOPaddy() {
+        paddyTableModel.setVouDate(txtDate);
+        paddyTableModel.setInventoryRepo(inventoryRepo);
+        paddyTableModel.setLblRec(lblRec);
+        paddyTableModel.addNewRow();
+        paddyTableModel.setParent(tblStock);
+        paddyTableModel.setObserver(this);
+        tblStock.setModel(paddyTableModel);
+        monoLoc = inventoryRepo.getLocation();
+        tblStock.getColumnModel().getColumn(0).setPreferredWidth(80);//code
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//name
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(50);//location
+        tblStock.getColumnModel().getColumn(3).setPreferredWidth(50);//Moisture
+        tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);//Rice
+        tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);//weight
+        tblStock.getColumnModel().getColumn(6).setPreferredWidth(50);//inqty
+        tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);//out qty
+        tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);//bag
+        tblStock.getColumnModel().getColumn(9).setPreferredWidth(50);//cost
+        tblStock.getColumnModel().getColumn(10).setPreferredWidth(80);//amt
+
+        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.subscribe((t) -> {
+            tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
+        tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
     }
 
     private void initTable() {
@@ -418,10 +468,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtInQty.setValue(0.0);
         txtOutQty.setValue(0.0);
         vouStatusAutoCompleter.setVoucher(null);
-        jobComboBoxModel.setSelectedItem(null);
-        labourGroupComboBoxModel.setSelectedItem(null);
-        cboJob.repaint();
-        cboLabourGroup.repaint();
+        labourGroupAutoCompleter.setObject(null);
+        jobAutoCompleter.setObject(null);
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
@@ -459,6 +507,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             case IO_W -> {
                 weightTableModel.delete(row);
             }
+            case IO_PADDY -> {
+                paddyTableModel.delete(row);
+            }
         }
     }
 
@@ -469,6 +520,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 return weightTableModel.isValidEntry();
+            }
+            case IO_PADDY -> {
+                return paddyTableModel.isValidEntry();
             }
             default -> {
                 return false;
@@ -486,6 +540,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 weightTableModel.clear();
                 weightTableModel.addNewRow();
             }
+            case IO_PADDY -> {
+                paddyTableModel.clear();
+                paddyTableModel.addNewRow();
+            }
         }
     }
 
@@ -496,6 +554,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 return weightTableModel.getListStock();
+            }
+            case IO_PADDY -> {
+                return paddyTableModel.getListStock();
             }
         }
         return null;
@@ -508,6 +569,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_W -> {
                 return weightTableModel.getDeleteList();
+            }
+            case IO_PADDY -> {
+                return paddyTableModel.getDeleteList();
             }
         }
         return null;
@@ -546,6 +610,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             io.setRemark(txtRemark.getText());
             io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             io.setVouStatusCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
+            LabourGroup lg = labourGroupAutoCompleter.getObject();
+            if (lg != null) {
+                io.setLabourGroupCode(lg.getKey() == null ? null : lg.getKey().getCode());
+            }
+            Job job = jobAutoCompleter.getObject();
+            if (job != null) {
+                io.setJobCode(job.getKey() == null ? null : job.getKey().getJobNo());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 StockIOKey key = new StockIOKey();
                 key.setCompCode(Global.compCode);
@@ -556,20 +628,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 io.setCreatedDate(LocalDateTime.now());
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
-                if (cboLabourGroup.getSelectedItem() instanceof LabourGroup lg) {
-                    if (lg.getKey() != null) {
-                        io.setLabourGroupCode(lg.getKey().getCode());
-                    } else {
-                        io.setLabourGroupCode(null);
-                    }
-                }
-                if (cboJob.getSelectedItem() instanceof Job job) {
-                    if (job.getKey() != null) {
-                        io.setJobCode(job.getKey().getJobNo());
-                    } else {
-                        io.setJobCode(null);
-                    }
-                }
+//                LabourGroup lg = labourGroupAutoCompleter.getObject();
+//                if (lg != null) {
+//                    io.setLabourGroupCode(lg.getKey() == null ? null : lg.getKey().getCode());
+//                }
+//                Job job = jobAutoCompleter.getObject();
+//                if (job != null) {
+//                    io.setJobCode(job.getKey() == null ? null : job.getKey().getJobNo());
+//                }
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -589,15 +655,13 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 vouStatusAutoCompleter.setVoucher(t);
             }).subscribe();
             inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
-                labourGroupComboBoxModel.setSelectedItem(t);
-                cboLabourGroup.repaint();
+                labourGroupAutoCompleter.setObject(t);
             }).subscribe();
             String jobNo = io.getJobCode();
             if (!Util1.isNullOrEmpty(jobNo)) {
                 inventoryRepo.findJob(jobNo).doOnSuccess((t) -> {
                     if (t != null) {
-                        jobComboBoxModel.setSelectedItem(t);
-                        cboJob.repaint();
+                        jobAutoCompleter.setObject(t);
                         if (t.isFinished()) {
                             lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
                             lblStatus.setForeground(Color.red);
@@ -648,21 +712,18 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 weightTableModel.setListStock(list);
                 weightTableModel.addNewRow();
             }
+            case IO_PADDY -> {
+                paddyTableModel.setListStock(list);
+                paddyTableModel.addNewRow();
+            }
         }
     }
 
     private void disableForm(boolean status) {
-        txtDate.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtDesp.setEnabled(status);
-        tblStock.setEnabled(status);
-        txtVouType.setEnabled(status);
-        cboJob.setEnabled(status);
-        cboLabourGroup.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
-
     }
 
     public void historyOP() {
@@ -751,10 +812,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel7 = new javax.swing.JLabel();
         txtVouType = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        cboLabourGroup = new javax.swing.JComboBox<>();
-        cboJob = new javax.swing.JComboBox<>();
         jLabel10 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        txtLG = new javax.swing.JTextField();
+        txtJob = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -833,20 +894,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Job");
 
-        cboLabourGroup.setFont(Global.textFont);
-        cboLabourGroup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboLabourGroupActionPerformed(evt);
-            }
-        });
-
-        cboJob.setFont(Global.textFont);
-        cboJob.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboJobActionPerformed(evt);
-            }
-        });
-
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Labour Group");
 
@@ -860,6 +907,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
         });
 
+        txtLG.setFont(Global.textFont);
+        txtLG.setName("txtRemark"); // NOI18N
+
+        txtJob.setFont(Global.textFont);
+        txtJob.setName("txtRemark"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -871,22 +924,22 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtVou)
-                    .addComponent(cboLabourGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cboJob, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                    .addComponent(txtJob, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDesp))
+                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -896,7 +949,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRemark))
+                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton2)))
@@ -927,12 +980,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
-                            .addComponent(cboLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(cboJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
                             .addComponent(jLabel4)
                             .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2))))
+                            .addComponent(jButton2)
+                            .addComponent(txtLG, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
 
@@ -1071,14 +1124,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         historyOP();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void cboLabourGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLabourGroupActionPerformed
-//        searchStock();
-    }//GEN-LAST:event_cboLabourGroupActionPerformed
-
-    private void cboJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboJobActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cboJobActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         moreDialog();
@@ -1086,8 +1131,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<Job> cboJob;
-    private javax.swing.JComboBox<LabourGroup> cboLabourGroup;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -1111,6 +1154,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtDesp;
     private javax.swing.JFormattedTextField txtInQty;
+    private javax.swing.JTextField txtJob;
+    private javax.swing.JTextField txtLG;
     private javax.swing.JFormattedTextField txtOutQty;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JFormattedTextField txtVou;
@@ -1154,7 +1199,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void refresh() {
-        initCombo();
+        initData();
     }
 
     @Override

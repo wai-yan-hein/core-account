@@ -20,15 +20,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class CurrencyExchange extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private ExchangeDialog dialog;
@@ -39,7 +36,6 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private JProgressBar progress;
     private DateAutoCompleter dateAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
-    @Autowired
     private UserRepo userRepo;
 
     public void setProgress(JProgressBar progress) {
@@ -49,6 +45,11 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     /**
      * Creates new form CurrencyExchange

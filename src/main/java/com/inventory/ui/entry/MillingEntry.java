@@ -6,6 +6,7 @@
 package com.inventory.ui.entry;
 
 import com.common.ColumnColorCellRenderer;
+import com.common.ComponentUtil;
 import com.common.CustomTableCellRenderer;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
@@ -15,6 +16,7 @@ import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
+import com.common.TableRowTransferHandler;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,12 +35,12 @@ import com.inventory.model.VouStatus;
 import com.inventory.ui.common.MillingExpenseTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.MillingOutTableModel;
-import com.inventory.ui.common.ProcessTypeComboBoxModel;
 import com.inventory.ui.entry.dialog.MillingHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Job;
 import com.inventory.model.MessageType;
 import com.inventory.model.MillingUsage;
@@ -66,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javax.swing.AbstractAction;
+import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -79,7 +82,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -99,22 +101,31 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private final MillingRawTableModel millingRawTableModel = new MillingRawTableModel();
     private final MillingExpenseTableModel milingExpenseTableModel = new MillingExpenseTableModel();
     private MillingHistoryDialog dialog;
-    private ProcessTypeComboBoxModel vouStatusTableModel = new ProcessTypeComboBoxModel();
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
+    private VouStatusAutoCompleter vouStatusAutoCompleter;
     private SelectionObserver observer;
     private MillingHis milling = new MillingHis();
     private JProgressBar progress;
     private MillingUsageDialog usageDialog;
     private JobSearchDialog jobSearchDialog;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
@@ -242,6 +253,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     public void initMain() {
         initCombo();
+        initData();
         initRawTable();
         initOutputTable();
         initExpenseTable();
@@ -349,26 +361,37 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOutput.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblOutput.setDragEnabled(true);
+        tblOutput.setDropMode(DropMode.INSERT);
+        tblOutput.setTransferHandler(new TableRowTransferHandler());
+
     }
 
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
-            currAutoCompleter.setCurrency(c);
-        });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouStatus, null, false);
+        vouStatusAutoCompleter.setObserver(this);;
+    }
+
+    private void initData() {
+        userRepo.getCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setListCurrency(t);
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
+            currAutoCompleter.setCurrency(c);
+        }).subscribe();
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
         }).subscribe();
-        getVouStatus();
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListData(t);
+        }).subscribe();
     }
 
     private void initKeyListener() {
@@ -392,19 +415,24 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setLocation(t);
         }).subscribe();
+        vouStatusAutoCompleter.setVoucher(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
+        lblLoadRecord.setText("0");
+        lblExpRecord.setText("0");
+        lblOutRecord.setText("0");
     }
 
     private void clear() {
         disableForm(true);
         assignDefaultValue();
-        millingOutTableModel.removeListDetail();
+        txtSaleDate.setDate(Util1.getTodayDate());
+        millingOutTableModel.clear();
         millingOutTableModel.clearDelList();
-        millingRawTableModel.removeListDetail();
+        millingRawTableModel.clear();
         millingRawTableModel.clearDelList();
-        milingExpenseTableModel.removeListDetail();
+        milingExpenseTableModel.clear();
         milingExpenseTableModel.setChange(false);
         milling = new MillingHis();
         lblStatus.setText("NEW");
@@ -426,7 +454,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtEffQty.setValue(null);
         txtEffWt.setValue(null);
         txtJob.setText(null);
-        cboProcessType.repaint();
     }
 
     public void saveSale(boolean print) {
@@ -495,7 +522,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void printVoucher(MillingHis his) {
-        String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.PURCHASE_VOUCHER), "MillingReport");
+        VouStatus v = vouStatusAutoCompleter.getVouStatus();
+        String reportName = Util1.isNull(v.getMillReportName(), "MillingReport");
         if (reportName != null) {
             try {
                 List<MillingRawDetail> listRaw = his.getListRaw();
@@ -511,13 +539,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 param.put("p_logo_path", logoPath);
                 param.put("p_vou_no", his.getKey().getVouNo());
                 param.put("p_vou_date", Util1.toDateStr(his.getVouDate(), Global.dateFormat));
-                param.put("p_job_no", milling.getJobNo());
-                if (!listRaw.isEmpty()) {
-                    MillingRawDetail r = listRaw.get(0);
-                    param.put("p_raw_name", r.getStockName());
-                    param.put("p_raw_qty", r.getQty());
-                    param.put("p_raw_unit_name", r.getUnitName());
-                }
+                param.put("p_job_no", his.getJobNo());
+                param.put("p_vou_type", v.getDescription());
+                param.put("p_sub_report_dir", "report/");
+                double ttlQty = listRaw.stream().mapToDouble((t) -> t.getQty()).sum();
+                param.put("p_raw_qty", ttlQty);
                 String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode n1 = mapper.readTree(Util1.gson.toJson(listOutput));
@@ -550,7 +576,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtCus.requestFocus();
-        } else if ((VouStatus) cboProcessType.getSelectedItem() == null) {
+        } else if (vouStatusAutoCompleter.getVouStatus() == null) {
             JOptionPane.showMessageDialog(this, "You must choose process type.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             status = false;
@@ -580,8 +606,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             milling.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             milling.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            VouStatus v = (VouStatus) cboProcessType.getSelectedItem();
-            milling.setVouStatusId(v.getKey().getCode());
+            VouStatus v = vouStatusAutoCompleter.getVouStatus();
+            milling.setVouStatusId(v.getKey() == null ? null : v.getKey().getCode());
             milling.setLoadQty(Util1.getDouble(txtLoadQty.getValue()));
             milling.setLoadWeight(Util1.getDouble(txtLoadWeight.getValue()));
             milling.setLoadAmount(Util1.getDouble(txtLoadAmt.getValue()));
@@ -722,7 +748,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     .mapToDouble((t) -> t.getAmount())
                     .sum();
             double amt = costAmt - knowAmt;
-            if (listOutDetail != null && listOutDetail.size() > 0) {
+            if (listOutDetail != null && !listOutDetail.isEmpty()) {
                 MillingOutDetail mod = listOutDetail.get(0);
                 double qty = Util1.getDouble(mod.getQty());
                 if (qty > 0) {
@@ -748,7 +774,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtEffWt.setValue(effWt);
         txtEffQty.setValue(effQty);
         txtQtyLoss.setValue(loadQty - outQty);
-
+        lblLoadRecord.setText(String.valueOf(listDetail.size() - 1));
+        lblExpRecord.setText(String.valueOf(listExpense.size() - 1));
+        lblOutRecord.setText(String.valueOf(listOutDetail.size() - 1));
     }
 
     public void historySale() {
@@ -768,21 +796,24 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void searchRawDetail(String vouNo, Integer deptId) {
         inventoryRepo.getRawDetail(vouNo, deptId).subscribe((l) -> {
+            lblLoadRecord.setText(String.valueOf(l.size()));
             millingRawTableModel.setListDetail(l);
             millingRawTableModel.addNewRow();
         });
     }
 
-    private void searchExpenseDetail(String vouNo, Integer deptId) {
-        inventoryRepo.getMillingExpense(vouNo).subscribe((e) -> {
-            milingExpenseTableModel.setListDetail(e);
+    private void searchExpenseDetail(String vouNo) {
+        inventoryRepo.getMillingExpense(vouNo).subscribe((l) -> {
+            lblExpRecord.setText(String.valueOf(l.size()));
+            milingExpenseTableModel.setListDetail(l);
             milingExpenseTableModel.addNewRow();
         });
     }
 
     private void searchOutputDetail(String vouNo, Integer deptId) {
-        inventoryRepo.getOutputDetail(vouNo, deptId).subscribe((t) -> {
-            millingOutTableModel.setListDetail(t);
+        inventoryRepo.getOutputDetail(vouNo, deptId).subscribe((l) -> {
+            lblOutRecord.setText(String.valueOf(l.size()));
+            millingOutTableModel.setListDetail(l);
             millingOutTableModel.addNewRow();
             progress.setIndeterminate(false);
         });
@@ -857,13 +888,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
             inventoryRepo.findVouStatus(milling.getVouStatusId()).doOnSuccess(t1 -> {
-                vouStatusTableModel.setSelectedItem(t1);
-                cboProcessType.repaint();
+                vouStatusAutoCompleter.setVoucher(t1);
             }).subscribe();
             //detail
             String vouNo = sh.getKey().getVouNo();
             searchRawDetail(vouNo, sh.getDeptId());
-            searchExpenseDetail(vouNo, sh.getDeptId());
+            searchExpenseDetail(vouNo);
             searchOutputDetail(vouNo, sh.getDeptId());
             searchUsageDetail(vouNo);
             focusTable();
@@ -872,18 +902,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void disableForm(boolean status) {
-        tblRaw.setEnabled(status);
-        tblExpense.setEnabled(status);
-        tblOutput.setEnabled(status);
-        panelSale.setEnabled(status);
-        txtSaleDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtReference.setEnabled(status);
-        txtProjectNo.setEnabled(status);
-        txtLocation.setEnabled(status);
-        cboProcessType.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -955,7 +974,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtProjectNo = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
-        cboProcessType = new javax.swing.JComboBox<>();
         btnTransfer = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
@@ -963,6 +981,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         addExpense1 = new javax.swing.JButton();
         txtJob = new javax.swing.JTextField();
         jLabel25 = new javax.swing.JLabel();
+        txtVouStatus = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRaw = new javax.swing.JTable();
@@ -975,6 +994,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtLoadWeight = new javax.swing.JFormattedTextField();
         jLabel8 = new javax.swing.JLabel();
         txtLoadAmt = new javax.swing.JFormattedTextField();
+        jLabel3 = new javax.swing.JLabel();
+        lblLoadRecord = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
@@ -991,6 +1012,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel23 = new javax.swing.JLabel();
         txtQtyLoss = new javax.swing.JFormattedTextField();
         jButton1 = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        lblOutRecord = new javax.swing.JLabel();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblExpense = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -998,6 +1021,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtLoadExpense = new javax.swing.JFormattedTextField();
         jLabel18 = new javax.swing.JLabel();
         txtLoadCost = new javax.swing.JFormattedTextField();
+        jLabel24 = new javax.swing.JLabel();
+        lblExpRecord = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1119,8 +1144,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
-        cboProcessType.setFont(Global.textFont);
-
         btnTransfer.setFont(Global.lableFont);
         btnTransfer.setText("Job");
         btnTransfer.setInheritsPopupMenu(true);
@@ -1167,6 +1190,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel25.setFont(Global.lableFont);
         jLabel25.setText("Job");
 
+        txtVouStatus.setFont(Global.textFont);
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1174,6 +1199,20 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             .addGroup(panelSaleLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelSaleLayout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 298, Short.MAX_VALUE)
+                        .addComponent(addExpense1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1193,42 +1232,25 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelSaleLayout.createSequentialGroup()
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(panelSaleLayout.createSequentialGroup()
                                 .addComponent(jLabel10)
                                 .addGap(12, 12, 12)
                                 .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(panelSaleLayout.createSequentialGroup()
                                 .addComponent(jLabel15)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 254, Short.MAX_VALUE)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnTransfer, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(panelSaleLayout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtVouStatus)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(addExpense1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addGap(906, 906, 906)
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel25)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnTransfer, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
+                            .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 
@@ -1258,13 +1280,13 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton2)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel9)
                         .addComponent(jLabel15)
-                        .addComponent(jButton2)
-                        .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnTransfer)))
+                        .addComponent(btnTransfer)
+                        .addComponent(txtVouStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1333,6 +1355,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Load Qty : ");
 
         txtLoadQty.setEditable(false);
@@ -1342,29 +1365,43 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
+        jLabel7.setFont(Global.lableFont);
         jLabel7.setText("Load Weight : ");
 
         txtLoadWeight.setEditable(false);
 
+        jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Load Amt : ");
 
         txtLoadAmt.setEditable(false);
+
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Records :");
+
+        lblLoadRecord.setFont(Global.lableFont);
+        lblLoadRecord.setText("-");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLoadAmt)
-                    .addComponent(txtLoadQty, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtLoadWeight))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtLoadAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(txtLoadQty, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtLoadWeight)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblLoadRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -1382,15 +1419,22 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtLoadAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(lblLoadRecord))
+                .addContainerGap())
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Output Qty : ");
 
+        jLabel12.setFont(Global.lableFont);
         jLabel12.setText("Output Weight :");
 
+        jLabel13.setFont(Global.lableFont);
         jLabel13.setText("Output Amt :");
 
         txtOutputAmt.setEditable(false);
@@ -1399,6 +1443,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         txtOutputQty.setEditable(false);
 
+        jLabel16.setFont(Global.lableFont);
         jLabel16.setText("Weight Loss :");
 
         txtWtLoss.setEditable(false);
@@ -1406,13 +1451,16 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtEffWt.setEditable(false);
         txtEffWt.setForeground(Color.red);
 
+        jLabel20.setFont(Global.lableFont);
         jLabel20.setText("Eff Weight :");
 
+        jLabel22.setFont(Global.lableFont);
         jLabel22.setText("Eff Qty :");
 
         txtEffQty.setEditable(false);
         txtEffQty.setForeground(Color.red);
 
+        jLabel23.setFont(Global.lableFont);
         jLabel23.setText("Qty Loss :");
 
         txtQtyLoss.setEditable(false);
@@ -1424,6 +1472,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 jButton1ActionPerformed(evt);
             }
         });
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Records :");
+
+        lblOutRecord.setFont(Global.lableFont);
+        lblOutRecord.setText("-");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -1457,9 +1511,15 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(txtEffQty)
-                                    .addComponent(txtQtyLoss)))))
-                    .addComponent(jButton1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(txtQtyLoss))))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblOutRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1)))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1488,8 +1548,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     .addComponent(jLabel20)
                     .addComponent(jLabel22)
                     .addComponent(txtEffQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
-                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jLabel5)
+                    .addComponent(lblOutRecord))
                 .addContainerGap())
         );
 
@@ -1500,13 +1563,21 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
+        jLabel14.setFont(Global.lableFont);
         jLabel14.setText("Load Expense :");
 
         txtLoadExpense.setEditable(false);
 
+        jLabel18.setFont(Global.lableFont);
         jLabel18.setText("Load Cost :");
 
         txtLoadCost.setEditable(false);
+
+        jLabel24.setFont(Global.lableFont);
+        jLabel24.setText("Records :");
+
+        lblExpRecord.setFont(Global.lableFont);
+        lblExpRecord.setText("-");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -1514,13 +1585,19 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLoadExpense)
-                    .addComponent(txtLoadCost))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtLoadExpense, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
+                            .addComponent(txtLoadCost)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel24)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblExpRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -1534,7 +1611,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
                     .addComponent(txtLoadCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel24)
+                    .addComponent(lblExpRecord))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -1709,8 +1790,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             case "Job" -> {
                 if (selectObj instanceof Job v) {
                     inventoryRepo.findJob(v.getKey().getJobNo()).subscribe((t) -> {
-                        milling.setJobNo(t.getKey().getJobNo());
-                        txtJob.setText(t.getJobName());
                         setMillingDetail(t);
                     });
                 }
@@ -1721,8 +1800,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void setMillingDetail(Job oh) {
-        millingRawTableModel.clear();
-        millingOutTableModel.clear();
+        clear();
         if (oh != null) {
             progress.setIndeterminate(true);
             String jobNo = oh.getKey().getJobNo();
@@ -1759,9 +1837,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         sd.setPrice(Util1.getDouble(od.getCostPrice()));
                         sd.setLocCode(od.getLocCode());
                         sd.setLocName(od.getLocName());
-                        millingRawTableModel.addSale(sd);
+                        millingRawTableModel.addData(sd);
                     }
                 });
+            }).doOnTerminate(() -> {
+                milling.setJobNo(oh.getKey().getJobNo());
+                txtJob.setText(oh.getJobName());
                 millingRawTableModel.addNewRow();
                 millingOutTableModel.addNewRow();
                 setMillingUsage();
@@ -1871,7 +1952,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addExpense1;
     private javax.swing.JButton btnTransfer;
-    private javax.swing.JComboBox<VouStatus> cboProcessType;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -1890,8 +1970,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -1903,6 +1986,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JLabel lblExpRecord;
+    private javax.swing.JLabel lblLoadRecord;
+    private javax.swing.JLabel lblOutRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
     private javax.swing.JTable tblExpense;
@@ -1928,6 +2014,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JTextField txtRemark;
     private com.toedter.calendar.JDateChooser txtSaleDate;
     private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouStatus;
     private javax.swing.JFormattedTextField txtWtLoss;
     // End of variables declaration//GEN-END:variables
 
@@ -1958,6 +2045,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     @Override
     public void refresh() {
+        initData();
     }
 
     @Override
@@ -1991,18 +2079,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         jobSearchDialog.search();
     }
 
-    private void getVouStatus() {
-        inventoryRepo.getVoucherStatus().subscribe((t) -> {
-            vouStatusTableModel.setData(t);
-            cboProcessType.setModel(vouStatusTableModel);
-        });
-    }
-
     private void vouStatusSetup() {
         VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
         vsDialog.setIconImage(icon);
         vsDialog.setInventoryRepo(inventoryRepo);
-        vsDialog.setListVou(vouStatusTableModel.getData());
+        vsDialog.setListVou(vouStatusAutoCompleter.getListData());
         vsDialog.initMain();
         vsDialog.setSize(Global.width / 2, Global.height / 2);
         vsDialog.setLocationRelativeTo(null);

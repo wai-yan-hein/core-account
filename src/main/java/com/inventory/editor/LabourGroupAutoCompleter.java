@@ -9,7 +9,6 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.LabourGroup;
-import com.inventory.model.WareHouseKey;
 import com.inventory.ui.setup.dialog.common.LabourGroupTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -165,7 +164,7 @@ public final class LabourGroupAutoCompleter implements KeyListener {
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-                type = tableModel.getObject(table.convertRowIndexToModel(
+            type = tableModel.getObject(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getLabourName());
             if (observer != null) {
@@ -174,9 +173,6 @@ public final class LabourGroupAutoCompleter implements KeyListener {
             popup.setVisible(false);
             if (editor != null) {
                 editor.stopCellEditing();
-            }
-            if (observer != null) {
-                observer.selected("ST", type.getKey().getCode());
             }
         }
     }

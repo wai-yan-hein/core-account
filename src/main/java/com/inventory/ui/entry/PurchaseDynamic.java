@@ -1343,34 +1343,32 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             clearDetail();
             String vouNo = his.getKey().getVouNo();
             ph.setLandVouNo(vouNo);
-            inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
-                txtRemark.setText(l.getRemark());
-                inventoryRepo.findLocation(l.getLocCode()).doOnSuccess((t) -> {
-                    locationAutoCompleter.setLocation(t);
-                }).subscribe();
-                inventoryRepo.findTrader(l.getTraderCode()).doOnSuccess((t) -> {
-                    traderAutoCompleter.setTrader(t);
-                }).subscribe();
-                inventoryRepo.getLandingChooseGrade(vouNo).doOnSuccess((g) -> {
-                    String stockCode = g.getStockCode();
-                    inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
-                        PurHisDetail detail = new PurHisDetail();
-                        detail.setUserCode(s.getUserCode());
-                        detail.setStockCode(s.getKey().getStockCode());
-                        detail.setStockName(s.getStockName());
-                        detail.setPrice(l.getPurPrice());
-                        detail.setWeight(s.getWeight());
-                        detail.setWeightUnit(s.getWeightUnit());
-                        detail.setQty(1);
-                        detail.setUnitCode(s.getPurUnitCode());
-                        detail.setLandVouNo(vouNo);
-                        detail.setPurQty(s.getPurQty());
-                        addPurchase(detail);
-                        addNewRow();
-                        tblPur.setRowSelectionInterval(0, 0);
-                        tblPur.setColumnSelectionInterval(7, 7);
-                        tblPur.requestFocus();
-                    }).subscribe();
+            txtRemark.setText(his.getRemark());
+            inventoryRepo.findLocation(his.getLocCode()).doOnSuccess((t) -> {
+                locationAutoCompleter.setLocation(t);
+            }).subscribe();
+            inventoryRepo.findTrader(his.getTraderCode()).doOnSuccess((t) -> {
+                traderAutoCompleter.setTrader(t);
+            }).subscribe();
+            inventoryRepo.getLandingChooseGrade(vouNo).doOnSuccess((g) -> {
+                String stockCode = g.getStockCode();
+                inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
+                    PurHisDetail detail = new PurHisDetail();
+                    detail.setUserCode(s.getUserCode());
+                    detail.setStockCode(s.getKey().getStockCode());
+                    detail.setStockName(s.getStockName());
+                    detail.setPrice(his.getPurPrice());
+                    detail.setWeight(s.getWeight());
+                    detail.setWeightUnit(s.getWeightUnit());
+                    detail.setQty(1);
+                    detail.setUnitCode(s.getPurUnitCode());
+                    detail.setLandVouNo(vouNo);
+                    detail.setPurQty(s.getPurQty());
+                    addPurchase(detail);
+                    addNewRow();
+                    tblPur.setRowSelectionInterval(0, 0);
+                    tblPur.setColumnSelectionInterval(7, 7);
+                    tblPur.requestFocus();
                 }).subscribe();
             }).subscribe();
         } else {

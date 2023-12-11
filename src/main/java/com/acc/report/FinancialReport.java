@@ -45,21 +45,16 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.swing.JRViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class FinancialReport extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private final ReportTableModel tableModel = new ReportTableModel("Financial Report");
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private boolean isReport = false;
     private TraderAAutoCompleter traderAutoCompleter;
@@ -71,6 +66,15 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;

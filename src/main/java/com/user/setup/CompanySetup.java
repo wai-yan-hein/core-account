@@ -26,7 +26,6 @@ import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
-import com.user.model.MachineInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -35,26 +34,20 @@ import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class CompanySetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private Environment environment;
-    @Autowired
-    private String getToken;
+    private String token;
+
     private int selectRow = -1;
     private CompanyInfo companyInfo = new CompanyInfo();
     private CurrencyAutoCompleter currencyAutoCompleter;
@@ -64,6 +57,22 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private JProgressBar progress;
     private DateLockDialog dateLockDialog;
     private MachineInfoDialog machineInfoDialog;
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -219,7 +228,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             companyInfo.setActive(chkActive.isSelected());
             companyInfo.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             companyInfo.setUpdateMenu(chkMenuUpdate.isSelected());
-            companyInfo.setToken(getToken);
+            companyInfo.setToken(token);
         }
         return status;
 

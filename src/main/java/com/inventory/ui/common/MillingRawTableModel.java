@@ -370,16 +370,20 @@ public class MillingRawTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addSale(MillingRawDetail sd) {
+    public void addData(MillingRawDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
+    public MillingRawDetail getData(int row){
+        return listDetail.get(row);
+    }
 
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 

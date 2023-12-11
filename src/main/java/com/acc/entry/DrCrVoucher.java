@@ -49,15 +49,12 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
@@ -69,9 +66,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private SelectionObserver observer;
     private JProgressBar progress;
     private final VoucherTableModel voucherTableModel = new VoucherTableModel();
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private VoucherEntryDailog dialog;
 
@@ -89,6 +84,14 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     /**

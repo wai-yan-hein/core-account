@@ -69,7 +69,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class COAManagment extends javax.swing.JPanel implements
         MouseListener,
@@ -84,9 +83,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private final StandardCOATableModel standardCOATableModel = new StandardCOATableModel();
     private final COAUnusedDailog unusedDailog = new COAUnusedDailog();
     private final COAViewTableModel cOAViewTableModel = new COAViewTableModel();
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private AccountRepo accountRepo;
     private MenuAutoCompleter completer;
     private TableRowSorter<TableModel> sorter;
@@ -97,6 +94,15 @@ public class COAManagment extends javax.swing.JPanel implements
     private boolean isNew = false;
     private JProgressBar progress;
     private StartWithRowFilter swrf;
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;

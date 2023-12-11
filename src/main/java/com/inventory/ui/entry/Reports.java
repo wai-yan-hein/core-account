@@ -6,8 +6,8 @@
 package com.inventory.ui.entry;
 
 import com.acc.editor.DateAutoCompleter;
+import com.common.ComponentUtil;
 import com.common.ExcelExporter;
-import com.common.FontCellRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -19,6 +19,7 @@ import com.common.Util1;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
+import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
@@ -26,6 +27,7 @@ import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
+import com.inventory.editor.WareHouseAutoCompleter;
 import com.inventory.model.General;
 import com.inventory.model.VOpening;
 import com.inventory.model.VPurchase;
@@ -34,15 +36,12 @@ import com.inventory.model.VSale;
 import com.inventory.model.VStockIO;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.ui.management.model.ClosingBalance;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import cv.api.common.StockValue;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -57,7 +56,6 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
@@ -70,24 +68,18 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.swing.JRViewer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private TaskExecutor taskExecutor;
     private boolean isReport = false;
     private String stDate;
@@ -107,12 +99,26 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private DateAutoCompleter dateAutoCompleter;
     private BatchAutoCompeter batchAutoCompeter;
     private ProjectAutoCompleter projectAutoCompleter;
+    private LabourGroupAutoCompleter labourGroupAutoCompleter;
+    private WareHouseAutoCompleter wareHouseAutoCompleter;
     private ReportFilter filter;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
     private final ExcelExporter exporter = new ExcelExporter();
     private Set<String> excelReport = new HashSet<>();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -125,50 +131,22 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     /**
      * Creates new form Reports
      */
     public Reports() {
         initComponents();
-        initFocusAdapter();
-    }
-
-    private void initFocusAdapter() {
-        txtDate.addFocusListener(fa);
-        txtFromDate.addFocusListener(fa);
-        txtToDate.addFocusListener(fa);
-        txtTrader.addFocusListener(fa);
-        txtSaleMan.addFocusListener(fa);
-        txtLocation.addFocusListener(fa);
-        txtStock.addFocusListener(fa);
-        txtStockType.addFocusListener(fa);
-        txtCategory.addFocusListener(fa);
-        txtBrand.addFocusListener(fa);
-        txtVouType.addFocusListener(fa);
-        txtRegion.addFocusListener(fa);
-        txtBatchNo.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtFromDueDate.addFocusListener(fa);
-        txtToDueDate.addFocusListener(fa);
     }
 
     public void initMain() {
+        ComponentUtil.addFocusListener(this);
         initExcel();
         initTableReport();
         initRowHeader();
         initRowSorter();
         initCombo();
+        initData();
         initDate();
         getReport();
     }
@@ -250,51 +228,63 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         }).subscribe();
     }
 
-    private void initCombo() {
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
-        locationAutoCompleter.setObserver(this);
-        inventoryRepo.getLocation().subscribe((t) -> {
+    private void initData() {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
-        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
-        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
-        inventoryRepo.getSaleMan().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getSaleMan().doOnSuccess((t) -> {
             saleManAutoCompleter.setListSaleMan(t);
-        });
-        stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
-        inventoryRepo.getStockType().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getStockType().doOnSuccess((t) -> {
             stockTypeAutoCompleter.setListStockType(t);
-        });
-        categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, null, true);
-        inventoryRepo.getCategory().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getCategory().doOnSuccess((t) -> {
             categoryAutoCompleter.setListCategory(t);
-        });
-        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
-        inventoryRepo.getStockBrand().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getStockBrand().doOnSuccess((t) -> {
             brandAutoCompleter.setListStockBrand(t);
-        });
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
-        inventoryRepo.getRegion().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getRegion().doOnSuccess((t) -> {
             regionAutoCompleter.setListRegion(t);
-        });
-        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        }).subscribe();
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
+        }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
         }).subscribe();
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListData(t);
+        }).subscribe();
+        inventoryRepo.getWareHouse().doOnSuccess((t) -> {
+            wareHouseAutoCompleter.setListObject(t);
+        }).subscribe();
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
+            labourGroupAutoCompleter.setListObject(t);
+        }).subscribe();
+    }
+
+    private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
+        locationAutoCompleter.setObserver(this);
+        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
+        stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, null, true);
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, true);
-        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vouStatusAutoCompleter.setListVouStatus(t);
-        }).subscribe();
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
         batchAutoCompeter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
+        labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, true);
+        labourGroupAutoCompleter.setObserver(this);
+        wareHouseAutoCompleter = new WareHouseAutoCompleter(txtWH, null, true);
     }
 
     private void report(boolean excel) {
@@ -330,6 +320,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
                     filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
                     filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+                    filter.setLabourGroupCode(labourGroupAutoCompleter.getObject().getKey().getCode());
                     filter.setCalSale(Util1.getBoolean(ProUtil.isDisableSale()));
                     filter.setCalPur(Util1.getBoolean(ProUtil.isDisablePur()));
                     filter.setCalRI(Util1.getBoolean(ProUtil.isDisableRetIn()));
@@ -613,6 +604,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtFromDueDate = new com.toedter.calendar.JDateChooser();
         txtToDueDate = new com.toedter.calendar.JDateChooser();
         jLabel18 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        txtLG = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        txtWH = new javax.swing.JTextField();
         txtFilter = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
@@ -681,7 +676,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         });
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Location");
+        jLabel2.setText("Ware House");
 
         txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -817,6 +812,34 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         jLabel18.setFont(Global.lableFont);
         jLabel18.setText("To Due Date");
 
+        jLabel19.setFont(Global.lableFont);
+        jLabel19.setText("Labour Group");
+
+        txtLG.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtLGFocusGained(evt);
+            }
+        });
+        txtLG.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtLGActionPerformed(evt);
+            }
+        });
+
+        jLabel20.setFont(Global.lableFont);
+        jLabel20.setText("Location");
+
+        txtWH.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtWHFocusGained(evt);
+            }
+        });
+        txtWH.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtWHKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -836,12 +859,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel17))
+                    .addComponent(jLabel17)
+                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtFromDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                            .addComponent(txtFromDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -849,7 +873,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                             .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                            .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtToDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(txtProjectNo, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtBatchNo, javax.swing.GroupLayout.Alignment.LEADING)
@@ -859,9 +883,15 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addComponent(txtCategory, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStockType, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtStock, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLocation, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtSaleMan, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtTrader))
+                    .addComponent(txtTrader)
+                    .addComponent(txtLG, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtWH, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel20)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -891,8 +921,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtLocation)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtLocation)
+                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtWH)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtStock)
@@ -925,6 +959,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtProjectNo))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtLG))
                 .addContainerGap())
         );
 
@@ -1059,7 +1097,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtFilter)
-                            .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE))
+                            .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 463, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1217,6 +1255,22 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         setEnableExcel();
     }//GEN-LAST:event_tblReportMouseClicked
 
+    private void txtLGFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLGFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLGFocusGained
+
+    private void txtLGActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLGActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLGActionPerformed
+
+    private void txtWHFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtWHFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtWHFocusGained
+
+    private void txtWHKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtWHKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtWHKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExcel;
@@ -1231,7 +1285,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1254,6 +1310,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private com.toedter.calendar.JDateChooser txtFromDueDate;
+    private javax.swing.JTextField txtLG;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRegion;
@@ -1264,6 +1321,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private com.toedter.calendar.JDateChooser txtToDueDate;
     private javax.swing.JTextField txtTrader;
     private javax.swing.JTextField txtVouType;
+    private javax.swing.JTextField txtWH;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -1290,6 +1348,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void refresh() {
         getReport();
+        initData();
     }
 
     @Override

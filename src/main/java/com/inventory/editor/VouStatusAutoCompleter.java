@@ -57,20 +57,25 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
     private int y = 0;
     private SelectionObserver observer;
     private boolean filter = false;
+    private List<VouStatus> listData;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public void setListVouStatus(List<VouStatus> list) {
+    public List<VouStatus> getListData() {
+        return listData;
+    }
+
+    public void setListData(List<VouStatus> listData) {
+        this.listData = listData;
         if (filter) {
             VouStatus sb = new VouStatus("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, sb);
+            listData.add(0, sb);
             setVoucher(sb);
         }
-        vouStatusTableModel.setListVou(list);
-        if (!list.isEmpty()) {
+        vouStatusTableModel.setListVou(listData);
+        if (!listData.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }

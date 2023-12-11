@@ -86,7 +86,7 @@ public class AccountRepo {
                 .bodyToMono(DepartmentA.class)
                 .onErrorResume((e) -> {
                     log.error("findDepartment : " + e.getMessage());
-                    return Mono.error(e);
+                    return Mono.empty();
                 });
     }
 
@@ -507,6 +507,9 @@ public class AccountRepo {
     }
 
     public Mono<ChartOfAccount> findCOA(String coaCode) {
+        if (Util1.isNullOrEmpty(coaCode)) {
+            return Mono.empty();
+        }
         COAKey key = new COAKey();
         key.setCoaCode(coaCode);
         key.setCompCode(Global.compCode);

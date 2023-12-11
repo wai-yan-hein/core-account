@@ -10,6 +10,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
+import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -52,6 +53,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -154,6 +156,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initData();
         initCombo();
         initTable();
+        initRowHeader();
+    }
+
+    private void initRowHeader() {
+        RowHeader header = new RowHeader();
+        JList list = header.createRowHeader(tblStock, 30);
+        s1.setRowHeaderView(list);
     }
 
     private void initData() {
@@ -166,13 +175,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         stockTableModel.setInventoryRepo(inventoryRepo);
         tblStock.setModel(stockTableModel);
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblStock.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(50);//code
-        tblStock.getColumnModel().getColumn(2).setPreferredWidth(200);//name
-        tblStock.getColumnModel().getColumn(3).setPreferredWidth(150);//group
-        tblStock.getColumnModel().getColumn(4).setPreferredWidth(150);//cat
-        tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);//weight
-        tblStock.getColumnModel().getColumn(6).setPreferredWidth(1);//active
+        tblStock.getColumnModel().getColumn(0).setPreferredWidth(50);//code
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);//name
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(150);//group
+        tblStock.getColumnModel().getColumn(3).setPreferredWidth(150);//cat
+        tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
+        tblStock.getColumnModel().getColumn(5).setPreferredWidth(1);//active
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
@@ -1068,6 +1076,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel21.setText("Weight");
 
         txtWt.setFont(Global.textFont);
+        txtWt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtWt.setToolTipText("Purchase Price");
         txtWt.setName("txtWt"); // NOI18N
         txtWt.addFocusListener(new java.awt.event.FocusAdapter() {

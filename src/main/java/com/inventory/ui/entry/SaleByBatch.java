@@ -74,18 +74,14 @@ import reactor.core.publisher.Mono;
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleByBatchTableModel saleTableModel = new SaleByBatchTableModel();
     private SaleHistoryDialog dialog;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -98,6 +94,19 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private double prvBal = 0;
     private double balance = 0;
     private StockBalanceFrame stockBalanceDialog;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;

@@ -15,7 +15,6 @@ import com.inventory.model.OutputCost;
 import com.inventory.model.OutputCostKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.OutputCostTabelModel;
-import com.repo.UserRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileWriter;
@@ -38,32 +37,30 @@ import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
     private OutputCost outputCost = new OutputCost();
     private final OutputCostTabelModel outputCostTableModel = new OutputCostTabelModel();
-    @Autowired
-    private TaskExecutor taskExecutor;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private UserRepo userRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     enum Header {
         UserCode,
@@ -178,7 +175,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
 //                outputCost.setDeptId(Global.deptId);
                 OutputCostKey key = new OutputCostKey();
                 key.setCompCode(Global.compCode);
-                key.setOutputCostCode(null);                
+                key.setOutputCostCode(null);
                 outputCost.setKey(key);
             } else {
                 outputCost.setUpdatedBy(Global.loginUser.getUserCode());

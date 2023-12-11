@@ -4,18 +4,17 @@
  */
 package com.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 /**
  *
@@ -27,17 +26,14 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @PropertySource("classpath:application.properties") // Use the same properties file as your main configuration
 public class H2DBConfig {
 
-    @Lazy
     @Bean
     public DataSource dataSource() {
-        try {
-            return new EmbeddedDatabaseBuilder()
-                    .setType(EmbeddedDatabaseType.H2)
-                    .build();
-        } catch (Exception e) {
-            log.error("Failed to create the H2 DataSource: " + e.getMessage());
-        }
-        return null;
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:h2:file:./data/database");
+        config.setUsername("root");
+        config.setPassword("corevalue");
+        config.setDriverClassName("org.h2.Driver");
+        return new HikariDataSource(config);
     }
 
     @Bean
@@ -45,8 +41,7 @@ public class H2DBConfig {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        String[] entity = {"com.user.model", "com.inventory.model", "com.acc.model"};
-        em.setPackagesToScan(entity);
+        em.setPackagesToScan("com.user.model", "com.inventory.model", "com.acc.model");
         em.setJpaProperties(additionalJpaProperties());
         return em;
     }
@@ -54,11 +49,13 @@ public class H2DBConfig {
     private Properties additionalJpaProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", "update"); // Example JPA property
-        properties.setProperty("hibernate.connection.username", "root");
+        /* properties.setProperty("hibernate.connection.username", "root");
         properties.setProperty("hibernate.connection.password", "corevalue");
-        properties.setProperty("hibernate.connection.url", "jdbc:h2:file:./data/database");
+        properties.setProperty("hibernate.connection.url", "jdbc:h2:file:./data/database");*/
         properties.setProperty("spring.h2.console.enabled", "true");
         properties.setProperty("spring.h2.console.path", "/h2-console");
+        //properties.setProperty("hibernate.hbm2ddl.auto", "validate");
+        properties.setProperty("hibernate.transaction.jta.platform", "org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform");
         return properties;
     }
 }

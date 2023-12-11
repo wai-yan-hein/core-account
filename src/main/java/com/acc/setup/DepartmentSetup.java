@@ -54,6 +54,17 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     private final String parentRootName = "Department";
     private SelectionObserver observer;
     private JProgressBar progress;
+    private TaskExecutor taskExecutor;
+    private AccountRepo accountRepo;
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -62,11 +73,6 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
-    @Autowired
-    private TaskExecutor taskExecutor;
-    @Autowired
-    private AccountRepo accountRepo;
 
     JPopupMenu popupmenu;
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -185,7 +191,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         enableForm(false);
         txtUserCode.requestFocus();
     }
-    private void enableForm(boolean status){
+
+    private void enableForm(boolean status) {
         txtUserCode.setEditable(status);
         txtName.setEditable(status);
     }

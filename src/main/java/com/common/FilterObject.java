@@ -33,7 +33,7 @@ public class FilterObject {
     private String compCode;
     private Integer deptId;
     private String processNo;
-    private boolean finished;
+    private Boolean finished;
     private boolean close;
     private String traderCode;
     private boolean nullBatch;
@@ -48,6 +48,7 @@ public class FilterObject {
     private String orderStatus;
     private String tranSource;
     private boolean draft;
+    private String jobNo;
 
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;

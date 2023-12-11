@@ -20,19 +20,28 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class OtherSetupMain extends javax.swing.JPanel {
 
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
     private AccountSettingEntry entry;
     private OtherSetup setup;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public JProgressBar getProgress() {
         return progress;

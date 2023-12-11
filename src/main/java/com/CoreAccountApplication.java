@@ -182,18 +182,9 @@ public class CoreAccountApplication {
             System.setProperty("flatlaf.menuBarEmbedded", "true");
             System.setProperty("flatlaf.animation", "true");
             System.setProperty("flatlaf.uiScale.enabled", "true");
-            UIManager.put("Button.arc", 20);
-            UIManager.put("Table.arc", 20);
-            UIManager.put("Component.arc", 20);
-            UIManager.put("ProgressBar.arc", 20);
-            UIManager.put("CheckBox.arc", 20);
-            UIManager.put("TextComponent.arc", 20);
-            UIManager.put("TabbedPane.showTabSeparators", true);
-            UIManager.put("TableHeader.foreground", Color.white);
-            UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
             boolean darkMode = isDarkModeEnabled();
             if (darkMode) {
-                UIManager.put("TextField.disabledForeground", Color.white);
+                //UIManager.put("TextField.disabledForeground", Color.white);
                 UIManager.setLookAndFeel(new FlatMacDarkLaf());
             } else {
                 UIManager.setLookAndFeel(new FlatMacLightLaf());
@@ -201,10 +192,19 @@ public class CoreAccountApplication {
             Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
             UIManager.put("TableHeader.background", Global.selectionColor);
             UIManager.put("Table.selectionBackground", Global.selectionColor);
+            UIManager.put("Button.arc", 20);
+            UIManager.put("Table.arc", 20);
+            UIManager.put("Component.arc", 20);
+            UIManager.put("ProgressBar.arc", 20);
+            UIManager.put("CheckBox.arc", 20);
+            UIManager.put("TextComponent.arc", 20);
+            UIManager.put("TabbedPane.showTabSeparators", true);
+            UIManager.put("TableHeader.foreground", Color.WHITE);
+            UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
             Util1.DARK_MODE = darkMode;
             log.info("theme end.");
         } catch (UnsupportedLookAndFeelException ex) {
-            System.err.println("Failed to initialize LaF");
+            log.error("Failed to initialize LaF");
         }
     }
 

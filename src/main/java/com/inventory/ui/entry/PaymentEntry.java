@@ -205,6 +205,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     private void initDate() {
         txtVouDate.setDate(Util1.getTodayDate());
     }
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPayment, 30);
@@ -359,13 +360,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             return false;
         } else {
             if (cboCash.getSelectedItem() instanceof ChartOfAccount coa) {
-                if (coa.getKey() != null) {
-                    ph.setAccount(coa.getKey().getCoaCode());
-                }
+                ph.setAccount(coa.getKey() == null ? null : coa.getKey().getCoaCode());
             }
             Project p = projectAutoCompleter.getProject();
             if (p != null) {
-                ph.setProjectNo(p.getKey().getProjectNo());
+                ph.setProjectNo(p.getKey() == null ? null : p.getKey().getProjectNo());
             }
             ph.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             ph.setTraderCode(t.getKey().getCode());

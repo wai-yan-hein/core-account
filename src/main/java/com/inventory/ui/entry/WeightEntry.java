@@ -17,6 +17,7 @@ import com.common.Util1;
 import com.inventory.editor.StockAutoCompleter1;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Stock;
+import com.inventory.model.Trader;
 import com.inventory.model.WeightHis;
 import com.inventory.model.WeightHisDetail;
 import com.inventory.model.WeightHisKey;
@@ -213,17 +214,17 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                 progress.setIndeterminate(true);
                 observer.selected("save", false);
                 his.setListDetail(getListDetail());
-                inventoryRepo.saveWeight(his).subscribe((t) -> {
+                inventoryRepo.saveWeight(his).doOnSuccess((t) -> {
                     if (print) {
-                        printWeightVoucher(his);
+                        printWeightVoucher(t);
                     } else {
                         clear(true);
                     }
-                }, (e) -> {
+                }).doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
                     observer.selected("save", false);
-                });
+                }).subscribe();
 
             }
         } catch (HeadlessException ex) {
@@ -357,10 +358,15 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         param.put("p_logo_path", logoPath);
         param.put("p_remark", p.getRemark());
         param.put("p_vou_no", p.getKey().getVouNo());
-        param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
         param.put("p_vou_date", Util1.getDate(p.getVouDate()));
         param.put("p_vou_time", Util1.getTime(p.getVouDate()));
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            param.put("p_trader_name", Util1.isNull(p.getDescription(), t.getTraderName()));
+            param.put("p_trader_address", t.getAddress());
+            param.put("p_trader_phone", t.getRemark());
+        }
         return param;
     }
 
@@ -402,6 +408,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                 lblStatus.setText("This voucher can't edit");
                 lblStatus.setForeground(Color.RED);
                 disableForm(false);
+                observer.selected("print", true);
             } else if (his.isDeleted()) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.RED);
@@ -492,7 +499,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         observer.selected("print", true);
         observer.selected("history", true);
         observer.selected("delete", true);
-        observer.selected("refresh", false);
+        observer.selected("refresh", true);
     }
 
     private void initModel() {

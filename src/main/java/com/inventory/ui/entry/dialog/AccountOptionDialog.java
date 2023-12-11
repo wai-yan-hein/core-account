@@ -4,8 +4,8 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.acc.common.COAComboBoxModel;
-import com.acc.common.DepartmentAccComboBoxModel;
+import com.acc.editor.COAAutoCompleter;
+import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.common.Global;
@@ -24,10 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AccountOptionDialog extends javax.swing.JDialog {
 
     private AccountRepo accountRepo;
-    private final DepartmentAccComboBoxModel departmentComboBoxModel = new DepartmentAccComboBoxModel();
-    private final COAComboBoxModel cashComboModel = new COAComboBoxModel();
-    private final COAComboBoxModel purchaseComboModel = new COAComboBoxModel();
-    private final COAComboBoxModel payableComboModel = new COAComboBoxModel();
+    private DepartmentAutoCompleter departmentCompleter;
+    private COAAutoCompleter cashCompleter;
+    private COAAutoCompleter purhcaseCompleter;
+    private COAAutoCompleter paybleCompleter;
     private Object object;
     private final String sale = "SALE";
     private final String purchase = "PURCHASE";
@@ -50,10 +50,10 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     private void initModel() {
-        cboDepartment.setModel(departmentComboBoxModel);
-        cboCash.setModel(cashComboModel);
-        cboPurchase.setModel(purchaseComboModel);
-        cboPayable.setModel(payableComboModel);
+        departmentCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
+        cashCompleter = new COAAutoCompleter(txtCash, null, false);
+        purhcaseCompleter = new COAAutoCompleter(txtPur, null, false);
+        paybleCompleter = new COAAutoCompleter(txtPayble, null, false);
     }
 
     public void initMain() {
@@ -62,38 +62,38 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     private void initCompleter() {
         accountRepo.getDepartment().doOnSuccess((t) -> {
-            departmentComboBoxModel.setData(t);
+            departmentCompleter.setListDepartment(t);
         }).subscribe();
         accountRepo.getCashBank().doOnSuccess((t) -> {
-            cashComboModel.setData(t);
+            cashCompleter.setListCOA(t);
         }).subscribe();
         accountRepo.getPurchaseAcc().doOnSuccess((t) -> {
-            purchaseComboModel.setData(t);
+            purhcaseCompleter.setListCOA(t);
         }).subscribe();
         accountRepo.getPayableAcc().doOnSuccess((t) -> {
-            payableComboModel.setData(t);
+            paybleCompleter.setListCOA(t);
         }).subscribe();
     }
 
     public void setObject(Object obj) {
+        this.object = obj;
         if (obj instanceof PurHis p) {
             setDepartment(p.getDeptCode());
             setCash(p.getCashAcc());
             setPurchase(p.getPurchaseAcc());
             setPayable(p.getPayableAcc());
         }
-        this.object = obj;
     }
 
     private void setPayable(String payableAcc) {
         accountRepo.findCOA(Util1.isNull(payableAcc, balanceAcc())).doOnSuccess((t) -> {
-            payableComboModel.setSelectedItem(t);
-            cboPayable.repaint();
+            paybleCompleter.setCoa(t);
         }).subscribe();
     }
 
     private String getPayable() {
-        if (cboPayable.getSelectedItem() instanceof ChartOfAccount coa) {
+        ChartOfAccount coa = paybleCompleter.getCOA();
+        if (coa != null) {
             if (coa.getKey() != null) {
                 return coa.getKey().getCoaCode();
             }
@@ -103,13 +103,13 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     private void setPurchase(String purAcc) {
         accountRepo.findCOA(Util1.isNull(purAcc, sourceAcc())).doOnSuccess((t) -> {
-            purchaseComboModel.setSelectedItem(t);
-            cboPurchase.repaint();
+            purhcaseCompleter.setCoa(t);
         }).subscribe();
     }
 
     private String getPurchase() {
-        if (cboPurchase.getSelectedItem() instanceof ChartOfAccount coa) {
+        ChartOfAccount coa = purhcaseCompleter.getCOA();
+        if (coa != null) {
             if (coa.getKey() != null) {
                 return coa.getKey().getCoaCode();
             }
@@ -119,13 +119,13 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     private void setCash(String cashAcc) {
         accountRepo.findCOA(Util1.isNull(cashAcc, payAcc())).doOnSuccess((t) -> {
-            cashComboModel.setSelectedItem(t);
-            cboCash.repaint();
+            cashCompleter.setCoa(t);
         }).subscribe();
     }
 
     private String getCash() {
-        if (cboCash.getSelectedItem() instanceof ChartOfAccount coa) {
+        ChartOfAccount coa = cashCompleter.getCOA();
+        if (coa != null) {
             if (coa.getKey() != null) {
                 return coa.getKey().getCoaCode();
             }
@@ -135,13 +135,13 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     private void setDepartment(String deptCode) {
         accountRepo.findDepartment(Util1.isNull(deptCode, depAcc())).doOnSuccess((t) -> {
-            departmentComboBoxModel.setSelectedItem(t);
-            cboDepartment.repaint();
+            departmentCompleter.setDepartment(t);
         }).subscribe();
     }
 
     private String getDepartment() {
-        if (cboDepartment.getSelectedItem() instanceof DepartmentA dep) {
+        DepartmentA dep = departmentCompleter.getDepartment();
+        if (dep != null) {
             if (dep.getKey() != null) {
                 return dep.getKey().getDeptCode();
             }
@@ -215,10 +215,10 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        cboDepartment = new javax.swing.JComboBox<>();
-        cboCash = new javax.swing.JComboBox<>();
-        cboPayable = new javax.swing.JComboBox<>();
-        cboPurchase = new javax.swing.JComboBox<>();
+        txtDep = new javax.swing.JTextField();
+        txtCash = new javax.swing.JTextField();
+        txtPur = new javax.swing.JTextField();
+        txtPayble = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Purchase More Dialog");
@@ -243,14 +243,6 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
         jLabel4.setText("Department");
 
-        cboDepartment.setFont(Global.textFont);
-
-        cboCash.setFont(Global.textFont);
-
-        cboPayable.setFont(Global.textFont);
-
-        cboPurchase.setFont(Global.textFont);
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -261,22 +253,18 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton1))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cboPayable, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
-                                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(cboDepartment, 0, 287, Short.MAX_VALUE)
-                                .addComponent(cboCash, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(cboPurchase, javax.swing.GroupLayout.Alignment.TRAILING, 0, 287, Short.MAX_VALUE))))
+                            .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
+                            .addComponent(txtCash, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtPur, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtPayble))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -285,19 +273,19 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboPayable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPayble, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 149, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -333,15 +321,15 @@ public class AccountOptionDialog extends javax.swing.JDialog {
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<ChartOfAccount> cboCash;
-    private javax.swing.JComboBox<DepartmentA> cboDepartment;
-    private javax.swing.JComboBox<ChartOfAccount> cboPayable;
-    private javax.swing.JComboBox<ChartOfAccount> cboPurchase;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JTextField txtCash;
+    private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtPayble;
+    private javax.swing.JTextField txtPur;
     // End of variables declaration//GEN-END:variables
 }

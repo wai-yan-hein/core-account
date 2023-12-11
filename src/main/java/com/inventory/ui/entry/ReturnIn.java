@@ -66,15 +66,12 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
@@ -82,11 +79,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private List<RetInHisDetail> listDetail = new ArrayList();
     private final ReturnInTableModel retInTableModel = new ReturnInTableModel();
     private ReturnInHistoryDialog dialog;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -96,6 +90,19 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private JProgressBar progress;
     private RetInHis ri = new RetInHis();
     private Mono<List<Location>> monoLoc;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
+    
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;

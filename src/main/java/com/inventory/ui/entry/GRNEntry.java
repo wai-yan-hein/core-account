@@ -63,21 +63,27 @@ import reactor.core.publisher.Mono;
  *
  * @author DELL
  */
-@Component
 @Slf4j
 public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
     private SelectionObserver observer;
     private JProgressBar progress;
     private TraderAutoCompleter traderAutoCompleter;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
     private LocationAutoCompleter locationAutoCompleter;
     private final GRNTableModel tableModel = new GRNTableModel();
     private GRNHistoryDialog dialog;
     private GRN grn = new GRN();
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;

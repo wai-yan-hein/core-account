@@ -23,14 +23,10 @@ import org.springframework.stereotype.Component;
  *
  * @author Lenovo
  */
-@Component
 public class CompanyTemplate extends javax.swing.JPanel {
 
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private TaskExecutor taskExecutor;
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -38,6 +34,18 @@ public class CompanyTemplate extends javax.swing.JPanel {
     private BusinessTypeComboBoxModel businessTypeComboBoxModel;
     private final MenuTemplateSetup menuTemplateSetup = new MenuTemplateSetup();
     private final COATemplateSetup cOATemplateSetup = new COATemplateSetup();
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;

@@ -8,25 +8,32 @@ import com.common.SelectionObserver;
 import com.repo.AccountRepo;
 import com.repo.UserRepo;
 import javax.swing.JProgressBar;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class ExcelReport extends javax.swing.JPanel {
 
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private TaskExecutor taskExecutor;
     private JProgressBar progress;
     private SelectionObserver observer;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -35,7 +42,6 @@ public class ExcelReport extends javax.swing.JPanel {
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
 
     /**
      * Creates new form ExcelReport

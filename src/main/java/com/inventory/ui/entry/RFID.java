@@ -61,22 +61,28 @@ import reactor.core.publisher.Mono;
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final RFIDTableModel tableModel = new RFIDTableModel();
     private SaleHistoryDialog dialog;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private SelectionObserver observer;
     private SaleHis saleHis = new SaleHis();
     private JProgressBar progress;
     private String locCode;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public JProgressBar getProgress() {
         return progress;

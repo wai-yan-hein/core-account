@@ -9,6 +9,7 @@ import com.acc.model.BusinessType;
 import com.acc.model.DeleteObj;
 import com.common.Global;
 import com.common.ReturnObject;
+import com.common.Util1;
 import com.user.model.RoleProperty;
 import com.inventory.model.AppRole;
 import com.inventory.model.Country;
@@ -563,6 +564,9 @@ public class UserRepo {
     }
 
     public Mono<Country> findCountry(String code) {
+        if (Util1.isNullOrEmpty(code)) {
+            return Mono.empty();
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/findCountry")
                 .queryParam("id", code)
@@ -1013,7 +1017,10 @@ public class UserRepo {
                 .build())
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .retrieve()
-                .bodyToMono(byte[].class);
+                .bodyToMono(byte[].class)
+                .doOnNext((t) -> {
+                    log.info("next");
+                });
     }
 
     public Mono<String> sendMessage(Message message) {

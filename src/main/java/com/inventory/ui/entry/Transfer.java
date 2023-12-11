@@ -10,8 +10,6 @@ import com.common.DecimalFormatRender;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -33,7 +31,10 @@ import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.LabourGroup;
+import com.inventory.model.THDetailKey;
+import com.inventory.model.TransferHisDetail;
 import com.inventory.ui.common.LabourGroupComboBoxModel;
+import com.inventory.ui.common.TransferPaddingTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -44,6 +45,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -61,14 +63,14 @@ import net.sf.jasperreports.view.JasperViewer;
  *
  * @author Lenovo
  */
-@Component
 public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
+    public static final int TRAN = 1;
+    public static final int TRAN_PADDY = 2;
     private final TransferTableModel tranTableModel = new TransferTableModel();
+    private final TransferPaddingTableModel tranPaddingTableModel = new TransferPaddingTableModel();
     private TransferHistoryDialog dialog;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private UserRepo userRepo;
     private LocationAutoCompleter fromLocaitonCompleter;
     private LocationAutoCompleter toLocaitonCompleter;
@@ -77,6 +79,15 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private SelectionObserver observer;
     private JProgressBar progress;
     private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
+    private int type;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -93,7 +104,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     /**
      * Creates new form StockInOutEntry
      */
-    public Transfer() {
+    public Transfer(int type) {
+        this.type = type;
         initComponents();
         initDateListner();
         actionMapping();
@@ -101,6 +113,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     public void initMain() {
         initTable();
+        initModel();
         initRowHeader();
         initCombo();
         initButttonGroup();
@@ -171,6 +184,28 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void initTable() {
+        tblTransfer.getTableHeader().setFont(Global.tblHeaderFont);
+        tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
+        tblTransfer.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblTransfer.setCellSelectionEnabled(true);
+        tblTransfer.changeSelection(0, 0, false, false);
+        tblTransfer.requestFocus();
+    }
+
+    private void initModel() {
+        switch (type) {
+            case TRAN -> {
+                initTransfer();
+            }
+            case TRAN_PADDY -> {
+                initTransferPaddy();
+            }
+        }
+    }
+
+    private void initTransfer() {
         tranTableModel.setVouDate(txtDate);
         tranTableModel.setLblRec(lblRec);
         tranTableModel.setInventoryRepo(inventoryRepo);
@@ -178,7 +213,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tranTableModel.setParent(tblTransfer);
         tranTableModel.setObserver(this);
         tblTransfer.setModel(tranTableModel);
-        tblTransfer.getTableHeader().setFont(Global.tblHeaderFont);
         tblTransfer.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblTransfer.getColumnModel().getColumn(1).setPreferredWidth(250);
         tblTransfer.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -194,13 +228,33 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             tblTransfer.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
             tblTransfer.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
         });
-        tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblTransfer.setDefaultRenderer(Float.class, new DecimalFormatRender());
-        tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblTransfer.setCellSelectionEnabled(true);
-        tblTransfer.changeSelection(0, 0, false, false);
-        tblTransfer.requestFocus();
+    }
+
+    private void initTransferPaddy() {
+        tranPaddingTableModel.setVouDate(txtDate);
+        tranPaddingTableModel.setLblRec(lblRec);
+        tranPaddingTableModel.setInventoryRepo(inventoryRepo);
+        tranPaddingTableModel.addNewRow();
+        tranPaddingTableModel.setParent(tblTransfer);
+        tranPaddingTableModel.setObserver(this);
+        tblTransfer.setModel(tranPaddingTableModel);
+        tblTransfer.getColumnModel().getColumn(0).setPreferredWidth(10);
+        tblTransfer.getColumnModel().getColumn(1).setPreferredWidth(250);
+        tblTransfer.getColumnModel().getColumn(2).setPreferredWidth(50);
+        tblTransfer.getColumnModel().getColumn(3).setPreferredWidth(50);
+        tblTransfer.getColumnModel().getColumn(4).setPreferredWidth(50);
+        tblTransfer.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tblTransfer.getColumnModel().getColumn(6).setPreferredWidth(50);
+        tblTransfer.getColumnModel().getColumn(7).setPreferredWidth(100);
+        tblTransfer.getColumnModel().getColumn(8).setPreferredWidth(150);
+        tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblTransfer.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblTransfer.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblTransfer.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblTransfer.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblTransfer.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
     }
 
     private void deleteVoucher() {
@@ -247,9 +301,48 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
     }
 
+    private boolean isValidDetail() {
+        switch (type) {
+            case TRAN -> {
+                return tranTableModel.isValidEntry();
+            }
+            case TRAN_PADDY -> {
+                return tranPaddingTableModel.isValidEntry();
+            }
+            default -> {
+                return false;
+
+            }
+        }
+    }
+
+    private List<TransferHisDetail> getListDetail() {
+        switch (type) {
+            case TRAN -> {
+                return tranTableModel.getListTransfer();
+            }
+            case TRAN_PADDY -> {
+                return tranPaddingTableModel.getListTransfer();
+            }
+        }
+        return null;
+    }
+
+    private List<THDetailKey> getDeleteList() {
+        switch (type) {
+            case TRAN -> {
+                return tranTableModel.getDeleteList();
+            }
+            case TRAN_PADDY -> {
+                return tranPaddingTableModel.getDeleteList();
+            }
+        }
+        return null;
+    }
+
     public boolean saveVoucher(boolean print) {
         boolean status = false;
-        if (isValidEntry() && tranTableModel.isValidEntry()) {
+        if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtDate.getDate())) {
                 DateLockUtil.showMessage(this);
                 txtDate.requestFocus();
@@ -257,8 +350,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            io.setListTD(tranTableModel.getListTransfer());
-            io.setDelList(tranTableModel.getDeleteList());
+            io.setListTD(getListDetail());
+            io.setDelList(getDeleteList());
             inventoryRepo.save(io)
                     .subscribe((t) -> {
                         clear();
@@ -281,6 +374,19 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }).subscribe();
     }
 
+    private void clearModel() {
+        switch (type) {
+            case TRAN -> {
+                tranTableModel.clear();
+                tranTableModel.addNewRow();
+            }
+            case TRAN_PADDY -> {
+                tranPaddingTableModel.clear();
+                tranPaddingTableModel.addNewRow();
+            }
+        }
+    }
+
     private void clear() {
         assingnDefault();
         io = new TransferHis();
@@ -288,8 +394,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         lblStatus.setText("NEW");
         txtRefNo.setText(null);
         txtRemark.setText(null);
-        tranTableModel.clear();
-        tranTableModel.addNewRow();
+        clearModel();
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
@@ -390,8 +495,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }).subscribe();
         String vouNo = io.getKey().getVouNo();
         inventoryRepo.getTransferDetail(vouNo, deptId, local).subscribe((t) -> {
-            tranTableModel.setListTransfer(t);
-            tranTableModel.addNewRow();
+            setListDetail(t);
             txtVou.setText(vouNo);
             txtDate.setDate(Util1.convertToDate(io.getVouDate()));
             txtRemark.setText(io.getRemark());
@@ -428,6 +532,19 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
 
+    }
+
+    private void setListDetail(List<TransferHisDetail> list) {
+        switch (type) {
+            case TRAN -> {
+                tranTableModel.setListTransfer(list);
+                tranTableModel.addNewRow();
+            }
+            case TRAN_PADDY -> {
+                tranPaddingTableModel.setListTransfer(list);
+                tranPaddingTableModel.addNewRow();
+            }
+        }
     }
 
     private void disableForm(boolean status) {

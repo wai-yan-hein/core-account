@@ -47,14 +47,11 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author DELL
  */
-@Component
 @Slf4j
 public class Journal extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
@@ -68,10 +65,17 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private JournalEntryDialog dialog;
     private CurrencyConversionDialog conversionDialog;
     private int selectRow = 0;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;

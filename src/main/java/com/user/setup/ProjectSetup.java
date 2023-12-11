@@ -36,10 +36,8 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class ProjectSetup extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
-    @Autowired
     private UserRepo userRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -52,6 +50,10 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     /**

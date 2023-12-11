@@ -13,12 +13,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
@@ -58,6 +61,7 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
     }
 
     public void start() {
+        createDirectory();
         String program = "core-account.jar";
         taskScheduler.scheduleAtFixedRate(() -> {
             userRepo.getUpdatedProgramDate(program).doOnSuccess((t) -> {
@@ -70,7 +74,7 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                         log.info("program need to update.");
                         observer.selected("message", "Program is updating.");
                         userRepo.downloadProgram(program).doOnSuccess((byteArray) -> {
-                            String filePath = "core-account.jar"; // File path where you want to save the byte array
+                            String filePath = "update/core-account.jar";
                             try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
                                 log.info("byteArray : " + byteArray.length);
                                 outputStream.write(byteArray);
@@ -82,18 +86,31 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                                 // Set the modification time for the saved file
                                 Path path = Path.of(filePath);
                                 Files.setLastModifiedTime(path, customTimestamp);
-                                setLocationRelativeTo(null);
-                                setVisible(true);
                             } catch (IOException e) {
                                 log.error(e.getMessage());
                             }
+                        }).doOnTerminate(() -> {
+                            btnExit.requestFocus();
+                            setLocationRelativeTo(null);
+                            setVisible(true);
                         }).subscribe();
                     }
                 } else {
                     log.info("local file not found.");
                 }
             }).onErrorResume((t) -> Mono.empty()).subscribe();
-        }, Duration.ofMinutes(60));
+        }, Duration.ofMinutes(5));
+    }
+
+    private void createDirectory() {
+        Path directoryPath = Paths.get("update");
+        if (!Files.exists(directoryPath)) {
+            try {
+                Files.createDirectories(directoryPath);
+            } catch (IOException ex) {
+                log.error("createDirectory : " + ex.getMessage());
+            }
+        }
     }
 
     private LocalDateTime getProgramDateTime(String program) {
@@ -133,7 +150,7 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel2 = new javax.swing.JLabel();
@@ -145,11 +162,13 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
         jLabel1.setForeground(new java.awt.Color(153, 0, 0));
         jLabel1.setText("Could you please exit the program and then reopen it? Thank you.     ");
 
-        jButton1.setFont(Global.lableFont);
-        jButton1.setText("Exit");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnExit.setBackground(Global.selectionColor);
+        btnExit.setFont(Global.lableFont);
+        btnExit.setForeground(new java.awt.Color(255, 255, 255));
+        btnExit.setText("Exit");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnExitActionPerformed(evt);
             }
         });
 
@@ -174,9 +193,9 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 699, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton2)
+                        .addComponent(btnExit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
+                        .addComponent(jButton2))
                     .addComponent(jSeparator1))
                 .addContainerGap())
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,7 +213,7 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(btnExit)
                     .addComponent(jButton2))
                 .addContainerGap())
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -207,10 +226,10 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         // TODO add your handling code here:
         restart();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnExitActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
@@ -223,7 +242,7 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

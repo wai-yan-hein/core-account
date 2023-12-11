@@ -301,7 +301,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
 
     private void calculateAmount(PurHisDetail pur) {
         double price = Util1.getDouble(pur.getPrice());
-        double qty = Util1.getDouble(pur.getQty());
+        double qty = Util1.roundDown2D(pur.getQty());
         if (pur.getStockCode() != null) {
             double amount = qty * price;
             int roundAmt = (int) amount;

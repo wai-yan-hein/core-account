@@ -294,14 +294,13 @@ public class TransferTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = false;
         if (listTransfer.size() >= 1) {
             TransferHisDetail get = listTransfer.get(listTransfer.size() - 1);
-            if (get.getUnitCode() == null) {
-                status = true;
+            if (get.getStockCode()== null) {
+                return true;
             }
         }
-        return status;
+        return false;
     }
 
     public void clear() {
