@@ -8,6 +8,7 @@ package com.inventory.ui.entry;
 import com.repo.AccountRepo;
 import com.common.Global;
 import com.inventory.ui.setup.dialog.LabourGroupSetupDialog;
+import com.inventory.ui.setup.dialog.LanguageSetupDialog;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
 import com.inventory.ui.setup.dialog.OrderStatusSetupDialog;
@@ -40,6 +41,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private OrderStatusSetupDialog osDialog;
     private LabourGroupSetupDialog lgDialog;
     private WareHouseSetupDialog wareHouseSetupDialog;
+    private LanguageSetupDialog lsDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -138,6 +140,26 @@ public class OtherSetup extends javax.swing.JPanel {
 
     }
 
+    private void languageSetup() {
+        if (lsDialog == null) {
+            lsDialog = new LanguageSetupDialog();
+            lsDialog.setIconImage(icon);
+            lsDialog.setInventoryRepo(inventoryRepo);
+            lsDialog.setUserRepo(userRepo);
+            lsDialog.initMain();
+            lsDialog.setSize(Global.width / 2, Global.height / 2);
+            lsDialog.setLocationRelativeTo(null);
+        }
+        userRepo.getLanguage().doOnSuccess((t) -> {
+            if (t != null) {
+                lsDialog.setList(t);
+            }
+        }).doOnTerminate(() -> {
+            lsDialog.setVisible(true);
+        }).subscribe();
+
+    }
+
     private void labourGroupSetup() {
         if (lgDialog == null) {
             lgDialog = new LabourGroupSetupDialog();
@@ -156,8 +178,6 @@ public class OtherSetup extends javax.swing.JPanel {
         }).subscribe();
 
     }
-
- 
 
     private void relationSetup() {
         if (relationSetupDialog == null) {
@@ -210,6 +230,7 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         jButton10 = new javax.swing.JButton();
+        jButton11 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         btnLocation = new javax.swing.JButton();
         tbnWH = new javax.swing.JButton();
@@ -272,6 +293,14 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        jButton11.setFont(Global.lableFont);
+        jButton11.setText("Language");
+        jButton11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton11ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -289,7 +318,9 @@ public class OtherSetup extends javax.swing.JPanel {
                         .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jButton4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -300,7 +331,10 @@ public class OtherSetup extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnRegion, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -419,11 +453,15 @@ public class OtherSetup extends javax.swing.JPanel {
         wareHouseDialog();
     }//GEN-LAST:event_tbnWHActionPerformed
 
+    private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
+        languageSetup();    }//GEN-LAST:event_jButton11ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLocation;
     private javax.swing.JButton btnRegion;
     private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;

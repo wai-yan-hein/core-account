@@ -25,6 +25,7 @@ public class MessageType {
     public static final String SALE_MAN = "SALE_MAN";
     public static final String VOU_STATUS = "VOU_STATUS";
     public static final String ORDER_STATUS = "ORDER_STATUS";
+    public static final String LANGUAGE = "LANGUAGE";
     public static final String PRICE_OPTION = "PRICE_OPTION";
     public static final String LABOUR_GROUP = "LABOUR_GROUP";
     public static final String FORMULA = "FORMULA";

@@ -1471,7 +1471,7 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
-    }
+    } 
 
     public Mono<List<LabourGroup>> getLabourGroup() {
         if (localDatabase) {
