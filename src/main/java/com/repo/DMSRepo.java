@@ -18,7 +18,7 @@ import javax.swing.ImageIcon;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.MediaType;
+import org.springframework.core.io.Resource;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -35,6 +35,10 @@ public class DMSRepo {
 
     @Autowired
     private WebClient dmsApi;
+
+    public String getRootUrl() {
+        return System.getProperty("dms.url");
+    }
 
     public Mono<List<CVFile>> getFolder(String parentId) {
         return dmsApi.get()
@@ -58,6 +62,18 @@ public class DMSRepo {
                 .bodyToFlux(CVFile.class)
                 .onErrorResume((e) -> {
                     log.error("getFile : " + e.getMessage());
+                    return Mono.empty();
+                }).collectList();
+    }
+
+    public Mono<List<CVFile>> getTrash() {
+        return dmsApi.get()
+                .uri(builder -> builder.path("/file/getTrash")
+                .build())
+                .retrieve()
+                .bodyToFlux(CVFile.class)
+                .onErrorResume((e) -> {
+                    log.error("getTrash : " + e.getMessage());
                     return Mono.empty();
                 }).collectList();
     }
@@ -104,6 +120,13 @@ public class DMSRepo {
 
     }
 
+    public Mono<Resource> viewFile(String fileId) {
+        return dmsApi.get()
+                .uri("file/view/{fileId}", fileId)
+                .retrieve()
+                .bodyToMono(Resource.class);
+    }
+
     public Mono<CVFileResponse> createFile(String parentId, Path filePath) {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", new FileSystemResource(filePath));
@@ -112,6 +135,21 @@ public class DMSRepo {
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
                 .bodyToMono(CVFileResponse.class);
+    }
+
+    public Mono<CVFile> updateFile(CVFile file) {
+        return dmsApi.put()
+                .uri("/file")
+                .body(Mono.just(file), CVFile.class)
+                .retrieve()
+                .bodyToMono(CVFile.class);
+    }
+
+    public Mono<Boolean> deleteForever(String fileId) {
+        return dmsApi.delete()
+                .uri("file/{fileId}", fileId)
+                .retrieve()
+                .bodyToMono(Boolean.class);
     }
 
 }

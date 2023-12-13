@@ -586,13 +586,12 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             try {
                 if (t != null) {
                     String reportName = "ReturnInVoucher";
-                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", logoPath);
+                    param.put("p_logo_path", ProUtil.logoPath());
                     String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                     ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(t);
                     JsonDataSource ds = new JsonDataSource(jsonDataStream);

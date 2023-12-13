@@ -5,8 +5,8 @@
 package com.inventory.model;
 
 import java.util.List;
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
 
 /**
  *

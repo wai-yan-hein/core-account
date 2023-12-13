@@ -1188,13 +1188,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private Map<String, Object> getDefaultParam(PurHis p) {
-        String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
         param.put("p_comp_name", Global.companyName);
         param.put("p_comp_address", Global.companyAddress);
         param.put("p_comp_phone", Global.companyPhone);
-        param.put("p_logo_path", logoPath);
+        param.put("p_logo_path", ProUtil.logoPath());
         param.put("p_remark", p.getRemark());
         param.put("p_vou_no", p.getKey().getVouNo());
         param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));

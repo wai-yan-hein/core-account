@@ -631,7 +631,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     String path = "temp/Ledger" + Global.macId + ".json";
                     List<Gl> list = allCashTableModel.getListVGl();
                     Util1.writeJsonFile(list, path);
-                    String logoPath = ProUtil.getLogoPath();
                     Map<String, Object> p = new HashMap();
                     p.put("p_report_name", this.getName());
                     p.put("p_date", String.format("Between %s and %s",
@@ -642,7 +641,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     p.put("p_comp_address", Global.companyAddress);
                     p.put("p_comp_phone", Global.companyPhone);
                     p.put("p_currency", currency);
-                    p.put("p_logo_path", logoPath);
+                    p.put("p_logo_path", ProUtil.logoPath());
                     Gl vGl = opTableModel.getVGl(0);
                     double op = vGl.getDrAmt();
                     double closing = vGl.getCrAmt();

@@ -82,6 +82,7 @@ import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
+import com.inventory.ui.entry.StockIssRecEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
 import com.inventory.ui.entry.WeightLossEntry;
@@ -761,6 +762,26 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 payment.initMain();
                 return payment;
             }
+            case "Stock Issue" -> {
+                StockIssRecEntry stockIss = new StockIssRecEntry("I");
+                stockIss.setUserRepo(userRepo);
+                stockIss.setInventoryRepo(inventoryRepo); 
+                stockIss.setName(menuName);
+                stockIss.setObserver(this);
+                stockIss.setProgress(progress);
+                stockIss.initMain();
+                return stockIss;
+            }
+            case "Stock Receive" -> {
+                StockIssRecEntry stockRec = new StockIssRecEntry("R");
+                stockRec.setUserRepo(userRepo);
+                stockRec.setInventoryRepo(inventoryRepo);  
+                stockRec.setName(menuName);
+                stockRec.setObserver(this);
+                stockRec.setProgress(progress);
+                stockRec.initMain();
+                return stockRec;
+            }
             case "Milling Entry", "Milling" -> {
                 MillingEntry millingEntry = new MillingEntry();
                 millingEntry.setName(menuName);
@@ -1217,11 +1238,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void initAccSetting() {
         inventoryRepo.getAccSetting().doOnSuccess((list) -> {
-            if (list != null) {
-                list.forEach((t) -> {
-                    Global.hmAcc.put(t.getKey().getType(), t);
-                });
-            }
+            inventoryRepo.getDefaultLocation().doOnSuccess((d) -> {
+                if (list != null) {
+                    list.forEach((acc) -> {
+                        acc.setPayAcc(Util1.isNull(d.getCashAcc(), acc.getPayAcc()));
+                        acc.setDeptCode(Util1.isNull(d.getDeptCode(), acc.getDeptCode()));
+                        Global.hmAcc.put(acc.getKey().getType(), acc);
+                    });
+                }
+            }).subscribe();
+
         }).subscribe();
     }
 

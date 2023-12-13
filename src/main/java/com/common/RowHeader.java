@@ -33,10 +33,12 @@ public class RowHeader {
 
     private void addListener(JTable table) {
         table.getModel().addTableModelListener((e) -> {
-            if (e.getType() == TableModelEvent.INSERT || e.getType() == TableModelEvent.DELETE) {
-                rowNumberListModel.setRowCount(table.getRowCount());
-            } else if (e.getType() == TableModelEvent.UPDATE) {
-                rowNumberListModel.setRowCount(table.getRowCount()+1);
+            switch (e.getType()) {
+                case TableModelEvent.INSERT -> rowNumberListModel.setRowCount(table.getRowCount() + 1);
+                case TableModelEvent.DELETE -> rowNumberListModel.setRowCount(table.getRowCount());
+                case TableModelEvent.UPDATE -> rowNumberListModel.setRowCount(table.getRowCount());
+                default -> {
+                }
             }
         });
     }

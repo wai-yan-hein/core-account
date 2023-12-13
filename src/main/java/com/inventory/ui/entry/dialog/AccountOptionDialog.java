@@ -8,11 +8,13 @@ import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.PurHis;
 import com.inventory.model.SaleHis;
 import com.repo.AccountRepo;
+import java.awt.Component;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +59,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     public void initMain() {
+        ComponentUtil.addFocusListener(this);
         initCompleter();
     }
 
@@ -77,11 +80,23 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     public void setObject(Object obj) {
         this.object = obj;
-        if (obj instanceof PurHis p) {
-            setDepartment(p.getDeptCode());
-            setCash(p.getCashAcc());
-            setPurchase(p.getPurchaseAcc());
-            setPayable(p.getPayableAcc());
+        switch (obj) {
+            case PurHis p -> {
+                setTitle("Purchase Account Dialog");
+                setDepartment(p.getDeptCode());
+                setCash(p.getCashAcc());
+                setSrcAcc(p.getPurchaseAcc());
+                setPayable(p.getPayableAcc());
+            }
+            case SaleHis s -> {
+                setTitle("Sale Account Dialog");
+                setDepartment(s.getDeptCode());
+                setCash(s.getCashAcc());
+                setSrcAcc(s.getSaleAcc());
+                setPayable(s.getDebtorAcc());
+            }
+            default -> {
+            }
         }
     }
 
@@ -101,13 +116,13 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         return null;
     }
 
-    private void setPurchase(String purAcc) {
+    private void setSrcAcc(String purAcc) {
         accountRepo.findCOA(Util1.isNull(purAcc, sourceAcc())).doOnSuccess((t) -> {
             purhcaseCompleter.setCoa(t);
         }).subscribe();
     }
 
-    private String getPurchase() {
+    private String getSrcAcc() {
         ChartOfAccount coa = purhcaseCompleter.getCOA();
         if (coa != null) {
             if (coa.getKey() != null) {
@@ -150,16 +165,21 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     }
 
     private void confirm() {
-        if (object instanceof PurHis p) {
-            p.setDeptCode(getDepartment());
-            p.setCashAcc(getCash());
-            p.setPayableAcc(getPayable());
-            p.setPurchaseAcc(getPurchase());
-        } else if (object instanceof SaleHis s) {
-            s.setDeptCode(getDepartment());
-            s.setCashAcc(getCash());
-            s.setReceivableAcc(getPayable());
-            s.setSaleAcc(getPurchase());
+        switch (object) {
+            case PurHis p -> {
+                p.setDeptCode(getDepartment());
+                p.setCashAcc(getCash());
+                p.setPayableAcc(getPayable());
+                p.setPurchaseAcc(getSrcAcc());
+            }
+            case SaleHis s -> {
+                s.setDeptCode(getDepartment());
+                s.setCashAcc(getCash());
+                s.setDebtorAcc(getPayable());
+                s.setSaleAcc(getSrcAcc());
+            }
+            default -> {
+            }
         }
         dispose();
     }
@@ -221,7 +241,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         txtPayble = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Purchase More Dialog");
+        setTitle("-");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 

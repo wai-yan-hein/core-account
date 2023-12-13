@@ -93,6 +93,7 @@ public class ProUtil {
     public static final String MAX_STOCK_WEIGHT = "max.stock.weight";
     public static final String PUR_RD_DIS = "purchase.round.down.discount";
     public static final String DECIMAL_PLACE = "decimal.palace";
+    public static final String STOCK_IR_EDIT="stockir.voucher";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
@@ -154,9 +155,6 @@ public class ProUtil {
         return Global.hmRoleProperty.get(key);
     }
 
-    public static String getLogoPath() {
-        return String.format("images%s%s", File.separator, getProperty("logo.name"));
-    }
 
     public static boolean isStockNoUnit() {
         return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_NO_UNIT));
@@ -225,6 +223,11 @@ public class ProUtil {
     public static boolean isPrint() {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }
+    
+    public static boolean isStockIREdit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_IR_EDIT));
+    }
+
 
     public static String getInvGroup() {
         return Global.hmRoleProperty.get("inventory.group");
@@ -284,5 +287,9 @@ public class ProUtil {
             return false;
         }
         return true;
+    }
+
+    public static String logoPath() {
+        return String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
     }
 }
