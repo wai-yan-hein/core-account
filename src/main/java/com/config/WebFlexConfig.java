@@ -112,6 +112,8 @@ public class WebFlexConfig {
     public WebClient dmsApi() {
         String url = environment.getProperty("dms.url");
         int port = Util1.getInteger(environment.getProperty("dms.port"));
+        String dmsUrl =getUrl(url, port);
+        System.setProperty("dms.url", dmsUrl);
         return WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
@@ -119,7 +121,7 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
-                .baseUrl(getUrl(url, port))
+                .baseUrl(dmsUrl)
                 .clientConnector(reactorClientHttpConnector())
                 .build();
     }

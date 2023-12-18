@@ -155,9 +155,6 @@ public class ProUtil {
         return Global.hmRoleProperty.get(key);
     }
 
-    public static String getLogoPath() {
-        return String.format("images%s%s", File.separator, getProperty("logo.name"));
-    }
 
     public static boolean isStockNoUnit() {
         return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_NO_UNIT));
@@ -290,5 +287,9 @@ public class ProUtil {
             return false;
         }
         return true;
+    }
+
+    public static String logoPath() {
+        return String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
     }
 }

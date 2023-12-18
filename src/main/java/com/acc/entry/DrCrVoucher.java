@@ -346,6 +346,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 p.put("p_comp_address", Global.companyAddress);
                 p.put("p_comp_phone", Global.companyPhone);
                 p.put("p_vou_type", gl.getTranSource());
+                p.put("p_logo_path", ProUtil.logoPath());
                 Util1.initJasperContext();
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode node = mapper.readTree(Util1.gson.toJson(list));

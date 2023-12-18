@@ -530,13 +530,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 listRaw.removeIf((t) -> t.getStockName() == null);
                 List<MillingOutDetail> listOutput = his.getListOutput();
                 listOutput.removeIf((t) -> t.getStockName() == null);
-                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                 Map<String, Object> param = new HashMap<>();
                 param.put("p_print_date", Util1.getTodayDateTime());
                 param.put("p_comp_name", Global.companyName);
                 param.put("p_comp_address", Global.companyAddress);
                 param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", logoPath);
+                param.put("p_logo_path", ProUtil.logoPath());
                 param.put("p_vou_no", his.getKey().getVouNo());
                 param.put("p_vou_date", Util1.toDateStr(his.getVouDate(), Global.dateFormat));
                 param.put("p_job_no", his.getJobNo());

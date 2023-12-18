@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.ImageIcon;
-import javax.swing.UIManager;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +29,11 @@ public class CVFileTableModel extends AbstractTableModel {
     private final String[] columnNames = {"Icon", "Name", "Owner", "Last modified", "File Size"};
     private Map<String, ImageIcon> hmIcon = new HashMap<>();
     private DMSRepo dmsRepo;
+    private JTable table;
+
+    public void setTable(JTable table) {
+        this.table = table;
+    }
 
     public void setDmsRepo(DMSRepo dmsRepo) {
         this.dmsRepo = dmsRepo;
@@ -105,13 +110,26 @@ public class CVFileTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public CVFile getSelectVou(int row) {
+    public CVFile getFile(int row) {
         if (listDetail != null) {
             if (!listDetail.isEmpty()) {
                 return listDetail.get(row);
             }
         }
         return null;
+    }
+
+    public void setFile(CVFile file) {
+        int row = table.getSelectedRow();
+        listDetail.set(row, file);
+        fireTableRowsUpdated(row, row);
+        
+    }
+
+    public void deleteFile(CVFile file) {
+        int row = table.getSelectedRow();
+        listDetail.remove(row);
+        fireTableRowsDeleted(row, row);
     }
 
     public void addObjectFirst(CVFile t) {
@@ -135,9 +153,14 @@ public class CVFileTableModel extends AbstractTableModel {
         if (hmIcon.containsKey(extension)) {
             return hmIcon.get(extension);
         } else {
-            ImageIcon icon = dmsRepo.getIcon(extension).block();
-            hmIcon.put(extension, icon);
-            return icon;
+            ImageIcon originalIcon = dmsRepo.getIcon(extension).block();
+            if (originalIcon != null) {
+                ImageIcon resizedIcon = new ImageIcon(originalIcon.getImage().getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH));
+                hmIcon.put(extension, resizedIcon);
+                return resizedIcon;
+            } else {
+                return null; // Handle the case where the icon is not available
+            }
         }
     }
 }

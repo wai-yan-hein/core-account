@@ -437,13 +437,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     if (!Util1.isNullOrEmpty(customReport)) {
                         reportName = customReport;
                     }
-                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", logoPath);
+                    param.put("p_logo_path", ProUtil.logoPath());
                     param.put("p_report_name", title);
                     String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                     ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(t));

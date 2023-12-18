@@ -66,8 +66,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import reactor.core.publisher.Mono;
 
 /**
@@ -348,13 +346,12 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             try {
                 if (t != null) {
                     String reportName = "ReturnOutVoucher";
-                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", logoPath);
+                    param.put("p_logo_path", ProUtil.logoPath());
                     String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                     ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(t);
                     JsonDataSource ds = new JsonDataSource(jsonDataStream);

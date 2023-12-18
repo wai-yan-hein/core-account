@@ -217,7 +217,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtComAmt.setName(ProUtil.P_COM_AMT);
         txtDivider.setName(ProUtil.DIVIDER);
         txtConversionAcc.setName(ProUtil.CONVERSION_ACC);
-        txtDrCr.setName(ProUtil.DRCR_REPORT);
         txtEmp.setName(ProUtil.EMP_ACC);
 
     }
@@ -347,7 +346,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtComP.setText(hmProperty.get(txtComP.getName()));
         txtComAmt.setText(hmProperty.get(txtComAmt.getName()));
         txtDivider.setText(hmProperty.get(txtDivider.getName()));
-        txtDrCr.setText(hmProperty.get(txtDrCr.getName()));
     }
 
     private void initCombo() {
@@ -549,7 +547,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setUpdatedDate(LocalDateTime.now());
         userRepo.saveSys(p).doOnSuccess((t) -> {
             Global.hmRoleProperty.put(key, value);
-            sendMessage(MessageType.SYSTEM_PROPERTY, t.getKey().getPropKey());
+            hmProperty.put(key, value);
+        }).doOnTerminate(() -> {
+            sendMessage(MessageType.SYSTEM_PROPERTY, key);
         }).subscribe();
     }
 
@@ -564,7 +564,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setUpdatedDate(LocalDateTime.now());
         userRepo.saveRoleProperty(p).doOnSuccess((t) -> {
             Global.hmRoleProperty.put(key, value);
-            sendMessage(MessageType.ROLE_PROPERTY, t.getKey().getPropKey());
+            hmProperty.put(key, value);
+        }).doOnTerminate(() -> {
+            sendMessage(MessageType.ROLE_PROPERTY, key);
         }).subscribe();
     }
 
@@ -578,9 +580,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setUpdatedDate(LocalDateTime.now());
         userRepo.saveMacProp(p).doOnSuccess((t) -> {
             Global.hmRoleProperty.put(key, value);
+            hmProperty.put(key, value);
+        }).doOnTerminate(() -> {
             sendMessage(MessageType.MACHINE_PROERTY, key);
         }).subscribe();
-
     }
 
     private void sendMessage(String messageType, String mes) {
@@ -784,9 +787,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTransferDelete = new javax.swing.JCheckBox();
         jPanel9 = new javax.swing.JPanel();
         chkUsage = new javax.swing.JCheckBox();
-        jPanel11 = new javax.swing.JPanel();
-        jLabel34 = new javax.swing.JLabel();
-        txtDrCr = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
@@ -1699,33 +1699,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(chkUsage))
         );
 
-        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder("Report"));
-
-        jLabel34.setText("Dr/Cr Report");
-
-        txtDrCr.setFont(Global.textFont);
-
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel34)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtDrCr)
-                .addContainerGap())
-        );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel11Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel34)
-                    .addComponent(txtDrCr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         jButton1.setBackground(Global.selectionColor);
         jButton1.setFont(Global.lableFont);
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
@@ -1802,9 +1775,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1814,10 +1785,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(panelMac, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1987,7 +1955,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1996,7 +1963,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
-    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -2033,7 +1999,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtDebtor;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtDivider;
-    private javax.swing.JTextField txtDrCr;
     private javax.swing.JTextField txtEmp;
     private javax.swing.JTextField txtExpense;
     private javax.swing.JTextField txtFixed;
