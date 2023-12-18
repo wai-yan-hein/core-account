@@ -21,8 +21,10 @@ com\acc\setup\COATemplateSetup.class
 com\user\model\ExchangeKey.class
 com\inventory\ui\common\ProcessHisTableModel.class
 com\inventory\editor\UnitAutoCompleter$9.class
+com\user\editor\DepartmentUserAutoCompleter$6.class
 com\acc\dialog\ChartOfAccountImportDialog$1.class
 com\inventory\model\PurHisKey.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog.class
 com\inventory\ui\setup\dialog\PriceOptionDialog$3.class
 com\h2\service\MenuServiceimpl.class
 com\inventory\ui\entry\LandingEntry$1.class
@@ -30,15 +32,14 @@ com\acc\common\TraderGroupComboModel.class
 com\inventory\editor\StockCriteriaCompleter$7.class
 com\acc\dialog\TrialBalanceDetailDialog$7.class
 com\acc\entry\TraderAdjustment$14.class
-com\inventory\ui\setup\dialog\JobSetupDialog$4.class
 com\acc\model\VTriBalance.class
 com\acc\setup\COAOpening$2.class
 com\user\dialog\DepartmentDialog$EnterAction.class
 com\user\editor\CurrencyEditor$1.class
+com\dms\commom\CustomRenderer.class
 com\user\setup\MenuTemplateSetup$5.class
 com\inventory\ui\entry\GRNEntry.class
 com\user\setup\MenuSetup.class
-com\inventory\ui\entry\StockInOutEntry$7.class
 com\inventory\ui\entry\dialog\OPHistoryDialog$1.class
 com\inventory\ui\setup\EmployeeSetup.class
 com\inventory\ui\entry\Reports.class
@@ -66,6 +67,7 @@ com\user\editor\CurrencyAutoCompleter.class
 com\inventory\ui\entry\MillingEntry$15.class
 com\acc\report\GLReport$14.class
 com\h2\dao\StockDao.class
+com\user\editor\DepartmentUserAutoCompleter$1.class
 com\inventory\editor\PriceEditor$2.class
 com\model\VoucherInfo.class
 com\inventory\ui\setup\dialog\PurAvgPriceDialog.class
@@ -94,6 +96,7 @@ com\inventory\ui\entry\dialog\GRNHistoryDialog$5.class
 com\inventory\ui\entry\StockInOutEntry$2.class
 com\inventory\ui\entry\dialog\MillingHistoryDialog$13.class
 com\inventory\ui\entry\dialog\OPHistoryDialog$13.class
+com\inventory\ui\entry\dialog\StockIOHistoryDialog$15.class
 com\inventory\ui\entry\Purchase$16.class
 com\inventory\ui\setup\EmployeeSetup$11.class
 com\inventory\ui\entry\dialog\PurchaseHistoryDialog$14.class
@@ -102,7 +105,6 @@ com\acc\model\GlLog.class
 com\inventory\editor\StockTypeAutoCompleter$5.class
 com\user\setup\CompanyTemplate$2.class
 com\ui\management\StockPayable$3.class
-com\inventory\ui\setup\dialog\JobSetupDialog$12.class
 com\inventory\ui\entry\SaleDynamic$31.class
 com\inventory\editor\StockFormulaCompleter.class
 com\inventory\ui\setup\OutputCostSetup$7.class
@@ -113,6 +115,7 @@ com\inventory\editor\StockAutoCompleter$8.class
 com\inventory\ui\entry\dialog\RetOutHistoryDialog$15.class
 com\inventory\ui\setup\dialog\RelationSetupDialog$2.class
 com\inventory\ui\entry\OrderDynamic$15.class
+com\MyApplicationListener.class
 com\inventory\editor\TraderGroupAutoCompleter$2.class
 com\inventory\ui\setup\CustomerSetup$16.class
 com\acc\model\TraderA.class
@@ -123,12 +126,12 @@ com\inventory\ui\entry\dialog\PaymentHistoryDialog$7.class
 com\inventory\ui\entry\dialog\ReorderAlertDialog$1.class
 com\inventory\editor\WareHouseAutoCompleter$3.class
 com\inventory\ui\entry\dialog\WeightHistoryDialog$6.class
-com\inventory\ui\entry\OtherSetup$10.class
 com\h2\dao\MenuDaoImpl.class
 com\inventory\ui\entry\PurchaseDynamic$20.class
 com\acc\common\JournalEntryTableModel.class
 com\inventory\ui\setup\StockSetup$10.class
 com\inventory\editor\CountryAutoCompleter$8.class
+com\inventory\model\PurOrderHisDetailKey.class
 com\inventory\model\RetInHisDetail.class
 com\acc\dialog\DatePickerDialog$1.class
 com\inventory\ui\entry\dialog\common\GRNHistoryTableModel.class
@@ -154,7 +157,6 @@ com\inventory\ui\setup\OpeningSetup$7.class
 com\inventory\ui\entry\GRNEntry$1.class
 com\user\dialog\ProgramDownloadDialog$1.class
 com\h2\service\PriceOptionService.class
-com\user\editor\DepartmentAutoCompleter$3.class
 com\inventory\ui\entry\Sale$25.class
 com\user\setup\RoleCompany$2.class
 com\inventory\ui\entry\dialog\SaleHistoryDialog$2.class
@@ -169,7 +171,6 @@ com\user\setup\CompanySetup$1.class
 com\acc\report\FinancialReport$12.class
 com\acc\report\FinancialReport$4.class
 com\inventory\ui\entry\Sale.class
-com\inventory\ui\setup\dialog\JobSetupDialog$9.class
 com\ui\LoginDialog.class
 com\inventory\ui\setup\dialog\TraderGroupDialog$9.class
 com\h2\dao\OutputCostDao.class
@@ -212,6 +213,7 @@ com\inventory\ui\entry\dialog\ReturnInHistoryDialog$3.class
 com\inventory\ui\entry\AccountSettingEntry$12.class
 com\h2\service\StockInOutDetailServiceImpl.class
 com\inventory\model\RetInKey.class
+com\inventory\editor\JobAutoCompleter$8.class
 com\inventory\ui\setup\StockSetup$45.class
 com\inventory\ui\entry\dialog\PaymentHistoryDialog.class
 com\acc\editor\DespAutoCompleter$7.class
@@ -328,7 +330,6 @@ com\user\setup\CurrencyExchange$1.class
 com\inventory\ui\entry\dialog\WeightHistoryDialog$1.class
 com\user\dialog\CurrencySetupDialog$1.class
 com\user\setup\MenuSetup$4.class
-com\inventory\ui\setup\EmployeeSetup$16.class
 com\inventory\editor\LabourGroupAutoCompleter$3.class
 com\inventory\ui\entry\dialog\WeightHistoryDialog$10.class
 com\acc\entry\AllCash$13.class
@@ -343,6 +344,7 @@ com\h2\dao\StockTypeDao.class
 com\acc\entry\Journal$6.class
 com\inventory\ui\entry\dialog\RetOutHistoryDialog.class
 com\inventory\ui\setup\dialog\RegionSetup$5.class
+com\inventory\editor\JobAutoCompleter$3.class
 com\inventory\ui\common\OpeningTableModel.class
 com\h2\dao\ReportDao.class
 com\inventory\ui\entry\RFID.class
@@ -365,6 +367,7 @@ com\user\setup\CurrencyExchange$6.class
 com\acc\entry\TraderAdjustment$4.class
 com\inventory\editor\UnitRelationAutoCompleter$6.class
 com\acc\setup\TraderSetup.class
+com\inventory\ui\common\StockInOutPaddyTableModel.class
 com\inventory\ui\entry\OrderEntry$9.class
 com\inventory\editor\LabourGroupAutoCompleter$8.class
 com\inventory\ui\entry\dialog\StockIssRecHistoryDialog$2.class
@@ -387,7 +390,6 @@ com\inventory\ui\entry\AccountSettingEntry$15.class
 com\acc\editor\TranSourceAutoCompleter$4.class
 com\common\JTableDataSource.class
 com\inventory\editor\StockFormulaCompleter$3.class
-com\user\editor\DepartmentAutoCompleter.class
 com\inventory\model\WeightLossHisKey.class
 com\user\editor\RoleAutoCompleter$8.class
 com\inventory\ui\setup\dialog\TraderGroupDialog$1.class
@@ -401,11 +403,13 @@ com\acc\editor\COAAutoCompleter$8.class
 com\acc\entry\TraderAdjustment$9.class
 com\user\editor\BusinessTypeAutoCompleter$6.class
 com\acc\common\COAHeadTableModel.class
+com\inventory\ui\entry\PurOrderHisEntry$2.class
 com\inventory\editor\StockAutoCompleter1.class
 com\common\RowHeader.class
 com\inventory\ui\entry\ReturnIn$13.class
 com\inventory\ui\setup\dialog\CategorySetupDialog.class
 com\user\setup\MenuSetup$7.class
+com\inventory\ui\entry\dialog\JobSearchDialog$8.class
 com\acc\entry\DrCrVoucher$8.class
 com\acc\report\excel\ExcelIndividualLedger.class
 com\user\editor\ProjectCellEditor$2.class
@@ -416,7 +420,6 @@ com\inventory\editor\UnitRelationAutoCompleter$1.class
 com\inventory\ui\entry\dialog\OrderHistoryDialog$16.class
 com\inventory\ui\entry\dialog\common\TransferVouSearchTableModel.class
 com\user\setup\CurrencyExchange.class
-com\inventory\ui\entry\ReorderLevelEntry$3.class
 com\inventory\ui\setup\dialog\PurAvgPriceDialog$2.class
 com\inventory\ui\setup\dialog\RegionSetup$2.class
 com\inventory\ui\entry\SaleDynamic$29.class
@@ -457,6 +460,7 @@ com\inventory\ui\entry\SaleDynamic$24.class
 com\acc\editor\TraderCellEditor.class
 com\h2\dao\PriceOptionDaoImpl.class
 com\inventory\editor\BatchAutoCompeter$7.class
+com\inventory\ui\entry\Reports$30.class
 com\acc\setup\TraderAGroupDialog.class
 com\h2\dao\PurHisDetailDao.class
 com\inventory\editor\TraderGroupAutoCompleter$5.class
@@ -513,6 +517,7 @@ com\inventory\ui\entry\dialog\PurchaseHistoryDialog$12.class
 com\inventory\model\MillingOutDetail.class
 com\inventory\ui\entry\dialog\WeightLossHistoryDialog$9.class
 com\ui\management\StockPayable$1.class
+com\inventory\ui\entry\dialog\JobSearchDialog$11.class
 com\user\model\ProjectStatus.class
 com\h2\service\ProcessHisServiceImpl.class
 com\user\dialog\ReportNameDialog.class
@@ -561,6 +566,7 @@ com\user\setup\ProjectSetup$2.class
 com\acc\editor\RefAutoCompleter$6.class
 com\inventory\editor\StockCellEditor$1.class
 com\inventory\ui\entry\SaleByBatch.class
+com\inventory\ui\setup\dialog\VouStatusSetupDialog$11.class
 com\user\setup\MenuTemplateSetup$8.class
 com\inventory\ui\entry\dialog\GRNHistoryDialog$7.class
 com\acc\editor\TranSourceAutoCompleter$7.class
@@ -586,15 +592,16 @@ com\inventory\model\StockFormulaPriceKey.class
 com\acc\report\GLReport$6.class
 com\inventory\ui\entry\Sale$32.class
 com\inventory\ui\entry\dialog\SaleHistoryDialog$10.class
-com\inventory\ui\setup\dialog\JobSetupDialog.class
 com\inventory\model\MillingExpenseKey.class
 com\acc\dialog\TrialBalanceDetailDialog$4.class
 com\inventory\model\OrderDetailKey.class
 com\config\ActiveMqCondition.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$7.class
 com\user\setup\CompanySetup$4.class
 com\inventory\editor\DiscountDescriptionCompleter$2.class
 com\user\editor\ProjectAutoCompleter$7.class
 com\inventory\ui\entry\dialog\MillingHistoryDialog$6.class
+com\inventory\model\PurOrderHisKey.class
 com\inventory\ui\entry\PurchaseDynamic$28.class
 com\acc\editor\TranSourceAutoCompleter$2.class
 com\inventory\ui\entry\Purchase$4.class
@@ -631,6 +638,7 @@ com\inventory\ui\entry\dialog\StockIssRecHistoryDialog$9.class
 com\inventory\ui\entry\Sale$37.class
 com\inventory\ui\entry\SaleDynamic$DeleteAction.class
 com\inventory\ui\setup\dialog\StockUnitSetupDailog$3.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$2.class
 com\inventory\ui\entry\dialog\ReturnInHistoryDialog$13.class
 com\acc\dialog\ChartOfAccountImportDialog$3.class
 com\user\editor\ProjectAutoCompleter$2.class
@@ -640,6 +648,7 @@ com\inventory\ui\setup\dialog\LocationSetupDialog$5.class
 com\inventory\editor\StockAutoCompleter1$6.class
 com\inventory\model\StockFormulaQtyKey.class
 com\inventory\ui\entry\PurchaseDynamic$23.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$5.class
 com\user\editor\CompanyCellEditor$1.class
 com\inventory\ui\entry\Manufacture$1.class
 com\inventory\ui\entry\MillingEntry$12.class
@@ -701,6 +710,7 @@ com\inventory\ui\entry\StockInOutEntry$5.class
 com\inventory\editor\PriceCompleter$1.class
 com\inventory\model\WareHouse.class
 com\inventory\ui\entry\dialog\MillingHistoryDialog$9.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$3.class
 com\acc\editor\COA3CellEditor$1.class
 com\inventory\ui\setup\dialog\LocationSetupDialog$4.class
 com\inventory\editor\StockUnitEditor$2.class
@@ -715,6 +725,7 @@ com\inventory\ui\entry\PurchaseDynamic$25.class
 com\inventory\editor\WareHouseAutoCompleter$8.class
 com\user\setup\CompanySetup$8.class
 com\user\common\MenuTemplateTreeTrasnferHandler.class
+com\inventory\ui\entry\dialog\JobSearchDialog$10.class
 com\h2\service\OrderHisService.class
 com\inventory\ui\setup\StockSetup$2.class
 com\inventory\ui\entry\Sale$23.class
@@ -746,10 +757,10 @@ com\inventory\ui\entry\MillingEntry$3.class
 com\acc\report\AparReport$13.class
 com\h2\dao\RolePropertyDaoImpl.class
 com\inventory\ui\entry\AccountSettingEntry$4.class
+com\inventory\ui\entry\dialog\common\PurOrderHisVouSearchTableModel.class
 com\acc\entry\DrCrVoucher$9.class
 com\user\model\AuthenticationRequest.class
 com\acc\entry\Journal$10.class
-com\inventory\ui\setup\EmployeeSetup$13.class
 com\inventory\ui\setup\dialog\ExpenseSetupDialog$4.class
 com\inventory\editor\MachineInfoAutoCompleter$2.class
 com\inventory\model\SaleExpenseKey.class
@@ -801,12 +812,13 @@ com\inventory\model\PaymentHisDetailKey.class
 com\inventory\ui\entry\SaleByBatch$20.class
 com\user\dialog\DepartmentDialog$3.class
 com\inventory\ui\entry\AccountSettingEntry$9.class
+com\inventory\editor\JobAutoCompleter$6.class
 com\inventory\ui\setup\SupplierSetup.class
 com\acc\report\AparReport.class
+com\inventory\ui\entry\LabourPaymentEntry$3.class
 com\inventory\editor\BrandAutoCompleter$1.class
 com\inventory\ui\entry\Purchase$8.class
 com\inventory\ui\entry\Reports$23.class
-com\inventory\ui\setup\dialog\JobSetupDialog$6.class
 com\acc\editor\DespEditor$1.class
 com\inventory\ui\entry\OrderEntry$11.class
 com\user\model\PrivilegeMenu.class
@@ -827,6 +839,7 @@ com\inventory\ui\entry\dialog\SaleHistoryDialog$12.class
 com\inventory\ui\entry\dialog\SaleWeightLossPriceDialog.class
 com\user\dialog\DepartmentSetupDialog.class
 com\acc\entry\TraderAdjustment$20.class
+com\inventory\ui\common\OpeningPaddyTableModel.class
 com\h2\dao\WareHouseDao.class
 com\ui\management\dialog\SBWeightDetailDialog.class
 com\inventory\editor\UnitRelationAutoCompleter$5.class
@@ -849,6 +862,7 @@ com\h2\service\StockCriteriaService.class
 com\h2\service\VRoleMenuServiceImpl.class
 com\inventory\ui\entry\Purchase$21.class
 com\inventory\model\LandingHisQty.class
+com\inventory\model\VPurOrder.class
 com\acc\model\ChartOfAccount.class
 com\inventory\ui\entry\OrderDynamic$3.class
 com\inventory\model\MessageType.class
@@ -918,7 +932,6 @@ com\inventory\ui\entry\dialog\PurchaseHistoryDialog$7.class
 com\inventory\ui\entry\dialog\WeightLossHistoryDialog$8.class
 com\inventory\ui\entry\ReturnOut$10.class
 com\inventory\editor\StockTypeAutoCompleter$3.class
-com\inventory\ui\setup\dialog\JobSetupDialog$7.class
 com\inventory\ui\entry\PurchaseDynamic$3.class
 com\inventory\ui\entry\OrderEntry$10.class
 com\inventory\ui\setup\common\CustomerTabelModel.class
@@ -939,8 +952,8 @@ com\acc\setup\TraderSetup$6.class
 com\inventory\ui\entry\ReturnOut$4.class
 com\acc\editor\COA3AutoCompleter$4.class
 com\h2\dao\OrderHisDao.class
-com\inventory\ui\setup\dialog\JobSetupDialog$10.class
 com\inventory\ui\entry\dialog\OPHistoryDialog$3.class
+com\inventory\ui\entry\LabourPaymentEntry$2.class
 com\inventory\ui\entry\dialog\WeightHistoryDialog$4.class
 com\user\dialog\RoleSetupDialog$1.class
 com\acc\editor\COA3AutoCompleter$3.class
@@ -958,7 +971,6 @@ com\acc\entry\JournalClosingStock$2.class
 com\user\editor\CurrencyAutoCompleter$8.class
 com\inventory\ui\entry\PurchaseDynamic$8.class
 com\inventory\editor\BrandAutoCompleter$7.class
-com\inventory\ui\setup\EmployeeSetup$14.class
 com\inventory\ui\entry\dialog\SaleHistoryDialog$16.class
 com\inventory\ui\entry\OrderEntry$5.class
 com\inventory\model\WeightHis.class
@@ -1007,6 +1019,7 @@ com\h2\service\OrderStatusService.class
 com\inventory\model\StockFormulaPrice.class
 com\inventory\editor\BatchAutoCompeter$1.class
 com\user\setup\MenuTemplateSetup.class
+com\inventory\editor\JobAutoCompleter$1.class
 com\h2\service\CompanyInfoService.class
 com\MessageDialog.class
 com\inventory\ui\entry\dialog\WeightHistoryDialog$3.class
@@ -1022,11 +1035,11 @@ com\inventory\editor\BatchAutoCompeter$2.class
 com\inventory\model\TraderKey.class
 com\inventory\ui\setup\dialog\CategorySetupDialog$4.class
 com\inventory\ui\entry\OrderEntry$16.class
-com\inventory\ui\setup\dialog\JobSetupDialog$1.class
 com\inventory\editor\UnitAutoCompleter$7.class
 com\inventory\model\OPHisDetail.class
 com\inventory\ui\setup\dialog\CustomerImportDialog.class
 com\inventory\ui\common\MillingOutTableModel.class
+com\inventory\editor\JobAutoCompleter$2.class
 com\inventory\ui\setup\dialog\VouStatusSetupDialog$7.class
 com\acc\report\GLReport$17.class
 com\acc\editor\DepartmentCellEditor$1.class
@@ -1045,7 +1058,6 @@ com\inventory\ui\entry\ReturnOut$8.class
 com\user\setup\SystemProperty$4.class
 com\acc\entry\AllCash$14.class
 com\inventory\ui\setup\dialog\ExpenseSetupDialog$8.class
-com\inventory\ui\setup\dialog\JobSetupDialog$2.class
 com\inventory\ui\entry\dialog\PaymentDialog$3.class
 com\inventory\ui\entry\OrderEntry$15.class
 com\inventory\ui\entry\AccountSettingEntry$13.class
@@ -1056,6 +1068,7 @@ com\inventory\editor\LabourGroupAutoCompleter$4.class
 com\inventory\ui\common\StockCriteriaTableModel.class
 com\inventory\ui\setup\dialog\VouStatusSetupDialog$6.class
 com\inventory\editor\CategoryAutoCompleter$7.class
+com\dms\CoreDrive.class
 com\user\editor\CompanyAutoCompleter$5.class
 com\inventory\ui\entry\dialog\PaymentDialog$2.class
 com\inventory\model\WeightStatus.class
@@ -1063,12 +1076,14 @@ com\inventory\ui\entry\dialog\RetOutHistoryDialog$14.class
 com\inventory\model\VOpening.class
 com\inventory\ui\entry\OrderDynamic$14.class
 com\user\common\ExchangeRateComoboModel.class
+com\dms\commom\FileDropHandler.class
 com\acc\model\DepartmentAKey.class
 com\inventory\model\StockIssRecDetailKey.class
 com\inventory\ui\entry\dialog\AccountOptionDialog$1.class
 com\inventory\ui\setup\StockSetup$27.class
 com\inventory\editor\ExpenseCompeter$8.class
 com\acc\dialog\CurrencyConversionDialog$8.class
+com\inventory\editor\JobAutoCompleter$5.class
 com\inventory\ui\entry\Purchase$25.class
 com\inventory\ui\entry\WeightLossEntry.class
 com\h2\service\OutputCostServiceImpl.class
@@ -1114,6 +1129,7 @@ com\inventory\ui\entry\dialog\LandingHistoryDialog$12.class
 com\inventory\ui\entry\dialog\WeightLossHistoryDialog$1.class
 com\inventory\ui\entry\OrderEntry$4.class
 com\inventory\ui\setup\dialog\CategorySetupDialog$7.class
+com\inventory\model\PurOrderHisDetail.class
 com\inventory\editor\ExpenseCompeter$3.class
 com\acc\entry\TraderAdjustment$21.class
 com\inventory\editor\LabourGroupAutoCompleter$1.class
@@ -1122,6 +1138,7 @@ com\inventory\ui\setup\dialog\ExpenseSetupDialog$5.class
 com\inventory\ui\entry\dialog\StockIOHistoryDialog$14.class
 com\inventory\ui\entry\AccountSettingEntry$10.class
 com\inventory\editor\MachineInfoAutoCompleter$3.class
+com\inventory\model\PurOrderHis.class
 com\inventory\ui\setup\common\LocationComboModel.class
 com\user\common\UserTableModel.class
 com\inventory\ui\setup\dialog\VouStatusSetupDialog$3.class
@@ -1132,7 +1149,6 @@ com\acc\report\AparReport$14.class
 com\inventory\ui\entry\OrderEntry$12.class
 com\user\model\MenuKey.class
 com\common\ZonedDateTimeAdapter.class
-com\inventory\ui\setup\dialog\JobSetupDialog$5.class
 com\acc\editor\BatchNoAutoCompeter$7.class
 com\user\editor\BusinessTypeAutoCompleter.class
 com\ui\management\common\SBDetailTableModel.class
@@ -1155,6 +1171,7 @@ com\user\setup\RoleCompany.class
 com\inventory\ui\entry\Sale$27.class
 com\acc\report\AparReport$12.class
 com\h2\service\PurHisDetailServiceImpl.class
+com\inventory\editor\JobAutoCompleter$7.class
 com\inventory\model\RetInHis.class
 com\ProgressDialog.class
 com\inventory\ui\setup\dialog\StockCriteriaSetupDialog$4.class
@@ -1195,7 +1212,6 @@ com\inventory\editor\UnitAutoCompleter$1.class
 com\acc\editor\DateAutoCompleter$6.class
 com\inventory\ui\entry\dialog\RetOutHistoryDialog$12.class
 com\acc\setup\TraderSetup$9.class
-com\inventory\ui\setup\dialog\JobSetupDialog$8.class
 com\inventory\ui\entry\OrderDynamic$16.class
 com\inventory\model\ReorderKey.class
 com\inventory\ui\common\StockInOutWeightTableModel.class
@@ -1209,6 +1225,7 @@ com\acc\editor\COA3CellEditor.class
 com\inventory\ui\entry\ReturnOut$2.class
 com\inventory\ui\entry\ReturnOut$DeleteAction.class
 com\inventory\ui\entry\Sale$24.class
+com\inventory\editor\JobAutoCompleter.class
 com\inventory\ui\entry\SaleDynamic$30.class
 com\inventory\ui\entry\Reports$26.class
 com\inventory\ui\entry\dialog\BatchSearchDialog$4.class
@@ -1346,6 +1363,7 @@ com\user\dialog\DepartmentDialog$1.class
 com\inventory\ui\entry\GRNEntry$DeleteAction.class
 com\inventory\ui\entry\dialog\PurchaseWeightLossPriceDialog$3.class
 com\inventory\model\WeightHisDetailKey.class
+com\dms\model\CVFile.class
 com\inventory\editor\MachineInfoAutoCompleter$6.class
 com\inventory\editor\RegionAutoCompleter$5.class
 com\h2\service\GlService.class
@@ -1399,6 +1417,7 @@ com\inventory\ui\entry\ReturnOut$1.class
 com\inventory\model\OutputCost.class
 com\inventory\ui\setup\dialog\StockBrandSetupDialog$5.class
 com\acc\editor\BatchNoAutoCompeter$6.class
+com\inventory\ui\entry\dialog\JobSearchDialog$9.class
 com\ui\management\StockBalance$6.class
 com\h2\dao\SaleHisDetailDaoImpl.class
 com\inventory\ui\entry\ReturnOut$6.class
@@ -1445,6 +1464,7 @@ com\acc\dialog\DatePickerDialog.class
 com\inventory\model\RetOutKey.class
 com\inventory\editor\PriceCompleter$5.class
 com\acc\dialog\TraderImportDialog$1.class
+com\common\TableRowTransferHandler.class
 com\ui\management\StockBalance$1.class
 com\acc\editor\COAAutoCompleter$2.class
 com\inventory\ui\entry\OtherSetup$2.class
@@ -1531,6 +1551,7 @@ com\inventory\ui\entry\dialog\LandingHistoryDialog$6.class
 com\acc\model\COATemplate.class
 com\inventory\editor\StockFormulaCompleter$7.class
 com\inventory\model\LandingHisPrice.class
+com\inventory\ui\setup\JobSetup$2.class
 com\user\model\PropertyKey.class
 com\inventory\model\LandingHis.class
 com\inventory\ui\setup\StockSetup$32.class
@@ -1542,6 +1563,7 @@ com\inventory\ui\setup\dialog\ExpenseSetupDialog$2.class
 com\user\model\MenuTemplate.class
 com\acc\common\JournalClosingStockTableModel.class
 com\inventory\editor\AppUserAutoCompleter$1.class
+com\inventory\ui\setup\JobSetup.class
 com\acc\report\AparReport$11.class
 com\acc\setup\COAManagment$2.class
 com\inventory\editor\BrandAutoCompleter$8.class
@@ -1555,9 +1577,9 @@ com\inventory\ui\entry\RFID$3.class
 com\h2\service\LocationService.class
 com\user\editor\CurrencyAutoCompleter$1.class
 com\h2\service\CurrencyService.class
+com\user\editor\DepartmentUserAutoCompleter.class
 com\inventory\ui\entry\ReturnOut$16.class
 com\inventory\model\PaymentHis.class
-com\inventory\ui\setup\EmployeeSetup$15.class
 com\inventory\ui\setup\EmployeeSetup$6.class
 com\acc\editor\BatchCellEditor$2.class
 com\h2\dao\AbstractDao.class
@@ -1576,6 +1598,7 @@ com\inventory\ui\setup\StockSetup$37.class
 com\ui\management\StockPayable$2.class
 com\acc\common\ColumnHeaderListener.class
 com\inventory\editor\BatchAutoCompeter$8.class
+com\inventory\ui\entry\dialog\StockIOHistoryDialog$16.class
 com\inventory\ui\entry\dialog\TransferHistoryDialog$5.class
 com\inventory\ui\setup\dialog\ExpenseSetupDialog$7.class
 com\h2\service\StockInOutService.class
@@ -1596,6 +1619,7 @@ com\inventory\ui\setup\OpeningSetup$3.class
 com\user\setup\SystemProperty$2.class
 com\inventory\tree\MyTreeTableCellEditor.class
 com\inventory\ui\entry\dialog\StockIOHistoryDialog$2.class
+com\inventory\ui\entry\LabourPaymentEntry$1.class
 com\acc\common\DateTableDecorator.class
 com\inventory\ui\entry\AccountSettingEntry$2.class
 com\inventory\ui\entry\dialog\WeightHistoryDialog$5.class
@@ -1605,6 +1629,7 @@ com\inventory\ui\entry\Sale$4.class
 com\user\editor\RoleAutoCompleter$4.class
 com\inventory\ui\entry\dialog\StockIOHistoryDialog.class
 com\inventory\ui\setup\PatternSetup$DeleteAction.class
+com\inventory\ui\common\PurOrderHisTableModel.class
 com\inventory\ui\setup\OutputCostSetup.class
 com\inventory\ui\entry\dialog\SaleHistoryDialog$6.class
 com\acc\common\StandardCOATableModel.class
@@ -1621,13 +1646,14 @@ com\inventory\ui\entry\dialog\StockIssRecHistoryDialog$11.class
 com\inventory\ui\setup\CustomerSetup$6.class
 com\inventory\ui\common\ReportTableModel.class
 com\inventory\ui\setup\CustomerSetup$12.class
-com\inventory\ui\setup\dialog\JobSetupDialog$11.class
 com\inventory\ui\entry\Sale$21.class
+com\user\editor\DepartmentUserAutoCompleter$2.class
 com\inventory\editor\UnitAutoCompleter$5.class
 com\inventory\ui\entry\AccountSettingEntry$11.class
 com\inventory\editor\SalePriceAutoCompleter$2.class
 com\inventory\ui\entry\PurchaseDynamic$5.class
 com\inventory\ui\setup\dialog\VouStatusSetupDialog$9.class
+com\inventory\editor\JobAutoCompleter$4.class
 com\inventory\ui\entry\RFID$DeleteAction.class
 com\inventory\ui\setup\dialog\WareHouseSetupDialog$6.class
 com\user\common\MenuTreeTrasnferHandler.class
@@ -1642,7 +1668,6 @@ com\inventory\ui\entry\dialog\OPHistoryDialog$5.class
 com\h2\dao\PatternDao.class
 com\CloudIntegration.class
 com\inventory\model\StockIssueReceiveKey.class
-com\inventory\ui\setup\dialog\JobSetupDialog$3.class
 com\acc\entry\AllCash$21.class
 com\acc\editor\COAAutoCompleter$7.class
 com\user\common\MenuTemplateTreeTrasnferHandler$NodesTransferable.class
@@ -1731,6 +1756,7 @@ com\inventory\ui\entry\dialog\ManufactureHistoryDialog$4.class
 com\acc\setup\DepartmentSetup$1.class
 com\inventory\editor\StockCriteriaCompleter$1.class
 com\inventory\ui\entry\dialog\GRNHistoryDialog$4.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$9.class
 com\inventory\ui\entry\PurchaseDynamic$24.class
 com\inventory\ui\common\BatchTableModel.class
 com\acc\report\AparReport$7.class
@@ -1743,7 +1769,6 @@ com\inventory\ui\entry\Sale$7.class
 com\inventory\editor\StockTypeAutoCompleter$6.class
 com\h2\service\BusinessTypeService.class
 com\h2\service\PrivilegeCompanyService.class
-com\inventory\ui\setup\EmployeeSetup$12.class
 com\user\model\SeqTableUser.class
 com\inventory\ui\entry\MillingEntry$16.class
 com\inventory\ui\setup\dialog\SaleManSetupDialog$3.class
@@ -1861,10 +1886,13 @@ com\h2\dao\ProjectDaoImpl.class
 com\h2\service\ExchangeRateService.class
 com\inventory\model\WeightLossHis.class
 com\acc\entry\DrCrVoucher$5.class
+com\inventory\ui\entry\LabourPaymentEntry$4.class
+com\inventory\ui\entry\Reports$32.class
 com\inventory\ui\entry\dialog\MillingHistoryDialog$14.class
 com\inventory\ui\setup\EmployeeSetup$1.class
 com\h2\service\GlLogServiceImpl.class
 com\inventory\ui\entry\ReturnOut$18.class
+com\repo\DMSRepo.class
 com\repo\InventoryRepo.class
 com\user\editor\RoleAutoCompleter.class
 com\inventory\editor\BrandEditor.class
@@ -1892,6 +1920,7 @@ com\acc\dialog\JournalEntryDialog$11.class
 com\inventory\ui\entry\Sale$19.class
 com\inventory\ui\entry\Purchase$7.class
 com\acc\editor\TranSourceAutoCompleter$1.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$6.class
 com\h2\service\MacPropertyServiceImpl.class
 com\inventory\model\FontKey.class
 com\inventory\ui\entry\dialog\OrderHistoryDialog$14.class
@@ -1918,6 +1947,7 @@ com\inventory\ui\setup\dialog\StockUnitSetupDailog$1.class
 com\h2\dao\TransferHisDetailDao.class
 com\h2\dao\CompanyInfoDaoImpl.class
 com\h2\dao\OrderStatusDaoImpl.class
+com\dms\model\FileObject.class
 com\h2\service\ReportService.class
 com\inventory\editor\StockAutoCompleter.class
 com\inventory\ui\entry\dialog\ReturnInHistoryDialog$12.class
@@ -1938,6 +1968,7 @@ com\inventory\ui\entry\dialog\MillingHistoryDialog$7.class
 com\inventory\ui\setup\dialog\TraderGroupDialog$5.class
 com\acc\model\DepartmentA.class
 com\inventory\ui\common\StockFormulaPriceTableModel.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$1.class
 com\acc\dialog\TraderImportDialog.class
 com\inventory\editor\LocationCellEditor$1.class
 com\acc\dialog\ChartOfAccountImportDialog$5.class
@@ -1953,6 +1984,7 @@ com\acc\dialog\ShootTriMessageDialog$1.class
 com\h2\dao\PurHisDaoImpl.class
 com\inventory\editor\MachineInfoAutoCompleter.class
 com\inventory\ui\entry\Reports$5.class
+com\inventory\ui\entry\PurOrderHisEntry$1.class
 com\inventory\model\Voucher.class
 com\acc\report\GLReport$7.class
 com\user\setup\ProjectSetup.class
@@ -1976,13 +2008,13 @@ com\acc\editor\TranSourceAutoCompleter$8.class
 com\inventory\editor\TraderGroupAutoCompleter$8.class
 com\user\editor\BusinessTypeAutoCompleter$8.class
 com\user\editor\ProjectAutoCompleter$5.class
+com\inventory\ui\setup\dialog\VouStatusSetupDialog$10.class
 com\acc\dialog\TrialBalanceDetailDialog$3.class
 com\common\ColumnColorCellRenderer.class
 com\user\common\DateLockTableModel.class
 com\h2\dao\TransferHisDetailDaoImpl.class
 com\h2\service\PrivilegeCompanyServiceImpl.class
 com\inventory\ui\entry\SaleDynamic$21.class
-com\inventory\ui\entry\StockInOutEntry$6.class
 com\inventory\editor\StockFormulaCompleter$2.class
 com\acc\editor\TranSourceAutoCompleter$5.class
 com\inventory\ui\entry\Purchase$10.class
@@ -1991,7 +2023,6 @@ com\acc\dialog\JournalEntryDialog$16.class
 com\inventory\ui\entry\StockInOutEntry$3.class
 com\acc\entry\TraderAdjustment$18.class
 com\inventory\ui\setup\dialog\OrderStatusSetupDialog$7.class
-com\inventory\ui\entry\dialog\MillingHistoryDialog$19.class
 com\user\model\PMKey.class
 com\user\setup\RoleSetting$3.class
 com\inventory\editor\PriceCompleter$3.class
@@ -2034,6 +2065,7 @@ com\user\setup\CompanySetup$7.class
 com\inventory\ui\entry\PurchaseDynamic$26.class
 com\acc\dialog\TrialBalanceDetailDialog$1.class
 com\inventory\editor\StockAutoCompleter1$4.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$4.class
 com\inventory\ui\setup\StockSetup$14.class
 com\SSEListener.class
 com\inventory\editor\StockUnitEditor$1.class
@@ -2068,6 +2100,8 @@ com\inventory\ui\setup\CustomerSetup$3.class
 com\inventory\editor\CategoryAutoCompleter.class
 com\inventory\ui\entry\dialog\TransferHistoryDialog$8.class
 com\model\WeightColumn.class
+com\dms\CoreDrive$4.class
+com\inventory\ui\setup\JobSetup$12.class
 com\inventory\editor\MenuAutoCompleter$6.class
 com\inventory\ui\entry\dialog\PaymentHistoryDialog$10.class
 com\inventory\editor\SalePriceCellEditor$2.class
@@ -2089,6 +2123,7 @@ com\h2\service\SeqService.class
 com\h2\service\DateLockServiceImpl.class
 com\user\editor\RoleAutoCompleter$2.class
 com\h2\service\VRoleCompanyService.class
+com\inventory\ui\entry\PurOrderHisEntry$3.class
 com\inventory\ui\entry\StockIssRecEntry$DeleteAction.class
 com\inventory\ui\setup\dialog\common\CustomerGridTabelModel.class
 com\inventory\ui\entry\ReturnIn$14.class
@@ -2123,6 +2158,7 @@ com\model\VoucherInfoEnum.class
 com\inventory\model\OPHisKey.class
 com\inventory\editor\StockAutoCompleter1$1.class
 com\inventory\editor\WareHouseAutoCompleter$5.class
+com\inventory\ui\entry\LabourPaymentEntry.class
 com\inventory\ui\common\JobComboBoxModel.class
 com\acc\dialog\VoucherEntryDailog$12.class
 com\acc\editor\DateAutoCompleter.class
@@ -2152,7 +2188,6 @@ com\inventory\ui\entry\Sale$6.class
 com\h2\dao\WeightLossDao.class
 com\inventory\model\Job.class
 com\inventory\ui\entry\dialog\SaleHistoryDialog$4.class
-com\user\editor\DepartmentAutoCompleter$5.class
 com\acc\editor\DespAutoCompleter$5.class
 com\inventory\model\UsrCompRoleKey.class
 com\inventory\ui\setup\dialog\common\StockImportTableModel.class
@@ -2165,10 +2200,13 @@ com\inventory\ui\setup\CustomerSetup$14.class
 com\inventory\ui\entry\WeightEntry$3.class
 com\user\model\MenuTemplateKey.class
 com\inventory\ui\entry\dialog\GRNHistoryDialog$3.class
+com\user\setup\SystemProperty$14.class
 com\inventory\editor\LocationAutoCompleter$3.class
+com\inventory\ui\entry\PurOrderHisEntry$DeleteAction.class
 com\user\common\RolePropertyTableModel.class
 com\h2\service\CompanyInfoServiceImpl.class
 com\H2Repo.class
+com\inventory\ui\setup\JobSetup$4.class
 com\h2\service\ProcessHisDetailService.class
 com\h2\service\SaleHisService.class
 com\inventory\editor\CarNoAutoCompleter$6.class
@@ -2177,6 +2215,7 @@ com\user\editor\BusinessTypeAutoCompleter$2.class
 com\ui\ApplicationMainFrame.class
 com\inventory\ui\common\CompanyNameTableModel.class
 com\inventory\ui\entry\dialog\StockIssRecHistoryDialog$6.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$8.class
 com\inventory\ui\entry\dialog\WeightLossHistoryDialog$10.class
 com\inventory\ui\entry\PurchaseDynamic$15.class
 com\inventory\ui\entry\Sale$DeleteSale.class
@@ -2192,6 +2231,7 @@ com\h2\service\OPHisDetailServiceImpl.class
 com\inventory\ui\entry\SaleByBatch$DeleteAction.class
 com\inventory\model\Stock.class
 com\inventory\ui\setup\dialog\StockTypeSetupDialog$4.class
+com\user\editor\DepartmentUserAutoCompleter$4.class
 com\inventory\editor\MenuAutoCompleter.class
 com\inventory\ui\entry\ReturnIn$1.class
 com\inventory\editor\CategoryEditor$2.class
@@ -2206,12 +2246,14 @@ com\user\common\MachinePropertyTableModel.class
 com\h2\dao\OPHisDetailDao.class
 com\inventory\model\GRNDetailKey.class
 com\inventory\ui\setup\OutputCostSetup$9.class
+com\common\TableRowTransferHandler$1.class
 com\acc\report\excel\ExcelIndividualLedger$1.class
 com\inventory\editor\TraderAutoCompleter$3.class
 com\acc\setup\COAManagment$13.class
 com\acc\model\GlLogKey.class
 com\inventory\ui\entry\SaleByBatch$3.class
 com\inventory\ui\setup\dialog\WareHouseSetupDialog.class
+com\inventory\ui\entry\Reports$31.class
 com\user\model\PrivilegeCompany.class
 com\h2\dao\SaleHisDaoImpl.class
 com\inventory\editor\SaleManAutoCompleter$2.class
@@ -2230,6 +2272,7 @@ com\inventory\editor\WareHouseAutoCompleter$1.class
 com\inventory\editor\TraderAutoCompleter$4.class
 com\inventory\editor\SaleManAutoCompleter$6.class
 com\acc\report\GLReport.class
+com\user\editor\DepartmentUserAutoCompleter$3.class
 com\user\setup\RoleMenuSetup.class
 com\acc\common\COA2TableModel.class
 com\h2\dao\RetOutDao.class
@@ -2253,6 +2296,7 @@ com\inventory\ui\entry\dialog\JobSearchDialog$6.class
 com\ui\management\StockBalance$3.class
 com\inventory\editor\CategoryEditor.class
 com\common\ComponentUtil$1.class
+com\IconManager.class
 com\inventory\ui\entry\dialog\OrderHistoryDialog$8.class
 com\h2\dao\SeqDaoImpl.class
 com\user\editor\TextAutoCompleter$1.class
@@ -2280,7 +2324,6 @@ com\acc\entry\TraderAdjustment$2.class
 com\inventory\ui\entry\Transfer$4.class
 com\inventory\ui\common\SaleByWeightTableModel.class
 com\inventory\ui\entry\dialog\OrderHistoryDialog$7.class
-com\user\editor\DepartmentAutoCompleter$1.class
 com\acc\setup\COAOpening$4.class
 com\inventory\ui\entry\Sale$5.class
 com\h2\service\BusinessTypeServiceImpl.class
@@ -2295,6 +2338,7 @@ com\acc\editor\DespAutoCompleter$6.class
 com\h2\dao\PriceOptionDao.class
 com\inventory\ui\entry\dialog\SaleHistoryDialog$5.class
 com\inventory\ui\entry\dialog\JobSearchDialog$1.class
+com\inventory\ui\common\TransferPaddingTableModel.class
 com\user\editor\RoleAutoCompleter$6.class
 com\inventory\ui\setup\dialog\StockTypeSetupDialog$9.class
 com\inventory\ui\setup\StockSetup$43.class
@@ -2381,6 +2425,7 @@ com\acc\common\COATemplateGroupTableModel.class
 com\inventory\model\VReturnOut.class
 com\inventory\ui\common\RowNumberListModel.class
 com\inventory\ui\setup\dialog\LabourGroupSetupDialog$6.class
+com\inventory\ui\entry\LabourPaymentEntry$DeleteAction.class
 com\inventory\editor\AppUserAutoCompleter$8.class
 com\inventory\model\Region.class
 com\ui\management\StockBalance$4.class
@@ -2397,9 +2442,11 @@ com\inventory\ui\setup\StockSetup$38.class
 com\inventory\ui\setup\dialog\common\StockTypeTableModel.class
 com\user\dialog\DateLockDialog$2.class
 com\inventory\model\LandingHisPriceKey.class
+com\dms\commom\IconRenderer.class
 com\inventory\ui\setup\OutputCostSetup$3.class
 com\inventory\ui\setup\CustomerSetup$15.class
 com\inventory\ui\entry\dialog\JobSearchDialog$3.class
+com\inventory\ui\setup\JobSetup$8.class
 com\inventory\ui\entry\dialog\common\PurVouSearchTableModel.class
 com\inventory\model\OPHisDetailKey.class
 com\ui\management\model\ClosingBalance.class
@@ -2436,7 +2483,6 @@ com\inventory\model\Category.class
 com\h2\service\TransferHisDetailServiceImpl.class
 com\acc\model\GlKey.class
 com\acc\dialog\VoucherEntryDailog$13.class
-com\user\editor\DepartmentAutoCompleter$9.class
 com\inventory\ui\setup\dialog\RelationSetupDialog$3.class
 com\user\dialog\PrintCountDialog.class
 com\inventory\model\WeightLossDetail.class
@@ -2456,6 +2502,7 @@ com\acc\editor\BatchNoAutoCompeter.class
 com\inventory\editor\SalePriceCellEditor$1.class
 com\h2\dao\TraderADao.class
 com\acc\model\COAOpening.class
+com\dms\model\CVFileResponse.class
 com\h2\service\ProjectService.class
 com\inventory\editor\PriceAutoCompleter$7.class
 com\acc\setup\TraderAGroupDialog$3.class
@@ -2471,6 +2518,8 @@ com\inventory\ui\setup\dialog\common\JobTableModel.class
 com\inventory\model\StockUnitKey.class
 com\acc\model\VExchange.class
 com\inventory\ui\setup\SupplierSetup$6.class
+com\inventory\ui\entry\PurOrderHisEntry.class
+com\inventory\ui\setup\JobSetup$11.class
 com\config\TransactionConfig.class
 com\user\editor\TextAutoCompleter$3.class
 com\acc\common\COA3TableModel.class
@@ -2495,7 +2544,6 @@ com\inventory\ui\entry\SaleByBatch$4.class
 com\inventory\ui\entry\OtherSetup.class
 com\acc\setup\TraderAGroupDialog$1.class
 com\inventory\ui\entry\dialog\LandingReportDialog$1.class
-com\user\editor\DepartmentAutoCompleter$2.class
 com\h2\service\CurrencyServiceImpl.class
 com\inventory\model\ProcessDetail.class
 com\common\CustomTableCellRenderer.class
@@ -2505,6 +2553,7 @@ com\user\editor\CompanyAutoCompleter.class
 com\inventory\ui\entry\dialog\GRNDetailDialog.class
 com\inventory\ui\common\ReorderTableModel.class
 com\inventory\ui\setup\OpeningSetup$4.class
+com\user\editor\DepartmentUserAutoCompleter$7.class
 com\user\setup\MenuTemplateSetup$11.class
 com\acc\editor\RefAutoCompleter.class
 com\common\ReorderCellRender.class
@@ -2526,6 +2575,7 @@ com\inventory\ui\setup\CustomerSetup$4.class
 com\inventory\editor\TraderAutoCompleter$2.class
 com\inventory\ui\entry\dialog\GRNHistoryDialog$11.class
 com\inventory\ui\entry\MillingEntry$24.class
+com\inventory\ui\setup\JobSetup$1.class
 com\inventory\editor\PriceAutoCompleter$4.class
 com\user\editor\RoleAutoCompleter$1.class
 com\inventory\editor\CarNoAutoCompleter$5.class
@@ -2533,6 +2583,7 @@ com\inventory\ui\entry\WeightEntry$4.class
 com\inventory\model\AccKey.class
 com\inventory\model\OrderStatusKey.class
 com\acc\setup\COASetup.class
+com\inventory\ui\setup\JobSetup$3.class
 com\h2\service\DepartmentUserService.class
 com\h2\service\StockInOutServiceImpl.class
 com\acc\setup\COAManagment$1.class
@@ -2554,6 +2605,7 @@ com\inventory\ui\entry\WeightEntry$5.class
 com\inventory\editor\PriceAutoCompleter$5.class
 com\acc\editor\DepartmentAutoCompleter$3.class
 com\inventory\editor\CarNoAutoCompleter$4.class
+com\user\editor\DepartmentUserAutoCompleter$5.class
 com\acc\entry\AllCash$26.class
 com\acc\common\DespTableModel.class
 com\inventory\ui\entry\GRNEntry$2.class
@@ -2561,7 +2613,7 @@ com\inventory\ui\entry\MillingEntry$22.class
 com\inventory\ui\common\SaleRiceTableModel.class
 com\inventory\ui\setup\CustomerSetup$2.class
 com\RowHeaderExample$1.class
-com\user\editor\DepartmentAutoCompleter$4.class
+com\dms\commom\CVFileTableModel.class
 com\inventory\ui\entry\dialog\PaymentHistoryDialog$8.class
 com\user\dialog\CompanyOptionDialog.class
 com\inventory\ui\entry\ReturnIn.class
@@ -2584,6 +2636,8 @@ com\acc\model\TmpOpeningKey.class
 com\inventory\ui\setup\OpeningSetup$8.class
 com\inventory\ui\setup\OutputCostSetup$6.class
 com\inventory\ui\setup\SupplierSetup$9.class
+com\inventory\ui\setup\JobSetup$5.class
+com\user\editor\DepartmentUserAutoCompleter$9.class
 com\inventory\ui\entry\MillingEntry$20.class
 com\inventory\editor\LocationAutoCompleter$4.class
 com\inventory\ui\entry\dialog\GRNHistoryDialog$12.class
@@ -2599,7 +2653,6 @@ com\acc\setup\COAManagment$4.class
 com\acc\entry\Journal.class
 com\h2\service\OPHisService.class
 com\inventory\editor\LocationAutoCompleter$9.class
-com\user\editor\DepartmentAutoCompleter$6.class
 com\inventory\ui\entry\dialog\PaymentHistoryDialog$3.class
 com\inventory\ui\entry\SaleByBatch$16.class
 com\acc\setup\COASetup$1.class
@@ -2611,7 +2664,7 @@ com\acc\editor\DepartmentAutoCompleter$4.class
 com\inventory\ui\entry\WeightLossEntry$DeleteAction.class
 com\acc\dialog\VoucherEntryDailog$7.class
 com\user\editor\MacAutoCompleter$1.class
-com\user\editor\DepartmentAutoCompleter$7.class
+com\inventory\ui\setup\JobSetup$10.class
 com\inventory\model\VSale.class
 com\acc\common\DepartmentOptionTableModel.class
 com\h2\service\RoleService.class
@@ -2621,10 +2674,12 @@ com\inventory\ui\setup\CustomerSetup$17.class
 com\inventory\ui\entry\SaleByBatch$6.class
 com\inventory\ui\setup\OutputCostSetup$1.class
 com\inventory\model\SaleMan.class
+com\user\editor\DepartmentUserAutoCompleter$8.class
 com\acc\report\excel\ExcelReport.class
 com\inventory\model\SaleDetailKey.class
 com\acc\dialog\VoucherEntryDailog$1.class
 com\inventory\ui\entry\dialog\ReturnInHistoryDialog.class
+com\user\dialog\OtherDialog.class
 com\inventory\ui\entry\dialog\OrderDetailDialog.class
 com\user\setup\MenuSetup$10.class
 com\acc\dialog\JournalEntryDialog.class
@@ -2642,6 +2697,7 @@ com\inventory\ui\entry\SaleDynamic$17.class
 com\acc\common\VoucherTableModel.class
 com\user\setup\RoleMenuSetup$1.class
 com\acc\editor\RefCellEditor$2.class
+com\inventory\ui\setup\JobSetup$6.class
 com\user\dialog\DepartmentSetupDialog$1.class
 com\inventory\ui\entry\SaleByBatch$15.class
 com\inventory\ui\setup\OpeningSetup$9.class
@@ -2669,7 +2725,6 @@ com\inventory\ui\setup\dialog\PriceOptionDialog$2.class
 com\acc\setup\COAManagment$6.class
 com\inventory\ui\entry\dialog\PaymentHistoryDialog$1.class
 com\acc\setup\COASetup$2.class
-com\user\editor\DepartmentAutoCompleter$8.class
 com\acc\editor\DepartmentAutoCompleter$8.class
 com\acc\editor\TraderCellEditor$1.class
 com\h2\service\SystemPropertyServiceImpl.class
@@ -2682,6 +2737,7 @@ com\user\setup\MenuTemplateSetup$13.class
 com\h2\dao\StockCriteriaDaoImpl.class
 com\common\RightCellRender.class
 com\user\model\AuthenticationRequest$AuthenticationRequestBuilder.class
+com\inventory\ui\setup\JobSetup$7.class
 com\inventory\editor\MenuAutoCompleter$4.class
 com\h2\dao\RelationDaoImpl.class
 com\inventory\ui\entry\SaleByBatch$7.class
@@ -2691,7 +2747,9 @@ com\h2\dao\StockInOutDao.class
 com\h2\service\PurHisDetailService.class
 com\inventory\ui\setup\SupplierSetup$2.class
 com\common\FontCellRender.class
+com\inventory\ui\setup\JobSetup$13.class
 com\inventory\ui\setup\OutputCostSetup$5.class
+com\dms\CoreDrive$3.class
 com\acc\common\AllCashTableModel.class
 com\inventory\ui\setup\dialog\common\RegionTableModel.class
 com\inventory\ui\setup\SupplierSetup$5.class
@@ -2713,12 +2771,15 @@ com\h2\service\StockService.class
 com\inventory\ui\common\ProcessHisDetailTableModel.class
 com\acc\model\VTriBalanceKey.class
 com\inventory\editor\TraderAutoCompleter.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$11.class
+com\dms\CoreDrive$2.class
 com\inventory\ui\setup\OutputCostSetup$4.class
 com\user\model\AppUser.class
 com\inventory\editor\MenuAutoCompleter$2.class
 com\h2\dao\WeightLossHisDetailDaoImpl.class
 com\h2\service\RetOutDetailServiceImpl.class
 com\acc\setup\COAManagment$9.class
+com\inventory\ui\setup\JobSetup$9.class
 com\user\dialog\DepartmentSetupDialog$4.class
 com\inventory\ui\entry\dialog\VouDiscountDialog$DeleteExpense.class
 com\acc\setup\COASetup$3.class
@@ -2726,6 +2787,7 @@ com\ui\management\StockBalance.class
 com\acc\editor\DepartmentAutoCompleter$10.class
 com\inventory\ui\setup\SupplierSetup$4.class
 com\inventory\ui\entry\SaleByBatch$11.class
+com\user\setup\MenuSetup$12.class
 com\h2\service\SystemPropertyService.class
 com\inventory\ui\entry\SaleDynamic$13.class
 com\user\dialog\ProgramDownloadDialog.class
@@ -2733,8 +2795,10 @@ com\inventory\model\OrderHis.class
 com\inventory\ui\setup\dialog\PriceOptionDialog$1.class
 com\common\Global.class
 com\inventory\ui\entry\dialog\PaymentHistoryDialog$2.class
+com\dms\CoreDrive$1.class
 com\user\dialog\DateLockDialog$EnterAction.class
 com\inventory\editor\LocationAutoCompleter$8.class
+com\inventory\ui\entry\dialog\PurOrderHisDialog$10.class
 com\user\model\SysProperty.class
 com\user\common\TextTableModel.class
 com\acc\editor\DepartmentAutoCompleter$9.class
