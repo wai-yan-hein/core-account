@@ -65,6 +65,9 @@ import com.inventory.model.PurExpense;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
+import com.inventory.model.PurOrderHis;
+import com.inventory.model.PurOrderHisDetail;
+import com.inventory.model.PurOrderHisKey;
 import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
 import com.inventory.model.RelationKey;
@@ -113,6 +116,7 @@ import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VLanding;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VOrder;
+import com.inventory.model.VPurOrder;
 import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
@@ -4129,4 +4133,85 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    
+    //purchase order
+     public Mono<PurOrderHis> savePurOrder(PurOrderHis his) {
+        return inventoryApi.post()
+                .uri("purOrder/savePurOrder")
+                .body(Mono.just(his), PurOrderHis.class)
+                .retrieve()
+                .bodyToMono(PurOrderHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> delete(PurOrderHisKey key) {
+        return inventoryApi.post()
+                .uri("/purOrder/deletePurOrder")
+                .body(Mono.just(key), PurOrderHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> restore(PurOrderHisKey key) {
+        return inventoryApi.post()
+                .uri("/purOrder/restorePurOrder")
+                .body(Mono.just(key), PurOrderHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<VPurOrder>> getPurOrderHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/purOrder/getPurOrderHistory")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VPurOrder.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<PurOrderHisDetail>> getPurOrderHisDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/purOrder/getPurOrderHisDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(PurOrderHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<PurOrderHis> findPurOrder(String vouNo, boolean local) {
+        PurOrderHisKey key = new PurOrderHisKey();
+        key.setCompCode(Global.compCode);
+        key.setVouNo(vouNo);
+        return inventoryApi.post()
+                .uri("/purOrder/findPurOrder")
+                .body(Mono.just(key), PurOrderHisKey.class)
+                .retrieve()
+                .bodyToMono(PurOrderHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
 }

@@ -79,6 +79,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.OrderDynamic;
+import com.inventory.ui.entry.PurOrderHisEntry;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
@@ -792,6 +793,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 stockRec.setProgress(progress);
                 stockRec.initMain();
                 return stockRec;
+            }
+            case "Purchase Order Entry" -> {
+                PurOrderHisEntry entry = new PurOrderHisEntry();
+                entry.setName(menuName);
+                entry.setObserver(this);
+                entry.setProgress(progress);
+                entry.setInventoryRepo(inventoryRepo);
+                entry.setUserRepo(userRepo);
+                entry.initMain();
+                return entry;
             }
             case "Milling Entry", "Milling" -> {
                 MillingEntry millingEntry = new MillingEntry();
