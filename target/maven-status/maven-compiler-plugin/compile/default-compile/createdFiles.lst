@@ -2544,17 +2544,10 @@ com\inventory\ui\setup\dialog\common\JobTableModel.class
 com\inventory\model\StockUnitKey.class
 com\acc\model\VExchange.class
 com\inventory\ui\setup\SupplierSetup$6.class
-<<<<<<< HEAD
-com\inventory\ui\entry\PurOrderHisEntry.class
-com\inventory\ui\setup\JobSetup$11.class
-=======
 com\dms\CoreDrive$5.class
-<<<<<<< HEAD
+com\inventory\ui\entry\PurOrderHisEntry.class
 com\inventory\ui\setup\dialog\LanguageSetupDialog$5.class
 com\inventory\ui\setup\JobSetup$11.class
-=======
->>>>>>> c3139237ef7880d88071429f290eff410380066a
->>>>>>> a617ab387b248fedd04573ffbef45cc6831c8ef6
 com\config\TransactionConfig.class
 com\user\editor\TextAutoCompleter$3.class
 com\acc\common\COA3TableModel.class
@@ -2649,14 +2642,7 @@ com\inventory\ui\entry\MillingEntry$22.class
 com\inventory\ui\common\SaleRiceTableModel.class
 com\inventory\ui\setup\CustomerSetup$2.class
 com\RowHeaderExample$1.class
-<<<<<<< HEAD
 com\dms\commom\CVFileTableModel.class
-=======
-<<<<<<< HEAD
-com\dms\commom\CVFileTableModel.class
-=======
->>>>>>> c3139237ef7880d88071429f290eff410380066a
->>>>>>> a617ab387b248fedd04573ffbef45cc6831c8ef6
 com\inventory\ui\entry\dialog\PaymentHistoryDialog$8.class
 com\user\dialog\CompanyOptionDialog.class
 com\inventory\ui\entry\ReturnIn.class
@@ -2711,14 +2697,7 @@ com\acc\editor\DepartmentAutoCompleter$4.class
 com\inventory\ui\entry\WeightLossEntry$DeleteAction.class
 com\acc\dialog\VoucherEntryDailog$7.class
 com\user\editor\MacAutoCompleter$1.class
-<<<<<<< HEAD
 com\inventory\ui\setup\JobSetup$10.class
-=======
-<<<<<<< HEAD
-com\inventory\ui\setup\JobSetup$10.class
-=======
->>>>>>> c3139237ef7880d88071429f290eff410380066a
->>>>>>> a617ab387b248fedd04573ffbef45cc6831c8ef6
 com\inventory\model\VSale.class
 com\acc\common\DepartmentOptionTableModel.class
 com\h2\service\RoleService.class
@@ -2801,10 +2780,7 @@ com\h2\dao\StockInOutDao.class
 com\h2\service\PurHisDetailService.class
 com\inventory\ui\setup\SupplierSetup$2.class
 com\common\FontCellRender.class
-<<<<<<< HEAD
 com\inventory\ui\setup\dialog\LanguageSetupDialog$1.class
-=======
->>>>>>> a617ab387b248fedd04573ffbef45cc6831c8ef6
 com\inventory\ui\setup\JobSetup$13.class
 com\inventory\ui\setup\OutputCostSetup$5.class
 com\dms\CoreDrive$3.class
@@ -2830,10 +2806,7 @@ com\h2\service\StockService.class
 com\inventory\ui\common\ProcessHisDetailTableModel.class
 com\acc\model\VTriBalanceKey.class
 com\inventory\editor\TraderAutoCompleter.class
-<<<<<<< HEAD
-=======
 com\inventory\ui\entry\dialog\PurOrderHisDialog$11.class
->>>>>>> a617ab387b248fedd04573ffbef45cc6831c8ef6
 com\dms\CoreDrive$2.class
 com\inventory\ui\setup\OutputCostSetup$4.class
 com\user\model\AppUser.class
