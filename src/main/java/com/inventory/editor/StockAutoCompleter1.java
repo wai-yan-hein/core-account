@@ -199,21 +199,25 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
     }
 
     public void showPopup() {
-        if (!popup.isVisible()) {
-            if (textComp.isEnabled()) {
-                textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-                        JComponent.WHEN_FOCUSED);
-                if (x == 0) {
-                    x = textComp.getWidth();
-                    y = textComp.getHeight();
-                }
+        try {
+            if (!popup.isVisible()) {
+                if (textComp.isEnabled()) {
+                    textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                            JComponent.WHEN_FOCUSED);
+                    if (x == 0) {
+                        x = textComp.getWidth();
+                        y = textComp.getHeight();
+                    }
 
-                popup.show(textComp, x, y);
-            } else {
-                popup.setVisible(false);
+                    popup.show(textComp, x, y);
+                } else {
+                    popup.setVisible(false);
+                }
             }
+            textComp.requestFocus();
+        } catch (Exception e) {
+            log.error("showPopup : " + e.getMessage());
         }
-        textComp.requestFocus();
     }
 
     Action showAction = new AbstractAction() {

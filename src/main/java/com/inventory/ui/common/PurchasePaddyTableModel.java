@@ -126,10 +126,10 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2, 3, 7 ->
-                true;
-            default ->
+            case 8 ->
                 false;
+            default ->
+                true;
         };
     }
 
@@ -197,7 +197,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
                                 addNewRow();
                             }
                         }
-                        parent.setColumnSelectionInterval(4, 4);
+                        parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
                         double wet = Util1.getDouble(value);
@@ -226,7 +226,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
                     case 6 -> {
                         double bag = Util1.getDouble(value);
                         if (bag > 0) {
-                            pd.setQty(bag);
+                            pd.setBag(bag);
                         }
                     }
                     case 7 -> {

@@ -89,6 +89,7 @@ import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.JobSetup;
+import com.inventory.ui.setup.LanguageSetup;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
@@ -522,6 +523,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
             case "Stock" -> {
                 StockSetup setup = new StockSetup(ProUtil.isStockNoUnit());
+                setup.setName(menuName);
+                setup.setUserRepo(userRepo);
+                setup.setInventoryRepo(inventoryRepo);
+                setup.setObserver(this);
+                setup.setProgress(progress);
+                setup.initMain();
+                return setup;
+            }
+            case "Language" -> {
+                LanguageSetup setup = new LanguageSetup();
                 setup.setName(menuName);
                 setup.setUserRepo(userRepo);
                 setup.setInventoryRepo(inventoryRepo);

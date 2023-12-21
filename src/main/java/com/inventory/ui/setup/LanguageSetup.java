@@ -1,11 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package com.inventory.ui.setup.dialog;
+package com.inventory.ui.setup;
 
 import com.common.Global;
+import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.Language;
@@ -15,16 +15,11 @@ import com.inventory.ui.setup.dialog.common.LanguageTableModel;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
@@ -33,19 +28,22 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author Lenovo
+ * @author Athu Sint
  */
 @Slf4j
-public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListener {
+public class LanguageSetup extends javax.swing.JPanel {
+
+    private TableRowSorter<TableModel> sorter;
+    private StartWithRowFilter swrf;
+    private SelectionObserver observer;
+    private JProgressBar progress;
+
+    private UserRepo userRepo;
+    private InventoryRepo inventoryRepo;
 
     private int selectRow = - 1;
     private Language lan = new Language();
     private final LanguageTableModel languageTableModel = new LanguageTableModel();
-    private InventoryRepo inventoryRepo;
-    private UserRepo userRepo;
-
-    private TableRowSorter<TableModel> sorter;
-    private StartWithRowFilter swrf;
     private List<Language> list = new ArrayList<>();
 
     public List<Language> getList() {
@@ -58,45 +56,56 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
 
     }
 
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
+    public JProgressBar getProgress() {
+        return progress;
     }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
 
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
     /**
-     * Creates new form ItemTypeSetupDialog
+     * Creates new form LanguageSetup
      */
-    public LanguageSetupDialog() {
-        super(Global.parentForm, false);
+    public LanguageSetup() {
         initComponents();
-        initKeyListener();
-        lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
         initTable();
         searchLanguage();
         txtType.requestFocus();
-    }
-
-    private void initKeyListener() {
-        txtType.addKeyListener(this);
-        txtCode.addKeyListener(this);
-        btnClear.addKeyListener(this);
-        btnSave.addKeyListener(this);
-        tblVou.addKeyListener(this);
+//        initCombo();
+//        initData();
+//        initTable();
+//        initRowHeader();
+//        searchEmployee();
+//        assignDefault();
     }
 
     private void searchLanguage() {
-        languageTableModel.setList(list);
+        userRepo.getLanguage().doOnSuccess((t) -> {
+            if (t != null) {
+                languageTableModel.setList(t);
+            }
+        }).doOnTerminate(() -> {
+        }).subscribe();
     }
 
     private void initTable() {
@@ -135,9 +144,9 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
             btnSave.setEnabled(false);
             userRepo.saveLanguage(lan).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    list.set(selectRow, t);
+                    languageTableModel.setLanguage(t, selectRow);
                 } else {
-                    list.add(t);
+                    languageTableModel.addLanguage(t);
                 }
                 clear();
                 sendMessage(t.getLanValue());
@@ -208,9 +217,9 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        txtFilter = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVou = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtCode = new javax.swing.JTextField();
@@ -223,10 +232,13 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
         chkActive = new javax.swing.JCheckBox();
         jLabel5 = new javax.swing.JLabel();
         txtDesc = new javax.swing.JTextField();
-        progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setModalityType(null);
+        txtFilter.setName("txtFilter"); // NOI18N
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFilterKeyReleased(evt);
+            }
+        });
 
         tblVou.setFont(Global.textFont);
         tblVou.setModel(new javax.swing.table.DefaultTableModel(
@@ -242,13 +254,6 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
         ));
         tblVou.setName("tblVou"); // NOI18N
         jScrollPane1.setViewportView(tblVou);
-
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -335,7 +340,7 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jSeparator1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -355,9 +360,6 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(txtDesc))))
                 .addContainerGap())
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnClear, btnSave});
-
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -382,58 +384,39 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(205, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
-                            .addComponent(txtFilter))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+            .addGap(0, 865, Short.MAX_VALUE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
+                        .addComponent(txtFilter))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap()))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+            .addGap(0, 501, Short.MAX_VALUE)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)))
+                    .addContainerGap()))
         );
-
-        getAccessibleContext().setAccessibleDescription("");
-
-        pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void txtCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtCodeActionPerformed
-
-    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        // TODO add your handling code here:
-        save();
-    }//GEN-LAST:event_btnSaveActionPerformed
-
-    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        // TODO add your handling code here:
-        clear();
-    }//GEN-LAST:event_btnClearActionPerformed
 
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
         // TODO add your handling code here:
@@ -448,6 +431,20 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
         // TODO add your handling code here:
         txtCode.selectAll();
     }//GEN-LAST:event_txtCodeFocusGained
+
+    private void txtCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCodeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCodeActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        // TODO add your handling code here:
+        save();
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnClearActionPerformed
 
     private void txtTypeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtTypeFocusGained
         // TODO add your handling code here:
@@ -465,9 +462,6 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDescActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
@@ -480,68 +474,10 @@ public class LanguageSetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVou;
     private javax.swing.JTextField txtCode;
     private javax.swing.JTextField txtDesc;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtType;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        Object sourceObj = e.getSource();
-        String ctrlName = "-";
-
-        if (sourceObj instanceof JTable jTable) {
-            ctrlName = jTable.getName();
-        } else if (sourceObj instanceof JTextField jTextField) {
-            ctrlName = jTextField.getName();
-        } else if (sourceObj instanceof JButton jButton) {
-            ctrlName = jButton.getName();
-        }
-        switch (ctrlName) {
-            case "txtName" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    btnSave.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnClear.requestFocus();
-                }
-            }
-            case "txtUserCode" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    txtCode.requestFocus();
-                }
-            }
-            case "btnSave" -> {
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtCode.requestFocus();
-                }
-            }
-            case "btnDelete" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    btnClear.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnSave.requestFocus();
-                }
-            }
-            case "btnClear" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    txtType.requestFocus();
-                }
-            }
-
-        }
-    }
 }
