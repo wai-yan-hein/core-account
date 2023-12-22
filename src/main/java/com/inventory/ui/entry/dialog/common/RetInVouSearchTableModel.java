@@ -10,7 +10,6 @@ import com.common.Util1;
 import com.inventory.model.VReturnIn;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JFormattedTextField;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,32 +22,20 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
 
     private List<VReturnIn> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
-    private JFormattedTextField txtPaid;
-    private JFormattedTextField txtAmt;
-    private JFormattedTextField txtRecord;
+    private double vouTotal;
+    private double paidTotal;
+    private int size;
 
-    public JFormattedTextField getTxtPaid() {
-        return txtPaid;
+    public double getVouTotal() {
+        return vouTotal;
     }
 
-    public void setTxtPaid(JFormattedTextField txtPaid) {
-        this.txtPaid = txtPaid;
+    public double getPaidTotal() {
+        return paidTotal;
     }
 
-    public JFormattedTextField getTxtAmt() {
-        return txtAmt;
-    }
-
-    public void setTxtAmt(JFormattedTextField txtAmt) {
-        this.txtAmt = txtAmt;
-    }
-
-    public JFormattedTextField getTxtRecord() {
-        return txtRecord;
-    }
-
-    public void setTxtRecord(JFormattedTextField txtRecord) {
-        this.txtRecord = txtRecord;
+    public int getSize() {
+        return size;
     }
 
     @Override
@@ -139,18 +126,23 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
     }
 
     public void addObject(VReturnIn t) {
-        txtAmt.setValue(Util1.getFloat(txtAmt.getValue()) + Util1.getFloat(t.getVouTotal()));
-        txtPaid.setValue(Util1.getFloat(txtPaid.getValue()) + Util1.getFloat(t.getPaid()));
         listDetail.add(t);
-        txtRecord.setValue(listDetail.size());
+        vouTotal += t.getVouTotal();
+        paidTotal += t.getPaid();
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
-
     public void clear() {
-        txtAmt.setValue(0);
-        txtPaid.setValue(0);
-        txtRecord.setValue(0);
         listDetail.clear();
+        vouTotal = 0;
+        paidTotal = 0;
+        size = 0;
         fireTableDataChanged();
     }
 }

@@ -73,6 +73,9 @@ public class AccountRepo {
     }
 
     public Mono<DepartmentA> findDepartment(String deptCode) {
+        if (Util1.isNullOrEmpty(deptCode)) {
+            return Mono.empty();
+        }
         DepartmentAKey key = new DepartmentAKey();
         key.setDeptCode(Util1.isNull(deptCode, "-"));
         key.setCompCode(Global.compCode);
@@ -730,16 +733,21 @@ public class AccountRepo {
     }
 
     public Mono<List<Gl>> searchGl(ReportFilter filter) {
-        if (filter.isLocal()) {
-            return h2Repo.searchGL(filter);
-
-        }
         return accountApi.post()
                 .uri("/account/searchGl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
                 .collectList();
+    }
+
+    public Flux<Gl> searchGlFlux(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/searchGl")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .onErrorResume((t) -> Flux.empty());
     }
 
     public Mono<List<Gl>> searchVoucher(ReportFilter filter) {

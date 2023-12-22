@@ -27,6 +27,8 @@ import com.inventory.model.Job;
 import com.inventory.model.JobKey;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.LabourGroupKey;
+import com.inventory.model.LabourPaymentDetail;
+import com.inventory.model.LabourPaymentDto;
 import com.inventory.model.LandingHisPrice;
 import com.inventory.model.LandingHis;
 import com.inventory.model.LandingHisGrade;
@@ -928,11 +930,14 @@ public class InventoryRepo {
     }
 
     public Mono<LabourGroup> findLabourGroup(String code) {
+        if (Util1.isNullOrEmpty(code)) {
+            return Mono.empty();
+        }
         LabourGroupKey key = new LabourGroupKey();
         key.setCompCode(Global.compCode);
         key.setCode(code);
         if (localDatabase) {
-//            return h2Repo.find(key);
+            return h2Repo.find(key);
         }
         return inventoryApi.post()
                 .uri("/setup/findLabourGroup")
@@ -2297,13 +2302,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<OrderHis> findOrder(String vouNo, boolean local) {
+    public Mono<OrderHis> findOrder(String vouNo) {
         OrderHisKey key = new OrderHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
-        if (local) {
-            return h2Repo.findOrder(key);
-        }
         return inventoryApi.post()
                 .uri("/order/findOrder")
                 .body(Mono.just(key), OrderHisKey.class)
@@ -2360,20 +2362,16 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VReturnIn>> getReturnInVoucher(FilterObject filter) {
-        if (filter.isLocal()) {
-            return h2Repo.searchReturnInVoucher(filter);
-        }
+    public Flux<VReturnIn> getReturnInVoucher(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/retin/getReturnIn")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VReturnIn.class)
-                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Flux.empty();
                 });
     }
 
@@ -3127,6 +3125,29 @@ public class InventoryRepo {
                 .collectList();
     }
 
+    public Flux<LabourPaymentDto> getLabourPaymentHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/labourPayment/history")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(LabourPaymentDto.class);
+    }
+
+    public Mono<List<LabourPaymentDetail>> getLabourPaymentDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/labourPayment/getDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(LabourPaymentDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<SaleHisDetail>> getSaleByBatch(String batchNo, boolean detail) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/getSaleByBatch")
@@ -3469,6 +3490,18 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<LabourPaymentDto> saveLabourPayment(LabourPaymentDto dto) {
+        return inventoryApi.post()
+                .uri("/labourPayment")
+                .body(Mono.just(dto), LabourPaymentDto.class)
+                .retrieve()
+                .bodyToMono(LabourPaymentDto.class)
+                .onErrorResume((e) -> {
+                    log.error("saveLabourPayment :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<Boolean> checkPaymentExist(String vouNo, String traderCode, String tranOption) {
         FilterObject obj = new FilterObject(Global.compCode, Global.deptId);
         obj.setVouNo(vouNo);
@@ -3726,10 +3759,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId, boolean local) {
-        if (local) {
-            return h2Repo.getOrderDetail(vouNo, deptId);
-        }
+    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/order/getOrderDetail")
                 .queryParam("vouNo", vouNo)
@@ -3745,19 +3775,15 @@ public class InventoryRepo {
 
     }
 
-    public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
-        if (filter.isLocal()) {
-            return h2Repo.getSaleHistory(filter);
-        }
+    public Flux<VSale> getSaleHistory(FilterObject filter) {
         return inventoryApi.post()
                 .uri("/sale/getSale")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)
-                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Flux.empty();
                 });
     }
 
@@ -4050,7 +4076,8 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-  //StockIssueReceive
+    //StockIssueReceive
+
     public Mono<StockIssueReceive> saveStockIssRec(StockIssueReceive his) {
         return inventoryApi.post()
                 .uri("stockIssRec/saveStockIssRec")
@@ -4114,7 +4141,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<StockIssueReceive> findStockIR(String vouNo, boolean local) {
         StockIssueReceiveKey key = new StockIssueReceiveKey();
         key.setCompCode(Global.compCode);
@@ -4129,4 +4156,28 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+
+    public Mono<List<LabourPaymentDetail>> calulateLabourPayment(ReportFilter filter) {
+        return inventoryApi.post()
+                .uri("/labourPayment/calculatePayment")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(LabourPaymentDetail.class)
+                .collectList();
+    }
+
+    public Mono<Boolean> deleteLabourPayment(String vouNo) {
+        return inventoryApi.delete()
+                .uri("labourPayment/delete/{fileId}/{compCode}", vouNo, Global.compCode)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<Boolean> restoreLabourPayment(String vouNo) {
+        return inventoryApi.put()
+                .uri("labourPayment/restore/{fileId}/{compCode}", vouNo, Global.compCode)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
 }

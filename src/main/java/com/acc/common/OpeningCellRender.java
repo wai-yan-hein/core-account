@@ -6,7 +6,6 @@
 package com.acc.common;
 
 import com.common.ProUtil;
-import com.common.Util1;
 import java.awt.Component;
 import java.text.DecimalFormat;
 import javax.swing.JLabel;
@@ -21,18 +20,10 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class OpeningCellRender extends DefaultTableCellRenderer {
 
-    private DecimalFormat formatter = new DecimalFormat("###,##0;(###,##0)");
+    private DecimalFormat formatter;
 
     public OpeningCellRender() {
-        int place = ProUtil.getDecimalPalace();
-        formatter = switch (place) {
-            case 1 ->
-                new DecimalFormat(Util1.DECIMAL_FORMAT1);
-            case 2 ->
-                new DecimalFormat(Util1.DECIMAL_FORMAT4);
-            default ->
-                new DecimalFormat(Util1.DECIMAL_FORMAT1);
-        };
+        formatter = ProUtil.getDecimalFormat();
     }
 
     @Override

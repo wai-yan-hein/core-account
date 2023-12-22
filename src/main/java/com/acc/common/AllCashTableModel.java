@@ -50,6 +50,21 @@ public class AllCashTableModel extends AbstractTableModel {
     private AccountRepo accountRepo;
     private JProgressBar progress;
     private UndoStack undo = new UndoStack();
+    private double drAmt;
+    private double crAmt;
+    private int size;
+
+    public double getDrAmt() {
+        return drAmt;
+    }
+
+    public double getCrAmt() {
+        return crAmt;
+    }
+
+    public int getSize() {
+        return size;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -145,8 +160,7 @@ public class AllCashTableModel extends AbstractTableModel {
                         return vgi.getReference();
                     }
                     case 4 -> {
-                        //Ref no
-                        return vgi.getRefNo();
+                        return Util1.isNull(vgi.getGlVouNo(), vgi.getRefNo());
                     }
                     case 5 -> {
                         return vgi.getBatchNo();
@@ -166,10 +180,10 @@ public class AllCashTableModel extends AbstractTableModel {
                         return vgi.getCurCode();
                     }
                     case 10 -> {
-                        return Util1.getDouble(vgi.getDrAmt()) == 0 ? null : vgi.getDrAmt();
+                        return Util1.toNull(vgi.getDrAmt());
                     }
                     case 11 -> {
-                        return Util1.getDouble(vgi.getCrAmt()) == 0 ? null : vgi.getCrAmt();
+                        return Util1.toNull(vgi.getCrAmt());
                     }
                     default -> {
                         return null;
@@ -293,11 +307,11 @@ public class AllCashTableModel extends AbstractTableModel {
                 }
                 case 10 -> {
                     gl.setDrAmt(Util1.getDouble(value));
-                    gl.setCrAmt(null);
+                    gl.setCrAmt(0);
                 }
                 case 11 -> {
                     gl.setCrAmt(Util1.getDouble(value));
-                    gl.setDrAmt(null);
+                    gl.setDrAmt(0);
                 }
             }
             if (canEdit(gl, row)) {
@@ -488,8 +502,24 @@ public class AllCashTableModel extends AbstractTableModel {
         fireTableStructureChanged();
     }
 
+    public void addObject(Gl gl) {
+        listVGl.add(gl);
+        drAmt += gl.getDrAmt();
+        crAmt += gl.getCrAmt();
+        size += 1;
+        int lastIndex = listVGl.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
+    }
+
     public void clear() {
         if (listVGl != null) {
+            drAmt = 0;
+            crAmt = 0;
+            size = 0;
             listVGl.clear();
             fireTableDataChanged();
         }

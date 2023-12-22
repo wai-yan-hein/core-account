@@ -15,7 +15,6 @@ import com.inventory.model.OrderHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.OrderDynamic;
-import com.inventory.ui.entry.OrderEntry;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
@@ -39,14 +38,9 @@ public class PurchaseOrderTableModel extends AbstractTableModel {
     private SelectionObserver observer;
     private final List<OrderDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
-    private OrderEntry orderEntry;
     private OrderDynamic orderDynamic;
     private boolean change = false;
     private JLabel lblRecord;
-
-    public void setOrderEntry(OrderEntry orderEntry) {
-        this.orderEntry = orderEntry;
-    }
 
     public void setOrderDynamic(OrderDynamic orderDynamic) {
         this.orderDynamic = orderDynamic;
@@ -312,7 +306,7 @@ public class PurchaseOrderTableModel extends AbstractTableModel {
 
     private void assignLocation(OrderHisDetail sd) {
         if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = orderEntry.getLocationAutoCompleter();
+            LocationAutoCompleter completer = orderDynamic.getLocationAutoCompleter();
             if (completer != null) {
                 Location l = completer.getLocation();
                 if (l != null) {

@@ -21,7 +21,6 @@ import com.inventory.model.MessageType;
 import com.inventory.model.VRoleMenu;
 import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
-import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.DateLock;
 import com.user.model.DepartmentKey;
@@ -35,15 +34,13 @@ import com.user.model.PrivilegeCompany;
 import com.user.model.PrivilegeMenu;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import com.user.model.YearEnd;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -253,6 +250,9 @@ public class UserRepo {
     }
 
     public Mono<Currency> findCurrency(String curCode) {
+        if(Util1.isNullOrEmpty(curCode)){
+            return Mono.empty();
+        }
         if (localdatabase) {
             return h2Repo.findCurrency(curCode);
         }
@@ -269,6 +269,9 @@ public class UserRepo {
     }
 
     public Mono<CompanyInfo> findCompany(String compCode) {
+         if(Util1.isNullOrEmpty(compCode)){
+            return Mono.empty();
+        }
         if (localdatabase) {
             return h2Repo.findCompany(compCode);
         }
@@ -280,6 +283,9 @@ public class UserRepo {
     }
 
     public Mono<AppRole> finRole(String roleCode) {
+         if(Util1.isNullOrEmpty(roleCode)){
+            return Mono.empty();
+        }
         if (localdatabase) {
             return h2Repo.finRole(roleCode);
         }
@@ -291,6 +297,9 @@ public class UserRepo {
     }
 
     public Mono<DepartmentUser> findDepartment(Integer deptId) {
+        if (Util1.isNullOrEmpty(deptId)) {
+            return Mono.empty();
+        }
         DepartmentKey key = new DepartmentKey();
         key.setDeptId(deptId);
         key.setCompCode(Global.compCode);
@@ -931,7 +940,7 @@ public class UserRepo {
                 ).bodyToMono(AppUser.class);
     }
 
-    public Mono<List<VRoleCompany>> getPrivilegeRoleCompany(String roleCode) {
+    public Mono<List<CompanyInfo>> getPrivilegeRoleCompany(String roleCode) {
         if (localdatabase) {
             return h2Repo.getPrivilegeCompany(roleCode);
         }
@@ -940,7 +949,7 @@ public class UserRepo {
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(VRoleCompany.class)
+                .bodyToFlux(CompanyInfo.class)
                 .collectList();
     }
 

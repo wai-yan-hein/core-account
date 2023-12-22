@@ -17,19 +17,11 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class DecimalFormatRender extends DefaultTableCellRenderer {
 
-    private DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
-    public DecimalFormatRender() {
-        int place = ProUtil.getDecimalPalace();
-        formatter = switch (place) {
-            case 1 ->
-                new DecimalFormat(Util1.DECIMAL_FORMAT1);
-            case 2 ->
-                new DecimalFormat(Util1.DECIMAL_FORMAT4);
-            default ->
-                new DecimalFormat(Util1.DECIMAL_FORMAT);
-        };
-    }
+    private DecimalFormat formatter;
 
+    public DecimalFormatRender() {
+        formatter = ProUtil.getDecimalFormat();
+    }
 
     public DecimalFormatRender(int format) {
         switch (format) {

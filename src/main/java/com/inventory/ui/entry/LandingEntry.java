@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -33,8 +34,6 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -94,16 +93,6 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     /**
      * Creates new form GradeManagement
@@ -116,12 +105,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initFoucsAdapter() {
-        txtTrader.addFocusListener(fa);
-        txtVouDate.addFocusListener(fa);
-        txtLocation.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtCargo.addFocusListener(fa);
-        txtStock.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
 
     }
 

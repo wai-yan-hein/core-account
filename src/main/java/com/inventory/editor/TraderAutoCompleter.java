@@ -124,7 +124,7 @@ public class TraderAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(600, 200);
+        popup.setPopupSize(600, 400);
 
         popup.add(scroll);
 

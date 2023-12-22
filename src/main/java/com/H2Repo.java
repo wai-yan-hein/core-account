@@ -95,7 +95,7 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
 import com.h2.service.OutputCostService;
@@ -125,6 +125,7 @@ import com.inventory.model.GradeDetailKey;
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
 import com.inventory.model.LabourGroup;
+import com.inventory.model.LabourGroupKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHisDetail;
@@ -601,7 +602,7 @@ public class H2Repo {
         return Mono.justOrEmpty(userService.findAll());
     }
 
-    public Mono<List<VRoleCompany>> getPrivilegeCompany(String roleCode) {
+    public Mono<List<CompanyInfo>> getPrivilegeCompany(String roleCode) {
         return Mono.justOrEmpty(vRoleCompanyService.getPrivilegeCompany(roleCode));
     }
 
@@ -1094,5 +1095,9 @@ public class H2Repo {
 
     public Mono<WareHouse> find(WareHouseKey key) {
         return Mono.justOrEmpty(wareHouseService.findById(key));
+    }
+
+    public Mono<LabourGroup> find(LabourGroupKey key) {
+        return Mono.justOrEmpty(labourGroupService.findById(key));
     }
 }

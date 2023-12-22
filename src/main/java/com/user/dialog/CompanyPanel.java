@@ -7,7 +7,7 @@ package com.user.dialog;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,28 +17,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CompanyPanel extends javax.swing.JPanel {
 
-    private VRoleCompany info;
+    private CompanyInfo info;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
     
-    public VRoleCompany getInfo() {
+    public CompanyInfo getInfo() {
         return info;
     }
 
-    public void setInfo(VRoleCompany info) {
+    public void setInfo(CompanyInfo info) {
         this.info = info;
     }
 
-    public CompanyPanel(VRoleCompany info) {
+    public CompanyPanel(CompanyInfo info) {
         this.info = info;
         initComponents();
         setData(info);
     }
 
-    private void setData(VRoleCompany info) {
+    private void setData(CompanyInfo info) {
         if (info != null) {
             panel.setName(info.getCompCode());
             lblCompanyName.setText(info.getCompName());

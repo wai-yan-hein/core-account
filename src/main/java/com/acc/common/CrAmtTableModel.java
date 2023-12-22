@@ -5,6 +5,7 @@
 package com.acc.common;
 
 import com.acc.model.Gl;
+import com.common.ProUtil;
 import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,12 +53,18 @@ public class CrAmtTableModel extends AbstractTableModel {
                     Util1.toDateStr(apar.getGlDate(), "dd/MM/yyyy");
                 case 1 ->
                     apar.getDeptUsrCode();
-                case 2 ->
-                    apar.getDescription();
+                case 2 -> {
+                    if (ProUtil.isShowAcc(apar.getTranSource())) {
+                        yield apar.getDescription() + String.format(" (%s)", apar.getAccName());
+                    }
+                    //Desp
+                    yield apar.getDescription();
+                }
                 case 3 ->
                     apar.getReference();
                 case 4 ->
-                    apar.getRefNo();
+                    //RefNo
+                    Util1.isNull(apar.getGlVouNo(), apar.getRefNo());
                 case 5 ->
                     apar.getCrAmt();
                 default ->

@@ -15,6 +15,9 @@ import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
@@ -51,6 +54,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
@@ -102,7 +107,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     public void setIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
-    
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -301,7 +305,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtVouNo.setText(null);
     }
 
-    private void clear() {
+    private void clear(boolean focus) {
         disableForm(true);
         retInTableModel.clear();
         retInTableModel.addNewRow();
@@ -314,7 +318,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         progress.setIndeterminate(false);
         txtRemark.setText(null);
         projectAutoCompleter.setProject(null);
-        focusTable();
+        txtRemark.requestFocus(focus);
+
     }
 
     private void deleteTran() {
@@ -343,28 +348,29 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             observer.selected("save", false);
             ri.setListRD(retInTableModel.getListDetail());
             ri.setListDel(retInTableModel.getDelList());
-            inventoryRepo.save(ri)
-                    .subscribe((t) -> {
-                        progress.setIndeterminate(false);
-                        clear();
-                        if (print) {
-                            printSaveVoucher(ri.getKey().getVouNo());
-                        }
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        progress.setIndeterminate(false);
-                        observer.selected("save", false);
-                    });
+            inventoryRepo.save(ri).doOnSuccess((t) -> {
+                progress.setIndeterminate(false);
+            }).doOnError((e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+                observer.selected("save", false);
+            }).doOnTerminate(() -> {
+                if (print) {
+                    printVoucher(ri);
+                }
+                clear(false);
+            }).subscribe();
 
         }
     }
 
     private boolean isValidEntry() {
         boolean status = true;
+        Trader trader = traderAutoCompleter.getTrader();
         if (lblStatus.getText().equals("DELETED")) {
             status = false;
-            clear();
-        } else if (traderAutoCompleter.getTrader() == null) {
+            clear(true);
+        } else if (trader == null) {
             JOptionPane.showMessageDialog(Global.parentForm, "Invalid Customer Name.",
                     "Choose Customer Name", JOptionPane.ERROR_MESSAGE);
             status = false;
@@ -401,7 +407,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             Project p = projectAutoCompleter.getProject();
             ri.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             ri.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
-            ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            ri.setTraderCode(trader.getKey().getCode());
+            ri.setTraderName(trader.getTraderName());
             ri.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
             if (lblStatus.getText().equals("NEW")) {
@@ -429,7 +436,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                         "Are you sure to delete?", "Return In Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
                     inventoryRepo.delete(ri.getKey()).subscribe((t) -> {
-                        clear();
+                        clear(true);
                     });
                 }
             }
@@ -581,30 +588,35 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         retInTableModel.setListDetail(listRetInDetail);
     }
 
-    private void printSaveVoucher(String vouNo) {
-        inventoryRepo.getReturnInReport(vouNo).subscribe((t) -> {
-            try {
-                if (t != null) {
-                    String reportName = "ReturnInVoucher";
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("p_print_date", Util1.getTodayDateTime());
-                    param.put("p_comp_name", Global.companyName);
-                    param.put("p_comp_address", Global.companyAddress);
-                    param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", ProUtil.logoPath());
-                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
-                    ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(t);
-                    JsonDataSource ds = new JsonDataSource(jsonDataStream);
-                    JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
-                    JasperViewer.viewReport(js, false);
-                }
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+    private void printVoucher(RetInHis ri) {
+        try {
+            List<RetInHisDetail> list = ri.getListRD().stream().filter((t) -> t.getStockCode() != null).toList();
+            String reportName = "ReturnInVoucher";
+            Map<String, Object> param = new HashMap<>();
+            param.put("p_print_date", Util1.getTodayDateTime());
+            param.put("p_comp_name", Global.companyName);
+            param.put("p_comp_address", Global.companyAddress);
+            param.put("p_comp_phone", Global.companyPhone);
+            param.put("p_logo_path", ProUtil.logoPath());
+            param.put("p_vou_no", ri.getKey().getVouNo());
+            param.put("p_trader_name", ri.getTraderName());
+            param.put("p_remark", ri.getRemark());
+            param.put("p_vou_total", ri.getVouTotal());
+            param.put("p_vou_paid", ri.getPaid());
+            param.put("p_vou_balance", ri.getBalance());
+            param.put("p_vou_date", Util1.toDateStr(ri.getVouDate(), Global.dateFormat));
+            param.put("p_sub_report_dir", "report/");
+            String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode n = mapper.readTree(Util1.gson.toJson(list));
+            JsonDataSource d = new JsonDataSource(n, null) {
+            };
+            JasperPrint js = JasperFillManager.fillReport(reportPath, param, d);
+            JasperViewer.viewReport(js, false);
+        } catch (JRException | JsonProcessingException ex) {
+            log.error("printVoucher : " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
     }
 
     private void focusTable() {
@@ -1412,7 +1424,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     @Override
     public void newForm() {
-        clear();
+        clear(true);
     }
 
     @Override

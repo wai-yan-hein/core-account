@@ -25,6 +25,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.WeightHistoryTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -142,13 +143,22 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         inventoryRepo.getWeightHistory(filter).doOnSuccess((t) -> {
             if (t != null) {
                 tableModel.setListDetail(t);
-                txtTotalRecord.setValue(t.size());
             }
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         }).doOnTerminate(() -> {
+            calTotal();
             setVisible(true);
         }).subscribe();
+    }
+
+    private void calTotal() {
+        List<WeightHis> list = tableModel.getListDetail();
+        double ttlQty = list.stream().mapToDouble((t) -> t.getTotalQty()).sum();
+        double ttlBag = list.stream().mapToDouble((t) -> t.getTotalBag()).sum();
+        txtTotalQty.setValue(ttlQty);
+        txtTotalBag.setValue(ttlBag);
+        txtTotalRecord.setValue(list.size());
     }
 
     private void select() {
@@ -227,6 +237,10 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         btnSearch = new javax.swing.JButton();
         lblTtlRecord = new javax.swing.JLabel();
         txtTotalRecord = new javax.swing.JFormattedTextField();
+        txtTotalQty = new javax.swing.JFormattedTextField();
+        lblTtlRecord1 = new javax.swing.JLabel();
+        txtTotalBag = new javax.swing.JFormattedTextField();
+        lblTtlRecord2 = new javax.swing.JLabel();
 
         setTitle("Weight History Dialog");
 
@@ -467,6 +481,20 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtTotalRecord.setFont(Global.amtFont);
 
+        txtTotalQty.setEditable(false);
+        txtTotalQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTotalQty.setFont(Global.amtFont);
+
+        lblTtlRecord1.setFont(Global.lableFont);
+        lblTtlRecord1.setText("Total Qty");
+
+        txtTotalBag.setEditable(false);
+        txtTotalBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTotalBag.setFont(Global.amtFont);
+
+        lblTtlRecord2.setFont(Global.lableFont);
+        lblTtlRecord2.setText("Total Bag");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -476,6 +504,14 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtTotalQty, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtTotalBag, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -487,10 +523,14 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblTtlRecord1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtTotalQty)
                     .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtTotalRecord)
                     .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(lblTtlRecord2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtTotalBag))
                 .addContainerGap())
         );
 
@@ -610,6 +650,8 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTtlRecord;
+    private javax.swing.JLabel lblTtlRecord1;
+    private javax.swing.JLabel lblTtlRecord2;
     private javax.swing.JPanel panelFilter;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtCus;
@@ -618,6 +660,8 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
+    private javax.swing.JFormattedTextField txtTotalBag;
+    private javax.swing.JFormattedTextField txtTotalQty;
     private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtVouNo;

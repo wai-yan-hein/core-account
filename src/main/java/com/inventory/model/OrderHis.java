@@ -66,6 +66,8 @@ public class OrderHis implements java.io.Serializable {
     private String projectNo;
     @Column(name = "order_status")
     private String orderStatus;
+    @Column(name = "post")
+    private boolean post;
     @Transient
     private String status = "STATUS";
     @Transient

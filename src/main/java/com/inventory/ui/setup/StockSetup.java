@@ -222,16 +222,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         inventoryRepo.findStockFormula(stock.getFormulaCode()).doOnSuccess((t) -> {
             stockFormulaCompleter.setStockFormula(t);
         }).subscribe();
-        Integer deptId = stock.getDeptId();
-        if (!Util1.isNullOrEmpty(deptId)) {
-            userRepo.findDepartment(deptId).subscribe((t) -> {
-                departmentComboBoxModel.setSelectedItem(t);
-                cboDept.repaint();
-            });
-        } else {
-            departmentComboBoxModel.setSelectedItem(null);
+        userRepo.findDepartment(stock.getDeptId()).doOnSuccess((t) -> {
+            departmentComboBoxModel.setSelectedItem(t);
             cboDept.repaint();
-        }
+        }).subscribe();
         txtWt.setText(Util1.getString(stock.getWeight()));
         txtPurPrice.setText(Util1.getString(stock.getPurPrice()));
         txtSalePrice.setText(Util1.getString(stock.getSalePriceN()));

@@ -4,6 +4,7 @@
  */
 package com.repo;
 
+import com.common.Global;
 import com.common.Util1;
 import com.dms.model.CVFile;
 import com.dms.model.CVFileResponse;
@@ -112,6 +113,7 @@ public class DMSRepo {
     }
 
     public Mono<CVFileResponse> createFolder(FileObject obj) {
+        obj.setUserId(Global.loginUser.getUserCode());
         return dmsApi.post()
                 .uri("/file/createFolder")
                 .body(Mono.just(obj), FileObject.class)
@@ -131,7 +133,10 @@ public class DMSRepo {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", new FileSystemResource(filePath));
         return dmsApi.post()
-                .uri(uriBuilder -> uriBuilder.path("/file/upload").queryParam("parentId", parentId).build())
+                .uri(uriBuilder -> uriBuilder.path("/file/upload")
+                .queryParam("parentId", parentId)
+                .queryParam("userId", Global.loginUser.getUserCode())
+                .build())
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
                 .bodyToMono(CVFileResponse.class);

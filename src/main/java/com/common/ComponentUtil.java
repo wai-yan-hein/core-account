@@ -10,6 +10,7 @@ import java.awt.Container;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -57,6 +58,23 @@ public class ComponentUtil {
         } else if (component instanceof Container container) {
             for (Component child : container.getComponents()) {
                 addFocusListener(child);
+            }
+        }
+    }
+
+    public static void setTextProperty(Component component) {
+        switch (component) {
+            case JFormattedTextField textField -> {
+                textField.setFont(Global.amtFont);
+                textField.setHorizontalAlignment(JTextField.RIGHT);
+                textField.setFormatterFactory(ProUtil.getDecimalFormatter());
+            }
+            case Container container -> {
+                for (Component child : container.getComponents()) {
+                    setTextProperty(child);
+                }
+            }
+            default -> {
             }
         }
     }

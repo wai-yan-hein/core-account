@@ -37,13 +37,13 @@ public class RetInHis {
     @Column(name = "deleted")
     private Boolean deleted;
     @Column(name = "vou_total")
-    private Float vouTotal;
+    private double vouTotal;
     @Column(name = "paid")
-    private Float paid;
+    private double paid;
     @Column(name = "discount")
-    private Float discount;
+    private double discount;
     @Column(name = "balance")
-    private Float balance;
+    private double balance;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
@@ -59,7 +59,7 @@ public class RetInHis {
     @Column(name = "cur_code")
     private String curCode;
     @Column(name = "disc_p")
-    private Float discP;
+    private double discP;
     @Column(name = "intg_upd_status")
     private String intgUpdStatus;
     @Column(name = "mac_id")
@@ -78,4 +78,6 @@ public class RetInHis {
     private List<RetInKey> listDel;
     @Transient
     private List<String> location;
+    @Transient
+    private String traderName;
 }

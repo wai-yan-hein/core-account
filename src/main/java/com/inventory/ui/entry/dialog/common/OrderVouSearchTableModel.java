@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderVouSearchTableModel extends AbstractTableModel {
 
     private List<VOrder> listOrderHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Status", "V-Total"};
-  
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Status", "V-Total", "Post"};
+
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -50,7 +50,10 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         switch (column) {
             case 7 -> {
-                return Float.class;
+                return Double.class;
+            }
+            case 8 -> {
+                return Boolean.class;
             }
         }
         return String.class;
@@ -97,6 +100,9 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
                     }
                     case 7 -> {
                         return his.getVouTotal();
+                    }
+                    case 8->{
+                        return his.isPost();
                     }
                 }
             }

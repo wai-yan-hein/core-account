@@ -46,6 +46,21 @@ public class DayBookTableModel extends AbstractTableModel {
     private boolean credit;
     private String curCode;
     private JProgressBar progress;
+    private double drAmt;
+    private double crAmt;
+    private int size;
+
+    public double getDrAmt() {
+        return drAmt;
+    }
+
+    public double getCrAmt() {
+        return crAmt;
+    }
+
+    public int getSize() {
+        return size;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -161,7 +176,7 @@ public class DayBookTableModel extends AbstractTableModel {
                         return vgi.getCurCode();
                     }
                     case 10 -> {
-                        return credit ? vgi.getCrAmt() : vgi.getDrAmt();
+                        return credit ? Util1.toNull(vgi.getCrAmt()) : Util1.toNull(vgi.getDrAmt());
                     }
                     default -> {
                         return null;
@@ -297,11 +312,11 @@ public class DayBookTableModel extends AbstractTableModel {
                 }
                 case 10 -> {
                     if (credit) {
-                        gl.setDrAmt(null);
+                        gl.setDrAmt(0);
                         gl.setCrAmt(Util1.getDouble(value));
                     } else {
                         gl.setDrAmt(Util1.getDouble(value));
-                        gl.setCrAmt(null);
+                        gl.setCrAmt(0);
                     }
                 }
             }
@@ -466,8 +481,24 @@ public class DayBookTableModel extends AbstractTableModel {
 
     public void clear() {
         if (listVGl != null) {
+            drAmt = 0;
+            crAmt = 0;
+            size = 0;
             listVGl.clear();
             fireTableDataChanged();
+        }
+    }
+
+    public void addObject(Gl gl) {
+        listVGl.add(gl);
+        drAmt += gl.getDrAmt();
+        crAmt += gl.getCrAmt();
+        size += 1;
+        int lastIndex = listVGl.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
         }
     }
 }

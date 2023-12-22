@@ -1,6 +1,6 @@
 package com.h2.service;
 import com.h2.dao.VRoleCompanyDao;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -14,7 +14,7 @@ public class VRoleCompanyServiceImpl implements VRoleCompanyService{
     @Autowired
     private VRoleCompanyDao dao;
     @Override
-    public List<VRoleCompany> getPrivilegeCompany(String roleCode) {
+    public List<CompanyInfo> getPrivilegeCompany(String roleCode) {
         return dao.getPrivilegeCompany(roleCode);
     }
 }

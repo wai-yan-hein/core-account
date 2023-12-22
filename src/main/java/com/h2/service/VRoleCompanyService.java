@@ -1,8 +1,8 @@
 package com.h2.service;
 
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import java.util.List;
 
 public interface VRoleCompanyService {
-    List<VRoleCompany> getPrivilegeCompany(String roleCode);
+    List<CompanyInfo> getPrivilegeCompany(String roleCode);
 }

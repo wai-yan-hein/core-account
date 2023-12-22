@@ -4,49 +4,50 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.editor.COA3AutoCompleter;
+import com.acc.editor.COA3CellEditor;
 import com.repo.AccountRepo;
-import com.acc.common.COAComboBoxModel;
+import com.acc.editor.COAAutoCompleter;
+import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.PaymentHis;
-import com.inventory.model.PaymentHisDetail;
-import com.inventory.model.PaymentHisKey;
-import com.inventory.model.Trader;
-import com.repo.InventoryRepo;
-import com.inventory.ui.common.PaymentTableModel;
-import com.inventory.ui.entry.dialog.PaymentHistoryDialog;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventory.editor.LabourGroupAutoCompleter;
+import com.inventory.model.LabourGroup;
+import com.inventory.model.LabourPaymentDetail;
+import com.inventory.model.LabourPaymentDto;
+import com.inventory.ui.common.LabourPaymentTableModel;
+import com.inventory.ui.entry.dialog.LabourPaymentHistory;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.toedter.calendar.JTextFieldDateEditor;
+import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
-import com.user.editor.ProjectAutoCompleter;
-import com.user.model.Project;
-import com.user.model.ProjectKey;
+import com.user.model.Currency;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
-import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -63,19 +64,19 @@ import net.sf.jasperreports.view.JasperViewer;
 @Slf4j
 public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
-    private final PaymentTableModel tableModel = new PaymentTableModel();
+    private final LabourPaymentTableModel tableModel = new LabourPaymentTableModel();
     private SelectionObserver observer;
     private JProgressBar progress;
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
-    private TraderAutoCompleter traderAutoCompleter;
-    private ProjectAutoCompleter projectAutoCompleter;
+    private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
-    private COAComboBoxModel coaComboModel = new COAComboBoxModel();
-    private PaymentHis ph = new PaymentHis();
-    private PaymentHistoryDialog dialog;
-    private String tranOption;
+    private COAAutoCompleter cOAAutoCompleter;
+    private COA3AutoCompleter expenseAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
+    private LabourPaymentDto ph = new LabourPaymentDto();
+    private LabourPaymentHistory dialog;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -100,27 +101,16 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     /**
      * Creates new form ReceiveEntry
      *
-     * @param tranOption
      */
-    public LabourPaymentEntry(String tranOption) {
-        this.tranOption = tranOption;
+    public LabourPaymentEntry() {
         initComponents();
         initFocusAdapter();
         initFormat();
-        configureOption();
         actionMapping();
-    }
-
-    private void configureOption() {
-        lblTrader.setText(tranOption.equals("C") ? "Customer" : "Supplier");
     }
 
     private void initFormat() {
         txtRecord.setFormatterFactory(Util1.getDecimalFormat());
-        txtAmount.setFormatterFactory(Util1.getDecimalFormat());
-        txtOutstanding.setFormatterFactory(Util1.getDecimalFormat());
-        txtCreditAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtDifAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
 
     private void actionMapping() {
@@ -149,7 +139,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                         "Are you sure to delete?", "Payment Transaction delete.", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
                     tableModel.delete(row);
-                    calTotalPayment();
+                    calculatePayment();
                 }
             }
         } else {
@@ -158,52 +148,52 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     }
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
-        traderAutoCompleter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLabourGroup, null, false);
+        labourGroupAutoCompleter.setObserver(this);
+        cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
+        expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountRepo, null, false, 3);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
+    }
+
+    private void initData() {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
+        accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
         accountRepo.getCashBank().doOnSuccess((t) -> {
             t.add(new ChartOfAccount());
-            coaComboModel.setData(t);
-            cboCash.setModel(coaComboModel);
+            cOAAutoCompleter.setListCOA(t);
+        }).subscribe();
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
+            labourGroupAutoCompleter.setListObject(t);
+        }).subscribe();
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
     }
 
     private void initFocusAdapter() {
-        txtAmount.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtTrader.addFocusListener(fa);
-        txtVouDate.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
 
     public void initMain() {
         initDate();
         initCombo();
+        initData();
         initTable();
         initRowHeader();
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JFormattedTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void initDate() {
         txtVouDate.setDate(Util1.getTodayDate());
+        txtFromDate.setDate(Util1.getTodayDate());
+        txtToDate.setDate(Util1.getTodayDate());
     }
 
     private void initRowHeader() {
@@ -214,6 +204,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
 
     private void initTable() {
         tableModel.setObserver(this);
+        tableModel.setAccountRepo(accountRepo);
         tableModel.setTable(tblPayment);
         tblPayment.setModel(tableModel);
         tblPayment.getTableHeader().setFont(Global.tblHeaderFont);
@@ -221,56 +212,22 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         tblPayment.setRowHeight(Global.tblRowHeight);
         tblPayment.setShowGrid(true);
         tblPayment.setFont(Global.textFont);
-        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(50);//Date
-        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(100);//VouNo
-        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(100);//Remark
-        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(100);//Ref
-        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(20);//VouNo
-        tblPayment.getColumnModel().getColumn(5).setPreferredWidth(60);//Total
-        tblPayment.getColumnModel().getColumn(6).setPreferredWidth(60);//Oustanting
-        tblPayment.getColumnModel().getColumn(7).setPreferredWidth(60);//Payment
-        tblPayment.getColumnModel().getColumn(8).setPreferredWidth(1);//paid
-        tblPayment.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(200);//Desp
+        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(50);//qty
+        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(70);//price
+        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(80);//Amount
+        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(100);//account
+        tblPayment.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(4).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
-    private void searchTraderBalance() {
-        Trader t = traderAutoCompleter.getTrader();
-        if (t != null) {
-            if (lblStatus.getText().equals("NEW")) {
-                progress.setIndeterminate(true);
-                Float creditAmt = Util1.getFloat(txtCreditAmt.getValue());
-                Float tmp = Util1.getFloat(ProUtil.getProperty(ProUtil.C_CREDIT_AMT));
-                txtCreditAmt.setValue(creditAmt == 0 ? tmp : creditAmt);
-                inventoryRepo.getTraderBalance(t.getKey().getCode(), tranOption)
-                        .subscribe((payment) -> {
-                            lblMessage.setText(payment.isEmpty() ? "No Record." : "");
-                            tableModel.setListDetail(payment);
-                            progress.setIndeterminate(false);
-                            calTotalPayment();
-                        }, (e) -> {
-                            JOptionPane.showMessageDialog(this, e.getMessage());
-                            progress.setIndeterminate(false);
-                        });
-            } else {
-                JOptionPane.showMessageDialog(this, "Create New Payment Voucher.");
-            }
-        }
-    }
-
-    private void calTotalPayment() {
-        double creditAmt = Util1.getDouble(txtCreditAmt.getValue());
-        double payment = tableModel.getListDetail().stream().mapToDouble((obj) -> Util1.getDouble(obj.getPayAmt())).sum();
-        double outstanding = tableModel.getListDetail().stream().mapToDouble((obj) -> Util1.getDouble(obj.getVouBalance())).sum();
-        txtAmount.setValue(payment);
-        txtOutstanding.setValue(outstanding - payment);
-        txtDifAmt.setValue(outstanding - creditAmt);
-        txtRecord.setValue(tableModel.getListDetail().size());
-    }
-
     private void savePayment(boolean print) {
+        progress.setIndeterminate(true);
         if (isValidEntry() && tableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
                 DateLockUtil.showMessage(this);
@@ -280,18 +237,21 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             observer.selected("save", false);
             progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());
-            ph.setListDelete(tableModel.getListDelete());
-            ph.setTranOption(tranOption);
-            inventoryRepo.savePayment(ph).subscribe((t) -> {
-                clear();
-                if (print) {
-                    printVoucher(t.getKey());
+            inventoryRepo.saveLabourPayment(ph).doOnSuccess((saved) -> {
+                if (saved != null) {
+                    ph.setVouDateTime(saved.getVouDateTime());
+                    progress.setIndeterminate(false);
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
-            });
+            }).doOnTerminate(() -> {
+                if (print) {
+                    printVoucher(ph);
+                }
+                clear();
+            }).subscribe();
         }
     }
 
@@ -303,119 +263,126 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         observer.selected("history", true);
     }
 
-    private void printVoucher(PaymentHisKey key) {
-        enableToolBar(false);
-        inventoryRepo.paymentReport(key).subscribe((t) -> {
-            try {
-                byte[] data = Util1.listToByteArray(t);
-                String reportName = "PaymentVoucher";
-                Map<String, Object> param = new HashMap<>();
-                param.put("p_print_date", Util1.getTodayDateTime());
-                param.put("p_comp_name", Global.companyName);
-                param.put("p_comp_address", Global.companyAddress);
-                param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", ProUtil.logoPath());
-                param.put("p_tran_option", tranOption);
-                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-                ByteArrayInputStream stream = new ByteArrayInputStream(data);
-                JsonDataSource ds = new JsonDataSource(stream);
-                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                JasperViewer.viewReport(jp, false);
-                enableToolBar(true);
-            } catch (JRException ex) {
-                enableToolBar(true);
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        });
+    private void printVoucher(LabourPaymentDto dto) {
+        try {
+            enableToolBar(false);
+            double labourPrice = dto.getMemberCount() == 0 ? 0 : dto.getPayTotal() / dto.getMemberCount();
+            String fromDate = Util1.toDateStr(dto.getFromDate(), Global.dateFormat);
+            String toDate = Util1.toDateStr(dto.getToDate(), Global.dateFormat);
+            String payDate = fromDate.equals(toDate) ? fromDate : String.format("%s : %s", fromDate, toDate);
+            String reportName = "LabourPaymentA5";
+            String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+            Map<String, Object> param = new HashMap<>();
+            param.put("p_print_date", Util1.getTodayDateTime());
+            param.put("p_comp_name", Global.companyName);
+            param.put("p_comp_address", Global.companyAddress);
+            param.put("p_comp_phone", Global.companyPhone);
+            param.put("p_logo_path", ProUtil.logoPath());
+            param.put("p_vou_no", dto.getVouNo());
+            param.put("p_vou_date", Util1.getDate(dto.getVouDateTime()));
+            param.put("p_vou_time", Util1.getTime(dto.getVouDateTime()));
+            param.put("p_pay_date", payDate);
+            param.put("p_labour_name", dto.getLabourName());
+            param.put("p_labour_count", dto.getMemberCount());
+            param.put("p_labour_price", labourPrice);
+            param.put("p_sub_report_dir", "report/");
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode n = mapper.readTree(Util1.gson.toJson(tableModel.getListDetail()));
+            JsonDataSource d = new JsonDataSource(n, null) {
+            };
+            JasperPrint main = JasperFillManager.fillReport(reportPath, param, d);
+            JasperViewer.viewReport(main, false);
+        } catch (JsonProcessingException | JRException e) {
+            log.error("printVoucher : " + e.getMessage());
+        }
+
     }
 
     private boolean isValidEntry() {
-        Trader t = traderAutoCompleter.getTrader();
-        if (t == null) {
-            JOptionPane.showMessageDialog(this, "Invalid Trader.");
-            txtTrader.requestFocus();
+        Date fromDate = txtFromDate.getDate();
+        Date toDate = txtToDate.getDate();
+        LabourGroup group = labourGroupAutoCompleter.getObject();
+        Currency currency = currencyAutoCompleter.getCurrency();
+        ChartOfAccount srcAcc = cOAAutoCompleter.getCOA();
+        DepartmentA department = departmentAutoCompleter.getDepartment();
+        if (fromDate == null || toDate == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Date Range.");
+            txtFromDate.requestFocus();
             return false;
-        } else if (txtVouDate.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Invalid Date.");
-            txtVouDate.requestFocus();
+        } else if (group == null) {
+            JOptionPane.showMessageDialog(this, "Choose Labour Group.");
+            txtLabourGroup.requestFocus();
             return false;
-        } else if (Util1.getFloat(txtAmount.getValue()) <= 0) {
-            JOptionPane.showMessageDialog(this, "Invalid Pay Amt.");
-            txtAmount.requestFocus();
-            return false;
-        } else if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
+        } else if (currency == null) {
             JOptionPane.showMessageDialog(this, "Invalid Currency.");
             txtCurrency.requestFocus();
             return false;
-        } else if (!Util1.isDateBetween(txtVouDate.getDate())) {
-            JOptionPane.showMessageDialog(this, "Invalid Date.",
-                    "Validation.", JOptionPane.ERROR_MESSAGE);
+        } else if (txtVouDate == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Pay Date.");
             txtVouDate.requestFocus();
             return false;
-        } else if (!Util1.isDateBetween(txtVouDate.getDate())) {
-            JOptionPane.showMessageDialog(this, "Invalid Date.",
-                    "Validation.", JOptionPane.ERROR_MESSAGE);
+        } else if (Util1.getDouble(txtPayTotal.getValue()) == 0) {
+            JOptionPane.showMessageDialog(this, "Invalid Pay Amount.");
             txtVouDate.requestFocus();
             return false;
         } else {
-            if (cboCash.getSelectedItem() instanceof ChartOfAccount coa) {
-                ph.setAccount(coa.getKey() == null ? null : coa.getKey().getCoaCode());
+            if (srcAcc != null) {
+                if (department == null) {
+                    JOptionPane.showConfirmDialog(this, "Invalid Department");
+                    return false;
+                }
+                ph.setDeptCode(department.getKey().getDeptCode());
             }
-            Project p = projectAutoCompleter.getProject();
-            if (p != null) {
-                ph.setProjectNo(p.getKey() == null ? null : p.getKey().getProjectNo());
-            }
-            ph.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-            ph.setTraderCode(t.getKey().getCode());
-            ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
-            ph.setAmount(Util1.getFloatOne(txtAmount.getValue()));
-            ph.setDeleted(false);
-            ph.setRemark(txtRemark.getText());
-            ph.setMacId(Global.macId);
-
             if (lblStatus.getText().equals("NEW")) {
-                PaymentHisKey key = new PaymentHisKey();
-                key.setCompCode(Global.compCode);
-                ph.setDeptId(Global.deptId);
-                ph.setKey(key);
                 ph.setCreatedBy(Global.loginUser.getUserCode());
-                ph.setCreatedDate(LocalDateTime.now());
             } else {
                 ph.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            ph.setDeptId(Global.deptId);
+            ph.setMacId(Global.macId);
+            ph.setCompCode(Global.compCode);
+            ph.setFromDate(Util1.toLocalDate(txtFromDate.getDate()));
+            ph.setToDate(Util1.toLocalDate(txtToDate.getDate()));
+            ph.setLabourGroupCode(group.getKey().getCode());
+            ph.setLabourName(group.getLabourName());
+            ph.setCurCode(currency.getCurCode());
+            ph.setMemberCount(Util1.getInteger(txtMember.getText()));
+            ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
+            ph.setRemark(txtRemark.getText());
+            ph.setPayTotal(Util1.getDouble(txtPayTotal.getValue()));
+            ChartOfAccount payAcc = cOAAutoCompleter.getCOA();
+            ChartOfAccount expAcc = expenseAutoCompleter.getCOA();
+            ph.setSourceAcc(payAcc == null ? null : payAcc.getKey().getCoaCode());
+            ph.setExpenseAcc(expAcc == null ? null : expAcc.getKey().getCoaCode());
         }
         return true;
     }
 
     private void clear() {
-        traderAutoCompleter.setTrader(null);
-        projectAutoCompleter.setProject(null);
-        coaComboModel.setSelectedItem(null);
         progress.setIndeterminate(false);
-        cboCash.repaint();
-        txtVouNo.setText(null);
+        labourGroupAutoCompleter.setObject(null);
+        cOAAutoCompleter.setCoa(null);
+        expenseAutoCompleter.setCoa(null);
         txtRemark.setText(null);
-        txtAmount.setValue(null);
-        txtCreditAmt.setValue(0);
-        txtOutstanding.setValue(0);
-        txtDifAmt.setValue(0);
-        txtRecord.setValue(0);
+        txtRecord.setText("0");
+        txtMember.setText(null);
+        txtVouNo.setText(null);
+        txtPayTotal.setValue(0);
         tableModel.clear();
-        lblStatus.setForeground(Color.green);
         lblStatus.setText("NEW");
-        lblMessage.setText("");
+        lblStatus.setForeground(Color.green);
+        ph = new LabourPaymentDto();
         enableForm(true);
-        ph = new PaymentHis();
+        observeMain();
+
     }
 
     private void historyPayment() {
         if (dialog == null) {
-            dialog = new PaymentHistoryDialog(Global.parentForm, tranOption);
+            dialog = new LabourPaymentHistory(Global.parentForm);
             dialog.setObserver(this);
             dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
-            dialog.setAccountRepo(accountRepo);
-            dialog.setTitle(String.format("%s Payment History Dialog", tranOption.equals("C") ? "Customer" : "Supplier"));
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
@@ -423,73 +390,55 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         dialog.search();
     }
 
-    private void setVoucherDetail(PaymentHis ph) {
+    private void setVoucherDetail(LabourPaymentDto ph) {
         this.ph = ph;
-        int deptId = ph.getDeptId();
-        String compCode = ph.getKey().getCompCode();
-        String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.findTrader(ph.getTraderCode()).subscribe((t) -> {
-            traderAutoCompleter.setTrader(t);
-        });
-        accountRepo.findCOA(ph.getAccount()).subscribe((t) -> {
-            coaComboModel.setSelectedItem(t);
-        });
-        userRepo.find(new ProjectKey(ph.getProjectNo(), compCode)).subscribe((t) -> {
-            projectAutoCompleter.setProject(t);
-        });
-        userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+        String vouNo = ph.getVouNo();
+        userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {
             currencyAutoCompleter.setCurrency(t);
-        });
+        }).subscribe();
+        inventoryRepo.findLabourGroup(ph.getLabourGroupCode()).doOnSuccess((t) -> {
+            labourGroupAutoCompleter.setObject(t);
+        }).subscribe();
+        accountRepo.findCOA(ph.getSourceAcc()).doOnSuccess((t) -> {
+            cOAAutoCompleter.setCoa(t);
+        }).subscribe();
+        accountRepo.findCOA(ph.getExpenseAcc()).doOnSuccess((t) -> {
+            expenseAutoCompleter.setCoa(t);
+        }).subscribe();
+        accountRepo.findDepartment(ph.getDeptCode()).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
+        txtMember.setText(Util1.getString(ph.getMemberCount()));
         txtVouNo.setText(vouNo);
         txtVouDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtRemark.setText(ph.getRemark());
-        txtAmount.setValue(Util1.getFloat(ph.getAmount()));
-        ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
+        txtPayTotal.setValue(ph.getPayTotal());
+        txtFromDate.setDate(Util1.toDate(ph.getFromDate()));
+        txtToDate.setDate(Util1.toDate(ph.getToDate()));
         if (ph.isDeleted()) {
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
             enableForm(false);
-        } else if (!ProUtil.isPaymentEdit()) {
-            lblStatus.setText("No Permission.");
-            lblStatus.setForeground(Color.RED);
-            enableForm(false);
-            observer.selected("print", true);
-        } else if (ph.isVouLock()) {
-            lblStatus.setText("Voucher is Lock.");
-            lblStatus.setForeground(Color.RED);
-            enableForm(false);
-            observer.selected("print", true);
         } else if (DateLockUtil.isLockDate(ph.getVouDate())) {
             lblStatus.setText(DateLockUtil.MESSAGE);
             lblStatus.setForeground(Color.RED);
             enableForm(false);
-            observer.selected("print", true);
         } else {
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
-            enableForm(true);
+            enableForm(false);
         }
-        inventoryRepo.getPaymentDetail(vouNo, deptId).subscribe((t) -> {
-            tableModel.setListDetail(t);
-            calTotalPayment();
-            tblPayment.requestFocus();
-        });
+        inventoryRepo.getLabourPaymentDetail(vouNo).doOnSuccess((t) -> {
+            if (t != null) {
+                tableModel.setListDetail(t);
+                tblPayment.requestFocus();
+            }
+        }).subscribe();
     }
 
     private void enableForm(boolean status) {
-        txtAmount.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtOutstanding.setEnabled(status);
-        txtProjectNo.setEnabled(status);
-        txtTrader.setEnabled(status);
-        txtVouNo.setEnabled(status);
-        txtVouDate.setEnabled(status);
-        cboCash.setEnabled(status);
-        tblPayment.setEnabled(status);
-        txtCurrency.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
-        observer.selected("delete", status);
-        observer.selected("print", status);
     }
 
     private void deletePayment() {
@@ -499,12 +448,11 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Payment Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
-                        if (t) {
-                            calTotalPayment();
+                    inventoryRepo.deleteLabourPayment(ph.getVouNo()).doOnSuccess((delete) -> {
+                        if (delete) {
                             clear();
                         }
-                    });
+                    }).subscribe();
                 }
             }
             case "DELETED" -> {
@@ -512,13 +460,13 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                         "Are you sure to restore?", "Payment Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     ph.setDeleted(false);
-                    inventoryRepo.restore(ph.getKey()).subscribe((t) -> {
-                        if (t) {
+                    inventoryRepo.restoreLabourPayment(ph.getVouNo()).doOnSuccess((restore) -> {
+                        if (restore) {
                             lblStatus.setText("EDIT");
                             lblStatus.setForeground(Color.blue);
                             enableForm(true);
                         }
-                    });
+                    }).subscribe();
                 }
             }
             default ->
@@ -526,33 +474,48 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         }
     }
 
-    private void generateFIFOPayment() {
-        List<PaymentHisDetail> list = tableModel.getListDetail();
-        list.stream().forEach((p) -> {
-            p.setPayAmt(0.0f);
-            p.setFullPaid(false);
-        });
-        float payment = Util1.getFloat(txtAmount.getValue());
-        double ttlBalance = Util1.getDouble(txtOutstanding.getValue());
-        if (payment <= ttlBalance) {
-            for (PaymentHisDetail p : list) {
-                if (payment > 0) {
-                    float balance = p.getVouBalance();
-                    if (payment >= balance) {
-                        p.setPayAmt(balance);
-                        p.setFullPaid(true);
-                    } else {
-                        p.setPayAmt(payment);
-                        p.setFullPaid(false);
-                    }
-                    payment -= balance;
-                }
-            }
-            tableModel.fireTableDataChanged();
+    private void calculatePayment() {
+        Date fromDate = txtFromDate.getDate();
+        Date toDate = txtToDate.getDate();
+        LabourGroup group = labourGroupAutoCompleter.getObject();
+        Currency currency = currencyAutoCompleter.getCurrency();
+        if (fromDate == null || toDate == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Date Range.");
+        } else if (group == null) {
+            JOptionPane.showMessageDialog(this, "Choose Labour Group.");
+        } else if (currency == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Currency.");
         } else {
-            JOptionPane.showMessageDialog(this, "Payment Amount is greater than outstanding.");
-            txtAmount.setValue(ttlBalance);
-            txtAmount.requestFocus();
+            progress.setIndeterminate(true);
+            ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
+            filter.setFromDate(Util1.toDateStr(fromDate, "yyyy-MM-dd"));
+            filter.setToDate(Util1.toDateStr(toDate, "yyyy-MM-dd"));
+            filter.setLabourGroupCode(group.getKey().getCode());
+            filter.setCurCode(currency.getCurCode());
+            inventoryRepo.calulateLabourPayment(filter).doOnSuccess((t) -> {
+                if (t != null) {
+                    tableModel.setListDetail(t);
+                }
+            }).doOnTerminate(() -> {
+                calTotal();
+                tableModel.addNewRow();
+                progress.setIndeterminate(false);
+            }).subscribe();
+        }
+    }
+
+    private void calTotal() {
+        List<LabourPaymentDetail> list = tableModel.getListDetail();
+        double total = list.stream().mapToDouble((t) -> t.getAmount()).sum();
+        txtPayTotal.setValue(total);
+        txtRecord.setValue(list.size());
+
+    }
+
+    private void setMemberCount() {
+        LabourGroup group = labourGroupAutoCompleter.getObject();
+        if (group != null) {
+            txtMember.setText(Util1.getString(group.getMemberCount()));
         }
     }
 
@@ -579,29 +542,31 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtVouNo = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtVouDate = new com.toedter.calendar.JDateChooser();
-        jLabel4 = new javax.swing.JLabel();
-        txtRemark = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        txtAmount = new javax.swing.JFormattedTextField();
-        txtOutstanding = new javax.swing.JFormattedTextField();
-        jLabel7 = new javax.swing.JLabel();
+        txtAccount = new javax.swing.JTextField();
+        txtExpense = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        txtCreditAmt = new javax.swing.JFormattedTextField();
-        jLabel12 = new javax.swing.JLabel();
-        txtDifAmt = new javax.swing.JFormattedTextField();
-        lblMessage = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        txtRemark = new javax.swing.JTextField();
+        txtPayTotal = new javax.swing.JFormattedTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         scroll = new javax.swing.JScrollPane();
         tblPayment = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
-        lblTrader = new javax.swing.JLabel();
-        txtTrader = new javax.swing.JTextField();
+        lblStatus = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        txtProjectNo = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
-        cboCash = new javax.swing.JComboBox<>();
+        txtFromDate = new com.toedter.calendar.JDateChooser();
+        jLabel7 = new javax.swing.JLabel();
+        txtToDate = new com.toedter.calendar.JDateChooser();
         jLabel9 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
-        lblStatus = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        txtLabourGroup = new javax.swing.JTextField();
+        btnCalculate = new javax.swing.JButton();
+        jLabel14 = new javax.swing.JLabel();
+        txtMember = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
@@ -612,6 +577,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             }
         });
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel1.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 jPanel1ComponentShown(evt);
@@ -625,51 +591,38 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtVouNo.setFont(Global.textFont);
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Vou Date");
+        jLabel2.setText("Pay Date");
 
         txtVouDate.setDateFormatString("dd/MM/yyyy");
         txtVouDate.setFont(Global.textFont);
         txtVouDate.setMaxSelectableDate(new java.util.Date(253370745073000L));
 
-        jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Remark");
+        txtAccount.setFont(Global.textFont);
+
+        txtExpense.setFont(Global.textFont);
+
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Expense A/C");
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Cash / Bank");
+
+        jLabel13.setFont(Global.lableFont);
+        jLabel13.setText("Remark");
 
         txtRemark.setFont(Global.textFont);
 
-        jLabel5.setFont(Global.lableFont);
-        jLabel5.setText("Multiple Payment");
+        txtPayTotal.setEditable(false);
+        txtPayTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPayTotal.setFont(Global.amtFont);
 
-        txtAmount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtAmount.setFont(Global.textFont);
-        txtAmount.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAmountActionPerformed(evt);
-            }
-        });
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Payment Total");
 
-        txtOutstanding.setEditable(false);
-        txtOutstanding.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtOutstanding.setFont(Global.amtFont);
+        jLabel15.setFont(Global.lableFont);
+        jLabel15.setText("Department");
 
-        jLabel7.setFont(Global.lableFont);
-        jLabel7.setText("Total Outstanding");
-
-        jLabel11.setFont(Global.lableFont);
-        jLabel11.setText("Credit Amount");
-
-        txtCreditAmt.setEditable(false);
-        txtCreditAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtCreditAmt.setFont(Global.amtFont);
-
-        jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Max / (Min)");
-
-        txtDifAmt.setEditable(false);
-        txtDifAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtDifAmt.setFont(Global.amtFont);
-
-        lblMessage.setFont(Global.lableFont);
-        lblMessage.setForeground(Global.selectionColor);
+        txtDep.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -678,76 +631,69 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtRemark)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addGap(110, 110, 110)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtAmount, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtRemark))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDifAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtOutstanding, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(jLabel15)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 131, Short.MAX_VALUE)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtPayTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtRemark, txtVouDate, txtVouNo});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtVouDate, txtVouNo});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtOutstanding, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel7))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel11)
-                                .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtPayTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel3)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtDifAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel12)
-                                .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(txtRemark))))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tblPayment.setModel(new javax.swing.table.DefaultTableModel(
@@ -763,28 +709,50 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         ));
         scroll.setViewportView(tblPayment);
 
-        lblTrader.setFont(Global.lableFont);
-        lblTrader.setText("Customer");
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        txtTrader.setFont(Global.textFont);
+        lblStatus.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        lblStatus.setText("NEW");
 
         jLabel6.setFont(Global.lableFont);
-        jLabel6.setText("Project No");
+        jLabel6.setText("From Date");
 
-        txtProjectNo.setFont(Global.textFont);
+        txtFromDate.setDateFormatString("dd/MM/yyyy");
+        txtFromDate.setFont(Global.textFont);
+        txtFromDate.setMaxSelectableDate(new java.util.Date(253370745073000L));
 
-        jLabel8.setFont(Global.lableFont);
-        jLabel8.setText("Account");
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("To Date");
 
-        cboCash.setFont(Global.textFont);
+        txtToDate.setDateFormatString("dd/MM/yyyy");
+        txtToDate.setFont(Global.textFont);
+        txtToDate.setMaxSelectableDate(new java.util.Date(253370745073000L));
 
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Currency");
 
         txtCurrency.setFont(Global.textFont);
 
-        lblStatus.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        lblStatus.setText("NEW");
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Labour Group");
+
+        txtLabourGroup.setFont(Global.textFont);
+
+        btnCalculate.setBackground(Global.selectionColor);
+        btnCalculate.setFont(Global.lableFont);
+        btnCalculate.setForeground(new java.awt.Color(255, 255, 255));
+        btnCalculate.setText("Calculate");
+        btnCalculate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCalculateActionPerformed(evt);
+            }
+        });
+
+        jLabel14.setFont(Global.lableFont);
+        jLabel14.setText("Labour Member");
+
+        txtMember.setFont(Global.textFont);
+        txtMember.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -792,51 +760,63 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel6)
-                    .addComponent(lblTrader))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtTrader, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 62, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel12))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblStatus))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(txtCurrency)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCalculate))
+                    .addComponent(txtLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel14)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtMember, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblStatus)
                 .addContainerGap())
         );
 
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtProjectNo, txtTrader});
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtFromDate, txtToDate});
 
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblTrader, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtTrader)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtMember, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblStatus))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtCurrency))
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtProjectNo)))
-                .addContainerGap())
+                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnCalculate)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Record :");
@@ -862,7 +842,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtRecord)
-                    .addComponent(jLabel10))
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -872,10 +852,10 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(scroll)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(scroll, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -887,7 +867,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -903,21 +883,23 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         observeMain();
     }//GEN-LAST:event_formComponentShown
 
-    private void txtAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAmountActionPerformed
+    private void btnCalculateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCalculateActionPerformed
         // TODO add your handling code here:
-        generateFIFOPayment();
-    }//GEN-LAST:event_txtAmountActionPerformed
+        calculatePayment();
+    }//GEN-LAST:event_btnCalculateActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<ChartOfAccount> cboCash;
+    private javax.swing.JButton btnCalculate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -925,34 +907,32 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JLabel lblTrader;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblPayment;
-    private javax.swing.JFormattedTextField txtAmount;
-    private javax.swing.JFormattedTextField txtCreditAmt;
+    private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtCurrency;
-    private javax.swing.JFormattedTextField txtDifAmt;
-    private javax.swing.JFormattedTextField txtOutstanding;
-    private javax.swing.JTextField txtProjectNo;
+    private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtExpense;
+    private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtLabourGroup;
+    private javax.swing.JTextField txtMember;
+    private javax.swing.JFormattedTextField txtPayTotal;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
-    private javax.swing.JTextField txtTrader;
+    private com.toedter.calendar.JDateChooser txtToDate;
     private com.toedter.calendar.JDateChooser txtVouDate;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.equals("CAL_PAYMENT")) {
-            calTotalPayment();
+        if (source.equals("LabourGroup")) {
+            setMemberCount();
         } else if (source.equals("PAYMENT_HISTORY")) {
-            if (selectObj instanceof PaymentHis p) {
+            if (selectObj instanceof LabourPaymentDto p) {
                 setVoucherDetail(p);
             }
-        } else if (source != null) {
-            searchTraderBalance();
         }
     }
 
