@@ -157,8 +157,6 @@ public class OtherSetup extends javax.swing.JPanel {
 
     }
 
- 
-
     private void relationSetup() {
         if (relationSetupDialog == null) {
             relationSetupDialog = new RelationSetupDialog(Global.parentForm);

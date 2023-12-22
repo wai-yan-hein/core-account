@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.acc.model;
+package com.inventory.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -15,18 +15,9 @@ import lombok.Data;
  */
 @Data
 @Embeddable
-public class DepartmentAKey implements Serializable {
-
-    @Column(name = "dept_code")
-    private String deptCode;
+public class PurOrderHisKey implements Serializable {
+    @Column(name = "vou_no")
+    private String vouNo;
     @Column(name = "comp_code")
     private String compCode;
-
-    public DepartmentAKey(String deptCode, String compCode) {
-        this.deptCode = deptCode;
-        this.compCode = compCode;
-    }
-
-    public DepartmentAKey() {
-    }
 }

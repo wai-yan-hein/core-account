@@ -80,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.OrderDynamic;
+import com.inventory.ui.entry.PurOrderHisEntry;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
@@ -90,6 +91,7 @@ import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.JobSetup;
+import com.inventory.ui.setup.LanguageSetup;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
@@ -528,6 +530,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 setup.initMain();
                 return setup;
             }
+            case "Language" -> {
+                LanguageSetup setup = new LanguageSetup();
+                setup.setName(menuName);
+                setup.setUserRepo(userRepo);
+                setup.setInventoryRepo(inventoryRepo);
+                setup.setObserver(this);
+                setup.setProgress(progress);
+                setup.initMain();
+                return setup;
+            }
             case "Stock Formula" -> {
                 StockFormulaSetup setup = new StockFormulaSetup();
                 setup.setName(menuName);
@@ -790,6 +802,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 stockRec.setProgress(progress);
                 stockRec.initMain();
                 return stockRec;
+            }
+            case "Purchase Order Entry" -> {
+                PurOrderHisEntry entry = new PurOrderHisEntry();
+                entry.setName(menuName);
+                entry.setObserver(this);
+                entry.setProgress(progress);
+                entry.setInventoryRepo(inventoryRepo);
+                entry.setUserRepo(userRepo);
+                entry.initMain();
+                return entry;
             }
             case "Milling Entry", "Milling" -> {
                 MillingEntry millingEntry = new MillingEntry();

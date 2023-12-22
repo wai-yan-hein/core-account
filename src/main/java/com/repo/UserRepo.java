@@ -13,6 +13,7 @@ import com.common.Util1;
 import com.user.model.RoleProperty;
 import com.inventory.model.AppRole;
 import com.inventory.model.Country;
+import com.inventory.model.Language;
 import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
 import com.user.model.MachineInfo;
@@ -1069,6 +1070,40 @@ public class UserRepo {
                     combinedList.add(tuple.getT1());
                     combinedList.add(tuple.getT2());
                     return combinedList;
+                });
+    }
+
+    public Mono<Language> saveLanguage(Language lan) {
+        return userApi.post()
+                .uri("/user/saveLanguage")
+                .body(Mono.just(lan), Language.class)
+                .retrieve()
+                .bodyToMono(Language.class)
+                .doOnSuccess((t) -> {
+//                    if (localDatabase) {
+//                        h2Repo.save(t);
+//                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<Language>> getLanguage() {
+//        if (localDatabase) {
+//            return h2Repo.getOrderStatus();
+//        }
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getLanguage")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Language.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
                 });
     }
 }

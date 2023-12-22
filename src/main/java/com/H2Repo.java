@@ -126,6 +126,7 @@ import com.inventory.model.Job;
 import com.inventory.model.JobKey;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.LabourGroupKey;
+import com.inventory.model.Language;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHisDetail;
@@ -312,6 +313,8 @@ public class H2Repo {
     private AccSettingService accSettingService;
     @Autowired
     private WareHouseService wareHouseService;
+//    @Autowired
+//    private Langua
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -425,6 +428,10 @@ public class H2Repo {
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
+    
+//    public Mono<Language> save(Language sh) {
+//        return Mono.justOrEmpty(saleHisService.save(sh));
+//    } 
 
     public Mono<Job> save(Job sh) {
         return Mono.justOrEmpty(jobService.save(sh));

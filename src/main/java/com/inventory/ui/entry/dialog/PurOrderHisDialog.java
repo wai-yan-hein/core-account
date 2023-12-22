@@ -4,8 +4,6 @@
  * and open the template in the editor.
  */
 package com.inventory.ui.entry.dialog;
-
-import com.acc.editor.DepartmentAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -14,7 +12,6 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -22,7 +19,9 @@ import com.user.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
+import com.inventory.model.VPurOrder;
 import com.inventory.model.VStockIssueReceive;
+import com.inventory.ui.entry.dialog.common.PurOrderHisVouSearchTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIssRecVouSearchTableModel;
 import com.user.editor.DepartmentUserAutoCompleter;
@@ -42,12 +41,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author pann
  */
 @Slf4j
-public class StockIssRecHistoryDialog extends javax.swing.JDialog implements KeyListener {
+public class PurOrderHisDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
-     * Creates new form StockIssueReceiveHisSearch
+     * Creates new form PurchaseOrderHistory
      */
-    private final StockIssRecVouSearchTableModel tableModel = new StockIssRecVouSearchTableModel();
+    private final PurOrderHisVouSearchTableModel tableModel = new PurOrderHisVouSearchTableModel();
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -56,10 +55,9 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private LocationAutoCompleter locationAutoCompleter;
+//    private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
-    private String tranSource;
-
+  
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -72,29 +70,19 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         this.observer = observer;
     }
 
-    public StockIssRecHistoryDialog(JFrame frame, String tranSource) {
-        super(frame, true);
-        this.tranSource = tranSource;
+    public PurOrderHisDialog(JFrame frame) {
+        super(frame, true);       
         initComponents();
         initKeyListener();
-//        configOption();
         setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-    }
-
-    private void configOption() {
-        lblVouNo.setText(tranSource.equals("I") ? "Issue Vou No" : "Receive Vou No");
-    }
+    }    
     public void initMain() {
         initTableVoucher();
         setTodayDate();
         initCombo();
     }
 
-    private void initCombo() {
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
-        inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter.setListLocation(t);
-        });
+    private void initCombo() {       
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);
@@ -138,9 +126,9 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
 
-    private String getLocCode() {
-        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
-    }
+//    private String getLocCode() {
+//        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+//    }
 
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
@@ -155,19 +143,18 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(getLocCode());
+//        filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
-        filter.setLocal(chkLocal.isSelected());      
-        filter.setTranSource(tranSource.equals("I")? String.valueOf(1):String.valueOf(2));
+        filter.setLocal(chkLocal.isSelected());     
         if (traderAutoCompleter.getTrader() != null) {
             filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         }
-        inventoryRepo.getStockIssRecHistory(filter).doOnSuccess((t) -> {
+        inventoryRepo.getPurOrderHistory(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
             calAmount();
             progess.setIndeterminate(false);
-            log.info("stock issue/receive test", t);
+            log.info("purchase order test", t);
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progess.setIndeterminate(false);
@@ -178,7 +165,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     }
 
     private void calAmount() {
-        List<VStockIssueReceive> list = tableModel.getListDetail();
+        List<VPurOrder> list = tableModel.getListDetail();
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
@@ -186,9 +173,9 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VStockIssueReceive stkIR = tableModel.getSelectVou(row);
-            stkIR.setLocal(chkLocal.isSelected());
-            observer.selected("ISSREC-HISTORY", stkIR);
+            VPurOrder purOrder = tableModel.getSelectVou(row);
+            purOrder.setLocal(chkLocal.isSelected());
+            observer.selected("PURORDER-HISTORY", purOrder);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -208,10 +195,9 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtVouNo.setText(null);
-//        txtRefNo.setText(null);
         txtRemark.setText(null);
         stockAutoCompleter.setStock(new Stock("-", "All"));
-        locationAutoCompleter.setLocation(new Location("-", "All"));
+//        locationAutoCompleter.setLocation(new Location("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         traderAutoCompleter.setTrader(new Trader("-", "All"));
     }
@@ -238,8 +224,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         jLabel9 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        jLabel12 = new javax.swing.JLabel();
-        txtLocation = new javax.swing.JTextField();
         chkDel = new javax.swing.JCheckBox();
         jLabel13 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
@@ -327,17 +311,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
             }
         });
 
-        jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Location");
-
-        txtLocation.setFont(Global.textFont);
-        txtLocation.setName("txtVouNo"); // NOI18N
-        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtLocationFocusGained(evt);
-            }
-        });
-
         chkDel.setText("Deleted");
 
         jLabel13.setFont(Global.lableFont);
@@ -384,7 +357,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                             .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
                             .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblVouNo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -402,7 +374,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                             .addComponent(txtDep)
                             .addComponent(txtCustomer)
                             .addComponent(txtStock, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtLocation, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtUser)
                             .addComponent(txtRemark)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -436,10 +407,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel9))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel12))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -649,10 +616,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
-    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtLocationFocusGained
-
     private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepFocusGained
@@ -672,7 +635,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel3;
@@ -692,7 +654,6 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
-    private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;

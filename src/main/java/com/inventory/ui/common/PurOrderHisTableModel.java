@@ -10,12 +10,9 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.PurDetailKey;
-import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
-import com.inventory.ui.entry.PurchaseDynamic;
+import com.inventory.model.PurOrderHisDetail;
+import com.inventory.model.PurOrderHisDetailKey;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,29 +24,21 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author wai yan
+ * @author pann
  */
 @Slf4j
-public class PurchasePaddyTableModel extends AbstractTableModel {
+public class PurOrderHisTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight",
         "Qty", "Bag", "Price", "Amount"};
     private JTable parent;
-    private List<PurHisDetail> listDetail = new ArrayList();
+    private List<PurOrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<PurDetailKey> deleteList = new ArrayList();
+    private final List<PurOrderHisDetailKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
+    private JDateChooser dueDate;
     private JLabel lblRec;
-    private PurchaseDynamic purchase;
-
-    public PurchaseDynamic getPurchase() {
-        return purchase;
-    }
-
-    public void setPurchase(PurchaseDynamic purchase) {
-        this.purchase = purchase;
-    }
 
     public JLabel getLblRec() {
         return lblRec;
@@ -65,6 +54,13 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
 
     public void setVouDate(JDateChooser vouDate) {
         this.vouDate = vouDate;
+    }
+    public JDateChooser getDueDate() {
+        return dueDate;
+    }
+    
+    public void setDueDate(JDateChooser dueDate) {
+        this.dueDate = dueDate;
     }
 
     public InventoryRepo getInventoryRepo() {
@@ -126,7 +122,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 8 ->
+            case  8 ->
                 false;
             default ->
                 true;
@@ -137,11 +133,11 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                PurHisDetail record = listDetail.get(row);
+                PurOrderHisDetail record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
-                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
+                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();                        
                     }
                     case 1 -> {
                         return record.getStockName();
@@ -180,23 +176,20 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
-        try {
-            if (value != null) {
-                PurHisDetail pd = listDetail.get(row);
+        try {  
+            if (value != null) {  
+                PurOrderHisDetail pd = listDetail.get(row);
                 switch (column) {
                     case 0, 1 -> {
                         //Code
-                        if (value != null) {
                             if (value instanceof Stock s) {
                                 pd.setStockCode(s.getKey().getStockCode());
                                 pd.setStockName(s.getStockName());
                                 pd.setUserCode(s.getUserCode());
-                                pd.setRelName(s.getRelName());
-                                pd.setQty(1.0);
-                                pd.setUnitCode(s.getPurUnitCode());
-                                addNewRow();
-                            }
-                        }
+                                pd.setWeight(Util1.getDouble(s.getWeight()));
+                                pd.setQty(1.0);                               
+                            } 
+                             addNewRow();
                         parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
@@ -235,12 +228,10 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
                             pd.setPrice(price);
                         }
                     }
-
                 }
-                assignLocation(pd);
-                calculateAmount(pd);
-                setRecord(listDetail.size() - 1);
+                calculateAmount(pd);               
                 fireTableRowsUpdated(row, row);
+                setRecord(listDetail.size() - 1);
                 observer.selected("CAL-TOTAL", "CAL-TOTAL");
                 parent.requestFocus();
             }
@@ -249,18 +240,18 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
         }
     }
 
-    private void assignLocation(PurHisDetail sd) {
-        if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = purchase.getLocationAutoCompleter();
-            if (completer != null) {
-                Location l = completer.getLocation();
-                if (l != null) {
-                    sd.setLocCode(l.getKey().getLocCode());
-                    sd.setLocName(l.getLocName());
-                }
-            }
-        }
-    }
+//    private void assignLocation(PurOrderHisDetail sd) {
+//        if (sd.getLocCode() == null) {
+//            LocationAutoCompleter completer = stockIssRec.getLocationAutoCompleter();
+//            if (completer != null) {
+//                Location l = completer.getLocation();
+//                if (l != null) {
+//                    sd.setLocCode(l.getKey().getLocCode());
+//                    sd.setLocName(l.getLocName());
+//                }
+//            }
+//        }
+//    }
 
     private void setRecord(int size) {
         if (lblRec != null) {
@@ -271,7 +262,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                PurHisDetail pd = new PurHisDetail();
+                PurOrderHisDetail pd = new PurOrderHisDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -281,7 +272,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            PurHisDetail get = listDetail.get(listDetail.size() - 1);
+            PurOrderHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -289,19 +280,20 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<PurHisDetail> getListDetail() {
+    public List<PurOrderHisDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<PurHisDetail> listDetail) {
+    public void setListDetail(List<PurOrderHisDetail> listDetail) {
         this.listDetail = listDetail;
-        //setRecord(listDetail.size());
+        setRecord(listDetail.size());
+//        addNewRow();
         fireTableDataChanged();
     }
 
-    private void calculateAmount(PurHisDetail pur) {
+    private void calculateAmount(PurOrderHisDetail pur) {
         double price = Util1.getDouble(pur.getPrice());
-        double qty = Util1.roundDown2D(pur.getQty());
+        double qty = Util1.getDouble(pur.getQty());
         if (pur.getStockCode() != null) {
             double amount = qty * price;
             int roundAmt = (int) amount;
@@ -320,16 +312,12 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     }
 
     public boolean isValidEntry() {
-        for (PurHisDetail sdh : listDetail) {
+        for (PurOrderHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                sdh.setUnitCode("-");
+//                sdh.setUnitCode("-");
                 if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    parent.requestFocus();
-                    return false;
-                } else if (sdh.getLocCode() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     parent.requestFocus();
                     return false;
                 }
@@ -338,7 +326,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
         return true;
     }
 
-    public List<PurDetailKey> getDelList() {
+    public List<PurOrderHisDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -349,7 +337,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        PurHisDetail sdh = listDetail.get(row);
+        PurOrderHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
@@ -364,14 +352,14 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addPurchase(PurHisDetail sd) {
+    public void addStockIssRec(PurOrderHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public PurHisDetail getObject(int row) {
+    public PurOrderHisDetail getObject(int row) {
         return listDetail.get(row);
     }
 
@@ -382,6 +370,9 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
         }
     }
 
+    public PurOrderHisDetail getSelectVou(int row) {
+        return listDetail.get(row);
+    }
     public void updateRow(int row) {
         fireTableRowsUpdated(row, row);
     }
