@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.VPurchase;
 import java.util.ArrayList;
@@ -21,7 +20,35 @@ import lombok.extern.slf4j.Slf4j;
 public class PurVouSearchTableModel extends AbstractTableModel {
 
     private List<VPurchase> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Supplier", "Reference", "Remark", "Paid Amt", "V-Total",};
+    private final String[] columnNames = {"Date", "Vou No", "Supplier", "Reference", "Remark", "Paid Amt", "V-Total"};
+    private double paidTotal;
+    private double vouTotal;
+    private int size;
+
+    public double getPaidTotal() {
+        return paidTotal;
+    }
+
+    public void setPaidTotal(double paidTotal) {
+        this.paidTotal = paidTotal;
+    }
+
+    public double getVouTotal() {
+        return vouTotal;
+    }
+
+    public void setVouTotal(double vouTotal) {
+        this.vouTotal = vouTotal;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+    
 
     @Override
     public String getColumnName(int column) {
@@ -113,10 +140,22 @@ public class PurVouSearchTableModel extends AbstractTableModel {
 
     public void addObject(VPurchase t) {
         listDetail.add(t);
+        vouTotal += t.getVouTotal();
+        paidTotal += t.getPaid();
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void clear() {
         listDetail.clear();
+        vouTotal = 0;
+        paidTotal = 0;
+        size = 0;
         fireTableDataChanged();
     }
 }

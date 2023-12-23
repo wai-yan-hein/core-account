@@ -34,7 +34,6 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -42,7 +41,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
-import reactor.core.scheduler.Schedulers;
 
 /**
  *
@@ -97,14 +95,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         super(frame, true);
         initComponents();
         initKeyListener();
-        initFocous();
-        initFormatFactory();
+        initProperty();
     }
 
-    private void initFormatFactory() {
-        txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat2());
-        txtPaid.setFormatterFactory(Util1.getDecimalFormat2());
-    }
 
     public void initMain() {
         initCombo();
@@ -112,8 +105,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         setTodayDate();
     }
 
-    private void initFocous() {
+    private void initProperty() {
         ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     private void initCombo() {
@@ -228,6 +222,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         filter.setLocal(chkLocal.isSelected());
         saleVouTableModel.clear();
         txtRecord.setValue(0);
+        txtTotalAmt.setValue(0);
+        txtPaid.setValue(0);
         inventoryRepo.getSaleHistory(filter)
                 .doOnNext(obj -> btnSearch.setEnabled(false))
                 .doOnNext(saleVouTableModel::addObject)
@@ -242,8 +238,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     btnSearch.setEnabled(true);
                     tblVoucher.requestFocus();
                     setVisible(true);
-                })
-                .subscribe();
+                }).subscribe();
 
     }
 

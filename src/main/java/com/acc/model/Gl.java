@@ -86,6 +86,8 @@ public class Gl implements Cloneable {
     private String exCode;
     @Column(name = "order_id")
     private Integer orderId;
+    private double price;
+    private double qty;
     @Transient
     private String glDateStr;
     @Transient

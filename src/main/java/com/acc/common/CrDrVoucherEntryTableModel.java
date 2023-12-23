@@ -14,7 +14,6 @@ import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.Util1;
-import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;
@@ -32,7 +31,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(CrDrVoucherEntryTableModel.class);
     private List<Gl> listVGl = new ArrayList();
-    String[] columnNames = {"Dep:", "Description", "Person", "Account", "Currency", "Amount"};
+    String[] columnNames = {"Dep:", "Description", "Person", "Account", "Qty", "Price", "Amount"};
     private JTable parent;
     private JFormattedTextField ttlAmt;
     private String vouType;
@@ -123,9 +122,11 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                 case 3 ->
                     gl.getAccName();
                 case 4 ->
-                    gl.getCurCode();
+                    Util1.toNull(gl.getQty());
                 case 5 ->
-                    vouType.equals("CR") ? gl.getDrAmt() : gl.getCrAmt();
+                    Util1.toNull(gl.getPrice());
+                case 6 ->
+                    vouType.equals("CR") ? Util1.toNull(gl.getDrAmt()) : Util1.toNull(gl.getCrAmt());
                 default ->
                     null;
             }; //dep
@@ -166,18 +167,14 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                                 gl.setTraderName(t.getTraderName());
                                 if (t.getAccount() != null) {
                                     gl.setAccCode(t.getAccount());
-                                    accountRepo.findCOA(t.getAccount()).subscribe((coa) -> {
+                                    accountRepo.findCOA(t.getAccount()).doOnSuccess((coa) -> {
                                         if (coa != null) {
                                             gl.setAccName(coa.getCoaNameEng());
+                                            parent.setColumnSelectionInterval(4, 4);
                                         }
-                                    });
-                                    if (ProUtil.isMultiCur()) {
-                                        parent.setColumnSelectionInterval(4, 4);
-                                    } else {
-                                        parent.setColumnSelectionInterval(5, 5);
-                                    }
+                                    }).subscribe();
                                 } else {
-                                    parent.setColumnSelectionInterval(5, 5);
+                                    parent.setColumnSelectionInterval(3, 3);
                                 }
                             }
                         }
@@ -187,26 +184,27 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                             if (value instanceof ChartOfAccount coa) {
                                 gl.setAccCode(coa.getKey().getCoaCode());
                                 gl.setAccName(coa.getCoaNameEng());
-                                parent.setColumnSelectionInterval(5, 5);
+                                parent.setColumnSelectionInterval(4, 4);
                             }
                         }
                     }
                     case 4 -> {
-                        if (value instanceof Currency cur) {
-                            gl.setCurCode(cur.getCurCode());
-                        }
-                        parent.setColumnSelectionInterval(5, 5);
+                        gl.setQty(Util1.getDouble(value));
                     }
                     case 5 -> {
+                        gl.setPrice(Util1.getDouble(value));
+                    }
+                    case 6 -> {
                         if (vouType.equals("CR")) {
                             gl.setDrAmt(Util1.getDouble(value));
                         } else {
                             gl.setCrAmt(Util1.getDouble(value));
                         }
-                        calAmount();
                     }
 
                 }
+                calAmount(gl);
+                calTotalAmount();
                 addNewRow(gl, row, column);
                 change = true;
             }
@@ -259,7 +257,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 5 ->
+            case 4, 5, 6 ->
                 Double.class;
             default ->
                 String.class;
@@ -358,19 +356,24 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
         }
     }
 
-    public void calAmount() {
+    private void calAmount(Gl gl) {
+        double amt = gl.getQty() * gl.getPrice();
+        if (vouType.equals("CR")) {
+            gl.setDrAmt(amt);
+        } else {
+            gl.setCrAmt(amt);
+        }
+    }
+
+    public void calTotalAmount() {
         if (!listVGl.isEmpty()) {
-            double amt = 0.0;
             if (vouType.equals("CR")) {
-                for (Gl gl : listVGl) {
-                    amt += Util1.getDouble(gl.getDrAmt());
-                }
+                double amt = listVGl.stream().mapToDouble((t) -> t.getDrAmt()).sum();
+                ttlAmt.setValue(amt);
             } else {
-                for (Gl gl : listVGl) {
-                    amt += Util1.getDouble(gl.getCrAmt());
-                }
+                double amt = listVGl.stream().mapToDouble((t) -> t.getCrAmt()).sum();
+                ttlAmt.setValue(amt);
             }
-            ttlAmt.setValue(amt);
         }
     }
 
@@ -384,7 +387,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                     delList.add(gl.getKey());
                     listVGl.remove(row);
                     fireTableRowsDeleted(row, row);
-                    calAmount();
+                    calTotalAmount();
                     parent.setRowSelectionInterval(row, row);
                     parent.requestFocus();
                 }

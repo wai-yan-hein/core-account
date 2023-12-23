@@ -89,6 +89,7 @@ import com.inventory.model.SaleManKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
+import com.inventory.model.StockColor;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
@@ -1484,7 +1485,7 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
-    } 
+    }
 
     public Mono<List<LabourGroup>> getLabourGroup() {
         if (localDatabase) {
@@ -1787,6 +1788,22 @@ public class InventoryRepo {
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
                         h2Repo.save(t);
+                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<StockColor> saveStockColor(StockColor color) {
+        return inventoryApi.post()
+                .uri("/setup/saveStockColor")
+                .body(Mono.just(color), StockColor.class)
+                .retrieve()
+                .bodyToMono(StockColor.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
                     }
                 })
                 .onErrorResume((e) -> {
@@ -2939,19 +2956,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VPurchase>> getPurchaseVoucher(FilterObject filter) {
-        if (filter.isLocal()) {
-            return h2Repo.searchPurchaseVoucher(filter);
-        }
+    public Flux<VPurchase> getPurchaseVoucher(FilterObject filter) {
         return inventoryApi.post()
                 .uri("/pur/getPur")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VPurchase.class)
-                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Flux.empty();
                 });
     }
 
@@ -3063,17 +3076,16 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<WeightHis>> getWeightHistory(FilterObject filter) {
+    public Flux<WeightHis> getWeightHistory(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/weight/getWeightHistory")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(WeightHis.class)
-                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Flux.empty();
                 });
     }
 
@@ -3365,20 +3377,16 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<VTransfer>> getTrasnfer(FilterObject filter) {
-        if (filter.isLocal()) {
-            return h2Repo.getTransferHistory(filter);
-        }
+    public Flux<VTransfer> getTrasnfer(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/transfer/getTransfer")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VTransfer.class)
-                .collectList()
                 .onErrorResume(e -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Flux.empty();
                 });
     }
 
@@ -4024,14 +4032,14 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<VStockIO>> getStockIO(FilterObject filter) {
+    public Flux<VStockIO> getStockIO(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/stockio/getStockIO")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VStockIO.class)
-                .collectList();
+                .onErrorResume((t) -> Flux.empty());
     }
 
     public Flux<Message> receiveMessage() {
@@ -4160,9 +4168,9 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     //purchase order
-     public Mono<PurOrderHis> savePurOrder(PurOrderHis his) {
+    public Mono<PurOrderHis> savePurOrder(PurOrderHis his) {
         return inventoryApi.post()
                 .uri("purOrder/savePurOrder")
                 .body(Mono.just(his), PurOrderHis.class)
@@ -4225,7 +4233,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<PurOrderHis> findPurOrder(String vouNo, boolean local) {
         PurOrderHisKey key = new PurOrderHisKey();
         key.setCompCode(Global.compCode);
@@ -4240,7 +4248,6 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
 
     public Mono<List<LabourPaymentDetail>> calulateLabourPayment(ReportFilter filter) {
         return inventoryApi.post()

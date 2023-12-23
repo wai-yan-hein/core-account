@@ -337,16 +337,6 @@ public class AccountRepo {
                 );
     }
 
-    public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/saveCOAFromTemplate")
-                .queryParam("busId", busId)
-                .queryParam("compCode", compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(ChartOfAccount.class)
-                .collectList();
-    }
 
     public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
         return accountApi.get()

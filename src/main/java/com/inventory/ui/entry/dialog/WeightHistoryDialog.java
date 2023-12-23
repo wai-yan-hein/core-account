@@ -25,7 +25,6 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.WeightHistoryTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -75,7 +74,12 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         super(frame, true);
         initComponents();
         initKeyListener();
-        ComponentUtil.addFocusListener(panelFilter);
+        initProperty();
+    }
+
+    private void initProperty() {
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     public void initMain() {
@@ -126,8 +130,11 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void search() {
+        progress.setIndeterminate(true);
         tableModel.clear();
         txtTotalRecord.setValue(0);
+        txtTotalBag.setValue(0);
+        txtTotalQty.setValue(0);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -140,25 +147,27 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         filter.setDraft(chkDraft.isSelected());
         WeightStatus status = (WeightStatus) cboStatus.getSelectedItem();
         filter.setTranSource(status.name());
-        inventoryRepo.getWeightHistory(filter).doOnSuccess((t) -> {
-            if (t != null) {
-                tableModel.setListDetail(t);
-            }
-        }).doOnError((e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }).doOnTerminate(() -> {
-            calTotal();
-            setVisible(true);
-        }).subscribe();
+        inventoryRepo.getWeightHistory(filter)
+                .doOnNext(obj -> btnSearch.setEnabled(false))
+                .doOnNext(tableModel::addObject)
+                .doOnNext(obj -> calTotal())
+                .doOnError(e -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                })
+                .doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    tblVoucher.requestFocus();
+                    setVisible(true);
+                }).subscribe();
     }
 
     private void calTotal() {
-        List<WeightHis> list = tableModel.getListDetail();
-        double ttlQty = list.stream().mapToDouble((t) -> t.getTotalQty()).sum();
-        double ttlBag = list.stream().mapToDouble((t) -> t.getTotalBag()).sum();
-        txtTotalQty.setValue(ttlQty);
-        txtTotalBag.setValue(ttlBag);
-        txtTotalRecord.setValue(list.size());
+        txtTotalQty.setValue(tableModel.getTotalQty());
+        txtTotalBag.setValue(tableModel.getTotalBag());
+        txtTotalRecord.setValue(tableModel.getSize());
     }
 
     private void select() {
@@ -241,6 +250,7 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         lblTtlRecord1 = new javax.swing.JLabel();
         txtTotalBag = new javax.swing.JFormattedTextField();
         lblTtlRecord2 = new javax.swing.JLabel();
+        progress = new javax.swing.JProgressBar();
 
         setTitle("Weight History Dialog");
 
@@ -419,7 +429,7 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
                 .addComponent(chkDraft)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addContainerGap(256, Short.MAX_VALUE))
+                .addContainerGap(183, Short.MAX_VALUE))
         );
 
         panelFilterLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
@@ -503,15 +513,15 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblTtlRecord1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalQty, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalQty, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblTtlRecord2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalBag, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtTotalBag, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -540,30 +550,35 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(panelFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 839, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(panelFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFilter))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 839, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtFilter))
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelFilter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -653,6 +668,7 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JLabel lblTtlRecord1;
     private javax.swing.JLabel lblTtlRecord2;
     private javax.swing.JPanel panelFilter;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;

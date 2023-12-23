@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
+import com.common.ComponentUtil;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -81,8 +82,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         super(frame, true);
         initComponents();
         initKeyListener();
-        txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat1());
-        txtPaid.setFormatterFactory(Util1.getDecimalFormat1());
+        initProperty();
+    }
+
+    private void initProperty() {
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     public void initMain() {
@@ -194,6 +199,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         filter.setCurCode(getCurCode());
         tableModel.clear();
+        txtRecord.setValue(0);
+        txtPaid.setValue(0);
+        txtTotalAmt.setValue(0);
         inventoryRepo.getReturnInVoucher(filter)
                 .doOnNext(obj -> btnSearch.setEnabled(false))
                 .doOnNext(tableModel::addObject)

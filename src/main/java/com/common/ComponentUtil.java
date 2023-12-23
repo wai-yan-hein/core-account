@@ -4,6 +4,7 @@
  */
 package com.common;
 
+import com.toedter.calendar.JDateChooser;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Component;
 import java.awt.Container;
@@ -64,6 +65,8 @@ public class ComponentUtil {
 
     public static void setTextProperty(Component component) {
         switch (component) {
+            case JDateChooser dateChooser ->
+                dateChooser.setFont(Global.textFont);
             case JFormattedTextField textField -> {
                 textField.setFont(Global.amtFont);
                 textField.setHorizontalAlignment(JTextField.RIGHT);
