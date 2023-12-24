@@ -23,6 +23,11 @@ public class JournalTableModel extends AbstractTableModel {
     private List<Gl> listGV = new ArrayList();
     private final String[] columnNames = {"Date", "Voucher No", "Description", "Refrence", "Project No", "Amount", "Type"};
     private JTable parent;
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
 
     @Override
     public int getRowCount() {
@@ -137,5 +142,22 @@ public class JournalTableModel extends AbstractTableModel {
             listGV.remove(row);
             fireTableRowsDeleted(row, row);
         }
+    }
+
+    public void addObject(Gl t) {
+        listGV.add(t);
+        size += 1;
+        int lastIndex = listGV.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
+    }
+
+    public void clear() {
+        listGV.clear();
+        size = 0;
+        fireTableDataChanged();
     }
 }

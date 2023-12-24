@@ -1521,6 +1521,20 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<StockColor>> getStockColor() {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getStockColor")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockColor.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Job>> getJob(FilterObject filterObject) {
         if (localDatabase) {
             return h2Repo.getJob(filterObject);
@@ -4126,17 +4140,16 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VStockIssueReceive>> getStockIssRecHistory(FilterObject filter) {
+    public Flux<VStockIssueReceive> getStockIssRecHistory(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/stockIssRec/getStockIssRecHistory")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VStockIssueReceive.class)
-                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Flux.empty();
                 });
     }
 

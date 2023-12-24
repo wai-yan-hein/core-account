@@ -190,9 +190,11 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         gl.setQty(Util1.getDouble(value));
+                        calAmount(gl);
                     }
                     case 5 -> {
                         gl.setPrice(Util1.getDouble(value));
+                        calAmount(gl);
                     }
                     case 6 -> {
                         if (vouType.equals("CR")) {
@@ -203,7 +205,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                     }
 
                 }
-                calAmount(gl);
                 calTotalAmount();
                 addNewRow(gl, row, column);
                 change = true;

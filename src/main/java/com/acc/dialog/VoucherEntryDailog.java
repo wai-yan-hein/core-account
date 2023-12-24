@@ -262,11 +262,12 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     this.dispose();
                     observer.selected("print", gl);
                 }
-                clear();
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
+            }).doOnTerminate(() -> {
+                clear();
             }).subscribe();
 
         }

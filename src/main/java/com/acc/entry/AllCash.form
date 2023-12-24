@@ -615,9 +615,6 @@
         <Component class="javax.swing.JFormattedTextField" name="txtCr">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
-            <Property name="document" type="javax.swing.text.Document" editor="org.netbeans.modules.form.ComponentChooserEditor">
-              <ComponentRef name="default"/>
-            </Property>
             <Property name="horizontalAlignment" type="int" value="4"/>
           </Properties>
         </Component>
@@ -632,9 +629,6 @@
         <Component class="javax.swing.JFormattedTextField" name="txtDr">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
-            <Property name="document" type="javax.swing.text.Document" editor="org.netbeans.modules.form.ComponentChooserEditor">
-              <ComponentRef name="default"/>
-            </Property>
             <Property name="horizontalAlignment" type="int" value="4"/>
           </Properties>
         </Component>
@@ -692,9 +686,6 @@
         <Component class="javax.swing.JFormattedTextField" name="txtClosing">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
-            <Property name="document" type="javax.swing.text.Document" editor="org.netbeans.modules.form.ComponentChooserEditor">
-              <ComponentRef name="default"/>
-            </Property>
             <Property name="horizontalAlignment" type="int" value="4"/>
           </Properties>
         </Component>
@@ -717,9 +708,6 @@
         <Component class="javax.swing.JFormattedTextField" name="txtOpening">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
-            <Property name="document" type="javax.swing.text.Document" editor="org.netbeans.modules.form.ComponentChooserEditor">
-              <ComponentRef name="default"/>
-            </Property>
             <Property name="horizontalAlignment" type="int" value="4"/>
           </Properties>
         </Component>

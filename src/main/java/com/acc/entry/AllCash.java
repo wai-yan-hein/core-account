@@ -281,11 +281,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
         tranSourceAutoCompleter.setObserver(this);
-        accountRepo.getTranSource().subscribe((t) -> {
+        accountRepo.getTranSource().doOnSuccess((t) -> {
             tranSourceAutoCompleter.setListGl(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
@@ -325,6 +323,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableCB() {
+        tblCash.setAutoCreateRowSorter(false);
         tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
@@ -735,10 +734,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setCoaCode(sourceAccId);
         return filter;
-    }
-
-    private List<Gl> getData() {
-        return single ? dayBookTableModel.getListVGl() : allCashTableModel.getListVGl();
     }
 
     private void calculateClosing() {

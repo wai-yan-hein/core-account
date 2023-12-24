@@ -337,7 +337,6 @@ public class AccountRepo {
                 );
     }
 
-
     public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getUpdatedCOA")
@@ -669,13 +668,16 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchJournal(ReportFilter filter) {
+    public Flux<Gl> searchJournal(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/searchJournal")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
-                .collectList();
+                .onErrorResume((e) -> {
+                    log.info("searchJournal : " + e.getMessage());
+                    return Flux.empty();
+                });
     }
 
     public Mono<List<StockOP>> searchOP(ReportFilter filter) {
@@ -740,14 +742,13 @@ public class AccountRepo {
                 .onErrorResume((t) -> Flux.empty());
     }
 
-    public Mono<List<Gl>> searchVoucher(ReportFilter filter) {
-        return accountApi
-                .post()
+    public Flux<Gl> searchVoucher(ReportFilter filter) {
+        return accountApi.post()
                 .uri("/account/searchVoucher")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
-                .collectList();
+                .onErrorResume((t) -> Flux.empty());
     }
 
     public Mono<List<DateModel>> getDate() {

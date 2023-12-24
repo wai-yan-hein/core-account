@@ -19,6 +19,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -59,9 +60,11 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public StockColorSetupDialog() {
-        super(Global.parentForm, false);
+    public StockColorSetupDialog(JFrame frame) {
+        super(frame, false);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.green);
@@ -118,9 +121,9 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
             btnSave.setEnabled(false);
             inventoryRepo.saveStockColor(ord).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    listVou.set(selectRow, t);
+                    stockColorTableModel.setObject(t, selectRow);
                 } else {
-                    listVou.add(t);
+                    stockColorTableModel.addObject(ord);
                 }
                 clear();
                 sendMessage(t.getColorName());
@@ -184,7 +187,6 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
         btnSave = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
-        chkActive = new javax.swing.JCheckBox();
         jSeparator2 = new javax.swing.JSeparator();
         progress = new javax.swing.JProgressBar();
 
@@ -255,10 +257,6 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
         lblStatus.setFont(Global.lableFont);
         lblStatus.setText("NEW");
 
-        chkActive.setFont(Global.lableFont);
-        chkActive.setSelected(true);
-        chkActive.setText("Active");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -269,17 +267,13 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
-                        .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE))
+                        .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 269, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(91, 91, 91)
-                        .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
@@ -296,13 +290,11 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkActive)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(332, Short.MAX_VALUE))
+                .addContainerGap(358, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -376,7 +368,6 @@ public class StockColorSetupDialog extends javax.swing.JDialog implements KeyLis
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
-    private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;

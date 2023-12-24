@@ -14,6 +14,7 @@ import com.inventory.ui.setup.dialog.OrderStatusSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.RelationSetupDialog;
 import com.inventory.ui.setup.dialog.SaleManSetupDialog;
+import com.inventory.ui.setup.dialog.StockColorSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.WareHouseSetupDialog;
 import com.repo.UserRepo;
@@ -40,6 +41,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private OrderStatusSetupDialog osDialog;
     private LabourGroupSetupDialog lgDialog;
     private WareHouseSetupDialog wareHouseSetupDialog;
+    private StockColorSetupDialog stockColorSetupDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -189,6 +191,24 @@ public class OtherSetup extends javax.swing.JPanel {
             wareHouseSetupDialog.setVisible(true);
         }).subscribe();
 
+    }
+
+    private void stockColorDialog() {
+        if (stockColorSetupDialog == null) {
+            stockColorSetupDialog = new StockColorSetupDialog(Global.parentForm);
+            stockColorSetupDialog.setIconImage(icon);
+            stockColorSetupDialog.setInventoryRepo(inventoryRepo);
+            stockColorSetupDialog.initMain();
+            stockColorSetupDialog.setSize(Global.width / 2, Global.height / 2);
+            stockColorSetupDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getStockColor().doOnSuccess((t) -> {
+            if (t != null) {
+                stockColorSetupDialog.setListVou(t);
+            }
+        }).doOnTerminate(() -> {
+            stockColorSetupDialog.setVisible(true);
+        }).subscribe();
     }
 
     /**
@@ -431,6 +451,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
         // TODO add your handling code here:
+        stockColorDialog();
     }//GEN-LAST:event_jButton9ActionPerformed
 
 

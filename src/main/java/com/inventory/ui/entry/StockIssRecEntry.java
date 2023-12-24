@@ -28,28 +28,22 @@ import com.inventory.ui.common.StockIssueRecTableModel;
 import com.inventory.ui.entry.dialog.StockIssRecHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.model.LabourGroup;
+import com.inventory.model.Location;
 import com.inventory.model.StockIssueReceiveKey;
 import com.inventory.model.VStockIssueReceive;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JsonDataSource;
-import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -80,7 +74,7 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -88,21 +82,23 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locaitonCompleter;
     }
 
     /**
      * Creates new form StockIR
+     *
+     * @param tranSource
      */
     public StockIssRecEntry(String tranSource) {
-        this.tranSource=tranSource;
+        this.tranSource = tranSource;
         initComponents();
         initDateListner();
         actionMapping();
     }
-    
+
     private void configureOption() {
         lblVouNo.setText(tranSource.equals("I") ? "Issue Vou No" : " Receive Vou No");
     }
@@ -127,7 +123,7 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
         txtVou.addKeyListener(this);
         txtRemark.addKeyListener(this);
         txtLocation.addKeyListener(this);
-        txtLG.addKeyListener(this);       
+        txtLG.addKeyListener(this);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -145,6 +141,7 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
     }
 
     private class DeleteAction extends AbstractAction {
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
@@ -156,7 +153,7 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
         locaitonCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
             locaitonCompleter.setListLocation(t);
-        });   
+        });
         labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, false);
         labourGroupAutoCompleter.setObserver(this);
         inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
@@ -220,10 +217,10 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
                 if (yes_no == 0) {
                     io.setDeleted(false);
                     inventoryRepo.restore(io.getKey()).doOnSuccess((t) -> {
-                        if(t){
-                        lblStatus.setText("EDIT");
-                        lblStatus.setForeground(Color.blue);
-                        disableForm(true);
+                        if (t) {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
                         }
                     }).subscribe();
                 }
@@ -286,16 +283,16 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
         assingnDefault();
         io = new StockIssueReceive();
         lblStatus.setForeground(Color.GREEN);
-        lblStatus.setText("NEW");     
+        lblStatus.setText("NEW");
         txtRemark.setText(null);
         tableModel.clear();
         tableModel.addNewRow();
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
-        traderAutoCompleter.setTrader(null);        
+        traderAutoCompleter.setTrader(null);
         labourGroupAutoCompleter.setObject(null);
-        disableForm(true);       
+        disableForm(true);
         lblStatus.setForeground(Color.green);
         lblStatus.setText("NEW");
     }
@@ -312,40 +309,34 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
     }
 
     private boolean isValidEntry() {
-        boolean status = true;
+        LabourGroup lg = labourGroupAutoCompleter.getObject();
+        Trader t = traderAutoCompleter.getTrader();
+        Location l = locaitonCompleter.getLocation();
         if (lblStatus.getText().equals("DELETED")) {
-            status = true;
             clear();
-        }else if(locaitonCompleter.getLocation() == null) {
+            return false;
+        } else if (l == null) {
             JOptionPane.showMessageDialog(this, "Choose Location.",
                     "No Location.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtLocation.requestFocus();
-        }else if (!Util1.isDateBetween(txtDate.getDate())) {
+            return false;
+        } else if (!Util1.isDateBetween(txtDate.getDate())) {
             JOptionPane.showMessageDialog(this, "Invalid Date.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             txtDate.requestFocus();
-            status = false;
-        } else if (Objects.isNull(labourGroupAutoCompleter.getObject())) {
-            JOptionPane.showMessageDialog(this, "Choose Labour Group",
-                    "Choose Labour Group", JOptionPane.ERROR_MESSAGE);
-            txtLG.requestFocus();
             return false;
-        }
-        else {
+        } else if (t == null) {
+            JOptionPane.showMessageDialog(this, "Choose Trader.",
+                    "No Trader.", JOptionPane.ERROR_MESSAGE);
+            txtCustomer.requestFocus();
+            return false;
+        } else {
             io.setRemark(txtRemark.getText());
             io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
-            io.setLocation(locaitonCompleter.getLocation().getKey().getLocCode());
+            io.setLocation(l.getKey().getLocCode());
             io.setStatus(lblStatus.getText());
-            Trader t = traderAutoCompleter.getTrader();
-            if (t != null) {
-                String traderCode = t.getKey().getCode();
-                io.setTraderCode(traderCode);
-            }
-            LabourGroup lg = labourGroupAutoCompleter.getObject();
-            if (lg != null) {
-                io.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
-            }
+            io.setTraderCode(t.getKey().getCode());
+            io.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
             if (lblStatus.getText().equals("NEW")) {
                 StockIssueReceiveKey key = new StockIssueReceiveKey();
                 key.setCompCode(Global.compCode);
@@ -360,16 +351,15 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
                 io.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
-        return status;
+        return true;
     }
 
-    private void setVoucher(StockIssueReceive s, boolean local) {
+    private void setVoucher(StockIssueReceive s) {
         progress.setIndeterminate(true);
         this.io = s;
-        Integer deptId = io.getDeptId();
         inventoryRepo.findLocation(io.getLocation()).doOnSuccess((t) -> {
             locaitonCompleter.setLocation(t);
-        }).subscribe();      
+        }).subscribe();
         inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
@@ -382,14 +372,14 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
             tableModel.addNewRow();
             txtVou.setText(vouNo);
             txtDate.setDate(Util1.convertToDate(io.getVouDate()));
-            txtRemark.setText(io.getRemark());  
+            txtRemark.setText(io.getRemark());
             io.setVouLock(!io.getDeptId().equals(Global.deptId));
             if (io.isVouLock()) {
-            lblStatus.setText("Voucher is Lock.");
-            lblStatus.setForeground(Color.RED);
-            disableForm(false);
-            observer.selected("print", true);
-            }else if (Util1.getBoolean(io.isDeleted())) {
+                lblStatus.setText("Voucher is Lock.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("print", true);
+            } else if (Util1.getBoolean(io.isDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
                 disableForm(false);
@@ -703,10 +693,11 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
-            dialog.setLocationRelativeTo(null);       
+            dialog.setLocationRelativeTo(null);
         }
         dialog.search();
     }
+
     @Override
     public void print() {
         saveVoucher(true);
@@ -725,9 +716,9 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("ISSREC-HISTORY")) {
             if (selectObj instanceof VStockIssueReceive v) {
-                inventoryRepo.findStockIR(v.getVouNo(), v.isLocal()).subscribe((t) -> {
-                    setVoucher(t, v.isLocal());
-                });
+                inventoryRepo.findStockIR(v.getVouNo(), v.isLocal()).doOnSuccess((t) -> {
+                    setVoucher(t);
+                }).subscribe();
             }
         }
 
