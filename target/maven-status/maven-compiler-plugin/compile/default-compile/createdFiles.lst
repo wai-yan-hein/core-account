@@ -2046,6 +2046,7 @@ com\acc\dialog\JournalEntryDialog$16.class
 com\inventory\ui\entry\StockInOutEntry$3.class
 com\acc\entry\TraderAdjustment$18.class
 com\inventory\ui\setup\dialog\OrderStatusSetupDialog$7.class
+com\inventory\ui\entry\dialog\MillingHistoryDialog$19.class
 com\user\model\PMKey.class
 com\user\setup\RoleSetting$3.class
 com\inventory\editor\PriceCompleter$3.class
