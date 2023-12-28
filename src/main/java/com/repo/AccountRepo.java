@@ -73,6 +73,9 @@ public class AccountRepo {
     }
 
     public Mono<DepartmentA> findDepartment(String deptCode) {
+        if (Util1.isNullOrEmpty(deptCode)) {
+            return Mono.empty();
+        }
         DepartmentAKey key = new DepartmentAKey();
         key.setDeptCode(Util1.isNull(deptCode, "-"));
         key.setCompCode(Global.compCode);
@@ -332,17 +335,6 @@ public class AccountRepo {
                             }
                         }
                 );
-    }
-
-    public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/saveCOAFromTemplate")
-                .queryParam("busId", busId)
-                .queryParam("compCode", compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(ChartOfAccount.class)
-                .collectList();
     }
 
     public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
@@ -676,13 +668,16 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchJournal(ReportFilter filter) {
+    public Flux<Gl> searchJournal(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/searchJournal")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
-                .collectList();
+                .onErrorResume((e) -> {
+                    log.info("searchJournal : " + e.getMessage());
+                    return Flux.empty();
+                });
     }
 
     public Mono<List<StockOP>> searchOP(ReportFilter filter) {
@@ -730,10 +725,6 @@ public class AccountRepo {
     }
 
     public Mono<List<Gl>> searchGl(ReportFilter filter) {
-        if (filter.isLocal()) {
-            return h2Repo.searchGL(filter);
-
-        }
         return accountApi.post()
                 .uri("/account/searchGl")
                 .body(Mono.just(filter), ReportFilter.class)
@@ -742,14 +733,22 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchVoucher(ReportFilter filter) {
-        return accountApi
-                .post()
+    public Flux<Gl> searchGlFlux(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/searchGl")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .onErrorResume((t) -> Flux.empty());
+    }
+
+    public Flux<Gl> searchVoucher(ReportFilter filter) {
+        return accountApi.post()
                 .uri("/account/searchVoucher")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
-                .collectList();
+                .onErrorResume((t) -> Flux.empty());
     }
 
     public Mono<List<DateModel>> getDate() {

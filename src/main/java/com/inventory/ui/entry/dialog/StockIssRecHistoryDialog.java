@@ -77,13 +77,9 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         this.tranSource = tranSource;
         initComponents();
         initKeyListener();
-//        configOption();
         setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
     }
 
-    private void configOption() {
-        lblVouNo.setText(tranSource.equals("I") ? "Issue Vou No" : "Receive Vou No");
-    }
     public void initMain() {
         initTableVoucher();
         setTodayDate();
@@ -118,7 +114,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);   
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -147,7 +143,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     }
 
     public void search() {
-        progess.setIndeterminate(true);
+        progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -158,29 +154,32 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
-        filter.setLocal(chkLocal.isSelected());      
-        filter.setTranSource(tranSource.equals("I")? String.valueOf(1):String.valueOf(2));
-        if (traderAutoCompleter.getTrader() != null) {
-            filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-        }
-        inventoryRepo.getStockIssRecHistory(filter).doOnSuccess((t) -> {
-            tableModel.setListDetail(t);
-            calAmount();
-            progess.setIndeterminate(false);
-            log.info("stock issue/receive test", t);
-        }).doOnError((e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progess.setIndeterminate(false);
-        }).doOnTerminate(() -> {
-            setVisible(true);
-//            progess.setIndeterminate(false);
-        }).subscribe();
+        filter.setLocal(chkLocal.isSelected());
+        filter.setTranSource(tranSource.equals("I") ? String.valueOf(1) : String.valueOf(2));
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        txtRecord.setValue(0);
+        tableModel.clear();
+        inventoryRepo.getStockIssRecHistory(filter)
+                .doOnNext(obj -> btnSearch.setEnabled(false))
+                .doOnNext(tableModel::addObject)
+                .doOnNext(obj -> calTotal())
+                .doOnError(e -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                })
+                .doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    tblVoucher.requestFocus();
+                    setVisible(true);
+                })
+                .subscribe();
+
     }
 
-    private void calAmount() {
-        List<VStockIssueReceive> list = tableModel.getListDetail();
-        txtTotalRecord.setValue(list.size());
-        tblVoucher.requestFocus();
+    private void calTotal() {
+        txtRecord.setValue(tableModel.getSize());
     }
 
     private void select() {
@@ -250,14 +249,12 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         txtToDate = new com.toedter.calendar.JDateChooser();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
-        progess = new javax.swing.JProgressBar();
+        progress = new javax.swing.JProgressBar();
         txtFilter = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        lblTtlAmount = new javax.swing.JLabel();
         lblTtlRecord = new javax.swing.JLabel();
-        txtTotalRecord = new javax.swing.JFormattedTextField();
-        txtTotalAmt = new javax.swing.JFormattedTextField();
+        txtRecord = new javax.swing.JFormattedTextField();
         btnSearch = new javax.swing.JButton();
         btnSelect = new javax.swing.JButton();
 
@@ -456,7 +453,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                         .addComponent(chkDel)))
                 .addGap(8, 8, 8)
                 .addComponent(chkLocal)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
@@ -495,19 +492,12 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        lblTtlAmount.setFont(Global.lableFont);
-        lblTtlAmount.setText("Total Amount :");
-
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Total Record :");
 
-        txtTotalRecord.setEditable(false);
-        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalRecord.setFont(Global.amtFont);
-
-        txtTotalAmt.setEditable(false);
-        txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalAmt.setFont(Global.amtFont);
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.amtFont);
 
         btnSearch.setFont(Global.lableFont);
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
@@ -535,12 +525,8 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblTtlAmount)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 310, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSelect)
@@ -553,9 +539,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblTtlRecord)
-                        .addComponent(lblTtlAmount)
-                        .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtTotalAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnSelect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -568,7 +552,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(progess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -584,7 +568,8 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(progess, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -683,21 +668,19 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JLabel lblTtlAmount;
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JLabel lblVouNo;
-    private javax.swing.JProgressBar progess;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
-    private javax.swing.JFormattedTextField txtTotalAmt;
-    private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables

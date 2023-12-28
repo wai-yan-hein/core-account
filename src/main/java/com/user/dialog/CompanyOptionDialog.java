@@ -7,7 +7,7 @@ package com.user.dialog;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.user.common.VRoleCompanyTableModel;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -25,22 +25,22 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
 
     private final VRoleCompanyTableModel companyTableModel = new VRoleCompanyTableModel();
     private SelectionObserver observer;
-    private VRoleCompany companyInfo;
-    private List<VRoleCompany> listCompany;
+    private CompanyInfo companyInfo;
+    private List<CompanyInfo> listCompany;
 
-    public List<VRoleCompany> getListCompany() {
+    public List<CompanyInfo> getListCompany() {
         return listCompany;
     }
 
-    public void setListCompany(List<VRoleCompany> listCompany) {
+    public void setListCompany(List<CompanyInfo> listCompany) {
         this.listCompany = listCompany;
     }
 
-    public VRoleCompany getCompanyInfo() {
+    public CompanyInfo getCompanyInfo() {
         return companyInfo;
     }
 
-    public void setCompanyInfo(VRoleCompany companyInfo) {
+    public void setCompanyInfo(CompanyInfo companyInfo) {
         this.companyInfo = companyInfo;
     }
 
@@ -72,7 +72,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
         });
     }
 
-    private JPanel getCompanyPanel(VRoleCompany info) {
+    private JPanel getCompanyPanel(CompanyInfo info) {
         CompanyPanel companyPanel = new CompanyPanel(info);
         companyPanel.setObserver(this);
         return companyPanel;
@@ -177,7 +177,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().endsWith("select")) {
-            if (selectObj instanceof VRoleCompany v) {
+            if (selectObj instanceof CompanyInfo v) {
                 companyInfo = v;
                 this.dispose();
             }

@@ -95,19 +95,14 @@
                       <Component id="jLabel9" alignment="0" max="32767" attributes="0"/>
                       <Component id="jLabel10" alignment="0" max="32767" attributes="0"/>
                       <Component id="jLabel15" alignment="0" max="32767" attributes="0"/>
-                      <Component id="chkDel" alignment="0" max="32767" attributes="0"/>
-                      <Component id="chkLocal" alignment="0" max="32767" attributes="0"/>
+                      <Component id="chkDel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="chkLocal" alignment="0" min="-2" pref="65" max="-2" attributes="0"/>
+                      <Component id="jLabel3" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jSeparator2" min="-2" pref="3" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Component id="btnUpload" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jButton1" min="-2" max="-2" attributes="0"/>
-                      </Group>
                       <Group type="103" groupAlignment="1" max="-2" attributes="0">
                           <Component id="txtProjectNo" alignment="0" max="32767" attributes="0"/>
                           <Component id="txtDep" alignment="0" max="32767" attributes="0"/>
@@ -117,17 +112,15 @@
                           <Component id="txtCus" alignment="0" max="32767" attributes="0"/>
                           <Component id="txtRemark" alignment="0" max="32767" attributes="0"/>
                           <Component id="txtVouNo" alignment="0" max="32767" attributes="0"/>
-                          <Group type="102" attributes="0">
-                              <Component id="txtFromDate" linkSize="1" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="txtToDate" linkSize="1" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="txtCurrency" max="32767" attributes="0"/>
+                          <Component id="txtToDate" alignment="0" pref="120" max="32767" attributes="0"/>
+                          <Component id="txtFromDate" alignment="0" max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Component id="jButton1" min="-2" pref="121" max="-2" attributes="0"/>
+                          <Component id="txtCurrency" min="-2" pref="121" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="93" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -140,11 +133,14 @@
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
                               <Component id="txtFromDate" alignment="0" max="32767" attributes="0"/>
-                              <Component id="txtToDate" alignment="0" max="32767" attributes="0"/>
-                              <Component id="jLabel3" alignment="0" max="32767" attributes="0"/>
                               <Component id="jLabel11" alignment="1" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="jLabel3" min="-2" pref="22" max="-2" attributes="0"/>
+                              <Component id="txtToDate" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtVouNo" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -189,10 +185,7 @@
                               <Group type="102" attributes="0">
                                   <Component id="txtCurrency" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="btnUpload" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
+                                  <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel15" min="-2" max="-2" attributes="0"/>
@@ -239,7 +232,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Date"/>
+            <Property name="text" type="java.lang.String" value="FromDate"/>
           </Properties>
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="txtFromDate">
@@ -257,7 +250,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="To"/>
+            <Property name="text" type="java.lang.String" value="To Date"/>
           </Properties>
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="txtToDate">
@@ -445,19 +438,6 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCurrencyActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="btnUpload">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Upload"/>
-            <Property name="iconTextGap" type="int" value="2"/>
-            <Property name="inheritsPopupMenu" type="boolean" value="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUploadActionPerformed"/>
-          </Events>
-        </Component>
         <Component class="javax.swing.JCheckBox" name="chkLocal">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -527,15 +507,15 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblTtlRecord" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtRecord" max="32767" attributes="0"/>
+                  <Component id="txtRecord" pref="66" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtPaid" max="32767" attributes="0"/>
+                  <Component id="txtPaid" pref="66" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtAmt" max="32767" attributes="0"/>
+                  <Component id="txtTotalAmt" pref="66" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="btnSearch" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -554,7 +534,7 @@
                           <Component id="lblTtlRecord" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblTtlAmount" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtRecord" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtAmt" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtTotalAmt" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblTtlAmount1" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtPaid" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -625,7 +605,7 @@
             <Property name="text" type="java.lang.String" value="Total Amount :"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtAmt">
+        <Component class="javax.swing.JFormattedTextField" name="txtTotalAmt">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">

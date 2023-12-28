@@ -111,6 +111,8 @@ public class SaleHis {
     private String deptCode;
     @Transient
     private String localVouNo;
+    @Transient
+    private List<String> listOrder;
     private transient String status = "STATUS";
     private transient List<SaleHisDetail> listSH;
     private transient List<SaleDetailKey> listDel;
@@ -119,6 +121,7 @@ public class SaleHis {
     private transient boolean local = false;
     private transient List<SaleExpense> listExpense;
     private transient List<SaleExpenseKey> listDelExpense;
+    
     @Transient
     private List<VouDiscount> listVouDiscount;
     @Transient

@@ -7,6 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
+import com.inventory.model.VStockIO;
 import com.inventory.model.VStockIssueReceive;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 public class StockIssRecVouSearchTableModel extends AbstractTableModel {
 
     private List<VStockIssueReceive> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Location","Remark", "Trader", "Created By"};
+    private final String[] columnNames = {"Date", "Vou No", "Location", "Remark", "Trader", "Created By"};
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -65,7 +71,7 @@ public class StockIssRecVouSearchTableModel extends AbstractTableModel {
                         return his.getVouNo();
                     }
                 }
-                case 2 -> {                 
+                case 2 -> {
                     return his.getLocation();
                 }
                 case 3 -> {
@@ -97,8 +103,20 @@ public class StockIssRecVouSearchTableModel extends AbstractTableModel {
         return listDetail.get(row);
     }
 
+    public void addObject(VStockIssueReceive t) {
+        listDetail.add(t);
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
+    }
+
     public void clear() {
         listDetail.clear();
+        size = 0;
         fireTableDataChanged();
     }
 }

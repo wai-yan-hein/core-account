@@ -4,12 +4,10 @@
  */
 package com.user.dialog;
 
-import static com.common.ComponentUtil.fa;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.model.PropertyKey;
 import com.user.model.SysProperty;
 import java.awt.Component;

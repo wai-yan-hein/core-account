@@ -12,8 +12,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import lombok.Data;
 
 /**
@@ -41,10 +41,10 @@ public class CompanyInfo {
     private String compEmail;
     @Column(name = "start_date")
     @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private LocalDate startDate;
     @Column(name = "end_date")
     @Temporal(TemporalType.DATE)
-    private Date endDate;
+    private LocalDate endDate;
     @Column(name = "active")
     private boolean active;
     @Column(name = "currency")
@@ -58,7 +58,7 @@ public class CompanyInfo {
     @Column(name = "batch_lock")
     private boolean batchLock;
     @Column(name = "year_end_date")
-    private Date yearEndDate;
+    private LocalDate yearEndDate;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
     @Column(name = "security_code")
@@ -67,6 +67,10 @@ public class CompanyInfo {
     private String token;
     @Transient
     private Boolean updateMenu;
+    @Transient
+    private String roleCode;
+    @Transient
+    private boolean allow;
 
     @Override
     public String toString() {

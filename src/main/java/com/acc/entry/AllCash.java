@@ -18,13 +18,10 @@ import com.acc.editor.TraderAAutoCompleter;
 import com.acc.editor.TraderCellEditor;
 import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.common.AllCashTableModel;
-import com.acc.common.CashInOutTableModel;
-import com.acc.common.CashOpeningTableModel;
 import com.acc.common.ColumnHeaderListener;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.DayBookTableModel;
-import com.acc.common.OpeningCellRender;
 import com.acc.editor.BatchCellEditor;
 import com.acc.editor.BatchNoAutoCompeter;
 import com.acc.editor.COA3AutoCompleter;
@@ -52,11 +49,8 @@ import com.user.editor.ProjectCellEditor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -77,10 +71,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
@@ -114,14 +106,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private TranSourceAutoCompleter tranSourceAutoCompleter;
     private BatchNoAutoCompeter batchNoAutoCompeter;
     private ProjectAutoCompleter projectAutoCompleter;
-    private final CashInOutTableModel inOutTableModel = new CashInOutTableModel();
-    private final CashOpeningTableModel opTableModel = new CashOpeningTableModel();
     private SelectionObserver observer;
     private String sourceAccId;
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
     private TableFilterHeader filterHeader;
-    private double opening;
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
@@ -168,10 +157,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     public AllCash(boolean single) {
         this.single = single;
         initComponents();
-        initFocus();
+        initProperty();
         initPopup();
-        initTableCashInOut();
-        initTableCashOP();
         initDateDecorator();
         actionMapping();
     }
@@ -182,24 +169,17 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         scroll.setRowHeaderView(list);
     }
 
-    private void initFocus() {
-        txtDate.addFocusListener(fa);
-        txtDepartment.addFocusListener(fa);
-        txtDesp.addFocusListener(fa);
-        txtRefrence.addFocusListener(fa);
-        txtPerson.addFocusListener(fa);
-        txtAccount.addFocusListener(fa);
-        txtBatchNo.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtCurrency.addFocusListener(fa);
-        txtOption.addFocusListener(fa);
+    private void initProperty() {
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
+        txtDr.setForeground(Color.GREEN);
+        txtCr.setForeground(Color.RED);
+        txtDr.setFont(Global.menuFont);
+        txtCr.setFont(Global.menuFont);
+        txtOpening.setFont(Global.menuFont);
+        txtClosing.setFont(Global.menuFont);
+
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            ((JTextField) e.getSource()).selectAll();
-        }
-    };
 
     private void tableListener(boolean status) {
         if (status) {
@@ -301,11 +281,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
         tranSourceAutoCompleter.setObserver(this);
-        accountRepo.getTranSource().subscribe((t) -> {
+        accountRepo.getTranSource().doOnSuccess((t) -> {
             tranSourceAutoCompleter.setListGl(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
@@ -344,31 +322,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     }
 
-    private void initTableCashInOut() {
-        tblCIO.setModel(inOutTableModel);
-        tblCIO.getTableHeader().setFont(Global.tblHeaderFont);
-        tblCIO.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCIO.setFont(Global.amtFont);
-        tblCIO.setDefaultRenderer(Double.class, new OpeningCellRender());
-        tblCIO.setDefaultRenderer(Object.class, new OpeningCellRender());
-        tblCIO.getColumnModel().getColumn(0).setPreferredWidth(10);
-        tblCIO.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tblCIO.getColumnModel().getColumn(2).setPreferredWidth(100);
-    }
-
-    private void initTableCashOP() {
-        tblCashOP.setModel(opTableModel);
-        tblCashOP.getTableHeader().setFont(Global.tblHeaderFont);
-        tblCashOP.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCashOP.setFont(Global.amtFont);
-        tblCashOP.setDefaultRenderer(Double.class, new OpeningCellRender());
-        tblCashOP.setDefaultRenderer(Object.class, new OpeningCellRender());
-        tblCashOP.getColumnModel().getColumn(0).setPreferredWidth(10);
-        tblCashOP.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tblCashOP.getColumnModel().getColumn(2).setPreferredWidth(100);
-    }
-
     private void initTableCB() {
+        tblCash.setAutoCreateRowSorter(false);
         tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
@@ -612,7 +567,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                                 allCashTableModel.deleteVGl(row);
                             }
                         }
-                        calDebitCredit();
+                        calculateClosing();
                     });
 
                 }
@@ -642,9 +597,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     p.put("p_comp_phone", Global.companyPhone);
                     p.put("p_currency", currency);
                     p.put("p_logo_path", ProUtil.logoPath());
-                    Gl vGl = opTableModel.getVGl(0);
-                    double op = vGl.getDrAmt();
-                    double closing = vGl.getCrAmt();
+                    double op = Util1.getDouble(txtOpening.getValue());
+                    double closing = Util1.getDouble(txtClosing.getValue());
                     p.put("p_opening", op);
                     p.put("p_closing", closing);
                     String rpName = chkSummary.isSelected() ? "IndividualLedgerSummary.jasper" : "IndividualLedger.jasper";
@@ -691,30 +645,42 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         enableToolBar(false);
         clearModel();
         ReportFilter filter = getFilter();
-        accountRepo.searchGl(filter).doOnSuccess((list) -> {
-            checkDateLock(list);
-            setData(list, filter.getFromDate());
+        accountRepo.searchGlFlux(filter).doOnNext((gl) -> {
+            addObject(gl);
+        }).doOnNext((t) -> {
+            calDrCr();
         }).doOnError((e) -> {
             log.error("searchCash: " + e.getMessage());
             enableToolBar(true);
         }).doOnTerminate(() -> {
             decorator.refreshButton(filter.getFromDate());
+            addNewRow(filter.getFromDate());
             enableToolBar(true);
             requestFoucsTable();
             accountRepo.getOpening(getOPFilter()).doOnSuccess((t) -> {
-                opening = t.getOpening();
+                txtOpening.setValue(t.getOpening());
             }).doOnTerminate(() -> {
-                calDebitCredit();
+                calculateClosing();
             }).subscribe();
         }).subscribe();
     }
 
-    private void checkDateLock(List<Gl> list) {
-        list.forEach((t) -> {
-            if (DateLockUtil.isLockDate(t.getGlDate())) {
-                t.setTranLock(true);
-            }
-        });
+    private void calDrCr() {
+        double drAmt;
+        double crAmt;
+        int size;
+        if (single) {
+            drAmt = dayBookTableModel.getDrAmt();
+            crAmt = dayBookTableModel.getCrAmt();
+            size = dayBookTableModel.getSize();
+        } else {
+            drAmt = allCashTableModel.getDrAmt();
+            crAmt = allCashTableModel.getCrAmt();
+            size = allCashTableModel.getSize();
+        }
+        txtDr.setValue(drAmt);
+        txtCr.setValue(crAmt);
+        lblRecord.setValue(size);
     }
 
     private void enableToolBar(boolean status) {
@@ -770,30 +736,16 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         return filter;
     }
 
-    private List<Gl> getData() {
-        return single ? dayBookTableModel.getListVGl() : allCashTableModel.getListVGl();
-    }
-
-    private void calDebitCredit() {
-        opTableModel.clear();
-        inOutTableModel.clear();
-        List<Gl> listVGl = getData();
-        double drAmt = listVGl.stream()
-                .filter(gl -> gl.getDrAmt() != null)
-                .mapToDouble(Gl::getDrAmt)
-                .sum();
-        double crAmt = listVGl.stream()
-                .filter(gl -> gl.getCrAmt() != null)
-                .mapToDouble(Gl::getCrAmt)
-                .sum();
+    private void calculateClosing() {
+        double opening = Util1.getDouble(txtOpening.getValue());
+        double drAmt = Util1.getDouble(txtDr.getValue());
+        double crAmt = Util1.getDouble(txtCr.getValue());
         double closing = opening + drAmt - crAmt;
-        Gl vgl = new Gl();
-        vgl.setCurCode(getCurCode());
-        vgl.setDrAmt(opening);
-        vgl.setCrAmt(closing);
-        opTableModel.addVGl(vgl);
-        inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
-        lblRecord.setValue(listVGl.size() - 1);
+        txtOpening.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
+        txtClosing.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
+        txtClosing.setValue(closing);
+        txtDr.setValue(drAmt);
+        txtCr.setValue(crAmt);
     }
 
     private void clearModel() {
@@ -803,19 +755,32 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             allCashTableModel.clear();
         }
         lblRecord.setValue(0);
+        txtOpening.setValue(0);
+        txtClosing.setValue(0);
+        txtDr.setValue(0);
+        txtCr.setValue(0);
     }
 
-    private void setData(List<Gl> list, String fromDate) {
+    private void addNewRow(String fromDate) {
         if (single) {
-            dayBookTableModel.setListVGl(list);
             dayBookTableModel.setGlDate(fromDate);
             dayBookTableModel.setCurCode(getCurCode());
             dayBookTableModel.addNewRow();
         } else {
-            allCashTableModel.setListVGl(list);
             allCashTableModel.setGlDate(fromDate);
             allCashTableModel.setCurCode(getCurCode());
             allCashTableModel.addNewRow();
+        }
+    }
+
+    private void addObject(Gl gl) {
+        if (DateLockUtil.isLockDate(gl.getGlDate())) {
+            gl.setTranLock(true);
+        }
+        if (single) {
+            dayBookTableModel.addObject(gl);
+        } else {
+            allCashTableModel.addObject(gl);
         }
     }
 
@@ -843,12 +808,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jMenuItem1 = new javax.swing.JMenuItem();
         scroll = new javax.swing.JScrollPane();
         tblCash = new javax.swing.JTable();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblCIO = new javax.swing.JTable();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        tblCashOP = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
-        txtDate = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
         txtDepartment = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -868,6 +828,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jLabel10 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
+        txtDate = new javax.swing.JTextField();
         panelDate = new javax.swing.JPanel();
         panelOption = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
@@ -876,6 +837,16 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         chkAdjust = new javax.swing.JCheckBox();
         chkLocal = new javax.swing.JCheckBox();
         lblInfo = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        txtCr = new javax.swing.JFormattedTextField();
+        jLabel13 = new javax.swing.JLabel();
+        txtDr = new javax.swing.JFormattedTextField();
+        jPanel3 = new javax.swing.JPanel();
+        txtClosing = new javax.swing.JFormattedTextField();
+        jLabel15 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        txtOpening = new javax.swing.JFormattedTextField();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -901,50 +872,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
         scroll.setViewportView(tblCash);
 
-        tblCIO.setFont(Global.shortCutFont);
-        tblCIO.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        tblCIO.setRowHeight(Global.tblRowHeight);
-        jScrollPane1.setViewportView(tblCIO);
-
-        tblCashOP.setFont(Global.shortCutFont);
-        tblCashOP.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        tblCashOP.setRowHeight(Global.tblRowHeight);
-        jScrollPane2.setViewportView(tblCashOP);
-
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        txtDate.setFont(Global.textFont);
-        txtDate.setName("txtDate"); // NOI18N
-        txtDate.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtDateFocusGained(evt);
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                txtDateFocusLost(evt);
-            }
-        });
-        txtDate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtDateActionPerformed(evt);
-            }
-        });
 
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Date");
@@ -1122,6 +1050,22 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Project No");
 
+        txtDate.setFont(Global.textFont);
+        txtDate.setName("txtDepartment"); // NOI18N
+        txtDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDateFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtDateFocusLost(evt);
+            }
+        });
+        txtDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtDateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1129,43 +1073,43 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                    .addComponent(txtDate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(txtDepartment))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtPerson)
+                    .addComponent(txtPerson, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtAccount)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDesp)
+                    .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRefrence)
+                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtBatchNo)
+                    .addComponent(txtBatchNo, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtProjectNo)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtOption, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1190,14 +1134,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(jLabel11))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtBatchNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1211,7 +1155,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelDate.setLayout(panelDateLayout);
         panelDateLayout.setHorizontalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 571, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         panelDateLayout.setVerticalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1266,7 +1210,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -1285,6 +1229,96 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap())
         );
 
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel12.setFont(Global.menuFont);
+        jLabel12.setText("Total Cash Out / Credit");
+
+        txtCr.setEditable(false);
+        txtCr.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jLabel13.setFont(Global.menuFont);
+        jLabel13.setText("Total Cash In / Debit");
+
+        txtDr.setEditable(false);
+        txtDr.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDr, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
+                    .addComponent(txtCr))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtDr))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCr)))
+                .addContainerGap())
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        txtClosing.setEditable(false);
+        txtClosing.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jLabel15.setFont(Global.menuFont);
+        jLabel15.setText("Closing");
+
+        jLabel14.setFont(Global.menuFont);
+        jLabel14.setText("Opening");
+
+        txtOpening.setEditable(false);
+        txtOpening.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtOpening, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtClosing, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel14)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtOpening))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtClosing)))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1294,13 +1328,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(scroll)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(5, 5, 5)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(panelOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1310,15 +1344,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(panelOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1327,18 +1361,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
         observeMain();
     }//GEN-LAST:event_formComponentShown
-
-    private void txtDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtDateFocusGained
-
-    private void txtDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtDateFocusLost
-
-    private void txtDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDateActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtDateActionPerformed
 
     private void txtDepartmentFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepartmentFocusGained
         // TODO add your handling code here:
@@ -1469,6 +1491,18 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         checkLock();
     }//GEN-LAST:event_tblCashMouseClicked
 
+    private void txtDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDateFocusGained
+
+    private void txtDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDateFocusLost
+
+    private void txtDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDateActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAdjust;
@@ -1477,6 +1511,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1487,22 +1525,24 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JLabel lblInfo;
     private javax.swing.JFormattedTextField lblRecord;
     private javax.swing.JPanel panelDate;
     private javax.swing.JPanel panelOption;
     private javax.swing.JScrollPane scroll;
-    private javax.swing.JTable tblCIO;
     private javax.swing.JTable tblCash;
-    private javax.swing.JTable tblCashOP;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtBatchNo;
+    private javax.swing.JFormattedTextField txtClosing;
+    private javax.swing.JFormattedTextField txtCr;
     private javax.swing.JTextField txtCurrency;
-    private javax.swing.JFormattedTextField txtDate;
+    private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDepartment;
     private javax.swing.JTextField txtDesp;
+    private javax.swing.JFormattedTextField txtDr;
+    private javax.swing.JFormattedTextField txtOpening;
     private javax.swing.JTextField txtOption;
     private javax.swing.JTextField txtPerson;
     private javax.swing.JTextField txtProjectNo;
@@ -1525,7 +1565,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 }
                 searchCash();
             } else if (source.equals("CAL-TOTAL")) {
-                calDebitCredit();
+                calculateClosing();
             } else {
                 searchCash();
             }

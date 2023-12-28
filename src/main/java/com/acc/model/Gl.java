@@ -39,9 +39,9 @@ public class Gl implements Cloneable {
     @Column(name = "cur_code")
     private String curCode;
     @Column(name = "dr_amt")
-    private Double drAmt;
+    private double drAmt;
     @Column(name = "cr_amt")
-    private Double crAmt;
+    private double crAmt;
     @Column(name = "reference")
     private String reference;
     @Column(name = "dept_code")
@@ -86,6 +86,8 @@ public class Gl implements Cloneable {
     private String exCode;
     @Column(name = "order_id")
     private Integer orderId;
+    private double price;
+    private double qty;
     @Transient
     private String glDateStr;
     @Transient

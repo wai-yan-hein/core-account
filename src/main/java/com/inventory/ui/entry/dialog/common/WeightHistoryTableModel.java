@@ -21,6 +21,21 @@ public class WeightHistoryTableModel extends AbstractTableModel {
 
     private List<WeightHis> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Supplier", "Description", "Remark", "Type", "Stock Name", "Weight", "Qty", "Bag", "Post"};
+    private double totalQty;
+    private double totalBag;
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
+
+    public double getTotalQty() {
+        return totalQty;
+    }
+
+    public double getTotalBag() {
+        return totalBag;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -99,7 +114,7 @@ public class WeightHistoryTableModel extends AbstractTableModel {
                     case 9 -> {
                         return his.getTotalBag();
                     }
-                    case 10->{
+                    case 10 -> {
                         return his.isPost();
                     }
                 }
@@ -130,14 +145,22 @@ public class WeightHistoryTableModel extends AbstractTableModel {
 
     public void addObject(WeightHis t) {
         listDetail.add(t);
-    }
-
-    public int getSize() {
-        return listDetail.size();
+        totalBag += t.getTotalBag();
+        totalQty += t.getTotalQty();
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void clear() {
         listDetail.clear();
+        totalBag = 0;
+        totalQty = 0;
+        size = 0;
         fireTableDataChanged();
     }
 }

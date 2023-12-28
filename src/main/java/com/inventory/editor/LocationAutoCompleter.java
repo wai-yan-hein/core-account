@@ -32,6 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -77,17 +78,19 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     public void setListLocation(List<Location> list) {
-        if (filter) {
-            Location loc = new Location("-", "All");
-            list.add(0, loc);
-            setLocation(loc);
-        }
-        if (custom) {
-            list.add(1, new Location("C", "Custom"));
-        }
-        locationTableModel.setListLocation(list);
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
+        if (list != null) {
+            if (filter) {
+                Location loc = new Location("-", "All");
+                list.add(0, loc);
+                setLocation(loc);
+            }
+            if (custom) {
+                list.add(1, new Location("C", "Custom"));
+            }
+            locationTableModel.setListLocation(list);
+            if (!list.isEmpty()) {
+                table.setRowSelectionInterval(0, 0);
+            }
         }
         this.listLocation = list;
     }
@@ -133,6 +136,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setRowHeight(Global.tblRowHeight);
         table.setSelectionForeground(Color.WHITE);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);

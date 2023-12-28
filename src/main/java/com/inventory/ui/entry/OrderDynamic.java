@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -45,12 +46,9 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -157,6 +155,11 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         initTextBoxValue();
         initDateListner();
         actionMapping();
+        initFocus();
+    }
+
+    private void initFocus() {
+        ComponentUtil.addFocusListener(this);
     }
 
     private void actionMapping() {
@@ -178,18 +181,9 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     private void initDateListner() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
-        txtOrderDate.getDateEditor().getUiComponent().addFocusListener(fa);
         txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
         txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
-        txtDueDate.getDateEditor().getUiComponent().addFocusListener(fa);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            ((JTextFieldDateEditor) e.getSource()).selectAll();
-        }
-
-    };
 
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
@@ -552,7 +546,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         dialog.search();
     }
 
-    public void setOrderVoucher(OrderHis sh, boolean local) {
+    public void setOrderVoucher(OrderHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
             orderHis = sh;
@@ -576,7 +570,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 orderStatusComboModel.setSelectedItem(o);
             }).subscribe();
             sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
-            inventoryRepo.getOrderDetail(vouNo, sh.getDeptId(), local)
+            inventoryRepo.getOrderDetail(vouNo, sh.getDeptId())
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);
                         orderTableModel.addNewRow();
@@ -598,6 +592,11 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                             lblStatus.setText(DateLockUtil.MESSAGE);
                             lblStatus.setForeground(Color.RED);
                             disableForm(false);
+                        } else if (sh.isPost()) {
+                            lblStatus.setText("This voucher can't edit");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                            observer.selected("print", true);
                         } else {
                             lblStatus.setText("EDIT");
                             lblStatus.setForeground(Color.blue);
@@ -619,16 +618,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void disableForm(boolean status) {
-        tblOrder.setEnabled(status);
-        panelSale.setEnabled(status);
-        txtOrderDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtLocation.setEnabled(status);
-        txtSaleman.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtDueDate.setEnabled(status);
-        txtReference.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -752,7 +742,6 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         jLabel11 = new javax.swing.JLabel();
         cboOrderStatus = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
-        lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         chkA5 = new javax.swing.JCheckBox();
         chkVou = new javax.swing.JCheckBox();
@@ -768,6 +757,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         jPanel4 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         txtVouTotal = new javax.swing.JFormattedTextField();
+        lblStatus = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1003,9 +993,6 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
-        lblStatus.setText("NEW");
-
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Report Type", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
 
         chkA5.setFont(Global.textFont);
@@ -1066,13 +1053,10 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(lblRec, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(lblRec, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(69, 69, 69)
@@ -1086,9 +1070,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblRec)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
-                .addComponent(lblStatus)
-                .addContainerGap())
+                .addContainerGap(63, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(88, 88, 88)
@@ -1189,6 +1171,9 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
+        lblStatus.setText("NEW");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1200,7 +1185,9 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sbPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1)
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1214,10 +1201,12 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblStatus))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1332,8 +1321,8 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             }
             case "ORDER-HISTORY" -> {
                 if (selectObj instanceof VOrder s) {
-                    inventoryRepo.findOrder(s.getVouNo(), s.isLocal()).doOnSuccess((t) -> {
-                        setOrderVoucher(t, s.isLocal());
+                    inventoryRepo.findOrder(s.getVouNo()).doOnSuccess((t) -> {
+                        setOrderVoucher(t);
                     }).subscribe();
                 }
             }

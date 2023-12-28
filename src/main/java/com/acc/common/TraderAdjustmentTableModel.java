@@ -186,26 +186,10 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                         return vgi.getCurCode();
                     }
                     case 8 -> {
-                        if (vgi.getDrAmt() != null) {
-                            if (vgi.getDrAmt() == 0) {
-                                return null;
-                            } else {
-                                return vgi.getDrAmt();
-                            }
-                        } else {
-                            return vgi.getDrAmt();
-                        }
+                        return Util1.toNull(vgi.getDrAmt());
                     }
                     case 9 -> {
-                        if (vgi.getCrAmt() != null) {
-                            if (vgi.getCrAmt() == 0) {
-                                return null;
-                            } else {
-                                return vgi.getCrAmt();
-                            }
-                        } else {
-                            return vgi.getCrAmt();
-                        }
+                        return Util1.toNull(vgi.getCrAmt());
                     }
                     default -> {
                         return null;
@@ -309,11 +293,11 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 }
                 case 8 -> {
                     gl.setDrAmt(Util1.getDouble(value));
-                    gl.setCrAmt(null);
+                    gl.setCrAmt(0);
                 }
                 case 9 -> {
                     gl.setCrAmt(Util1.getDouble(value));
-                    gl.setDrAmt(null);
+                    gl.setDrAmt(0);
                 }
             }
             TraderA t = traderAAutoCompleter.getTrader();
@@ -335,7 +319,7 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 DateLockUtil.showMessage(parent);
                 return;
             }
-            accountRepo.save(gl).subscribe((t) -> {
+            accountRepo.save(gl).doOnSuccess((t) -> {
                 if (t != null) {
                     listVGl.set(row, t);
                     addNewRow();
@@ -343,10 +327,10 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(0, 0);
                     observer.selected("CAL-TOTAL", "-");
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(parent, e.getMessage());
                 log.error("saveGl : " + e.getMessage());
-            });
+            }).subscribe();
         }
     }
 

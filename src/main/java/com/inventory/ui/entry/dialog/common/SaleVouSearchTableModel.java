@@ -22,6 +22,21 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
 
     private List<VSale> listSaleHis = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
+    private double vouTotal;
+    private double paidTotal;
+    private int size;
+
+    public double getVouTotal() {
+        return vouTotal;
+    }
+
+    public double getPaidTotal() {
+        return paidTotal;
+    }
+
+    public int getSize() {
+        return size;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -127,11 +142,22 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
 
     public void addObject(VSale t) {
         listSaleHis.add(t);
-
+        vouTotal += t.getVouTotal();
+        paidTotal += t.getPaid();
+        size += 1;
+        int lastIndex = listSaleHis.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void clear() {
         listSaleHis.clear();
+        vouTotal = 0;
+        paidTotal = 0;
+        size = 0;
         fireTableDataChanged();
     }
 }

@@ -49,6 +49,7 @@ public class FilterObject {
     private String tranSource;
     private boolean draft;
     private String jobNo;
+    private String labourGroupCode;
 
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;

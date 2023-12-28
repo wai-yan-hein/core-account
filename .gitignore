@@ -18,7 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
-*.gz
+*.zip
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,9 +31,10 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
+/config/
 .vscode/
 /download/
-/config/
+config/application.properties
 /data/
 /target/
 /token/

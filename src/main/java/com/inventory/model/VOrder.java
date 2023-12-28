@@ -84,4 +84,6 @@ public class VOrder {
     private boolean local;
     private String orderStatus;
     private String orderStatusName;
+    private boolean select;
+    private boolean post;
 }

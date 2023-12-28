@@ -40,10 +40,11 @@ import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.entry.GRNEntry;
+import com.inventory.ui.entry.LabourPaymentEntry;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.LandingEntry;
 import com.inventory.ui.entry.Manufacture;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseDynamic;
@@ -362,9 +363,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             public void mouseClicked(MouseEvent e) {
                 hmPanel.remove(title);
                 tabbedPane.remove(panel);
-                if (control != null) {
-                    control.newForm();
-                }
             }
 
             @Override
@@ -774,10 +772,21 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 payment.initMain();
                 return payment;
             }
+            case "Labour Payment" -> {
+                LabourPaymentEntry payment = new LabourPaymentEntry();
+                payment.setUserRepo(userRepo);
+                payment.setInventoryRepo(inventoryRepo);
+                payment.setAccountRepo(accounRepo);
+                payment.setName(menuName);
+                payment.setObserver(this);
+                payment.setProgress(progress);
+                payment.initMain();
+                return payment;
+            }
             case "Stock Issue" -> {
                 StockIssRecEntry stockIss = new StockIssRecEntry("I");
                 stockIss.setUserRepo(userRepo);
-                stockIss.setInventoryRepo(inventoryRepo); 
+                stockIss.setInventoryRepo(inventoryRepo);
                 stockIss.setName(menuName);
                 stockIss.setObserver(this);
                 stockIss.setProgress(progress);
@@ -787,7 +796,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "Stock Receive" -> {
                 StockIssRecEntry stockRec = new StockIssRecEntry("R");
                 stockRec.setUserRepo(userRepo);
-                stockRec.setInventoryRepo(inventoryRepo);  
+                stockRec.setInventoryRepo(inventoryRepo);
                 stockRec.setName(menuName);
                 stockRec.setObserver(this);
                 stockRec.setProgress(progress);
@@ -1104,9 +1113,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private int getOrderType(String menuName) {
         return switch (menuName) {
             case "Order" ->
-                SaleDynamic.WEIGHT;
+                OrderDynamic.ORDER;
             case "Purchase Order" ->
-                SaleDynamic.EXPORT;
+                OrderDynamic.PUR_ORDER;
             default ->
                 0;
         };
@@ -1185,7 +1194,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             } else {
                 assignCompany(t.get(0));
             }
-            initAccSetting();
             initDate();
             departmentAssign();
             initMenu();
@@ -1195,6 +1203,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             userRepo.setupProperty().doOnSuccess((u) -> {
                 Global.hmRoleProperty = u;
                 scheduleProgramUpdate();
+            }).doOnTerminate(() -> {
+                initAccSetting();
             }).subscribe();
         }).subscribe();
     }
@@ -1216,13 +1226,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }
 
-    private void assignCompany(VRoleCompany vuca) {
+    private void assignCompany(CompanyInfo vuca) {
         Global.roleCode = vuca.getRoleCode();
         Global.compCode = vuca.getCompCode();
         Global.companyName = vuca.getCompName();
         Global.companyAddress = vuca.getCompAddress();
         Global.companyPhone = vuca.getCompPhone();
-        Global.currency = vuca.getCurrency();
+        Global.currency = vuca.getCurCode();
         Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
         Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
         Global.batchLock = vuca.isBatchLock();
@@ -1263,8 +1273,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             inventoryRepo.getDefaultLocation().doOnSuccess((d) -> {
                 if (list != null) {
                     list.forEach((acc) -> {
-                        acc.setPayAcc(Util1.isNull(d.getCashAcc(), acc.getPayAcc()));
-                        acc.setDeptCode(Util1.isNull(d.getDeptCode(), acc.getDeptCode()));
+                        if (d != null) {
+                            acc.setPayAcc(Util1.isNull(d.getCashAcc(), acc.getPayAcc()));
+                            acc.setDeptCode(Util1.isNull(d.getDeptCode(), acc.getDeptCode()));
+                        }
                         Global.hmAcc.put(acc.getKey().getType(), acc);
                     });
                 }
@@ -1330,31 +1342,21 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }).subscribe();
     }
 
-    private void createMenu(List<VRoleMenu> listVRM) {
-        if (!listVRM.isEmpty()) {
-            listVRM.forEach((menu) -> {
-                if (menu.isAllow()) {
-                    if (menu.getChild() != null) {
-                        if (!menu.getChild().isEmpty()) {
-                            JMenu parent = new JMenu();
-                            parent.setText(menu.getMenuName());
-                            parent.setFont(Global.menuFont);
-                            parent.setName(getMenuName(menu));
-                            //Need to add action listener
-                            //====================================
-                            menuBar.add(parent);
-                            addChildMenu(parent, menu.getChild());
-                        } else {  //No Child
-
-                            JMenu jmenu = new JMenu();
-                            jmenu.setText(menu.getMenuName());
-                            jmenu.setFont(Global.menuFont);
-                            jmenu.setName(getMenuName(menu));
-                            //Need to add action listener
-                            //====================================
-                            menuBar.add(jmenu);
-                        }
+    private void createMenu(List<VRoleMenu> list) {
+        if (!list.isEmpty()) {
+            list.forEach((menu) -> {
+                if (menu.getChild() != null) {
+                    if (!menu.getChild().isEmpty()) {
+                        JMenu parent = new JMenu();
+                        parent.setText(menu.getMenuName());
+                        parent.setFont(Global.menuFont);
+                        parent.setName(getMenuName(menu));
+                        //Need to add action listener
+                        //====================================
+                        menuBar.add(parent);
+                        addChildMenu(parent, menu.getChild());
                     } else {  //No Child
+
                         JMenu jmenu = new JMenu();
                         jmenu.setText(menu.getMenuName());
                         jmenu.setFont(Global.menuFont);
@@ -1363,6 +1365,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         //====================================
                         menuBar.add(jmenu);
                     }
+                } else {  //No Child
+                    JMenu jmenu = new JMenu();
+                    jmenu.setText(menu.getMenuName());
+                    jmenu.setFont(Global.menuFont);
+                    jmenu.setName(getMenuName(menu));
+                    //Need to add action listener
+                    //====================================
+                    menuBar.add(jmenu);
                 }
             });
         }

@@ -7,6 +7,7 @@ package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
 import com.MessageDialog;
+import com.common.ComponentUtil;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -29,17 +30,12 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -99,83 +95,52 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         super(frame, true);
         initComponents();
         initKeyListener();
-        initFocous();
-        initFormatFactory();
+        initProperty();
     }
 
-    private void initFormatFactory() {
-        txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtPaid.setFormatterFactory(Util1.getDecimalFormat());
-    }
 
     public void initMain() {
         initCombo();
         initTableVoucher();
         setTodayDate();
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
-        }
 
-    };
-
-    private void initFocous() {
-        txtStock.addFocusListener(fa);
-        txtVouNo.addFocusListener(fa);
-        txtFromDate.addFocusListener(fa);
-        txtToDate.addFocusListener(fa);
-        txtBatchNo.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtRef.addFocusListener(fa);
-        txtCus.addFocusListener(fa);
-        txtSaleMan.addFocusListener(fa);
-        txtStock.addFocusListener(fa);
-        txtLocation.addFocusListener(fa);
-        txtUser.addFocusListener(fa);
-        txtDep.addFocusListener(fa);
-        txtCurrency.addFocusListener(fa);
+    private void initProperty() {
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
+        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
-        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
-        inventoryRepo.getSaleMan().subscribe((t) -> {
+        inventoryRepo.getSaleMan().doOnSuccess((t) -> {
             saleManAutoCompleter.setListSaleMan(t);
-        });
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
-        inventoryRepo.getLocation().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
-        departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
+        }).subscribe();
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
         userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
             departmentAutoCompleter.setDepartment(t);
         }).subscribe();
-        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
-        });
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        }).subscribe();
         if (inventoryRepo.localDatabase) {
             chkLocal.setVisible(true);
             btnUpload.setVisible(true);
@@ -257,27 +222,30 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         filter.setLocal(chkLocal.isSelected());
         saleVouTableModel.clear();
         txtRecord.setValue(0);
-        //
-        inventoryRepo.getSaleHistory(filter).subscribe((t) -> {
-            saleVouTableModel.setListSaleHis(t);
-            calAmount();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            progress.setIndeterminate(false);
-            setVisible(true);
-        });
+        txtTotalAmt.setValue(0);
+        txtPaid.setValue(0);
+        inventoryRepo.getSaleHistory(filter)
+                .doOnNext(obj -> btnSearch.setEnabled(false))
+                .doOnNext(saleVouTableModel::addObject)
+                .doOnNext(obj -> calTotal())
+                .doOnError(e -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                })
+                .doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    tblVoucher.requestFocus();
+                    setVisible(true);
+                }).subscribe();
 
     }
 
-    private void calAmount() {
-        List<VSale> list = saleVouTableModel.getListSaleHis();
-        txtPaid.setValue(list.stream().mapToDouble(VSale::getPaid).sum());
-        txtTotalAmt.setValue(list.stream().mapToDouble(VSale::getVouTotal).sum());
-        txtRecord.setValue(list.size());
-        tblVoucher.requestFocus();
+    private void calTotal() {
+        txtPaid.setValue(saleVouTableModel.getPaidTotal());
+        txtTotalAmt.setValue(saleVouTableModel.getVouTotal());
+        txtRecord.setValue(saleVouTableModel.getSize());
     }
 
     private void select() {
@@ -418,7 +386,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         btnSearch1 = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sale Voucher Search");
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
@@ -903,7 +870,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))

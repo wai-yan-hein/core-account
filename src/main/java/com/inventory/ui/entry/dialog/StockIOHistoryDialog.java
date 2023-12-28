@@ -28,7 +28,6 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIOVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -60,40 +59,40 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private TraderAutoCompleter traderAutoCompleter;
     private JobSearchDialog jobSearchDialog;
     private Job job;
-    
+
     public Job getJob() {
         return job;
     }
-    
+
     public void setJob(Job job) {
         this.job = job;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public StockIOHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
     }
-    
+
     public void initMain() {
         ComponentUtil.addFocusListener(panelFilter);
         initTableVoucher();
         setTodayDate();
         initCombo();
     }
-    
+
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
         userRepo.getAppUser().doOnSuccess((t) -> {
@@ -114,11 +113,11 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListData(t);
         }).subscribe();
-        
+
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
     }
-    
+
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
@@ -134,33 +133,33 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-    
+
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
-    
+
     private String getUserCode() {
         return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-    
+
     private String getLocCode() {
         return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-    
+
     private String getVouStatus() {
         return vouStatusAutoCompleter.getVouStatus() == null ? "-" : vouStatusAutoCompleter.getVouStatus().getKey().getCode();
     }
-    
+
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
-    
+
     public void search() {
-        progess.setIndeterminate(true);
-        txtTotalRecord.setValue(0);
+        progress.setIndeterminate(true);
+        txtRecord.setValue(0);
         tableModel.clear();
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -178,24 +177,30 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         if (getJob() != null) {
             filter.setJobNo(getJob().getKey().getJobNo());
         }
-        inventoryRepo.getStockIO(filter).doOnSuccess((t) -> {
-            tableModel.setListDetail(t);
-            calAmount();
-            progess.setIndeterminate(false);
-        }).doOnError((e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progess.setIndeterminate(false);
-        }).doOnTerminate(() -> {
-            setVisible(true);
-        }).subscribe();
+        txtRecord.setValue(0);
+        inventoryRepo.getStockIO(filter)
+                .doOnNext(obj -> btnSearch.setEnabled(false))
+                .doOnNext(tableModel::addObject)
+                .doOnNext(obj -> calTotal())
+                .doOnError(e -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                })
+                .doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    tblVoucher.requestFocus();
+                    setVisible(true);
+                })
+                .subscribe();
+
     }
-    
-    private void calAmount() {
-        List<VStockIO> listIO = tableModel.getListDetail();
-        txtTotalRecord.setValue(listIO.size());
-        tblVoucher.requestFocus();
+
+    private void calTotal() {
+        txtRecord.setValue(tableModel.getSize());
     }
-    
+
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
@@ -207,7 +212,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -216,7 +221,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtVouNo.addKeyListener(this);
         txtUser.addKeyListener(this);
     }
-    
+
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -229,7 +234,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
     }
-    
+
     public void jobDialog() {
         if (jobSearchDialog == null) {
             jobSearchDialog = new JobSearchDialog(Global.parentForm);
@@ -283,16 +288,14 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         jLabel14 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
-        progess = new javax.swing.JProgressBar();
+        progress = new javax.swing.JProgressBar();
         txtFilter = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         btnSearch = new javax.swing.JButton();
-        lblTtlAmount = new javax.swing.JLabel();
         btnSelect = new javax.swing.JButton();
-        txtTotalAmt = new javax.swing.JFormattedTextField();
         lblTtlRecord = new javax.swing.JLabel();
-        txtTotalRecord = new javax.swing.JFormattedTextField();
+        txtRecord = new javax.swing.JFormattedTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock In/Out Voucher Search Dialog");
@@ -594,9 +597,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
-        lblTtlAmount.setFont(Global.lableFont);
-        lblTtlAmount.setText("Total Amount :");
-
         btnSelect.setFont(Global.lableFont);
         btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
         btnSelect.setText("Select");
@@ -606,16 +606,12 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
-        txtTotalAmt.setEditable(false);
-        txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalAmt.setFont(Global.amtFont);
-
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Total Record :");
 
-        txtTotalRecord.setEditable(false);
-        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalRecord.setFont(Global.amtFont);
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.amtFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -625,12 +621,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblTtlAmount)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSelect)
@@ -645,9 +637,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(lblTtlRecord)
-                                .addComponent(lblTtlAmount)
-                                .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(txtTotalAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(btnSearch))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(btnSelect, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -661,12 +651,12 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(progess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(panelFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -677,7 +667,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(progess, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -797,10 +788,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JLabel lblTtlAmount;
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JPanel panelFilter;
-    private javax.swing.JProgressBar progess;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtDesp;
@@ -808,11 +798,10 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLocation;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
-    private javax.swing.JFormattedTextField txtTotalAmt;
-    private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtTrader;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtVouNo;
@@ -822,16 +811,16 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {

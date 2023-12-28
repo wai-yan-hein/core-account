@@ -12,4 +12,5 @@ public class FileObject {
     private Long totalSpace;
     private Long usedSpace;
     private Long freeSpace;
+    private String userId;
 }

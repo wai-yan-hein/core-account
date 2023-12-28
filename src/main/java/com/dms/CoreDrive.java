@@ -159,6 +159,8 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                     restore();
                 case "Delete Forever" ->
                     deleteForever();
+                case "Download" ->
+                    downloadFile();
 
             }
         }
@@ -168,6 +170,14 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         CVFile file = getSelectFile();
         if (file != null) {
             String url = dmsRepo.getRootUrl() + "file/view/" + file.getFileId();
+            openWebBrowser(url);
+        }
+    }
+
+    private void downloadFile() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            String url = dmsRepo.getRootUrl() + "file/download/" + file.getFileId();
             openWebBrowser(url);
         }
     }
@@ -221,21 +231,27 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void restore() {
+        progress.setIndeterminate(true);
         CVFile file = getSelectFile();
         if (file != null) {
             file.setDeleted(false);
             dmsRepo.updateFile(file).doOnSuccess((t) -> {
                 fileTableModel.deleteFile(t);
+            }).doOnTerminate(() -> {
+                progress.setIndeterminate(false);
             }).subscribe();
         }
     }
 
     private void deleteForever() {
+        progress.setIndeterminate(true);
         CVFile file = getSelectFile();
         if (file != null) {
             file.setDeleted(false);
             dmsRepo.deleteForever(file.getFileId()).doOnSuccess((t) -> {
                 fileTableModel.deleteFile(file);
+            }).doOnTerminate(() -> {
+                progress.setIndeterminate(false);
             }).subscribe();
         }
     }
@@ -352,6 +368,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void getTrash() {
+        progress.setIndeterminate(true);
         dmsRepo.getTrash().doOnSuccess((t) -> {
             log.info(t.size() + "");
             fileTableModel.setListDetail(t);
@@ -364,8 +381,8 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     private void setFileDetail(CVFile file) {
         if (file != null) {
             lastFile = file;
-            lblFileIcon.setIcon(getFileIcon(file.getFileExtension()));
-            lblFileName.setText(file.getFileName());
+            lblFileIcon.setIcon(getFileIcon(Util1.isNull(file.getFileExtension(), "folder")));
+            lblFileName.setText(file.getFileDescription());
             lblFileType.setText(file.isFile() ? file.getFileContent() : "Folder");
             lblFileSize.setText(Util1.bytesToSize(file.getFileSize()));
             lblPath.setText(file.getFilePath());

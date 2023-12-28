@@ -5,7 +5,7 @@
 package com.user.common;
 
 import com.common.Util1;
-import com.user.model.VRoleCompany;
+import com.user.model.CompanyInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VRoleCompanyTableModel extends AbstractTableModel {
 
-    private List<VRoleCompany> listCompany = new ArrayList();
+    private List<CompanyInfo> listCompany = new ArrayList();
     private final String[] columnNames = {"No.", "Company Name", "Financial Year"};
 
     private Integer selectedIndex;
@@ -49,7 +49,7 @@ public class VRoleCompanyTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            VRoleCompany p = listCompany.get(row);
+            CompanyInfo p = listCompany.get(row);
             switch (column) {
                 case 0 -> {
                     return String.valueOf(row + 1 + ". ");
@@ -84,33 +84,33 @@ public class VRoleCompanyTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public void addCompany(VRoleCompany info) {
+    public void addCompany(CompanyInfo info) {
         listCompany.add(info);
         fireTableRowsInserted(listCompany.size() - 1, listCompany.size() - 1);
     }
 
-    public void setCompany(int row, VRoleCompany user) {
+    public void setCompany(int row, CompanyInfo user) {
         if (!listCompany.isEmpty()) {
             listCompany.set(row, user);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public List<VRoleCompany> getListCompany() {
+    public List<CompanyInfo> getListCompany() {
         return listCompany;
     }
 
-    public void setListCompany(List<VRoleCompany> listCompany) {
+    public void setListCompany(List<CompanyInfo> listCompany) {
         this.listCompany = listCompany;
         fireTableDataChanged();
     }
 
-    public VRoleCompany getCompany(int row) {
+    public CompanyInfo getCompany(int row) {
         return listCompany.get(row);
     }
 
     public void addNewRow() {
-        listCompany.add(new VRoleCompany());
+        listCompany.add(new CompanyInfo());
         fireTableRowsInserted(listCompany.size() - 1, listCompany.size() - 1);
     }
 

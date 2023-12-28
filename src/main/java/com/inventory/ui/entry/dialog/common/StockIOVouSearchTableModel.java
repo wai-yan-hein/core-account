@@ -8,6 +8,7 @@ package com.inventory.ui.entry.dialog.common;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.VStockIO;
+import com.inventory.model.VTransfer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -24,6 +25,11 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     private List<VStockIO> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Description", "Remark", "Voucher Type", "Created By"};
     private JTable parent;
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -105,14 +111,18 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
 
     public void addObject(VStockIO t) {
         listDetail.add(t);
-    }
-
-    public int getSize() {
-        return listDetail.size();
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void clear() {
         listDetail.clear();
+        size = 0;
         fireTableDataChanged();
     }
 }

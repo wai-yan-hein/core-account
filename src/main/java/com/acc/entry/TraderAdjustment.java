@@ -1160,11 +1160,9 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         inOutTableModel.clear();
         List<Gl> listVGl = adjustmentTableModel.getListVGl();
         double drAmt = listVGl.stream()
-                .filter(gl -> gl.getDrAmt() != null)
                 .mapToDouble(Gl::getDrAmt)
                 .sum();
         double crAmt = listVGl.stream()
-                .filter(gl -> gl.getCrAmt() != null)
                 .mapToDouble(Gl::getCrAmt)
                 .sum();
         double closing = opening + drAmt - crAmt;

@@ -6,8 +6,11 @@
 package com.common;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 
 /**
  *
@@ -93,7 +96,7 @@ public class ProUtil {
     public static final String MAX_STOCK_WEIGHT = "max.stock.weight";
     public static final String PUR_RD_DIS = "purchase.round.down.discount";
     public static final String DECIMAL_PLACE = "decimal.palace";
-    public static final String STOCK_IR_EDIT="stockir.voucher";
+    public static final String STOCK_IR_EDIT = "stockir.voucher";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
@@ -154,7 +157,6 @@ public class ProUtil {
     public static String getProperty(String key) {
         return Global.hmRoleProperty.get(key);
     }
-
 
     public static boolean isStockNoUnit() {
         return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_NO_UNIT));
@@ -223,11 +225,10 @@ public class ProUtil {
     public static boolean isPrint() {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }
-    
+
     public static boolean isStockIREdit() {
         return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_IR_EDIT));
     }
-
 
     public static String getInvGroup() {
         return Global.hmRoleProperty.get("inventory.group");
@@ -289,7 +290,42 @@ public class ProUtil {
         return true;
     }
 
+    public static boolean isShowAcc(String tranSource) {
+        return switch (tranSource) {
+            case "SALE", "PURCHASE", "RETURN_IN", "RETURN_OUT", "DR", "CR" ->
+                true;
+            default ->
+                false;
+        };
+    }
+
     public static String logoPath() {
         return String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+    }
+
+    public static DefaultFormatterFactory getDecimalFormatter() {
+        int place = ProUtil.getDecimalPalace();
+        return switch (place) {
+            case 1 ->
+                new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(Util1.DECIMAL_FORMAT1)));
+            case 2 ->
+                new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(Util1.DECIMAL_FORMAT2)));
+            default ->
+                new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(Util1.DECIMAL_FORMAT)));
+        };
+    }
+
+    public static DecimalFormat getDecimalFormat() {
+        int place = ProUtil.getDecimalPalace();
+        return switch (place) {
+            case 1 ->
+                new DecimalFormat(Util1.DECIMAL_FORMAT1);
+            case 2 ->
+                new DecimalFormat(Util1.DECIMAL_FORMAT2);
+            case 3 ->
+                new DecimalFormat(Util1.DECIMAL_FORMAT3);
+            default ->
+                new DecimalFormat(Util1.DECIMAL_FORMAT);
+        };
     }
 }

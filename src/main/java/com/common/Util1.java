@@ -62,7 +62,6 @@ import com.google.gson.JsonSyntaxException;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -80,11 +79,10 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,###.###;(###,###.###)";
-    public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
-    public static final String DECIMAL_FORMAT2 = "###,###.##;(###,###.##)";
-    public static final String DECIMAL_FORMAT3 = "###,###.000;(###,###.000)";
-    public static final String DECIMAL_FORMAT4 = "###,##0.00;(###,##0.00)";
+    public static final String DECIMAL_FORMAT = "###,##0;(###,##0)";
+    public static final String DECIMAL_FORMAT1 = "###,##0.0;(###,##0.0)";
+    public static final String DECIMAL_FORMAT2 = "###,##0.00;(###,##0.00)";
+    public static final String DECIMAL_FORMAT3 = "###,##0.000;(###,##0.000)";
 
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static String SYNC_DATE;
@@ -261,6 +259,14 @@ public class Util1 {
         return null;
     }
 
+    public static Date convertToDate(LocalDate localDate) {
+        if (localDate != null) {
+            // Convert LocalDate to Date
+            return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        }
+        return null;
+    }
+
     public static LocalDateTime convertToLocalDateTime(Date date) {
         if (date != null) {
             Instant instant = date.toInstant();
@@ -355,14 +361,17 @@ public class Util1 {
     }
 
     public static String toDateStrMYSQL(String dateStr, String format) {
-        DateFormat inputFormat = new SimpleDateFormat(format);
-        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            Date date = inputFormat.parse(dateStr);
-            return outputFormat.format(date);
-        } catch (ParseException e) {
-            return null;
+        if (dateStr != null) {
+            DateFormat inputFormat = new SimpleDateFormat(format);
+            DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date date = inputFormat.parse(dateStr);
+                return outputFormat.format(date);
+            } catch (ParseException e) {
+                return null;
+            }
         }
+        return null;
     }
 
     public static Date addDateTo(Date date, int ttlDay) {
@@ -1303,6 +1312,28 @@ public class Util1 {
         LocalTime time = localDateTime.toLocalTime();
 
         // Format the LocalTime using the specified pattern
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
+        String formattedTime = time.format(formatter);
+        return formattedTime;
+    }
+
+    public static String getDate(ZonedDateTime zonedDateTime) {
+        if (zonedDateTime == null) {
+            return ""; // or handle null as needed
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Global.dateFormat);
+        return zonedDateTime.format(formatter);
+    }
+
+    public static String getTime(ZonedDateTime zonedDateTime) {
+        if (zonedDateTime == null) {
+            return ""; // or handle null as needed
+        }
+        // Extract the LocalTime from the ZonedDateTime
+        ZonedDateTime zonedDateTimeInUtc = zonedDateTime.withZoneSameInstant(java.time.ZoneOffset.UTC);
+        java.time.LocalTime time = zonedDateTimeInUtc.toLocalTime();
+
+        // Use "HH:mm:ss" for 24-hour format or "hh:mm:ss a" for 12-hour format with AM/PM
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
         String formattedTime = time.format(formatter);
         return formattedTime;

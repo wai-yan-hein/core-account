@@ -138,10 +138,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         if (e.getSource() instanceof JCheckBox chk) {
             String key = chk.getName();
             String value = Util1.getString(chk.isSelected());
+            log.info(key);
+            log.info(value);
             save(key, value);
-        }
-        if (e.getSource() instanceof JTextField txt) {
+        } else if (e.getSource() instanceof JTextField txt) {
             String key = txt.getName();
+            log.info("textbox : " + key);
             String value = txt.getText();
             save(key, value);
         }
@@ -153,6 +155,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     public SystemProperty() {
         initComponents();
         initKey();
+
     }
 
     private void initKey() {
@@ -218,6 +221,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtDivider.setName(ProUtil.DIVIDER);
         txtConversionAcc.setName(ProUtil.CONVERSION_ACC);
         txtEmp.setName(ProUtil.EMP_ACC);
+        addActionListener(this);
 
     }
 
@@ -251,7 +255,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     public void initMain() {
         progress.setIndeterminate(true);
-        addActionListener(this);
         initMac();
         initProperty();
         initCheckBox();

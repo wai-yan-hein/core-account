@@ -22,6 +22,11 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
 
     private List<VTransfer> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Location From", "Location To", "Remark", "Ref No", "Trader", "Created By"};
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -106,8 +111,20 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
         return listDetail.get(row);
     }
 
+    public void addObject(VTransfer t) {
+        listDetail.add(t);
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
+    }
+
     public void clear() {
         listDetail.clear();
+        size = 0;
         fireTableDataChanged();
     }
 }

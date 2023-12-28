@@ -5,7 +5,6 @@
 package com.h2.dao;
 
 import com.user.model.PrivilegeCompany;
-import com.user.model.VRoleCompany;
 import java.util.List;
 
 /**
