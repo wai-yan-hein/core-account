@@ -21,6 +21,8 @@ import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.WeightHis;
 import com.inventory.model.WeightStatus;
+import com.inventory.ui.entry.PurchaseDynamic;
+import com.inventory.ui.entry.SaleDynamic;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.WeightHistoryTableModel;
 import java.awt.event.KeyEvent;
@@ -83,9 +85,18 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void initMain() {
+        setType();
         initCombo();
         initTableVoucher();
         setTodayDate();
+    }
+
+    private void setType() {
+        if (observer instanceof SaleDynamic) {
+            cboStatus.setSelectedIndex(1);
+        } else if (observer instanceof PurchaseDynamic) {
+            cboStatus.setSelectedIndex(0);
+        }
     }
 
     private void initCombo() {

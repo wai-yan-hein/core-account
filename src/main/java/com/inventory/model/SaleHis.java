@@ -44,23 +44,23 @@ public class SaleHis {
     @Column(name = "reference")
     private String reference;
     @Column(name = "vou_total")
-    private Double vouTotal;
+    private double vouTotal;
     @Column(name = "grand_total")
-    private Double grandTotal;
+    private double grandTotal;
     @Column(name = "discount")
-    private Double discount;
+    private double discount;
     @Column(name = "disc_p")
-    private Double discP;
+    private double discP;
     @Column(name = "tax_amt")
-    private Double taxAmt;
+    private double taxAmt;
     @Column(name = "tax_p")
-    private Double taxPercent;
+    private double taxPercent;
     @Column(name = "deleted")
     private boolean deleted;
     @Column(name = "paid")
-    private Double paid;
+    private double paid;
     @Column(name = "vou_balance")
-    private Double balance;
+    private double balance;
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdDate;
     @Column(name = "created_by")
@@ -96,7 +96,7 @@ public class SaleHis {
     @Column(name = "grn_vou_no")
     private String grnVouNo;
     @Column(name = "expense")
-    private Double expense;
+    private double expense;
     @Column(name = "account")
     private String saleAcc;
     @Column(name = "labour_group_code")
@@ -109,6 +109,8 @@ public class SaleHis {
     private String cashAcc;
     @Column(name = "dept_code")
     private String deptCode;
+    @Column(name = "weight_vou_no")
+    private String weightVouNo;
     @Transient
     private String localVouNo;
     @Transient

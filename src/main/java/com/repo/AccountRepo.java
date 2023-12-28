@@ -77,7 +77,7 @@ public class AccountRepo {
             return Mono.empty();
         }
         DepartmentAKey key = new DepartmentAKey();
-        key.setDeptCode(Util1.isNull(deptCode, "-"));
+        key.setDeptCode(deptCode);
         key.setCompCode(Global.compCode);
         if (localDatabase) {
             return h2Repo.find(key);

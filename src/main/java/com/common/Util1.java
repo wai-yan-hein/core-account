@@ -158,6 +158,14 @@ public class Util1 {
         return LocalDateTime.of(date.toLocalDate(), LocalTime.of(now.getHour(), now.getMinute(), now.getSecond()));
     }
 
+    public static LocalDateTime toDateTime(Date date) {
+        LocalDateTime now = LocalDateTime.now();
+        return LocalDateTime.of(
+                date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                LocalTime.of(now.getHour(), now.getMinute(), now.getSecond())
+        );
+    }
+
     public static Date toJavaDate(Object objDate) {
         SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzzz yyyy");
         Date date = null;
@@ -269,9 +277,11 @@ public class Util1 {
 
     public static LocalDateTime convertToLocalDateTime(Date date) {
         if (date != null) {
-            Instant instant = date.toInstant();
-            ZoneId zoneId = ZoneId.systemDefault();
-            return instant.atZone(zoneId).toLocalDateTime();
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            return LocalDateTime.of(
+                    date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                    currentDateTime.toLocalTime()
+            );
         }
         return null;
     }
@@ -781,20 +791,6 @@ public class Util1 {
         return null;
     }
 
-    public static Date toDateTime(Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        SimpleDateFormat f2 = new SimpleDateFormat("dd/MM/yyyy");
-        LocalDateTime now = LocalDateTime.now();
-        String strDate = f2.format(date) + " " + now.getHour() + ":"
-                + now.getMinute() + ":" + now.getSecond();
-        try {
-            date = formatter.parse(strDate);
-        } catch (ParseException ex) {
-            log.error(String.format("toDateTime: %s", ex.getMessage()));
-        }
-        return date;
-    }
-
     public static void extractZipToJson(byte[] zipData, String exportPath) {
         try {
             File file = new File(exportPath.concat(".zip"));
@@ -1213,6 +1209,13 @@ public class Util1 {
         return Util1.toDateStr(localDateTime, "dd/MM/yyyy hh:mm a");
     }
 
+    public static String convertToLocalStorage(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return null;
+        }
+        return Util1.toDateStr(localDateTime, "dd/MM/yyyy hh:mm a");
+    }
+
     public static <T> List<T> readJsonToList(InputStream inputStream, Class<T> targetType) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -1329,11 +1332,7 @@ public class Util1 {
         if (zonedDateTime == null) {
             return ""; // or handle null as needed
         }
-        // Extract the LocalTime from the ZonedDateTime
-        ZonedDateTime zonedDateTimeInUtc = zonedDateTime.withZoneSameInstant(java.time.ZoneOffset.UTC);
-        java.time.LocalTime time = zonedDateTimeInUtc.toLocalTime();
-
-        // Use "HH:mm:ss" for 24-hour format or "hh:mm:ss a" for 12-hour format with AM/PM
+        LocalDateTime time = zonedDateTime.toLocalDateTime();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
         String formattedTime = time.format(formatter);
         return formattedTime;

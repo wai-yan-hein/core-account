@@ -8,6 +8,7 @@ import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -18,6 +19,7 @@ import com.inventory.model.AccType;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AccountSettingTableModel;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JOptionPane;
@@ -76,22 +78,9 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     }
 
     private void initFoucsAdapter() {
-        txtSrc.addFocusListener(fa);
-        txtCash.addFocusListener(fa);
-        txtDiscount.addFocusListener(fa);
-        txtTax.addFocusListener(fa);
-        txtBal.addFocusListener(fa);
-        txtDep.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            Object s = e.getSource();
-            if (s instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
+
 
     private void initComobo() {
         sourceCompleter = new COA3AutoCompleter(txtSrc, accountRepo, null, false, 3);

@@ -2608,9 +2608,6 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(SaleHis sh) {
         SaleHisKey key = sh.getKey();
-        if (sh.isLocal()) {
-            return h2Repo.deleteSale(key);
-        }
         return inventoryApi.post()
                 .uri("/sale/deleteSale")
                 .body(Mono.just(key), SaleHisKey.class)
@@ -2636,9 +2633,6 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(SaleHis sh) {
         SaleHisKey key = sh.getKey();
-        if (sh.isLocal()) {
-            return h2Repo.restoreSale(key);
-        }
         return inventoryApi.post()
                 .uri("/sale/restoreSale")
                 .body(Mono.just(key), SaleHisKey.class)
@@ -2652,9 +2646,6 @@ public class InventoryRepo {
 
     public Mono<Boolean> restoreMilling(MillingHis his) {
         MillingHisKey key = his.getKey();
-        if (his.isLocal()) {
-//            return h2Repo.restoreSale(key);
-        }
         return inventoryApi.post()
                 .uri("/milling/restoreMilling")
                 .body(Mono.just(key), MillingHisKey.class)
@@ -4026,7 +4017,7 @@ public class InventoryRepo {
 
     public Mono<List<VTransfer>> getTransferReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/getTransferReport")
+                .uri(builder -> builder.path("/transfer/getTransferReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())

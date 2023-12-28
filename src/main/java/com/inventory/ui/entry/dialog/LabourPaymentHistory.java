@@ -108,8 +108,10 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);//labour
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(180);//member
         tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);//total
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(10);//total
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);

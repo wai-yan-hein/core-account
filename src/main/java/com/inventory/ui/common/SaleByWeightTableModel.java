@@ -196,7 +196,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(),Global.parentForm);
+                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -356,7 +356,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
 
     public void removeListDetail() {
         this.listDetail.clear();
-        addNewRow();
     }
 
     private void calculateAmount(SaleHisDetail s) {
@@ -368,7 +367,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
             double amount = (qty * wt * price) / stdWt;
             s.setAmount(amount);
         }
-        if (s.getQty() != null && s.getWeight() != null) {
+        if (s.getQty() > 0 && s.getWeight() > 0) {
             s.setTotalWeight(Util1.getDouble(s.getQty()) * Util1.getDouble(s.getWeight()));
         }
     }

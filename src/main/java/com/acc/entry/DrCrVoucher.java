@@ -143,9 +143,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     if (tblVoucher.getSelectedRow() >= 0) {
                         selectRow = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
                         Gl gl = voucherTableModel.getVGl(selectRow);
-                        accountRepo.getVoucher(gl.getGlVouNo()).subscribe((t) -> {
-                            openVoucherDialog(gl.getTranSource(), t);
-                        });
+                        openVoucherDialog(gl.getTranSource(), gl.getGlVouNo());
                     }
                 }
             }
@@ -281,20 +279,19 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    public void openVoucherDialog(String type, List<Gl> listVGl) {
+    public void openVoucherDialog(String type, String glVouNo) {
+        progress.setIndeterminate(true);
         if (dialog == null) {
             dialog = new VoucherEntryDailog(Global.parentForm);
-            dialog.setIconImage(Global.parentForm.getIconImage());
+            dialog.setSize(Global.width - 20, Global.height - 20);
+            dialog.setLocationRelativeTo(null);
             dialog.setAccountRepo(accountRepo);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.initMain();
         }
         dialog.setVouType(type);
-        dialog.setListVGl(listVGl);
-        dialog.setSize(Global.width - 20, Global.height - 20);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        dialog.searchDetail(glVouNo);
     }
 
     private void deleteVoucher() {
@@ -791,13 +788,16 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source != null) {
-            search();
-            if (source.equals("print")) {
-                if (selectObj instanceof Gl gl) {
-                    printVoucher(gl);
-                }
+        if (source.equals("print")) {
+            if (selectObj instanceof Gl gl) {
+                printVoucher(gl);
             }
+        } else if (source.equals("progress")) {
+            if (selectObj instanceof Boolean status) {
+                progress.setIndeterminate(status);
+            }
+        } else {
+            search();
         }
     }
 

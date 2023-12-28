@@ -9,6 +9,7 @@ import com.acc.editor.COA3CellEditor;
 import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.editor.DepartmentCellEditor;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.common.ComponentUtil;
@@ -20,9 +21,6 @@ import com.common.ReportFilter;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.LabourPaymentDetail;
@@ -37,8 +35,8 @@ import com.user.model.Currency;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -203,6 +201,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     }
 
     private void initTable() {
+        tableModel.addNewRow();
         tableModel.setObserver(this);
         tableModel.setAccountRepo(accountRepo);
         tableModel.setTable(tblPayment);
@@ -212,33 +211,40 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         tblPayment.setRowHeight(Global.tblRowHeight);
         tblPayment.setShowGrid(true);
         tblPayment.setFont(Global.textFont);
-        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(200);//Desp
-        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(50);//qty
-        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(70);//price
-        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(80);//Amount
-        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(100);//account
-        tblPayment.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(5);//Desp
+        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(200);//Desp
+        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(100);//account
+        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(50);//qty
+        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(70);//price
+        tblPayment.getColumnModel().getColumn(5).setPreferredWidth(80);//Amount
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            tblPayment.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
+        }).subscribe();
         tblPayment.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
-        tblPayment.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblPayment.getColumnModel().getColumn(4).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblPayment.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblPayment.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     private void savePayment(boolean print) {
-        progress.setIndeterminate(true);
         if (isValidEntry() && tableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
                 DateLockUtil.showMessage(this);
                 txtVouDate.requestFocus();
                 return;
             }
+            progress.setIndeterminate(true);
             observer.selected("save", false);
             progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());
             inventoryRepo.saveLabourPayment(ph).doOnSuccess((saved) -> {
                 if (saved != null) {
+                    ph.setVouNo(saved.getVouNo());
+                    ph.setVouDate(saved.getVouDate());
                     ph.setVouDateTime(saved.getVouDateTime());
                     progress.setIndeterminate(false);
                 }
@@ -279,20 +285,19 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             param.put("p_comp_phone", Global.companyPhone);
             param.put("p_logo_path", ProUtil.logoPath());
             param.put("p_vou_no", dto.getVouNo());
-            param.put("p_vou_date", Util1.getDate(dto.getVouDateTime()));
-            param.put("p_vou_time", Util1.getTime(dto.getVouDateTime()));
+            param.put("p_vou_date", Util1.getDate(dto.getVouDate()));
+            param.put("p_vou_time", Util1.getTime(dto.getVouDate()));
             param.put("p_pay_date", payDate);
             param.put("p_labour_name", dto.getLabourName());
+            param.put("p_remark", dto.getRemark());
             param.put("p_labour_count", dto.getMemberCount());
             param.put("p_labour_price", labourPrice);
             param.put("p_sub_report_dir", "report/");
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode n = mapper.readTree(Util1.gson.toJson(tableModel.getListDetail()));
-            JsonDataSource d = new JsonDataSource(n, null) {
-            };
-            JasperPrint main = JasperFillManager.fillReport(reportPath, param, d);
+            ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(tableModel.getPaymentList()));
+            JsonDataSource ds = new JsonDataSource(jsonDataStream);
+            JasperPrint main = JasperFillManager.fillReport(reportPath, param, ds);
             JasperViewer.viewReport(main, false);
-        } catch (JsonProcessingException | JRException e) {
+        } catch (JRException e) {
             log.error("printVoucher : " + e.getMessage());
         }
 
@@ -325,6 +330,10 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             JOptionPane.showMessageDialog(this, "Invalid Pay Amount.");
             txtVouDate.requestFocus();
             return false;
+        } else if (Util1.getDouble(txtMember.getText()) == 0) {
+            JOptionPane.showMessageDialog(this, "Invalid Labour Member.");
+            txtMember.requestFocus();
+            return false;
         } else {
             if (srcAcc != null) {
                 if (department == null) {
@@ -350,6 +359,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ph.setRemark(txtRemark.getText());
             ph.setPayTotal(Util1.getDouble(txtPayTotal.getValue()));
+            ph.setPost(rdoPost.isSelected());
             ChartOfAccount payAcc = cOAAutoCompleter.getCOA();
             ChartOfAccount expAcc = expenseAutoCompleter.getCOA();
             ph.setSourceAcc(payAcc == null ? null : payAcc.getKey().getCoaCode());
@@ -369,8 +379,10 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtVouNo.setText(null);
         txtPayTotal.setValue(0);
         tableModel.clear();
+        tableModel.addNewRow();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
+        rdoPost.setSelected(false);
         ph = new LabourPaymentDto();
         enableForm(true);
         observeMain();
@@ -415,6 +427,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtPayTotal.setValue(ph.getPayTotal());
         txtFromDate.setDate(Util1.toDate(ph.getFromDate()));
         txtToDate.setDate(Util1.toDate(ph.getToDate()));
+        rdoPost.setSelected(ph.isPost());
         if (ph.isDeleted()) {
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
@@ -426,13 +439,15 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         } else {
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
-            enableForm(false);
+            enableForm(!ph.isPost());
         }
         inventoryRepo.getLabourPaymentDetail(vouNo).doOnSuccess((t) -> {
             if (t != null) {
                 tableModel.setListDetail(t);
-                tblPayment.requestFocus();
             }
+        }).doOnTerminate(() -> {
+            tableModel.addNewRow();
+            tblPayment.requestFocus();
         }).subscribe();
     }
 
@@ -552,6 +567,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         jLabel3 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        rdoPost = new javax.swing.JRadioButton();
         scroll = new javax.swing.JScrollPane();
         tblPayment = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -624,6 +640,8 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
 
         txtDep.setFont(Global.textFont);
 
+        rdoPost.setText("Post Account");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -650,13 +668,18 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                             .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(txtRemark))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel15)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 131, Short.MAX_VALUE)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtPayTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 131, Short.MAX_VALUE)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPayTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(rdoPost)))
                 .addContainerGap())
         );
 
@@ -692,7 +715,8 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(rdoPost))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -908,6 +932,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JRadioButton rdoPost;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblPayment;
     private javax.swing.JTextField txtAccount;
@@ -933,6 +958,8 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             if (selectObj instanceof LabourPaymentDto p) {
                 setVoucherDetail(p);
             }
+        } else if (source.equals("CAL_PAYMENT")) {
+            calTotal();
         }
     }
 

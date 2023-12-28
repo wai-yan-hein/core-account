@@ -58,7 +58,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private SelectionObserver observer;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
-    private List<Gl> listVGl;
     private COAAutoCompleter completer;
     private CurrencyAutoCompleter currencyAutoCompleter;
     private String status;
@@ -73,11 +72,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public void setListVGl(List<Gl> listVGl) {
-        this.listVGl = listVGl;
-        searchDetail();
     }
 
     public void setVouType(String vouType) {
@@ -203,36 +197,46 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         txtAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
 
-    private void searchDetail() {
-        if (listVGl != null && !listVGl.isEmpty()) {
-            Gl vgl = listVGl.getFirst();
-            accountRepo.findCOA(vgl.getSrcAccCode()).doOnSuccess((coa) -> {
-                completer.setCoa(coa);
-            }).subscribe();
-            userRepo.findCurrency(vgl.getCurCode()).doOnSuccess((t) -> {
-                currencyAutoCompleter.setCurrency(t);
-            }).subscribe();
-            if (DateLockUtil.isLockDate(vgl.getGlDate())) {
-                enableForm(false);
-                lblMessage.setText(DateLockUtil.MESSAGE);
-            } else {
-                enableForm(true);
-                lblMessage.setText("");
-            }
-            txtVouDate.setDate(Util1.convertToDate(vgl.getGlDate()));
-            txtRefrence.setText(vgl.getReference());
-            txtVouNo.setText(vgl.getGlVouNo());
-            txtFrom.setText(vgl.getFromDes());
-            txtFor.setText(vgl.getForDes());
-            txtNa.setText(vgl.getNarration());
-            tableModel.setListVGl(listVGl);
-            setStatus("EDIT");
-            tableModel.addEmptyRow();
-            tableModel.calTotalAmount();
-        } else {
+    public void searchDetail(String glVouNo) {
+        if (glVouNo == null) {
             setStatus("NEW");
             assignDefault();
+            observer.selected("progress", false);
+            setVisible(true);
+        } else {
+            accountRepo.getVoucher(glVouNo).doOnSuccess((list) -> {
+                if (list != null && !list.isEmpty()) {
+                    Gl vgl = list.getFirst();
+                    accountRepo.findCOA(vgl.getSrcAccCode()).doOnSuccess((coa) -> {
+                        completer.setCoa(coa);
+                    }).subscribe();
+                    userRepo.findCurrency(vgl.getCurCode()).doOnSuccess((t) -> {
+                        currencyAutoCompleter.setCurrency(t);
+                    }).subscribe();
+                    if (DateLockUtil.isLockDate(vgl.getGlDate())) {
+                        enableForm(false);
+                        lblMessage.setText(DateLockUtil.MESSAGE);
+                    } else {
+                        enableForm(true);
+                        lblMessage.setText("");
+                    }
+                    txtVouDate.setDate(Util1.convertToDate(vgl.getGlDate()));
+                    txtRefrence.setText(vgl.getReference());
+                    txtVouNo.setText(vgl.getGlVouNo());
+                    txtFrom.setText(vgl.getFromDes());
+                    txtFor.setText(vgl.getForDes());
+                    txtNa.setText(vgl.getNarration());
+                    setStatus("EDIT");
+                }
+                tableModel.setListVGl(list);
+            }).doOnTerminate(() -> {
+                tableModel.addEmptyRow();
+                tableModel.calTotalAmount();
+                observer.selected("progress", false);
+                setVisible(true);
+            }).subscribe();
         }
+
     }
 
     private void enableForm(boolean status) {
@@ -291,7 +295,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             for (Gl g : tableModel.getListVGl()) {
                 g.setCurCode(currency.getCurCode());
                 g.setSrcAccCode(coa.getKey().getCoaCode());
-                g.setGlDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
+                g.setGlDate(Util1.toDateTime(txtVouDate.getDate()));
                 g.setReference(txtRefrence.getText());
                 g.setFromDes(txtFrom.getText());
                 g.setForDes(txtFor.getText());
@@ -620,7 +624,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         lblStatus.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         lblStatus.setText("NEW");
 
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
