@@ -204,7 +204,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             dayBookTableModel.setObserver(this);
             dayBookTableModel.setSourceAccId(sourceAccId);
             dayBookTableModel.setProgress(progress);
-            dayBookTableModel.addNewRow();
             accountRepo.findCOA(sourceAccId).doOnSuccess((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
@@ -231,7 +230,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 allCashTableModel.setObserver(this);
                 allCashTableModel.setSourceAccId(sourceAccId);
                 allCashTableModel.setProgress(progress);
-                allCashTableModel.addNewRow();
                 accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
                     allCashTableModel.setDepartment(t);
                 }).subscribe();
@@ -648,7 +646,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         accountRepo.searchGlFlux(filter).doOnNext((gl) -> {
             addObject(gl);
         }).doOnNext((t) -> {
-            calDrCr();
+            calDrCrStream();
         }).doOnError((e) -> {
             log.error("searchCash: " + e.getMessage());
             enableToolBar(true);
@@ -665,7 +663,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }).subscribe();
     }
 
-    private void calDrCr() {
+    private void calDrCrStream() {
         double drAmt;
         double crAmt;
         int size;
@@ -681,6 +679,18 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtDr.setValue(drAmt);
         txtCr.setValue(crAmt);
         lblRecord.setValue(size);
+    }
+
+    private void calDrCr() {
+        List<Gl> list = getListDetail();
+        double drAmt = list.stream().mapToDouble((t) -> t.getDrAmt()).sum();
+        double crAmt = list.stream().mapToDouble((t) -> t.getCrAmt()).sum();
+        txtDr.setValue(drAmt);
+        txtCr.setValue(crAmt);
+    }
+
+    private List<Gl> getListDetail() {
+        return single ? dayBookTableModel.getListVGl() : allCashTableModel.getListVGl();
     }
 
     private void enableToolBar(boolean status) {
@@ -742,7 +752,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         double crAmt = Util1.getDouble(txtCr.getValue());
         double closing = opening + drAmt - crAmt;
         txtOpening.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
-        txtClosing.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
+        txtClosing.setForeground(closing >= 0 ? Color.GREEN : Color.RED);
         txtClosing.setValue(closing);
         txtDr.setValue(drAmt);
         txtCr.setValue(crAmt);
@@ -1565,6 +1575,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 }
                 searchCash();
             } else if (source.equals("CAL-TOTAL")) {
+                calDrCr();
                 calculateClosing();
             } else {
                 searchCash();

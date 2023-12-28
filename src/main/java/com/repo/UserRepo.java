@@ -251,7 +251,7 @@ public class UserRepo {
     }
 
     public Mono<Currency> findCurrency(String curCode) {
-        if(Util1.isNullOrEmpty(curCode)){
+        if (Util1.isNullOrEmpty(curCode)) {
             return Mono.empty();
         }
         if (localdatabase) {
@@ -270,7 +270,7 @@ public class UserRepo {
     }
 
     public Mono<CompanyInfo> findCompany(String compCode) {
-         if(Util1.isNullOrEmpty(compCode)){
+        if (Util1.isNullOrEmpty(compCode)) {
             return Mono.empty();
         }
         if (localdatabase) {
@@ -284,7 +284,7 @@ public class UserRepo {
     }
 
     public Mono<AppRole> finRole(String roleCode) {
-         if(Util1.isNullOrEmpty(roleCode)){
+        if (Util1.isNullOrEmpty(roleCode)) {
             return Mono.empty();
         }
         if (localdatabase) {
@@ -684,14 +684,19 @@ public class UserRepo {
     }
 
     public Mono<Project> find(ProjectKey key) {
+        if (Util1.isNullOrEmpty(key.getProjectNo())) {
+            return Mono.empty();
+        }
         if (localdatabase) {
             return h2Repo.find(key);
         }
-        return userApi.post()
-                .uri("/user/findProject")
-                .body(Mono.just(key), ProjectKey.class)
-                .retrieve()
-                .bodyToMono(Project.class);
+        return userApi.get()
+                .uri(builder -> builder.path("/user/findProject")
+                .queryParam("projectNo", key.getProjectNo())
+                .queryParam("compCode", key.getCompCode())
+                .build())
+                .retrieve().bodyToMono(Project.class);
+
     }
 
     public Mono<Project> save(Project obj) {

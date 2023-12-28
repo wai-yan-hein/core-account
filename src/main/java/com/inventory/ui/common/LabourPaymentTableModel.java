@@ -6,6 +6,7 @@
 package com.inventory.ui.common;
 
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.LabourPaymentDetail;
@@ -26,10 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 public class LabourPaymentTableModel extends AbstractTableModel {
 
     private List<LabourPaymentDetail> listDetail = new ArrayList<>();
-    private final String[] columnNames = {"Description", "Qty", "Price", "Amount", "Expens A/C"};
+    private final String[] columnNames = {"Department", "Description", "Expense A/C", "Qty", "Price", "Amount"};
     private JTable table;
     private SelectionObserver observer;
-    private HashMap<String, String> hm = new HashMap<>();
+    private HashMap<String, String> hmCOA = new HashMap<>();
+    private HashMap<String, String> hmDep = new HashMap<>();
     private AccountRepo accountRepo;
 
     public void setAccountRepo(AccountRepo accountRepo) {
@@ -62,13 +64,13 @@ public class LabourPaymentTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column != 3;
+        return column != 5;
     }
 
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 1, 2, 3 -> {
+            case 3, 4, 5 -> {
                 return Double.class;
             }
         }
@@ -99,15 +101,17 @@ public class LabourPaymentTableModel extends AbstractTableModel {
             LabourPaymentDetail b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    b.getDescription();
+                    getDeptName(b);
                 case 1 ->
-                    b.getQty();
+                    b.getDescription();
                 case 2 ->
-                    b.getPrice();
+                    getCoaName(b);
                 case 3 ->
-                    b.getAmount();
+                    Util1.toNull(b.getQty());
                 case 4 ->
-                    getCoaName(b.getAccount());
+                    Util1.toNull(b.getPrice());
+                case 5 ->
+                    Util1.toNull(b.getAmount());
                 default ->
                     null;
             }; //Code
@@ -125,18 +129,25 @@ public class LabourPaymentTableModel extends AbstractTableModel {
             if (value != null) {
                 LabourPaymentDetail obj = listDetail.get(row);
                 switch (column) {
-                    case 0 ->
-                        obj.setDescription(value.toString());
+                    case 0 -> {
+                        if (value instanceof DepartmentA dep) {
+                            obj.setDeptCode(dep.getKey().getDeptCode());
+                            obj.setDeptUserCode(dep.getUserCode());
+                        }
+                    }
                     case 1 ->
-                        obj.setQty(Util1.getDouble(value));
-                    case 2 ->
-                        obj.setPrice(Util1.getDouble(value));
-                    case 4 -> {
+                        obj.setDescription(value.toString());
+                    case 2 -> {
                         if (value instanceof ChartOfAccount coa) {
                             obj.setAccount(coa.getKey().getCoaCode());
                             obj.setAccountName(coa.getCoaNameEng());
                         }
                     }
+                    case 3 ->
+                        obj.setQty(Util1.getDouble(value));
+                    case 4 ->
+                        obj.setPrice(Util1.getDouble(value));
+
                 }
                 calAmount(obj);
                 addNewRow();
@@ -154,14 +165,35 @@ public class LabourPaymentTableModel extends AbstractTableModel {
         obj.setAmount(obj.getQty() * obj.getPrice());
     }
 
-    private String getCoaName(String coaCode) {
-        if (hm.containsKey(coaCode)) {
-            return hm.get(coaCode);
+    private String getCoaName(LabourPaymentDetail pd) {
+        if (!Util1.isNullOrEmpty(pd.getAccountName())) {
+            return pd.getAccountName();
+        }
+        String coaCode = pd.getAccount();
+        if (hmCOA.containsKey(coaCode)) {
+            return hmCOA.get(coaCode);
         }
         ChartOfAccount coa = accountRepo.findCOA(coaCode).block();
         if (coa != null) {
-            hm.put(coaCode, coa.getCoaNameEng());
+            hmCOA.put(coaCode, coa.getCoaNameEng());
             return coa.getCoaNameEng();
+        }
+        return "-";
+
+    }
+
+    private String getDeptName(LabourPaymentDetail pd) {
+        if (!Util1.isNullOrEmpty(pd.getDeptUserCode())) {
+            return pd.getDeptUserCode();
+        }
+        String deptCode = pd.getDeptCode();
+        if (hmDep.containsKey(deptCode)) {
+            return hmDep.get(deptCode);
+        }
+        DepartmentA coa = accountRepo.findDepartment(deptCode).block();
+        if (coa != null) {
+            hmDep.put(deptCode, coa.getUserCode());
+            return coa.getUserCode();
         }
         return "-";
 

@@ -15,7 +15,8 @@ import java.time.ZonedDateTime;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VTransfer {
-private String vouNo;
+
+    private String vouNo;
     private String vouDate;
     private ZonedDateTime vouDateTime;
     private String remark;
@@ -40,4 +41,5 @@ private String vouNo;
     private String labourGroupName;
     private String traderName;
     private boolean local;
+    private Double saleAmt;
 }

@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.common;
 
+import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
@@ -13,8 +14,10 @@ import com.inventory.model.Location;
 import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
+import com.inventory.ui.entry.PurchaseDynamic;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
+import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
@@ -28,31 +31,54 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class SaleRiceTableModel extends AbstractTableModel {
+public class SalePaddyTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Std-Weight", "Avg-Weight", "Qty", "Total Weight", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight",
+        "Qty", "Bag", "Price", "Amount"};
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<SaleDetailKey> deleteList = new ArrayList();
-    private JLabel lblRecord;
+    private InventoryRepo inventoryRepo;
+    private JDateChooser vouDate;
+    private JLabel lblRec;
     private SaleDynamic sale;
     private StockBalanceFrame dialog;
-
-    public void setDialog(StockBalanceFrame dialog) {
-        this.dialog = dialog;
-    }
-
-    public SaleDynamic getSale() {
-        return sale;
-    }
 
     public void setSale(SaleDynamic sale) {
         this.sale = sale;
     }
 
-    public void setLblRecord(JLabel lblRecord) {
-        this.lblRecord = lblRecord;
+    public void setDialog(StockBalanceFrame dialog) {
+        this.dialog = dialog;
+    }
+
+    public JLabel getLblRec() {
+        return lblRec;
+    }
+
+    public void setLblRec(JLabel lblRec) {
+        this.lblRec = lblRec;
+    }
+
+    public JDateChooser getVouDate() {
+        return vouDate;
+    }
+
+    public void setVouDate(JDateChooser vouDate) {
+        this.vouDate = vouDate;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public JTable getParent() {
+        return parent;
     }
 
     public void setParent(JTable parent) {
@@ -83,6 +109,9 @@ public class SaleRiceTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
+        if (listDetail == null) {
+            return 0;
+        }
         return listDetail.size();
     }
 
@@ -99,7 +128,7 @@ public class SaleRiceTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 7 ->
+            case 8 ->
                 false;
             default ->
                 true;
@@ -109,38 +138,40 @@ public class SaleRiceTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            SaleHisDetail sd = listDetail.get(row);
-            switch (column) {
-                case 0 -> {
-                    //code
-                    return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
-                }
-                case 1 -> {
-                    return sd.getStockName();
-                }
-                case 2 -> {
-                    return Util1.toNull(sd.getWeight());
-                }
-                case 3 -> {
-                    return Util1.toNull(sd.getStdWeight());
-                }
-                case 4 -> {
-                    //qty
-                    return Util1.toNull(sd.getQty());
-                }
-                case 5 -> {
-                    return Util1.toNull(sd.getTotalWeight());
-                }
-                case 6 -> {
-                    //price
-                    return Util1.toNull(sd.getPrice());
-                }
-                case 7 -> {
-                    //amount
-                    return Util1.toNull(sd.getAmount());
-                }
-                default -> {
-                    return null;
+            if (!listDetail.isEmpty()) {
+                SaleHisDetail record = listDetail.get(row);
+                switch (column) {
+                    case 0 -> {
+                        //code
+                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
+                    }
+                    case 1 -> {
+                        return record.getStockName();
+                    }
+                    case 2 -> {
+                        return Util1.toNull(record.getWet());
+                    }
+                    case 3 -> {
+                        return Util1.toNull(record.getRice());
+                    }
+                    case 4 -> {
+                        return Util1.toNull(record.getWeight());
+                    }
+                    case 5 -> {
+                        return Util1.toNull(record.getQty());
+                    }
+                    case 6 -> {
+                        return Util1.toNull(record.getBag());
+                    }
+                    case 7 -> {
+                        return Util1.toNull(record.getPrice());
+                    }
+                    case 8 -> {
+                        return Util1.toNull(record.getAmount());
+                    }
+                    default -> {
+                        return new Object();
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -152,89 +183,71 @@ public class SaleRiceTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            SaleHisDetail sd = listDetail.get(row);
             if (value != null) {
+                SaleHisDetail pd = listDetail.get(row);
                 switch (column) {
                     case 0, 1 -> {
                         //Code
-                        if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
-                            sd.setStockCode(s.getKey().getStockCode());
-                            sd.setStockName(s.getStockName());
-                            sd.setUserCode(s.getUserCode());
-                            sd.setRelName(s.getRelName());
-                            sd.setQty(1.0);
-                            sd.setWeight(Util1.getDouble(s.getWeight()));
-                            sd.setWeightUnit(s.getWeightUnit());
-                            sd.setUnitCode(Util1.isNull(s.getSaleUnitCode(), "-"));
-                            sd.setStock(s);
-                            sd.setPrice(Util1.getDouble(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
-                            setSelection(row, 2);
-                            addNewRow();
-                            observer.selected("STOCK-INFO", "STOCK-INFO");
+                        if (value != null) {
+                            if (value instanceof Stock s) {
+                                pd.setStockCode(s.getKey().getStockCode());
+                                pd.setStockName(s.getStockName());
+                                pd.setUserCode(s.getUserCode());
+                                pd.setRelName(s.getRelName());
+                                pd.setQty(1.0);
+                                pd.setUnitCode(s.getPurUnitCode());
+                                addNewRow();
+                            }
                         }
+                        parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
-                        sd.setWeight(Util1.getDouble(value));
+                        double wet = Util1.getDouble(value);
+                        if (wet > 0) {
+                            pd.setWet(wet);
+                        }
                     }
                     case 3 -> {
-                        sd.setStdWeight(Util1.getDouble(value));
+                        double rice = Util1.getDouble(value);
+                        if (rice > 0) {
+                            pd.setRice(rice);
+                        }
                     }
                     case 4 -> {
-                        //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                                if (sd.getUnitCode() == null) {
-                                    setSelection(row, 6);
-                                } else {
-                                    setSelection(row, 7);
-                                }
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double wt = Util1.getDouble(value);
+                        if (wt > 0) {
+                            pd.setWeight(wt);
+                        }
+                    }
+                    case 5 -> {
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            pd.setQty(qty);
                         }
                     }
                     case 6 -> {
-                        //price
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                sd.setOrgPrice(Util1.getDouble(value));
-                                setSelection(row + 1, 0);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            setSelection(row, column);
+                        double bag = Util1.getDouble(value);
+                        if (bag > 0) {
+                            pd.setBag(bag);
                         }
                     }
                     case 7 -> {
-                        //amt
-                        sd.setAmount(Util1.getDouble(value));
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            pd.setPrice(price);
+                        }
                     }
+
                 }
-                assignLocation(sd);
-                calculateAmount(sd);
-                fireTableRowsUpdated(row, row);
+                assignLocation(pd);
+                calculateAmount(pd);
                 setRecord(listDetail.size() - 1);
-                observer.selected("SALE-TOTAL", "SALE-TOTAL");
-                parent.requestFocusInWindow();
+                fireTableRowsUpdated(row, row);
+                parent.requestFocus();
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
-    }
-
-    private void setSelection(int row, int column) {
-        parent.setRowSelectionInterval(row, row);
-        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(SaleHisDetail sd) {
@@ -247,6 +260,12 @@ public class SaleRiceTableModel extends AbstractTableModel {
                     sd.setLocName(l.getLocName());
                 }
             }
+        }
+    }
+
+    private void setRecord(int size) {
+        if (lblRec != null) {
+            lblRec.setText("Records : " + size);
         }
     }
 
@@ -277,59 +296,37 @@ public class SaleRiceTableModel extends AbstractTableModel {
 
     public void setListDetail(List<SaleHisDetail> listDetail) {
         this.listDetail = listDetail;
-        setRecord(listDetail.size());
-        addNewRow();
+        //setRecord(listDetail.size());
         fireTableDataChanged();
     }
 
-    private void setRecord(int size) {
-        lblRecord.setText("Records : " + size);
-    }
-
-    public void removeListDetail() {
-        this.listDetail.clear();
-    }
-
-    private void calculateAmount(SaleHisDetail s) {
-        double orgPrice = Util1.getDouble(s.getOrgPrice());
-        double qty = Util1.getDouble(s.getQty());
-        double weight = s.getWeight();
-        double stdWt = s.getStdWeight();
-        if (s.getStockCode() != null && weight > 0 && orgPrice > 0) {
-            stdWt = stdWt == 0 ? weight : stdWt;
-            double price = stdWt / weight * orgPrice;
+    private void calculateAmount(SaleHisDetail sale) {
+        double price = Util1.getDouble(sale.getPrice());
+        double qty = Util1.roundDown2D(sale.getQty());
+        if (sale.getStockCode() != null) {
             double amount = qty * price;
-            s.setPrice(price);
-            s.setAmount(amount);
+            sale.setAmount(amount);
         }
-        if (s.getQty() > 0 && s.getWeight() > 0) {
-            s.setTotalWeight(Util1.getDouble(s.getQty()) * Util1.getDouble(s.getWeight()));
-        }
-    }
-
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(Global.parentForm, text);
+        observer.selected("SALE-TOTAL", "SALE-TOTAL");
     }
 
     public boolean isValidEntry() {
-        boolean status = true;
         for (SaleHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
+                sdh.setUnitCode("-");
                 if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    status = false;
                     parent.requestFocus();
-                    break;
+                    return false;
                 } else if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
-                    status = false;
                     parent.requestFocus();
-                    break;
+                    return false;
                 }
             }
         }
-        return status;
+        return true;
     }
 
     public List<SaleDetailKey> getDelList() {
@@ -365,13 +362,22 @@ public class SaleRiceTableModel extends AbstractTableModel {
         }
     }
 
-    public SaleHisDetail getSale(int row) {
+    public SaleHisDetail getObject(int row) {
         return listDetail.get(row);
+    }
+
+    public void removeListDetail() {
+        this.listDetail.clear();
     }
 
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
+    }
+
+    public void updateRow(int row) {
+        fireTableRowsUpdated(row, row);
     }
 }

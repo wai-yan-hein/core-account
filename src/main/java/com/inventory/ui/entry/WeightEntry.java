@@ -360,6 +360,9 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         param.put("p_vou_date", Util1.getDate(p.getVouDate()));
         param.put("p_vou_time", Util1.getTime(p.getVouDate()));
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
+        String type =WeightStatus.values()[cboStatus.getSelectedIndex()].name();
+        log.info(type);
+        param.put("p_type", type);
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(p.getDescription(), t.getTraderName()));

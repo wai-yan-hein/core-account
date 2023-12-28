@@ -1,19 +1,20 @@
 package com.inventory.model;
 
-
 import lombok.Data;
 
 @Data
 public class LabourPaymentDetail {
+
     private String vouNo;
     private String compCode;
     private int uniqueId;
     private String description;
-    private double qty;
     private double price;
+    private double qty;
     private double amount;
     private String account;
     private String accountName;
-
+    private String deptCode;
+    private String deptUserCode;
 
 }

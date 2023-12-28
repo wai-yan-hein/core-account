@@ -33,5 +33,6 @@ public class LabourPaymentDto {
     private double payTotal;
     private ZonedDateTime vouDateTime;
     private String labourName;
+    private boolean post;
 
 }

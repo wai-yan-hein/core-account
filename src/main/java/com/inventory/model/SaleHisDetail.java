@@ -36,29 +36,32 @@ public class SaleHisDetail {
     @Column(name = "expire_date")
     private Date expDate;
     @Column(name = "qty", nullable = false)
-    private Double qty;
+    private double qty;
     @Column(name = "sale_unit")
     private String unitCode;
     @Column(name = "sale_price", nullable = false)
-    private Double price;
+    private double price;
     @Column(name = "sale_amt", nullable = false)
-    private Double amount;
+    private double amount;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "batch_no")
     private String batchNo;
     @Column(name = "weight")
-    private Double weight;
+    private double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "std_weight")
-    private Double stdWeight;
+    private double stdWeight;
     @Column(name = "total_weight")
-    private Double totalWeight;
+    private double totalWeight;
     @Column(name = "org_price")
     private double orgPrice;
     @Column(name = "weight_loss")
     private double weightLoss;
+    private double wet;
+    private double rice;
+    private double bag;
     @Transient
     private String userCode;
     @Transient

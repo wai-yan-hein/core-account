@@ -66,6 +66,8 @@ public class ChartOfAccount {
     private boolean credit;
     @Column(name = "sort_order_id")
     private Integer sortOrderId;
+    @Column(name = "bank_no")
+    private String bankNo;
     @Transient
     private String groupCode;
     @Transient

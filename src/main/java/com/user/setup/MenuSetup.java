@@ -275,6 +275,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             Menu menu = new Menu();
             menu.setKey(vMenu.getKey());
             menu.setMenuName(menuName);
+            menu.setMenuNameMM(txtMenuMM.getText());
             menu.setParentMenuCode(parentCode);
             menu.setMenuUrl(txtMenuUrl.getText());
             ChartOfAccount coa = cOA3AutoCompleter.getCOA();
@@ -310,6 +311,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void setMenu(Menu menu) {
         txtMenuName.setText(menu.getMenuName());
+        txtMenuMM.setText(menu.getMenuNameMM());
         txtMenuUrl.setText(menu.getMenuUrl());
         txtOrder.setText(menu.getOrderBy() == null ? null : menu.getOrderBy().toString());
         accountRepo.findCOA(menu.getAccount()).doOnSuccess((t) -> {
@@ -322,6 +324,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void clear() {
         txtMenuName.setText(null);
+        txtMenuMM.setText(null);
         txtMenuUrl.setText(null);
         txtOrder.setText(null);
         txtAccount.setText(null);

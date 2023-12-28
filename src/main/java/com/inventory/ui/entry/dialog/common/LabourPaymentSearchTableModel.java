@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LabourPaymentSearchTableModel extends AbstractTableModel {
 
     private List<LabourPaymentDto> listDetail = new ArrayList();
-    private final String[] columnNames = {"Pay Date", "Vou No", "Remark", "Labour Group", "Member", "Payment"};
+    private final String[] columnNames = {"Pay Date", "Vou No", "Remark", "Labour Group", "Member", "Payment", "Post"};
     private double paidTotal;
     private int size;
 
@@ -95,6 +95,10 @@ public class LabourPaymentSearchTableModel extends AbstractTableModel {
                     case 5 -> {
                         //user
                         return his.getPayTotal();
+
+                    }
+                    case 6 -> {
+                        return his.isPost();
                     }
                 }
             }

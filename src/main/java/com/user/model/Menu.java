@@ -32,6 +32,8 @@ public class Menu {
     private String menuClass;
     @Column(name = "menu_name")
     private String menuName;
+    @Column(name = "menu_name_mm")
+    private String menuNameMM;
     @Column(name = "menu_url")
     private String menuUrl;
     @Column(name = "parent_menu_code")

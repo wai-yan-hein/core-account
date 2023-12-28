@@ -20,6 +20,7 @@ public class VRoleMenu {
     private String roleCode;
     private boolean allow;
     private String menuName;
+    private String menuNameMM;
     private String menuType;
     private String menuUrl;
     private String menuClass;

@@ -440,7 +440,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleByBatch.initMain();
                 return saleByBatch;
             }
-            case "Sale By Weight", "Sale Export", "Sale Rice" -> {
+            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy" -> {
                 int type = getSaleType(menuName);
                 SaleDynamic s = new SaleDynamic(type);
                 s.setUserRepo(userRepo);
@@ -1105,6 +1105,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.EXPORT;
             case "Sale Rice" ->
                 SaleDynamic.RICE;
+            case "Sale Paddy" ->
+                SaleDynamic.PADDY;
             default ->
                 0;
         };
@@ -1348,9 +1350,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 if (menu.getChild() != null) {
                     if (!menu.getChild().isEmpty()) {
                         JMenu parent = new JMenu();
-                        parent.setText(menu.getMenuName());
                         parent.setFont(Global.menuFont);
                         parent.setName(getMenuName(menu));
+                        parent.setText(Util1.isNull(menu.getMenuNameMM(), menu.getMenuName()));
                         //Need to add action listener
                         //====================================
                         menuBar.add(parent);
@@ -1358,20 +1360,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     } else {  //No Child
 
                         JMenu jmenu = new JMenu();
-                        jmenu.setText(menu.getMenuName());
                         jmenu.setFont(Global.menuFont);
                         jmenu.setName(getMenuName(menu));
-                        //Need to add action listener
-                        //====================================
+                        jmenu.setText(Util1.isNull(menu.getMenuNameMM(), menu.getMenuName()));
                         menuBar.add(jmenu);
                     }
                 } else {  //No Child
                     JMenu jmenu = new JMenu();
-                    jmenu.setText(menu.getMenuName());
                     jmenu.setFont(Global.menuFont);
                     jmenu.setName(getMenuName(menu));
-                    //Need to add action listener
-                    //====================================
+                    jmenu.setText(Util1.isNull(menu.getMenuNameMM(), menu.getMenuName()));
                     menuBar.add(jmenu);
                 }
             });
@@ -1394,35 +1392,34 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 if (vrMenu.getChild() != null) {
                     if (!vrMenu.getChild().isEmpty()) {
                         JMenu menu = new JMenu();
-                        menu.setText(vrMenu.getMenuName());
                         menu.setFont(Global.menuFont);
                         menu.setName(vrMenu.getMenuClass() + ","
                                 + Util1.isNull(vrMenu.getAccount(), "-") + ","
                                 + vrMenu.getMenuName());
+                        menu.setText(Util1.isNull(vrMenu.getMenuNameMM(), vrMenu.getMenuName()));
                         //Need to add action listener
                         //====================================
                         parent.add(menu);
                         addChildMenu(menu, vrMenu.getChild());
                     } else {  //No Child
                         JMenuItem menuItem = new JMenuItem();
-                        menuItem.setText(vrMenu.getMenuName());
                         menuItem.addActionListener(menuListener);
                         menuItem.setFont(Global.menuFont);
                         menuItem.setName(vrMenu.getMenuClass() + ","
                                 + Util1.isNull(vrMenu.getAccount(), "-") + ","
                                 + vrMenu.getMenuName());
+                        menuItem.setText(Util1.isNull(vrMenu.getMenuNameMM(), vrMenu.getMenuName()));
                         //====================================
                         parent.add(menuItem);
                     }
                 } else {  //No Child
                     JMenuItem menuItem = new JMenuItem();
-
-                    menuItem.setText(vrMenu.getMenuName());
                     menuItem.setName(vrMenu.getMenuClass() + ","
                             + Util1.isNull(vrMenu.getAccount(), "-") + ","
                             + vrMenu.getMenuName());                    //Need to add action listener
                     menuItem.addActionListener(menuListener);
                     menuItem.setFont(Global.menuFont);
+                    menuItem.setText(Util1.isNull(vrMenu.getMenuNameMM(), vrMenu.getMenuName()));
                     //====================================
                     parent.add(menuItem);
                 }

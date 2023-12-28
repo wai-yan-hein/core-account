@@ -540,16 +540,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     }
 
     private void initTextBoxFormat() {
-        txtVouBalance.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouPaid.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouTotal.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouDiscP.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouTaxP.setFormatterFactory(Util1.getDecimalFormat2());
-        txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat2());
-        txtTax.setFormatterFactory(Util1.getDecimalFormat2());
-        txtComPercent.setFormatterFactory(Util1.getDecimalFormat2());
-        txtComAmt.setFormatterFactory(Util1.getDecimalFormat2());
+        ComponentUtil.setTextProperty(this);
     }
 
     private void assignDefaultValue() {
@@ -671,7 +662,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             ph.setListPD(getListDetail());
             ph.setListExpense(expenseTableModel.getExpenseList());
             ph.setListDel(getListDel());
-            inventoryRepo.save(ph).subscribe((t) -> {
+            inventoryRepo.save(ph).doOnSuccess((t) -> {
                 if (print) {
                     String landVouNo = t.getLandVouNo();
                     String weightVouNo = t.getWeightVouNo();
@@ -685,11 +676,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 } else {
                     clear(true);
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 observer.selected("save", false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
         }
     }
 

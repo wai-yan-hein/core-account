@@ -58,8 +58,6 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.dialog = dialog;
     }
 
-   
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -71,6 +69,7 @@ public class SaleExportTableModel extends AbstractTableModel {
     public void setVouDate(JDateChooser vouDate) {
         this.vouDate = vouDate;
     }
+
     public void setParent(JTable parent) {
         this.parent = parent;
     }
@@ -193,7 +192,7 @@ public class SaleExportTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(),Global.parentForm);
+                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -348,7 +347,6 @@ public class SaleExportTableModel extends AbstractTableModel {
 
     public void removeListDetail() {
         this.listDetail.clear();
-        addNewRow();
     }
 
     private void calculateAmount(SaleHisDetail s) {
@@ -358,7 +356,7 @@ public class SaleExportTableModel extends AbstractTableModel {
             double amount = qty * price;
             s.setAmount(amount);
         }
-        if (s.getQty() != null && s.getWeight() != null) {
+        if (s.getQty() > 0 && s.getWeight() > 0) {
             s.setTotalWeight(Util1.getDouble(s.getQty()) * Util1.getDouble(s.getWeight()));
         }
         observer.selected("SALE-TOTAL", "SALE-TOTAL");
