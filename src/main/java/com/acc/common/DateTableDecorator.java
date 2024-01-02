@@ -13,7 +13,7 @@ public class DateTableDecorator {
     private final int currentPageSize = 1;
     private int currentPage = 1;
     private JPanel pageLinkPanel;
-    private static final int MAX_PAGING_TO_SHOW = 9;
+    private static int MAX_PAGING_TO_SHOW = 9;
     private static final String ELLIPSES = "...";
     private HashMap<Integer, String> hmData;
     private HashMap<String, Integer> hmPage;
@@ -70,6 +70,12 @@ public class DateTableDecorator {
 
     private JPanel createPaginationPanel() {
         JPanel paginationPanel = new JPanel();
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        int screenWidth = gd.getDisplayMode().getWidth();
+        if (screenWidth <= 1366) {
+            MAX_PAGING_TO_SHOW = 7;
+        }
         pageLinkPanel = new JPanel(new GridLayout(1, MAX_PAGING_TO_SHOW, 3, 3));
         paginationPanel.add(pageLinkPanel);
         return paginationPanel;
