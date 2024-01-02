@@ -29,7 +29,7 @@ import com.inventory.ui.setup.common.SupplierTabelModel;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import com.repo.UserRepo;
-import com.user.common.DepartmentComboBoxModel;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.user.model.DepartmentUser;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -73,7 +73,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
-    private DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
+    private DepartmentUserAutoCompleter departmentUserAutoCompleter;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -132,6 +132,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void initCombo() {
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, false);
+        departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
         inventoryRepo.getRegion().subscribe((t) -> {
             regionAutoCompleter.setListRegion(t);
         });
@@ -140,15 +141,12 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             traderGroupAutoCompleter.setGroup(null);
         });
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
-        accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CREDITOR_GROUP))
-                .subscribe((t) -> {
-                    cOAAutoCompleter.setListCOA(t);
-                });
-        userRepo.getDeparment(true).subscribe(t -> {
-            departmentComboBoxModel.setData(t);
-            cboDept.setModel(departmentComboBoxModel);
-            cboDept.setSelectedIndex(0);
-        });
+        accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CREDITOR_GROUP)).doOnSuccess((t) -> {
+            cOAAutoCompleter.setListCOA(t);
+        }).subscribe();
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setListDepartment(t);
+        }).subscribe();
         assignDefault();
     }
 
@@ -156,10 +154,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         accountRepo.findCOA(ProUtil.getProperty(ProUtil.CREDITOR_ACC)).subscribe((tt) -> {
             cOAAutoCompleter.setCoa(tt);
         });
-        userRepo.findDepartment(Global.deptId).subscribe(t -> {
-            departmentComboBoxModel.setSelectedItem(t);
-            cboDept.repaint();
-        });
+        userRepo.findDepartment(Global.deptId).doOnSuccess(t -> {
+            departmentUserAutoCompleter.setDepartment(t);
+        }).subscribe();
     }
 
     private void initTable() {
@@ -206,38 +203,36 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         spPercent.setValue(Util1.getInteger(supplier.getCreditDays()));
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        inventoryRepo.findRegion(supplier.getRegCode()).subscribe((t) -> {
+        inventoryRepo.findRegion(supplier.getRegCode()).doOnSuccess((t) -> {
             regionAutoCompleter.setRegion(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
-        inventoryRepo.findTraderGroup(supplier.getGroupCode(), Global.deptId).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findTraderGroup(supplier.getGroupCode(), Global.deptId).doOnSuccess((t) -> {
             traderGroupAutoCompleter.setGroup(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
         accountRepo.findCOA(supplier.getAccount()).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
         }).subscribe();
         Integer deptId = supplier.getDeptId();
-        if (!Util1.isNullOrEmpty(deptId)) {
-            userRepo.findDepartment(deptId).subscribe(t -> {
-                departmentComboBoxModel.setSelectedItem(t);
-                cboDept.repaint();
-            });
-        }
+        userRepo.findDepartment(deptId).doOnSuccess(t -> {
+            departmentUserAutoCompleter.setDepartment(t);
+        }).subscribe();
 
     }
 
     private boolean isValidEntry() {
         boolean status;
+        DepartmentUser department = departmentUserAutoCompleter.getDepartment();
+        Region region = regionAutoCompleter.getRegion();
+        ChartOfAccount coa = cOAAutoCompleter.getCOA();
+        TraderGroup traderGroup = traderGroupAutoCompleter.getGroup();
+
         if (txtCusName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(Global.parentForm, "Customer Name can't be empty");
             status = false;
-        } else if (cboDept.getSelectedIndex() == -1) {
+        } else if (department == null) {
             JOptionPane.showMessageDialog(this, "You must choose department.", "Department", JOptionPane.ERROR_MESSAGE);
             status = false;
-            cboDept.requestFocus();
+            txtDep.requestFocus();
         } else {
             supplier.setUserCode(txtCusCode.getText());
             supplier.setTraderName(txtCusName.getText());
@@ -246,29 +241,14 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             supplier.setAddress(txtCusAddress.getText());
             supplier.setActive(chkActive.isSelected());
             supplier.setCreditDays(Util1.getInteger(spPercent.getValue()));
-            if (cboDept.getSelectedItem() instanceof DepartmentUser user) {
-                supplier.setDeptId(user.getKey().getDeptId());
-            }
-            Region r = regionAutoCompleter.getRegion();
-            if (r != null) {
-                supplier.setRegCode(r.getKey().getRegCode());
-            }
-            if (cOAAutoCompleter != null) {
-                ChartOfAccount coa = cOAAutoCompleter.getCOA();
-                if (coa != null) {
-                    supplier.setAccount(coa.getKey().getCoaCode());
-                } else {
-                    supplier.setAccount(ProUtil.getProperty(ProUtil.CREDITOR_ACC));
-                }
-            }
+            supplier.setDeptId(department.getKey().getDeptId());
+            supplier.setRegCode(region == null ? null : region.getKey().getRegCode());
+            supplier.setAccount(coa == null ? ProUtil.getProperty(ProUtil.CREDITOR_ACC) : coa.getKey().getCoaCode());
             supplier.setType("SUP");
             supplier.setCashDown(chkCD.isSelected());
             supplier.setMulti(chkMulti.isSelected());
-            TraderGroup t = traderGroupAutoCompleter.getGroup();
-            if (t != null) {
-                supplier.setGroupCode(t.getKey().getGroupCode());
+            supplier.setGroupCode(traderGroup == null ? null : traderGroup.getKey().getGroupCode());
 
-            }
             if (lblStatus.getText().equals("NEW")) {
                 supplier.setMacId(Global.macId);
                 supplier.setCreatedBy(Global.loginUser.getUserCode());
@@ -289,17 +269,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         if (isValidEntry()) {
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            inventoryRepo.saveTrader(supplier).subscribe((t) -> {
+            inventoryRepo.saveTrader(supplier).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     supplierTabelModel.setCustomer(selectRow, t);
                 } else {
                     supplierTabelModel.addCustomer(t);
                 }
-                clear();
-                sendMessage(t.getTraderName());
-            }, (e) -> {
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).doOnTerminate(() -> {
+                sendMessage(supplier.getTraderName());
+                clear();
+            }).subscribe();
 
         }
     }
@@ -420,7 +401,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         jLabel12 = new javax.swing.JLabel();
         spPercent = new javax.swing.JSpinner();
         jLabel30 = new javax.swing.JLabel();
-        cboDept = new javax.swing.JComboBox<>();
+        txtDep = new javax.swing.JTextField();
         s1 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
@@ -545,7 +526,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         jLabel30.setFont(Global.lableFont);
         jLabel30.setText("Department");
 
-        cboDept.setFont(Global.textFont);
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtCusName"); // NOI18N
 
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
@@ -592,10 +574,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtCusAddress, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(cboDept, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtCusName, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtCusEmail)
-                            .addComponent(spPercent))
+                            .addComponent(spPercent)
+                            .addComponent(txtDep))
                         .addContainerGap())))
         );
 
@@ -608,8 +590,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtSysCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboDept, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel30))
+                    .addComponent(jLabel30)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -798,7 +780,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnGroup;
-    private javax.swing.JComboBox<DepartmentUser> cboDept;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCD;
     private javax.swing.JCheckBox chkMulti;
@@ -828,6 +809,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JTextField txtCusEmail;
     private javax.swing.JTextField txtCusName;
     private javax.swing.JTextField txtCusPhone;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtGroup;
     private javax.swing.JTextField txtRegion;

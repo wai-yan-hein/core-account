@@ -56,6 +56,8 @@ public class VStockIO {
     private String inUnitName;
     private String outUnitName;
     private String weightUnitName;
-    private double weight;
+    private Double weight;
+    private Double inBag;
+    private Double outBag;
 
 }

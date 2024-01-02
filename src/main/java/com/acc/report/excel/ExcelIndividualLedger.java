@@ -193,9 +193,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                 font.setFontHeightInPoints((short) 12);
                 CellStyle cellStyle = workbook.createCellStyle();
                 cellStyle.setFont(font);
-                List<ChartOfAccount> coaList = cOATableModel.getListCOA();
-                coaList.forEach((t) -> {
-                    if (t.isActive()) {
+                List<ChartOfAccount> coaList = cOATableModel.getListCOA().stream().filter((c) -> c.isActive()).toList();
+                if (!coaList.isEmpty()) {
+                    coaList.forEach((t) -> {
                         String coaCode = t.getKey().getCoaCode();
                         String coaName = t.getCoaNameEng();
                         lblMessage.setText("Data requesting for " + coaName);
@@ -203,12 +203,14 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                         lblMessage.setText("Data ready for " + coaName + " Record : " + data.size());
                         String sheetName = Util1.replaceSpecialCharactersWithSpace(coaName);
                         createCOASheet(workbook, data, coaCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
-                    }
-                });
-                lblMessage.setText("Exporting File... Please wait.");
-                workbook.write(outputStream);
-                lastPath = outputPath;
-                lblMessage.setText("complete.");
+                    });
+                    lblMessage.setText("Exporting File... Please wait.");
+                    workbook.write(outputStream);
+                    lastPath = outputPath;
+                    lblMessage.setText("complete.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please Select Chart Of Account.");
+                }
                 btnExport.setEnabled(true);
             } catch (IOException e) {
                 btnExport.setEnabled(true);
@@ -228,9 +230,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                 font.setFontHeightInPoints((short) 12);
                 CellStyle cellStyle = workbook.createCellStyle();
                 cellStyle.setFont(font);
-                List<TraderA> listTrader = traderTableModel.getListTrader();
-                listTrader.forEach((t) -> {
-                    if (t.isActive()) {
+                List<TraderA> listTrader = traderTableModel.getListTrader().stream().filter((t) -> t.isActive()).toList();
+                if (!listTrader.isEmpty()) {
+                    listTrader.forEach((t) -> {
                         String traderCode = t.getKey().getCode();
                         String traderName = t.getTraderName();
                         String coaCode = t.getAccount();
@@ -239,12 +241,14 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                         lblMessage.setText("Data ready for " + traderName + " Record : " + data.size());
                         String sheetName = Util1.replaceSpecialCharactersWithSpace(traderName);
                         createTraderSheet(workbook, data, coaCode, traderCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
-                    }
-                });
-                lblMessage.setText("Exporting File... Please wait.");
-                workbook.write(outputStream);
-                lastPath = outputPath;
-                lblMessage.setText("complete.");
+                    });
+                    lblMessage.setText("Exporting File... Please wait.");
+                    workbook.write(outputStream);
+                    lastPath = outputPath;
+                    lblMessage.setText("complete.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please Select Customer or Supplier.");
+                }
                 btnExport.setEnabled(true);
             } catch (IOException e) {
                 btnExport.setEnabled(true);

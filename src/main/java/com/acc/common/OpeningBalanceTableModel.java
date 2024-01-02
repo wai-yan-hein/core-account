@@ -29,22 +29,20 @@ import javax.swing.JTable;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author htut
  */
+@Slf4j
 public class OpeningBalanceTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(OpeningBalanceTableModel.class);
     private AccountRepo accountRepo;
     private JTable parent;
     private TraderAAutoCompleter tradeAutoCompleter;
     private SelectionObserver selectionObserver;
-    private String[] columnsName = {"Code", "Chart Of Account", "Trader Code", "Trader Name", "Dept:", "Project No ", "Currency", "Dr-Amt", "Cr-Amt"};
+    private String[] columnsName = {"Dept:", "Code", "Chart Of Account", "Trader Code", "Trader Name", "Project No ", "Currency", "Dr-Amt", "Cr-Amt"};
     private List<OpeningBalance> listOpening = new ArrayList();
     private JDateChooser opDate;
     private JProgressBar progress;
@@ -134,19 +132,19 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
             OpeningBalance opening = listOpening.get(rowIndex);
             switch (columnIndex) {
                 case 0 -> {
-                    return opening.getCoaUsrCode();
+                    return opening.getDeptUsrCode();
                 }
                 case 1 -> {
-                    return opening.getSrcAccName();
+                    return opening.getCoaUsrCode();
                 }
                 case 2 -> {
-                    return opening.getTraderUsrCode() == null ? opening.getTraderCode() : opening.getTraderUsrCode();
+                    return opening.getSrcAccName();
                 }
                 case 3 -> {
-                    return opening.getTraderName();
+                    return opening.getTraderUsrCode() == null ? opening.getTraderCode() : opening.getTraderUsrCode();
                 }
                 case 4 -> {
-                    return opening.getDeptUsrCode();
+                    return opening.getTraderName();
                 }
                 case 5 -> {
                     return opening.getProjectNo();
@@ -174,18 +172,27 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         try {
             OpeningBalance opening = listOpening.get(rowIndex);
             switch (columnIndex) {
-                case 0, 1 -> {
+                case 0 -> {
+                    if (value != null) {
+                        if (value instanceof DepartmentA dep) {
+                            opening.setDeptCode(dep.getKey().getDeptCode());
+                            opening.setDeptUsrCode(dep.getUserCode());
+                            parent.setColumnSelectionInterval(1, 1);
+                        }
+                    }
+                }
+                case 1, 2 -> {
                     if (value != null) {
                         if (value instanceof ChartOfAccount coa) {
                             opening.setCoaUsrCode(coa.getCoaCodeUsr());
                             opening.setSourceAccId(coa.getKey().getCoaCode());
                             opening.setSrcAccName(coa.getCoaNameEng());
                             parent.setRowSelectionInterval(rowIndex, rowIndex);
-                            parent.setColumnSelectionInterval(2, 2);
+                            parent.setColumnSelectionInterval(3, 3);
                         }
                     }
                 }
-                case 2, 3 -> {
+                case 3, 4 -> {
                     if (value != null) {
                         if (value instanceof TraderA trader) {
                             opening.setTraderUsrCode(trader.getUserCode());
@@ -202,19 +209,11 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                                 }).block();
                             }
                             parent.setRowSelectionInterval(rowIndex, rowIndex);
-                            parent.setColumnSelectionInterval(4, 4);
+                            parent.setColumnSelectionInterval(5, 6);
                         }
                     }
                 }
-                case 4 -> {
-                    if (value != null) {
-                        if (value instanceof DepartmentA dep) {
-                            opening.setDeptCode(dep.getKey().getDeptCode());
-                            opening.setDeptUsrCode(dep.getUserCode());
-                            parent.setColumnSelectionInterval(5, 5);
-                        }
-                    }
-                }
+
                 case 5 -> {
                     if (value != null) {
                         if (value instanceof Project p) {

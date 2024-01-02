@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import java.io.Serializable;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -15,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class VStockBalance implements Serializable {
+public class VStockBalance {
 
     private String stockCode;
     private String stockName;
@@ -24,4 +23,8 @@ public class VStockBalance implements Serializable {
     private double totalQty;
     private double weight;
     private String unitName;
+    private Double salePrice;
+    private Double saleQty;
+    private Double transferQty;
+    private Double opQty;
 }

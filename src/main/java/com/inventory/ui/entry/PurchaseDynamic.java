@@ -374,6 +374,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(String.class, new DecimalFormatRender(2));
@@ -541,6 +544,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void initTextBoxFormat() {
         ComponentUtil.setTextProperty(this);
+        txtVouNo.setHorizontalAlignment(JTextField.LEFT);
     }
 
     private void assignDefaultValue() {
@@ -591,6 +595,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private void clear(boolean focus) {
         disableForm(true);
         clearDetail();
+        addNewRow();
         initTextBoxValue();
         assignDefaultValue();
         labourGroupAutoCompleter.setObject(null);
@@ -1383,6 +1388,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         detail.setBag(s.getTotalBag());
         detail.setPrice(0.0);
         addPurchase(detail);
+        purchasePaddyTableModel.setEdit(false);
         tblPur.setRowSelectionInterval(0, 0);
         tblPur.setColumnSelectionInterval(2, 2);
         tblPur.requestFocus();

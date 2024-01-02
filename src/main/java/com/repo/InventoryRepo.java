@@ -4093,8 +4093,6 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    //StockIssueReceive
-
     public Mono<StockIssueReceive> saveStockIssRec(StockIssueReceive his) {
         return inventoryApi.post()
                 .uri("stockIssRec/saveStockIssRec")

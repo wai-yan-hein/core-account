@@ -548,7 +548,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoAutoCompleter.setAutoText(null);
         projectAutoCompleter.setProject(null);
         progress.setIndeterminate(false);
-        txtCus.requestFocus(focus);
+        if(focus){
+            txtCus.requestFocus();
+        }
     }
 
     private void clearDiscount() {
@@ -599,11 +601,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     if (!Util1.isNullOrEmpty(t.getWeightVouNo())) {
                         printWeightVoucher(t);
                     } else {
-                        String reportName = getReportName();
-                        printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
+                        printVoucher(t.getKey().getVouNo(), chkVou.isSelected());
                     }
                 } else {
-                    clear(false);
+                    clear(true);
                 }
             }).doOnError((e) -> {
                 observer.selected("save", true);
@@ -1043,22 +1044,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void disableForm(boolean status) {
-        tblSale.setEnabled(status);
-        panelSale.setEnabled(status);
-        txtSaleDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtLocation.setEnabled(status);
-        txtSaleman.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtDueDate.setEnabled(status);
-        txtVouPaid.setEnabled(status);
-        txtTax.setEnabled(status);
-        txtVouTaxP.setEnabled(status);
-        txtVouDiscP.setEnabled(status);
-        txtVouDiscount.setEnabled(status);
-        txtGrandTotal.setEnabled(status);
-        txtReference.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -1077,10 +1063,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         setListDetail(listSaleDetail);
     }
 
-    private void printVoucher(String vouNo, String reportName, boolean print) {
+    private void printVoucher(String vouNo, boolean print) {
         inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
             if (t != null) {
-                viewReport(t, reportName, print);
+                viewReport(t, print);
             }
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -1090,9 +1076,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }).subscribe();
     }
 
-    private void viewReport(List<VSale> list, String reportName, boolean print) {
+    private void viewReport(List<VSale> list, boolean print) {
         try {
+            String reportName = getReportName();
             if (reportName != null) {
+                VSale sale = list.getFirst();
                 Map<String, Object> param = new HashMap<>();
                 param.put("p_print_date", Util1.getTodayDateTime());
                 param.put("p_comp_name", Global.companyName);
@@ -1102,9 +1090,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 param.put("p_balance", balance);
                 param.put("p_prv_balance", prvBal);
                 param.put("p_sub_report_dir", "report/");
+                param.put("p_trader_name", Util1.isNull(sale.getReference(), sale.getTraderName()));
                 if (!list.isEmpty()) {
                     ObjectMapper mapper = new ObjectMapper();
-                    JsonNode n1 = mapper.readTree(Util1.gson.toJson(list.get(0).getListDiscount()));
+                    JsonNode n1 = mapper.readTree(Util1.gson.toJson(sale.getListDiscount()));
                     JsonDataSource d1 = new JsonDataSource(n1, null) {
                     };
                     param.put("p_sub_data", d1);
@@ -1113,7 +1102,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(list));
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                log.info(ProUtil.getFontPath());
                 if (print) {
                     JasperReportUtil.print(jp);
                 } else {
@@ -1129,17 +1117,16 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     private String getReportName() {
-        String name = null;
         if (chkVou.isSelected()) {
-            name = ProUtil.getProperty("report.sale.voucher");
+            return ProUtil.getProperty(ProUtil.SALE_VOU);
         }
         if (chkA4.isSelected()) {
-            name = ProUtil.getProperty("report.sale.A4");
+            return ProUtil.getProperty(ProUtil.SALE_VOU_A4);
         }
         if (chkA5.isSelected()) {
-            name = ProUtil.getProperty("report.sale.A5");
+            return ProUtil.getProperty(ProUtil.SALE_VOU_A5);
         }
-        return name;
+        return null;
     }
 
     private void focusTable() {

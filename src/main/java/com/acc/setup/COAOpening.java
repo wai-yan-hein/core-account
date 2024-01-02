@@ -16,6 +16,7 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.acc.model.OpeningKey;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.SelectionObserver;
 import com.common.PanelControl;
@@ -24,7 +25,6 @@ import com.common.Util1;
 import com.common.DecimalFormatRender;
 import com.common.ReportFilter;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
@@ -32,8 +32,6 @@ import com.user.editor.ProjectCellEditor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -46,15 +44,11 @@ import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 
 import net.coderazzi.filters.gui.AutoChoices;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
@@ -97,7 +91,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
      */
     public COAOpening() {
         initComponents();
-        initFocusListener();
         actionMapping();
     }
 
@@ -142,13 +135,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             if (key != null) {
                 int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?");
                 if (yn == JOptionPane.YES_OPTION) {
-                    accountRepo.delete(key).subscribe((sucess) -> {
+                    accountRepo.delete(key).doOnSuccess((sucess) -> {
                         if (sucess) {
                             openingTableModel.deleteOpening(row);
                         }
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+                    }).subscribe();
                 }
             } else {
                 openingTableModel.deleteOpening(row);
@@ -157,6 +148,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void initMain() {
+        initProperty();
         batchLock(!Global.batchLock);
         txtDate.setDate(Util1.parseDate(Global.startDate, "dd/MM/yyyy"));
         initComboBox();
@@ -164,7 +156,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         searchOpening();
     }
 
-    // initialize data for combo box
     private void initComboBox() {
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, null, true, true);
         departmentAutoCompleter.setObserver(this);
@@ -185,25 +176,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         projectAutoCompleter.setObserver(this);
     }
 
-    private void initFocusListener() {
-        txtDept.addFocusListener(fa);
-        txtCOA.addFocusListener(fa);
-        txtCurrency.addFocusListener(fa);
-        txtDate.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
+    private void initProperty() {
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
-
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor ch) {
-                ch.selectAll();
-            }
-
-        }
-    };
 
     private void initTable() {
         tblOpening.setModel(openingTableModel);
@@ -223,29 +199,30 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         openingTableModel.setObserver(this);
         openingTableModel.setProgress(progress);
         openingTableModel.addNewRow();
-        tblOpening.getColumnModel().getColumn(0).setPreferredWidth(10);
-        tblOpening.getColumnModel().getColumn(1).setPreferredWidth(250);
-        tblOpening.getColumnModel().getColumn(2).setPreferredWidth(20);
-        tblOpening.getColumnModel().getColumn(3).setPreferredWidth(250);
-        tblOpening.getColumnModel().getColumn(4).setPreferredWidth(5);
-        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(10);
-        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(20);
-        tblOpening.getColumnModel().getColumn(7).setPreferredWidth(20);
-        tblOpening.getColumnModel().getColumn(6).setCellRenderer(new DecimalFormatRender());
-        tblOpening.getColumnModel().getColumn(7).setCellRenderer(new DecimalFormatRender());
-        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblOpening.getColumnModel().getColumn(0).setPreferredWidth(10);//dep
+        tblOpening.getColumnModel().getColumn(1).setPreferredWidth(80);//code
+        tblOpening.getColumnModel().getColumn(2).setPreferredWidth(200);//name
+        tblOpening.getColumnModel().getColumn(3).setPreferredWidth(80);//trader code
+        tblOpening.getColumnModel().getColumn(4).setPreferredWidth(200);//trader name
+        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//project no
+        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(20);//cur
+        tblOpening.getColumnModel().getColumn(7).setPreferredWidth(80);//dr
+        tblOpening.getColumnModel().getColumn(8).setPreferredWidth(80);//dr
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            tblOpening.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
+        }).subscribe();
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        tblOpening.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
+        tblOpening.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(accountRepo));
-        accountRepo.getDepartment().subscribe((t) -> {
-            tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(t));
-        });
+        tblOpening.getColumnModel().getColumn(4).setCellEditor(new TraderCellEditor(accountRepo));
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new ProjectCellEditor(userRepo));
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             tblOpening.getColumnModel().getColumn(6).setCellEditor(new CurrencyEditor(t));
-        });
+        }).subscribe();
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblOpening.getColumnModel().getColumn(7).setCellRenderer(new DecimalFormatRender());
+        tblOpening.getColumnModel().getColumn(8).setCellRenderer(new DecimalFormatRender());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
@@ -255,7 +232,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         filterHeader.setVisible(false);
     }
 
-    // allo cell editable for tabl e
+    // allo cell editable for table
     public boolean isCellEditable(int row, int column) {
         return tblOpening.getModel().isCellEditable(row, column);
     }
@@ -648,7 +625,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtFOB, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)

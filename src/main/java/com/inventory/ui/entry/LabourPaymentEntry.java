@@ -108,7 +108,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     }
 
     private void initFormat() {
-        txtRecord.setFormatterFactory(Util1.getDecimalFormat());
+        ComponentUtil.setTextProperty(this);
     }
 
     private void actionMapping() {
@@ -378,6 +378,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtMember.setText(null);
         txtVouNo.setText(null);
         txtPayTotal.setValue(0);
+        txtLabourPrice.setValue(0);
         tableModel.clear();
         tableModel.addNewRow();
         lblStatus.setText("NEW");
@@ -522,9 +523,11 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     private void calTotal() {
         List<LabourPaymentDetail> list = tableModel.getListDetail();
         double total = list.stream().mapToDouble((t) -> t.getAmount()).sum();
+        double count = Util1.getDouble(txtMember.getText());
+        double price = count == 0 ? 0 : total / count;
         txtPayTotal.setValue(total);
+        txtLabourPrice.setValue(price);
         txtRecord.setValue(list.size());
-
     }
 
     private void setMemberCount() {
@@ -583,6 +586,8 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         btnCalculate = new javax.swing.JButton();
         jLabel14 = new javax.swing.JLabel();
         txtMember = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        txtLabourPrice = new javax.swing.JFormattedTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
@@ -778,6 +783,13 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtMember.setFont(Global.textFont);
         txtMember.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
+        jLabel16.setFont(Global.lableFont);
+        jLabel16.setText("Labour Price");
+
+        txtLabourPrice.setEditable(false);
+        txtLabourPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtLabourPrice.setFont(Global.amtFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -805,10 +817,16 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                         .addComponent(btnCalculate))
                     .addComponent(txtLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel14)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtMember, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel14)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMember, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtLabourPrice)))
+                .addGap(430, 430, 430)
                 .addComponent(lblStatus)
                 .addContainerGap())
         );
@@ -836,7 +854,9 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnCalculate)))
+                        .addComponent(btnCalculate)
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtLabourPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -922,6 +942,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel6;
@@ -941,6 +962,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     private javax.swing.JTextField txtExpense;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLabourGroup;
+    private javax.swing.JFormattedTextField txtLabourPrice;
     private javax.swing.JTextField txtMember;
     private javax.swing.JFormattedTextField txtPayTotal;
     private javax.swing.JFormattedTextField txtRecord;

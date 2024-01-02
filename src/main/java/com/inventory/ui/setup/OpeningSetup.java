@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.ExcelExporter;
@@ -29,13 +30,10 @@ import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.OPHisDetailKey;
 import com.inventory.ui.common.OpeningPaddyTableModel;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileReader;
 import java.io.IOException;
@@ -48,7 +46,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -146,8 +143,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initTextBoxFormat() {
-        txtQty.setFormatterFactory(Util1.getDecimalFormat());
-        txtAmount.setFormatterFactory(Util1.getDecimalFormat());
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
         switch (type) {
             case 1, 3 -> {
                 lblCusName.setVisible(false);
@@ -160,17 +157,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         }
 
     }
-
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void initCompleter() {
         monoLoc = inventoryRepo.getLocation();
@@ -224,10 +210,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//weight
-        inventoryRepo.getStockUnit().subscribe((t) -> {
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblOpening.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t)); // unit
             tblOpening.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t)); // weight_unit
-        });
+        }).subscribe();
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
     }
@@ -378,6 +364,18 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         }
     }
 
+    private int getListSize() {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                return openingTableModel.getListDetail().size();
+            }
+            case STKOPENINGPADDY -> {
+                return openingPaddyTableModel.getListDetail().size();
+            }
+        }
+        return 0;
+    }
+
     private boolean isValidEntry() {
         if (locationAutoCompleter.getLocation() == null) {
             JOptionPane.showMessageDialog(this, "Invalid Location");
@@ -386,7 +384,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         } else if (lblStatus.getText().equals("DELETED")) {
             clear();
             return false;
-        } else if (openingTableModel.getListDetail().size() == 1) {
+        } else if (getListSize() == 1) {
             JOptionPane.showMessageDialog(this, "Invalid Transaction.");
             tblOpening.requestFocus();
             return false;
@@ -544,8 +542,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Opening Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
-                openingTableModel.delete(row);
+                delete(row);
                 calculatAmount();
+            }
+        }
+    }
+
+    private void delete(int row) {
+        switch (type) {
+            case STKOPENING, STKOPENINGPAYABLE -> {
+                openingTableModel.delete(row);
+            }
+            case STKOPENINGPADDY -> {
+                openingPaddyTableModel.delete(row);
             }
         }
     }
@@ -691,12 +700,12 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        txtVouNo = new javax.swing.JFormattedTextField();
         jLabel8 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         lblCusName = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
+        txtVouNo = new javax.swing.JTextField();
         scroll = new javax.swing.JScrollPane();
         tblOpening = new javax.swing.JTable();
         txtAmount = new javax.swing.JFormattedTextField();
@@ -736,9 +745,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Remark");
 
-        txtVouNo.setEditable(false);
-        txtVouNo.setFont(Global.lableFont);
-
         jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Currency");
 
@@ -771,6 +777,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             }
         });
 
+        txtVouNo.setEditable(false);
+        txtVouNo.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -781,9 +790,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addComponent(jLabel1)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtLocation)
+                    .addComponent(txtVouNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -802,12 +811,12 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 323, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 417, Short.MAX_VALUE)
                 .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtLocation, txtOPDate, txtRemark, txtVouNo});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtLocation, txtOPDate, txtRemark});
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel8, lblCusName});
 
@@ -820,8 +829,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(txtOPDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtVouNo)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel8)
@@ -836,7 +846,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                                 .addComponent(jLabel4)
                                 .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel2)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(16, Short.MAX_VALUE))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
@@ -951,7 +961,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 409, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1033,7 +1043,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private com.toedter.calendar.JDateChooser txtOPDate;
     private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JTextField txtRemark;
-    private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables
 
     @Override

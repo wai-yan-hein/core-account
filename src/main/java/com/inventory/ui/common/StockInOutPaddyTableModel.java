@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StockInOutPaddyTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Stock Code", "Stock Name", "Location", "Moisture", "Hard Rice", "Weight",
-        "In-Qty", "Out-Qty", "Bag", "Price", "Amount"};
+        "In-Qty", "Out-Qty", "In-Bag", "Out-Bag", "Price", "Amount"};
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
     private List<StockInOutKey> deleteList = new ArrayList();
@@ -41,7 +41,6 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-
 
     public void setLblRec(JLabel lblRec) {
         this.lblRec = lblRec;
@@ -125,12 +124,15 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     return Util1.toNull(io.getOutQty());
                 }
                 case 8 -> {
-                    return Util1.toNull(io.getBag());
+                    return Util1.toNull(io.getInBag());
                 }
                 case 9 -> {
-                    return Util1.toNull(io.getCostPrice());
+                    return Util1.toNull(io.getOutBag());
                 }
                 case 10 -> {
+                    return Util1.toNull(io.getCostPrice());
+                }
+                case 11 -> {
                     double amt = Util1.getDouble(io.getCostPrice()) * (Util1.getDouble(io.getInQty()) + Util1.getDouble(io.getOutQty()));
                     return amt == 0 ? null : amt;
                 }
@@ -146,7 +148,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
 //        "Stock Code", "Stock Name", "Location", "Moisture", "Hard Rice", "Weight",
 //        "In-Qty", "Out-Qty", "Bag", "Cost Price", "Amount", "Total Weight"
         return switch (column) {
-            case 3, 4, 5, 6, 7, 8, 9, 10 ->
+            case 3, 4, 5, 6, 7, 8, 9, 10, 11 ->
                 Double.class;
             default ->
                 String.class;
@@ -156,7 +158,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 10 ->
+            case 11 ->
                 false;
             default ->
                 true;
@@ -204,7 +206,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         double wt = Util1.getDouble(value);
-                        if (wt > 0) {
+                        if (wt >= 0) {
                             io.setWeight(wt);
                             if (io.getInQty() > 0) {
                                 io.setTotalWeight(wt * io.getInQty());
@@ -216,8 +218,9 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
 
                     }
                     case 6 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setInQty(Util1.getDouble(value));
+                        double qty = Util1.getDouble(value);
+                        if (qty >= 0) {
+                            io.setInQty(qty);
                             io.setOutQty(0);
                             io.setOutUnitCode(null);
                             if (io.getWeight() > 0) {
@@ -228,8 +231,9 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
 
                     }
                     case 7 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setOutQty(Util1.getDouble(value));
+                        double qty = Util1.getDouble(value);
+                        if (qty >=0) {
+                            io.setOutQty(qty);
                             io.setInQty(0);
                             io.setInUnitCode(null);
                             if (io.getWeight() > 0) {
@@ -240,12 +244,21 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     }
                     case 8 -> {
                         double bag = Util1.getDouble(value);
-                        if (bag > 0) {
-                            io.setBag(bag);
-                            setSelection(row, 9);
+                        if (bag >= 0) {
+                            io.setInBag(bag);
+                            io.setOutBag(0);
+                            setSelection(row, 10);
                         }
                     }
                     case 9 -> {
+                        double bag = Util1.getDouble(value);
+                        if (bag >= 0) {
+                            io.setOutBag(bag);
+                            io.setInBag(0);
+                            setSelection(row, 10);
+                        }
+                    }
+                    case 10 -> {
                         if (Util1.isNumber(value)) {
                             io.setCostPrice(Util1.getDouble(value));
                             addNewRow();
@@ -370,8 +383,11 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     parent.requestFocus();
                     return false;
-                } else if (Util1.getDouble(od.getInQty()) <= 0 && Util1.getDouble(od.getOutQty()) <= 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
+                } else if (od.getInQty() <= 0
+                        && od.getOutQty() <= 0
+                        && od.getInBag() <= 0
+                        && od.getOutBag() <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty or Bag.");
                     parent.requestFocus();
                     return false;
                 }

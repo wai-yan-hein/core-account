@@ -97,6 +97,9 @@ public class ProUtil {
     public static final String PUR_RD_DIS = "purchase.round.down.discount";
     public static final String DECIMAL_PLACE = "decimal.palace";
     public static final String STOCK_IR_EDIT = "stockir.voucher";
+    public static final String SALE_VOU = "report.sale.voucher";
+    public static final String SALE_VOU_A5 = "report.sale.voucher";
+    public static final String SALE_VOU_A4 = "report.sale.A4";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));

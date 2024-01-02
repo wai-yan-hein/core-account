@@ -54,7 +54,7 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="scroll" pref="409" max="32767" attributes="0"/>
+              <Component id="scroll" pref="399" max="32767" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="txtAmount" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -92,9 +92,9 @@
                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtLocation" linkSize="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtVouNo" linkSize="3" min="-2" pref="150" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="txtLocation" linkSize="3" max="32767" attributes="0"/>
+                      <Component id="txtVouNo" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -118,7 +118,7 @@
                           <Component id="txtCurrency" min="-2" pref="156" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace pref="323" max="32767" attributes="0"/>
+                  <EmptySpace pref="417" max="32767" attributes="0"/>
                   <Component id="lblStatus" min="-2" pref="185" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -133,8 +133,10 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                   <Component id="txtOPDate" linkSize="2" max="32767" attributes="0"/>
-                                  <Component id="txtVouNo" max="32767" attributes="0"/>
-                                  <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
+                                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                                      <Component id="jLabel1" alignment="3" max="32767" attributes="0"/>
+                                      <Component id="txtVouNo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                                   <Component id="jLabel3" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -155,7 +157,7 @@
                                   <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <EmptySpace pref="16" max="32767" attributes="0"/>
                       </Group>
                       <Component id="lblStatus" max="32767" attributes="0"/>
                   </Group>
@@ -218,14 +220,6 @@
             <Property name="text" type="java.lang.String" value="Remark"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtVouNo">
-          <Properties>
-            <Property name="editable" type="boolean" value="false"/>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel8">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -276,6 +270,14 @@
             <EventHandler event="mouseExited" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="txtCusMouseExited"/>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCusActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtVouNo">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

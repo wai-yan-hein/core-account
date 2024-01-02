@@ -360,7 +360,6 @@ public class OpeningTableModel extends AbstractTableModel {
             deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
-        addNewRow();
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {
             parent.setRowSelectionInterval(row - 1, row - 1);

@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
@@ -14,7 +15,6 @@ import com.common.Util1;
 import com.inventory.model.PurHis;
 import com.inventory.model.SaleHis;
 import com.repo.AccountRepo;
-import java.awt.Component;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,8 +28,8 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     private AccountRepo accountRepo;
     private DepartmentAutoCompleter departmentCompleter;
     private COAAutoCompleter cashCompleter;
-    private COAAutoCompleter purhcaseCompleter;
-    private COAAutoCompleter paybleCompleter;
+    private COA3AutoCompleter purhcaseCompleter;
+    private COA3AutoCompleter paybleCompleter;
     private Object object;
     private final String sale = "SALE";
     private final String purchase = "PURCHASE";
@@ -46,20 +46,20 @@ public class AccountOptionDialog extends javax.swing.JDialog {
      * @param frame
      */
     public AccountOptionDialog(JFrame frame) {
-        super(frame, false);
+        super(frame, true);
         initComponents();
-        initModel();
     }
 
     private void initModel() {
         departmentCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
         cashCompleter = new COAAutoCompleter(txtCash, null, false);
-        purhcaseCompleter = new COAAutoCompleter(txtPur, null, false);
-        paybleCompleter = new COAAutoCompleter(txtPayble, null, false);
+        purhcaseCompleter = new COA3AutoCompleter(txtPur, accountRepo, null, false, 3);
+        paybleCompleter = new COA3AutoCompleter(txtPayble, accountRepo, null, false, 3);
     }
 
     public void initMain() {
         ComponentUtil.addFocusListener(this);
+        initModel();
         initCompleter();
     }
 
@@ -69,12 +69,6 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         }).subscribe();
         accountRepo.getCashBank().doOnSuccess((t) -> {
             cashCompleter.setListCOA(t);
-        }).subscribe();
-        accountRepo.getPurchaseAcc().doOnSuccess((t) -> {
-            purhcaseCompleter.setListCOA(t);
-        }).subscribe();
-        accountRepo.getPayableAcc().doOnSuccess((t) -> {
-            paybleCompleter.setListCOA(t);
         }).subscribe();
     }
 
@@ -244,7 +238,6 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         txtPur = new javax.swing.JTextField();
         txtPayble = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("-");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -285,7 +278,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                             .addComponent(lblSource, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
+                            .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
                             .addComponent(txtCash, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPur, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPayble))))
@@ -310,7 +303,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblAcc, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtPayble, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 149, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 172, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
         );

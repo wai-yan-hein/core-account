@@ -52,8 +52,10 @@ public class StockInOutDetail implements Serializable {
     private double wet;
     @Column(name = "rice")
     private double rice;
-    @Column(name = "bag")
-    private double bag;
+    @Column(name = "in_bag")
+    private double inBag;
+    @Column(name = "out_bag")
+    private double outBag;
     @Transient
     private String userCode;
     @Transient

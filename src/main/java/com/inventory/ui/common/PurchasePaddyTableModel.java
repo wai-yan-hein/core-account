@@ -42,6 +42,15 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private JLabel lblRec;
     private PurchaseDynamic purchase;
+    private boolean edit;
+
+    public boolean isEdit() {
+        return edit;
+    }
+
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
 
     public PurchaseDynamic getPurchase() {
         return purchase;
@@ -126,6 +135,8 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
+            case 4, 5, 6 ->
+                isEdit();
             case 8 ->
                 false;
             default ->
@@ -378,6 +389,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            setEdit(true);
             fireTableDataChanged();
         }
     }

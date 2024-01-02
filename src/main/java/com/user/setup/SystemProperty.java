@@ -335,14 +335,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     }
 
     private void initTextBox() {
-        txtVouReport.setName("report.sale.voucher");
-        txtVouReport.setText(hmProperty.get("report.sale.voucher"));
         txtCreditAmt.setName(ProUtil.C_CREDIT_AMT);
         txtCreditAmt.setText(hmProperty.get(txtCreditAmt.getName()));
-        txtA5Report.setName("report.sale.A5");
-        txtA5Report.setText(hmProperty.get("report.sale.A5"));
-        txtA4Report.setName("report.sale.A4");
-        txtA4Report.setText(hmProperty.get("report.sale.A4"));
         txtLogoName.setName("logo.name");
         txtLogoName.setText(hmProperty.get("logo.name"));
         txtPages.setText(hmProperty.get(txtPages.getName()));
@@ -716,12 +710,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkCalStock = new javax.swing.JCheckBox();
         chkPricePopup = new javax.swing.JCheckBox();
         chkSalePaid = new javax.swing.JCheckBox();
-        jLabel5 = new javax.swing.JLabel();
-        txtVouReport = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
-        txtA5Report = new javax.swing.JTextField();
-        txtA4Report = new javax.swing.JTextField();
-        jLabel7 = new javax.swing.JLabel();
         chkSaleEdit = new javax.swing.JCheckBox();
         chkPriceChange = new javax.swing.JCheckBox();
         chkBalance = new javax.swing.JCheckBox();
@@ -1130,18 +1118,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkSalePaid.setText("Paid");
 
-        jLabel5.setText("Vou Report");
-
-        txtVouReport.setFont(Global.textFont);
-
-        jLabel6.setText("A5 Report");
-
-        txtA5Report.setFont(Global.textFont);
-
-        txtA4Report.setFont(Global.textFont);
-
-        jLabel7.setText("A4 Report");
-
         chkSaleEdit.setText(" Edit");
 
         chkPriceChange.setText("Price Change");
@@ -1178,17 +1154,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jSeparator7)
                     .addComponent(jSeparator1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtA5Report)
-                            .addComponent(txtVouReport)
-                            .addComponent(txtA4Report)
-                            .addComponent(txtCreditAmt)))
+                        .addComponent(txtCreditAmt))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(chkPriceOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1255,20 +1223,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jLabel18)
                     .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(txtVouReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(txtA5Report, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(txtA4Report, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jSeparator7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Purchase", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont));
@@ -1581,7 +1536,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(15, 15, 15)
                         .addComponent(chkDisableDrVoucher)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Report"));
@@ -1752,27 +1707,27 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(panelMac, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jButton1)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(jButton3)
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jButton2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton4)
+                                        .addGap(4, 4, 4))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jButton2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton4)))
                                 .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1960,9 +1915,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
@@ -1985,8 +1937,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jlablel;
     private javax.swing.JLabel lablel;
     private javax.swing.JPanel panelMac;
-    private javax.swing.JTextField txtA4Report;
-    private javax.swing.JTextField txtA5Report;
     private javax.swing.JTextField txtBankGroup;
     private javax.swing.JTextField txtCapital;
     private javax.swing.JTextField txtCash;
@@ -2020,7 +1970,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtStock;
     private javax.swing.JTextField txtSup;
     private javax.swing.JTextField txtSupplier;
-    private javax.swing.JTextField txtVouReport;
     // End of variables declaration//GEN-END:variables
 
     @Override

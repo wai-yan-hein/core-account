@@ -8,6 +8,7 @@ package com.user.setup;
 import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -18,6 +19,7 @@ import com.repo.UserRepo;
 import com.user.common.MenuTreeTrasnferHandler;
 import com.user.model.Menu;
 import com.user.model.MenuKey;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -137,32 +139,31 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void getMenu() {
         progress.setIndeterminate(true);
-        userRepo.getMenuTree()
-                .subscribe((menus) -> {
-                    if (!menus.isEmpty()) {
-                        menus.forEach((menu) -> {
-                            if (menu.getChild() != null) {
-                                if (!menu.getChild().isEmpty()) {
-                                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                                    treeRoot.add(parent);
-                                    addChildMenu(parent, menu.getChild());
-                                } else {  //No Child
-                                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                                    treeRoot.add(parent);
-                                }
-                            } else {  //No Child
-                                DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                                treeRoot.add(parent);
-                            }
-
-                        });
+        userRepo.getMenuTree().doOnSuccess((menus) -> {
+            if (!menus.isEmpty()) {
+                menus.forEach((menu) -> {
+                    if (menu.getChild() != null) {
+                        if (!menu.getChild().isEmpty()) {
+                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                            treeRoot.add(parent);
+                            addChildMenu(parent, menu.getChild());
+                        } else {  //No Child
+                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                            treeRoot.add(parent);
+                        }
+                    } else {  //No Child
+                        DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                        treeRoot.add(parent);
                     }
-                    treeModel.setRoot(treeRoot);
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
+
                 });
+            }
+            treeModel.setRoot(treeRoot);
+            progress.setIndeterminate(false);
+        }).doOnError((e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }).subscribe();
 
     }
 
@@ -271,34 +272,36 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         }
         String menuName = txtMenuName.getText();
         if (!menuName.isEmpty()) {
-            Menu vMenu = (Menu) selectedNode.getUserObject();
-            Menu menu = new Menu();
-            menu.setKey(vMenu.getKey());
-            menu.setMenuName(menuName);
-            menu.setMenuNameMM(txtMenuMM.getText());
-            menu.setParentMenuCode(parentCode);
-            menu.setMenuUrl(txtMenuUrl.getText());
-            ChartOfAccount coa = cOA3AutoCompleter.getCOA();
-            if (coa != null) {
-                menu.setAccount(coa.getKey().getCoaCode());
+            if (selectedNode.getUserObject() instanceof Menu menu) {
+                menu.setMenuName(menuName);
+                menu.setMenuNameMM(txtMenuMM.getText());
+                menu.setParentMenuCode(parentCode);
+                menu.setMenuUrl(txtMenuUrl.getText());
+                ChartOfAccount coa = cOA3AutoCompleter.getCOA();
+                if (coa != null) {
+                    menu.setAccount(coa.getKey().getCoaCode());
+                }
+                menu.setMenuType(txtMenuType.getText().trim());
+                menu.setMenuClass(txtMenuClass.getText());
+                menu.setOrderBy(Integer.valueOf(Util1.isNull(txtOrder.getText(), "0")));
+                if (txtOrder.getValue() != null) {
+                    menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
+                }
+                userRepo.save(menu).doOnSuccess((t) -> {
+                    selectedNode.setUserObject(t);
+                    TreePath path = treeCOA.getSelectionPath();
+                    DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
+                    model.nodeChanged(selectedNode);
+                    treeCOA.setSelectionPath(path);
+                    sendMessage(t.getMenuName());
+                }).doOnError((e) -> {
+                    JOptionPane.showConfirmDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }).doOnTerminate(() -> {
+                    observer.selected("menu", "menu");
+                    clear();
+                }).subscribe();
             }
-            menu.setMenuType(txtMenuType.getText().trim());
-            menu.setMenuClass(txtMenuClass.getText());
-            menu.setOrderBy(Integer.valueOf(Util1.isNull(txtOrder.getText(), "0")));
-            if (txtOrder.getValue() != null) {
-                menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
-            }
-            userRepo.save(menu).doOnSuccess((t) -> {
-                selectedNode.setUserObject(t);
-                TreePath path = treeCOA.getSelectionPath();
-                DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
-                model.nodeChanged(selectedNode);
-                treeCOA.setSelectionPath(path);
-                sendMessage(t.getMenuName());
-            }).doOnTerminate(() -> {
-                observer.selected("menu", "menu");
-                clear();
-            }).subscribe();
+
         }
     }
 
@@ -349,24 +352,8 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     }
 
     private void initFocusListener() {
-        txtMenuName.addFocusListener(fa);
-        txtMenuMM.addFocusListener(fa);
-        txtAccount.addFocusListener(fa);
-        txtMenuClass.addFocusListener(fa);
-        txtMenuType.addFocusListener(fa);
-        txtMenuUrl.addFocusListener(fa);
-        txtOrder.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void observeMain() {
         observer.selected("control", this);

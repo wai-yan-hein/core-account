@@ -42,6 +42,7 @@ import com.inventory.ui.setup.dialog.StockUnitSetupDailog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.DepartmentComboBoxModel;
 import com.repo.UserRepo;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.user.model.DepartmentUser;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -98,7 +99,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private SelectionObserver observer;
     private JProgressBar progress;
     private InventoryRepo inventoryRepo;
-    private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
+    private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private final DepartmentComboBoxModel departmentComboBoxModel1 = new DepartmentComboBoxModel();
     private UserRepo userRepo;
     private RelationSetupDialog relationSetupDialog;
@@ -223,8 +224,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stockFormulaCompleter.setStockFormula(t);
         }).subscribe();
         userRepo.findDepartment(stock.getDeptId()).doOnSuccess((t) -> {
-            departmentComboBoxModel.setSelectedItem(t);
-            cboDept.repaint();
+            departmentUserAutoCompleter.setDepartment(t);
         }).subscribe();
         txtWt.setText(Util1.getString(stock.getWeight()));
         txtPurPrice.setText(Util1.getString(stock.getPurPrice()));
@@ -304,11 +304,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         brandAutoCompleter.setBrand(null);
         brandAutoCompleterF = new BrandAutoCompleter(txtBrand1, null, true);
         brandAutoCompleterF.setObserver(this);
-        inventoryRepo.getStockBrand().subscribe((t) -> {
+        inventoryRepo.getStockBrand().doOnSuccess((t) -> {
             brandAutoCompleter.setListStockBrand(t);
             List<StockBrand> bList = new ArrayList<>(t);
             brandAutoCompleterF.setListStockBrand(bList);
-        });
+        }).subscribe();
         purUnitCompleter = new UnitAutoCompleter(txtPurUnit, null);
         purUnitCompleter.setStockUnit(null);
         saleUnitCompleter = new UnitAutoCompleter(txtSaleUnit, null);
@@ -325,17 +325,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         inventoryRepo.getUnitRelation().subscribe((t) -> {
             relationAutoCompleter.setListRelation(t);
         });
-        userRepo.getDeparment(true).subscribe((t) -> {
-            departmentComboBoxModel.setData(t);
-            cboDept.setModel(departmentComboBoxModel);
-
+        departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setListDepartment(t);
             DepartmentUser dep = new DepartmentUser(0, "All");
             List<DepartmentUser> list = new ArrayList<>(t);
             list.add(0, dep);
             departmentComboBoxModel1.setData(list);
             cboDept1.setModel(departmentComboBoxModel1);
             cboDept1.setSelectedIndex(0);
-        });
+        }).subscribe();
         stockFormulaCompleter = new StockFormulaCompleter(txtFormula, inventoryRepo, null);
         stockFormulaCompleter.setObserver(this);
         stockAutoCompleterF = new StockAutoCompleter(txtStock1, inventoryRepo, null, true);
@@ -344,10 +343,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     private void assignDefault() {
-        userRepo.findDepartment(Global.deptId).subscribe((t) -> {
-            departmentComboBoxModel.setSelectedItem(t);
-            cboDept.repaint();
-        });
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setDepartment(t);
+        }).subscribe();
         txtFilter.setText(null);
         ComponentUtil.enableForm(panelStock, true);
     }
@@ -361,7 +359,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         StockFormula formula = stockFormulaCompleter.getStockFormula();
         Category category = categoryAutoCompleter.getCategory();
         StockBrand brand = brandAutoCompleter.getBrand();
-        DepartmentUser department = (DepartmentUser) cboDept.getSelectedItem();
+        DepartmentUser department = departmentUserAutoCompleter.getDepartment();
         if (txtStockName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Stock Name must not be blank.",
                     "Stock name.", JOptionPane.ERROR_MESSAGE);
@@ -387,11 +385,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     "Stock Relation.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtRelation.requestFocus();
-        } else if (cboDept.getSelectedIndex() == -1) {
+        } else if (department == null) {
             JOptionPane.showMessageDialog(this, "You must choose department.",
                     "Department.", JOptionPane.ERROR_MESSAGE);
             status = false;
-            cboDept.requestFocus();
+            txtDep.requestFocus();
         } else {
             if (ProUtil.isUseWeight() && weightUnit == null && !noUnit) {
                 int yn = JOptionPane.showConfirmDialog(this, "Weight Unit can not be blank.",
@@ -704,7 +702,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel6 = new javax.swing.JLabel();
         txtStockCode = new javax.swing.JTextField();
         jLabel30 = new javax.swing.JLabel();
-        cboDept = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
         txtFormula = new javax.swing.JTextField();
         panelUnit = new javax.swing.JPanel();
@@ -725,6 +722,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         btnAddItemType1 = new javax.swing.JButton();
         chkCal = new javax.swing.JCheckBox();
         chkActive = new javax.swing.JCheckBox();
+        txtDep = new javax.swing.JTextField();
         jPanel5 = new javax.swing.JPanel();
         jLabel25 = new javax.swing.JLabel();
         txtGroup1 = new javax.swing.JTextField();
@@ -1195,8 +1193,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel30.setFont(Global.lableFont);
         jLabel30.setText("Department");
 
-        cboDept.setFont(Global.textFont);
-
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Formula");
 
@@ -1424,6 +1420,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addContainerGap())
         );
 
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtStockName"); // NOI18N
+        txtDep.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDepFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelStockLayout = new javax.swing.GroupLayout(panelStock);
         panelStock.setLayout(panelStockLayout);
         panelStockLayout.setHorizontalGroup(
@@ -1474,7 +1478,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                                 .addComponent(btnAddCategory))
                             .addComponent(txtStockName)
                             .addComponent(txtBarCode, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cboDept, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(txtDep, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1508,9 +1512,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             .addComponent(jLabel9)
                             .addComponent(txtFormula, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(panelStockLayout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(cboDept, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(31, 31, 31)
                         .addGroup(panelStockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtStockName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3))
@@ -1524,7 +1526,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addGroup(panelStockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtBarCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7)))
-                    .addComponent(jLabel30, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelStockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel30, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(8, 8, 8)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1533,7 +1537,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addComponent(panelUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(115, Short.MAX_VALUE))
         );
 
         jScrollPane2.setViewportView(panelStock);
@@ -1945,6 +1949,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtPurPrice.setText(Util1.getString(price));
     }//GEN-LAST:event_txtPurAmtActionPerformed
 
+    private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepFocusGained
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
@@ -1954,7 +1962,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JButton btnAddRelation;
     private javax.swing.JButton btnDownload;
     private javax.swing.JButton btnUnit;
-    private javax.swing.JComboBox<DepartmentUser> cboDept;
     private javax.swing.JComboBox<DepartmentUser> cboDept1;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCal;
@@ -2010,6 +2017,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JTextField txtBrand1;
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtCat1;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtFormula;
     private javax.swing.JTextField txtGroup1;
