@@ -18,6 +18,7 @@ import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
@@ -34,7 +35,6 @@ import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.THDetailKey;
 import com.inventory.model.TransferHisDetail;
-import com.inventory.ui.common.LabourGroupComboBoxModel;
 import com.inventory.ui.common.TransferPaddingTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
@@ -76,10 +76,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private LocationAutoCompleter fromLocaitonCompleter;
     private LocationAutoCompleter toLocaitonCompleter;
     private TraderAutoCompleter traderAutoCompleter;
+    private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private TransferHis io = new TransferHis();
     private SelectionObserver observer;
     private JProgressBar progress;
-    private final LabourGroupComboBoxModel labourGroupComboBoxModel = new LabourGroupComboBoxModel();
     private int type;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -169,17 +169,15 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initCombo() {
         fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, null, false, false);
         toLocaitonCompleter = new LocationAutoCompleter(txtTo, null, false, false);
-
-        inventoryRepo.getLocation().subscribe((t) -> {
+        labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLabour, null, false);
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             fromLocaitonCompleter.setListLocation(t);
             toLocaitonCompleter.setListLocation(t);
-        });
-        inventoryRepo.getLabourGroup().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
             t.add(new LabourGroup());
-            labourGroupComboBoxModel.setData(t);
-            cboLabourGroup.setModel(labourGroupComboBoxModel);
-            cboLabourGroup.setSelectedItem(null);
-        });
+            labourGroupAutoCompleter.setListObject(t);
+        }).subscribe();
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
     }
@@ -187,7 +185,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initTable() {
         tblTransfer.getTableHeader().setFont(Global.tblHeaderFont);
         tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblTransfer.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblTransfer.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblTransfer.setCellSelectionEnabled(true);
@@ -225,10 +223,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        inventoryRepo.getStockUnit().subscribe((t) -> {
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblTransfer.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
             tblTransfer.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
-        });
+        }).subscribe();
     }
 
     private void initTransferPaddy() {
@@ -402,7 +400,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtVou.setText(null);
         traderAutoCompleter.setTrader(null);
         toLocaitonCompleter.setLocation(null);
-        labourGroupComboBoxModel.setSelectedItem(null);
+        labourGroupAutoCompleter.setObject(null);
         disableForm(true);
     }
 
@@ -463,13 +461,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 io.setCreatedDate(LocalDateTime.now());
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
-                if (cboLabourGroup.getSelectedItem() instanceof LabourGroup lg) {
-                    if (lg.getKey() != null) {
-                        io.setLabourGroupCode(lg.getKey().getCode());
-                    } else {
-                        io.setLabourGroupCode(null);
-                    }
-                }
+                LabourGroup lg = labourGroupAutoCompleter.getObject();
+                io.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -491,8 +484,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             traderAutoCompleter.setTrader(t);
         }).subscribe();
         inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
-            labourGroupComboBoxModel.setSelectedItem(t);
-            cboLabourGroup.repaint();
+            labourGroupAutoCompleter.setObject(t);
         }).subscribe();
         String vouNo = io.getKey().getVouNo();
         txtVou.setText(vouNo);
@@ -617,8 +609,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtTo = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtCustomer = new javax.swing.JTextField();
-        cboLabourGroup = new javax.swing.JComboBox<>();
         jLabel11 = new javax.swing.JLabel();
+        txtLabour = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -699,15 +691,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtCustomer.setFont(Global.textFont);
         txtCustomer.setName("txtRefNo"); // NOI18N
 
-        cboLabourGroup.setFont(Global.textFont);
-        cboLabourGroup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboLabourGroupActionPerformed(evt);
-            }
-        });
-
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Labour Group");
+
+        txtLabour.setFont(Global.textFont);
+        txtLabour.setName("txtRefNo"); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -721,13 +709,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtVou)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFrom))
+                        .addComponent(txtFrom, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -739,17 +727,17 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtRemark)
+                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel11))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(txtRefNo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cboLabourGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtCustomer))
+                    .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                    .addComponent(txtLabour, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -773,7 +761,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                                 .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel11)
-                                .addComponent(cboLabourGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(txtLabour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
@@ -870,13 +858,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         // TODO add your handling code here:
     }//GEN-LAST:event_tblTransferKeyReleased
 
-    private void cboLabourGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLabourGroupActionPerformed
-        //        searchStock();
-    }//GEN-LAST:event_cboLabourGroupActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<LabourGroup> cboLabourGroup;
     private javax.swing.ButtonGroup chkGroupReport;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel3;
@@ -897,6 +880,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private javax.swing.JTextField txtCustomer;
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtFrom;
+    private javax.swing.JTextField txtLabour;
     private javax.swing.JTextField txtRefNo;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtTo;

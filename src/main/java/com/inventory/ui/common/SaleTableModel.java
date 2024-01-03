@@ -203,18 +203,18 @@ public class SaleTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     //qty
-                    return sd.getQty();
+                    return Util1.toNull(sd.getQty());
                 }
                 case 5 -> {
                     return sd.getUnitCode();
                 }
                 case 6 -> {
                     //price
-                    return sd.getPrice();
+                    return Util1.toNull(sd.getPrice());
                 }
                 case 7 -> {
                     //amount
-                    return sd.getAmount();
+                    return Util1.toNull(sd.getAmount());
                 }
                 default -> {
                     return null;

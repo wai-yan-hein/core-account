@@ -9,6 +9,7 @@ import com.CloudIntegration;
 import com.H2Repo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
@@ -20,6 +21,7 @@ import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.common.YNOptionPane;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,6 +84,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
+import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -244,7 +247,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void setSaleVoucherDetail(OrderHis oh) {
-        saleTableModel.clear();
+        clear(false);
         if (oh != null) {
             progress.setIndeterminate(true);
             getSaleDetailFromOrder(oh.getDeptId()).doOnSuccess((t) -> {
@@ -446,6 +449,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         projectAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
         batchAutoCompeter.setObserver(this);
+        userRepo.getDefaultCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }).subscribe();
+        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        }).subscribe();
+        inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }).subscribe();
+        inventoryRepo.getDefaultSaleMan().doOnSuccess((tt) -> {
+            saleManCompleter.setSaleMan(tt);
+        }).subscribe();
     }
 
     private void initKeyListener() {
@@ -480,29 +495,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void initTextBoxFormat() {
-        txtVouBalance.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouPaid.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouDiscP.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouTaxP.setFormatterFactory(Util1.getDecimalFormat());
-        txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtTax.setFormatterFactory(Util1.getDecimalFormat());
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     private void assignDefaultValue() {
-        userRepo.getDefaultCurrency().doOnSuccess((t) -> {
-            currAutoCompleter.setCurrency(t);
-        }).subscribe();
-        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
-            locationAutoCompleter.setLocation(tt);
-        }).subscribe();
-        inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
-            traderAutoCompleter.setTrader(t);
-        }).subscribe();
-        inventoryRepo.getDefaultSaleMan().doOnSuccess((tt) -> {
-            saleManCompleter.setSaleMan(tt);
-        }).subscribe();
         coaComboModel.setSelectedItem(null);
         batchAutoCompeter.setBatch(null);
         btnBatch.setText("Batch");
@@ -579,6 +576,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtSaleDate.requestFocus();
                 return;
             }
+            if (!Util1.isNullOrEmpty(saleHis.getKey().getVouNo())) {
+                YNOptionPane optionPane = new YNOptionPane("Are you sure to edit?", JOptionPane.WARNING_MESSAGE);
+                JDialog d = optionPane.createDialog("Edit Confirmation");
+                d.setVisible(true);
+                int yn = (int) optionPane.getValue();
+                if (yn != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
             saleHis.setListSH(saleTableModel.getListDetail());
             saleHis.setListDel(saleTableModel.getDelList());
             saleHis.setBackup(saleTableModel.isChange());
@@ -612,35 +618,34 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private boolean isValidEntry() {
-        boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
-            status = false;
             clear(true);
+            return false;
         } else if (currAutoCompleter.getCurrency() == null) {
             JOptionPane.showMessageDialog(this, "Choose Currency.",
                     "No Currency.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtCurrency.requestFocus();
+            return false;
         } else if (locationAutoCompleter.getLocation() == null) {
             JOptionPane.showMessageDialog(this, "Choose Location.",
                     "No Location.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtLocation.requestFocus();
+            return false;
         } else if (traderAutoCompleter.getTrader() == null) {
             JOptionPane.showMessageDialog(this, "Choose Trader.",
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtCus.requestFocus();
+            return false;
         } else if (Util1.getDouble(txtVouTotal.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Amount.",
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtVouTotal.requestFocus();
+            return false;
         } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
             JOptionPane.showMessageDialog(this, "Invalid Date.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
-            status = false;
             txtSaleDate.requestFocus();
+            return false;
         } else {
             saleHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();
@@ -695,7 +700,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
         }
-        return status;
+        return true;
     }
 
     private void deleteSale() {
@@ -869,11 +874,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtVouBalance.setValue(Util1.getDouble(saleHis.getBalance()));
             txtGrandTotal.setValue(Util1.getDouble(saleHis.getGrandTotal()));
             chkPaid.setSelected(saleHis.getPaid() > 0);
-            String orderNo = saleHis.getOrderNo();
-            if (!Util1.isNullOrEmpty(orderNo)) {
-                btnOrder.setText("Order:View");
-            }
             String vouNo = sh.getKey().getVouNo();
+            checkOrderNo(vouNo);
             inventoryRepo.getSaleDetail(vouNo, sh.getDeptId(), saleHis.isLocal()).doOnSuccess((t) -> {
                 saleTableModel.setListDetail(t);
                 saleTableModel.addNewRow();
@@ -885,23 +887,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
     }
 
+    private void checkOrderNo(String vouNo) {
+        if (!Util1.isNullOrEmpty(vouNo)) {
+            inventoryRepo.getSaleOrder(vouNo).doOnSuccess((t) -> {
+                if (t != null && !t.isEmpty()) {
+                    btnOrder.setText("Order:View");
+                }
+            }).subscribe();
+        }
+    }
+
     private void disableForm(boolean status) {
-        tblSale.setEnabled(status);
-        panelSale.setEnabled(status);
-        txtSaleDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtLocation.setEnabled(status);
-        txtSaleman.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtDueDate.setEnabled(status);
-        txtVouPaid.setEnabled(status);
-        txtTax.setEnabled(status);
-        txtVouTaxP.setEnabled(status);
-        txtVouDiscP.setEnabled(status);
-        txtVouDiscount.setEnabled(status);
-        txtGrandTotal.setEnabled(status);
-        txtReference.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -1171,7 +1168,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtCus = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtSaleman = new javax.swing.JTextField();
-        txtVouNo = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -1189,6 +1185,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         jLabel11 = new javax.swing.JLabel();
         txtBatchNo = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
+        txtVouNo = new javax.swing.JTextField();
         panelInfo = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -1280,11 +1277,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtSalemanActionPerformed(evt);
             }
         });
-
-        txtVouNo.setEditable(false);
-        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtVouNo.setFont(Global.textFont);
-        txtVouNo.setName("txtVouNo"); // NOI18N
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Sale Date");
@@ -1383,11 +1375,34 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         });
 
+        jButton2.setBackground(Global.selectionColor);
         jButton2.setFont(Global.lableFont);
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
         jButton2.setText("Account");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
+            }
+        });
+
+        txtVouNo.setEditable(false);
+        txtVouNo.setFont(Global.textFont);
+        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtVouNo.setName("txtCus"); // NOI18N
+        txtVouNo.setNextFocusableComponent(txtLocation);
+        txtVouNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtVouNoFocusGained(evt);
+            }
+        });
+        txtVouNo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtVouNoMouseExited(evt);
+            }
+        });
+        txtVouNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtVouNoActionPerformed(evt);
             }
         });
 
@@ -1452,13 +1467,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel17)
-                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel22)
                             .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel6)
                             .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
-                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1482,7 +1497,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel9)
                         .addComponent(jButton2)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         panelSaleLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel3, jLabel5});
@@ -1904,7 +1919,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -2084,6 +2099,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         optionDialog();
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoFocusGained
+
+    private void txtVouNoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtVouNoMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoMouseExited
+
+    private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -2107,12 +2134,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     boolean local = s.isLocal();
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).doOnSuccess((t) -> {
                         t.setLocal(local);
                         setSaleVoucher(t);
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+                    }).subscribe();
                 }
             }
             case "PRINT" -> {
@@ -2131,9 +2156,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "TR-HISTORY" -> {
                 if (selectObj instanceof VTransfer v) {
-                    inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
+                    inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId(), v.isLocal()).doOnSuccess((t) -> {
                         setTransferVoucher(t, v.isLocal());
-                    });
+                    }).subscribe();
                 }
             }
             case "Select" -> {
@@ -2141,14 +2166,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "Batch" -> {
                 if (selectObj instanceof GRN g) {
-                    inventoryRepo.findTrader(g.getTraderCode()).subscribe((t) -> {
+                    inventoryRepo.findTrader(g.getTraderCode()).doOnSuccess((t) -> {
                         traderAutoCompleter.setTrader(t);
-                    });
-                    inventoryRepo.findGRN(g.getKey().getVouNo()).subscribe((t) -> {
+                    }).subscribe();
+                    inventoryRepo.findGRN(g.getKey().getVouNo()).doOnSuccess((t) -> {
                         batchAutoCompeter.setBatch(t);
                         btnBatch.setText("Batch:View");
-                    });
-
+                    }).subscribe();
                 }
             }
         }
@@ -2332,7 +2356,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JFormattedTextField txtVouBalance;
     private javax.swing.JFormattedTextField txtVouDiscP;
     private javax.swing.JFormattedTextField txtVouDiscount;
-    private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouNo;
     private javax.swing.JFormattedTextField txtVouPaid;
     private javax.swing.JFormattedTextField txtVouTaxP;
     private javax.swing.JFormattedTextField txtVouTotal;

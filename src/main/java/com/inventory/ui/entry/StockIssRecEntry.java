@@ -258,17 +258,17 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
             io.setListDel(tableModel.getDelList());
             io.setTranSource(tranSource.equals("I") ? 1 : 2);
             inventoryRepo.saveStockIssRec(io)
-                    .subscribe((t) -> {
+                    .doOnSuccess((t) -> {
                         clear();
                         focusOnTable();
                         if (print) {
                             printVoucher(t.getKey().getVouNo());
                         }
-                    }, (e) -> {
-                        observer.selected("save", true);
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        progress.setIndeterminate(false);
-                    });
+                    }).doOnError((e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            }).subscribe();
         }
         return status;
     }
@@ -367,41 +367,38 @@ public class StockIssRecEntry extends javax.swing.JPanel implements PanelControl
             labourGroupAutoCompleter.setObject(t);
         }).subscribe();
         String vouNo = io.getKey().getVouNo();
-        inventoryRepo.getStockIssRecDetail(vouNo).subscribe((t) -> {
+        txtVou.setText(vouNo);
+        txtDate.setDate(Util1.convertToDate(io.getVouDate()));
+        txtRemark.setText(io.getRemark());
+        io.setVouLock(!io.getDeptId().equals(Global.deptId));
+        if (io.isVouLock()) {
+            lblStatus.setText("Voucher is Lock.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+            observer.selected("print", true);
+        } else if (Util1.getBoolean(io.isDeleted())) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.red);
+            disableForm(false);
+            observer.selected("delete", true);
+        } else if (DateLockUtil.isLockDate(io.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else {
+            lblStatus.setText("EDIT");
+            lblStatus.setForeground(Color.blue);
+            disableForm(true);
+        }
+        inventoryRepo.getStockIssRecDetail(vouNo).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
-            tableModel.addNewRow();
-            txtVou.setText(vouNo);
-            txtDate.setDate(Util1.convertToDate(io.getVouDate()));
-            txtRemark.setText(io.getRemark());
-            io.setVouLock(!io.getDeptId().equals(Global.deptId));
-            if (io.isVouLock()) {
-                lblStatus.setText("Voucher is Lock.");
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-                observer.selected("print", true);
-            } else if (Util1.getBoolean(io.isDeleted())) {
-                lblStatus.setText("DELETED");
-                lblStatus.setForeground(Color.red);
-                disableForm(false);
-                observer.selected("delete", true);
-            } else if (DateLockUtil.isLockDate(io.getVouDate())) {
-                lblStatus.setText(DateLockUtil.MESSAGE);
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-            } else {
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                disableForm(true);
-            }
-            int row = tblStockIR.getRowCount();
-            tblStockIR.setColumnSelectionInterval(0, 0);
-            tblStockIR.setRowSelectionInterval(row - 1, row - 1);
-            tblStockIR.requestFocus();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+            progress.setIndeterminate(false);
+        }).doOnTerminate(() -> {
+            tableModel.addNewRow();
+            progress.setIndeterminate(false);
+        }).subscribe();
     }
 
     private void disableForm(boolean status) {

@@ -86,6 +86,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
+import com.inventory.model.SaleOrderJoin;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
@@ -3930,6 +3931,17 @@ public class InventoryRepo {
                 .collectList();
     }
 
+    public Mono<List<SaleOrderJoin>> getSaleOrder(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/sale/getSaleOrder")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(SaleOrderJoin.class)
+                .collectList();
+    }
+
     public Mono<List<MillingExpense>> getMillingExpense(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/milling/getMillingExpense")
@@ -4093,6 +4105,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+
     public Mono<StockIssueReceive> saveStockIssRec(StockIssueReceive his) {
         return inventoryApi.post()
                 .uri("stockIssRec/saveStockIssRec")
