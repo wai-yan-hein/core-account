@@ -278,15 +278,11 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 menu.setParentMenuCode(parentCode);
                 menu.setMenuUrl(txtMenuUrl.getText());
                 ChartOfAccount coa = cOA3AutoCompleter.getCOA();
-                if (coa != null) {
-                    menu.setAccount(coa.getKey().getCoaCode());
-                }
+                menu.setAccount(coa == null ? null : coa.getKey().getCoaCode());
                 menu.setMenuType(txtMenuType.getText().trim());
                 menu.setMenuClass(txtMenuClass.getText());
                 menu.setOrderBy(Integer.valueOf(Util1.isNull(txtOrder.getText(), "0")));
-                if (txtOrder.getValue() != null) {
-                    menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
-                }
+                menu.setMenuVersion(Util1.getInteger(txtVersion.getText()));
                 userRepo.save(menu).doOnSuccess((t) -> {
                     selectedNode.setUserObject(t);
                     TreePath path = treeCOA.getSelectionPath();
@@ -322,6 +318,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         }).subscribe();
         txtMenuType.setText(menu.getMenuType());
         txtMenuClass.setText(menu.getMenuClass());
+        txtVersion.setText(Util1.getString(menu.getMenuVersion()));
         enableControl(true);
     }
 
@@ -334,17 +331,12 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuType.setText(null);
         txtMenuClass.setText(null);
         txtMenuMM.setText(null);
+        txtVersion.setText(null);
         enableControl(false);
     }
 
     private void enableControl(boolean status) {
-        txtMenuName.setEditable(status);
-        txtMenuUrl.setEditable(status);
-        txtOrder.setEditable(status);
-        txtAccount.setEditable(status);
-        txtMenuType.setEditable(status);
-        txtMenuMM.setEditable(status);
-        txtMenuClass.setEditable(status);
+        ComponentUtil.enableForm(panelEntry, status);
     }
 
     private void removeSpace() {
@@ -375,7 +367,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
         jScrollPane1 = new javax.swing.JScrollPane();
         treeCOA = new javax.swing.JTree();
-        jPanel1 = new javax.swing.JPanel();
+        panelEntry = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txtMenuName = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -404,8 +396,8 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         treeCOA.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPane1.setViewportView(treeCOA);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-        jPanel1.setFont(Global.textFont);
+        panelEntry.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        panelEntry.setFont(Global.textFont);
 
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Menu Name");
@@ -493,13 +485,13 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
+        panelEntry.setLayout(panelEntryLayout);
+        panelEntryLayout.setHorizontalGroup(
+            panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelEntryLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -508,14 +500,14 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtMenuUrl)
                     .addComponent(txtMenuName)
                     .addComponent(txtAccount)
                     .addComponent(txtMenuType)
                     .addComponent(txtMenuClass)
                     .addComponent(txtMenuMM)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(panelEntryLayout.createSequentialGroup()
                         .addComponent(txtOrder)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel8)
@@ -523,37 +515,37 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                         .addComponent(txtVersion)))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        panelEntryLayout.setVerticalGroup(
+            panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelEntryLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtMenuName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtMenuMM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtMenuUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtMenuType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(txtMenuClass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtOrder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel8)
                         .addComponent(txtVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -568,7 +560,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -576,7 +568,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -634,8 +626,8 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel panelEntry;
     private javax.swing.JTree treeCOA;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtMenuClass;

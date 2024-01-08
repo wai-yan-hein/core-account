@@ -40,8 +40,8 @@ public class DateLockUtil {
     public static boolean isLockDate(Date date) {
         if (listLock != null) {
             for (DateLock dateLock : listLock) {
-                LocalDate startDate = dateLock.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalDate endDate = dateLock.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate startDate = dateLock.getStartDate();
+                LocalDate endDate = dateLock.getEndDate();
                 LocalDate checkDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
                 // Compare only the date portion (ignoring time)
@@ -58,8 +58,8 @@ public class DateLockUtil {
         if (listLock != null) {
             LocalDate userDate = date.toLocalDate();
             for (DateLock dateLock : listLock) {
-                LocalDate startDate = Util1.convertToLocalDateTime(dateLock.getStartDate()).toLocalDate();
-                LocalDate endDate = Util1.convertToLocalDateTime(dateLock.getEndDate()).toLocalDate();
+                LocalDate startDate = dateLock.getStartDate();
+                LocalDate endDate = dateLock.getEndDate();
                 if ((userDate.isEqual(startDate) || userDate.isEqual(endDate))
                         || (userDate.isAfter(startDate) && userDate.isBefore(endDate))) {
                     return true;

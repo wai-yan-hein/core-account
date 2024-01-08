@@ -4,6 +4,7 @@
  */
 package com.ui.management;
 
+import com.common.ColorCellRender;
 import com.common.ComponentUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -24,6 +25,7 @@ import com.ui.management.common.SBSummaryTableModel;
 import com.ui.management.common.SBWeightSummaryTableModel;
 import com.ui.management.dialog.SBWeightDetailDialog;
 import com.ui.management.model.ClosingBalance;
+import java.awt.Color;
 import java.lang.reflect.Type;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -99,17 +101,27 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         tblBalance.getColumnModel().getColumn(0).setPreferredWidth(30);
         tblBalance.getColumnModel().getColumn(1).setPreferredWidth(100);
         tblBalance.getColumnModel().getColumn(2).setPreferredWidth(40);//op
-        tblBalance.getColumnModel().getColumn(3).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(4).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(5).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(6).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(8).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(9).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(10).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(11).setPreferredWidth(20);
-        tblBalance.getColumnModel().getColumn(12).setPreferredWidth(20);
+        tblBalance.getColumnModel().getColumn(3).setPreferredWidth(20);//op
+        tblBalance.getColumnModel().getColumn(4).setPreferredWidth(20);//pur
+        tblBalance.getColumnModel().getColumn(5).setPreferredWidth(20);//pur
+        tblBalance.getColumnModel().getColumn(6).setPreferredWidth(20);//in
+        tblBalance.getColumnModel().getColumn(7).setPreferredWidth(20);//in
+        tblBalance.getColumnModel().getColumn(8).setPreferredWidth(20);//sale
+        tblBalance.getColumnModel().getColumn(9).setPreferredWidth(20);//sale
+        tblBalance.getColumnModel().getColumn(10).setPreferredWidth(20);//out
+        tblBalance.getColumnModel().getColumn(11).setPreferredWidth(20);//out
+        tblBalance.getColumnModel().getColumn(12).setPreferredWidth(20);//cl
         tblBalance.getColumnModel().getColumn(13).setPreferredWidth(40);//cl
+        tblBalance.getColumnModel().getColumn(4).setCellRenderer(new ColorCellRender(Color.green));
+        tblBalance.getColumnModel().getColumn(5).setCellRenderer(new ColorCellRender(Color.green));
+        tblBalance.getColumnModel().getColumn(6).setCellRenderer(new ColorCellRender(Color.green));
+        tblBalance.getColumnModel().getColumn(7).setCellRenderer(new ColorCellRender(Color.green));
+
+        tblBalance.getColumnModel().getColumn(8).setCellRenderer(new ColorCellRender(Color.red));
+        tblBalance.getColumnModel().getColumn(9).setCellRenderer(new ColorCellRender(Color.red));
+        tblBalance.getColumnModel().getColumn(10).setCellRenderer(new ColorCellRender(Color.red));
+        tblBalance.getColumnModel().getColumn(11).setCellRenderer(new ColorCellRender(Color.red));
+
     }
 
     private void initQtyTable() {
@@ -158,7 +170,10 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         }).subscribe();
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        }).subscribe();
+        }).then(inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
+        })).subscribe();
+
     }
 
     private void calculate() {
@@ -512,14 +527,14 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(lblRecord)
                         .addComponent(jLabel9))
                     .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtCat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnCalculate)
-                        .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnCalculate))
                     .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -529,11 +544,11 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))

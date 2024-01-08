@@ -34,7 +34,7 @@
                       <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="panelDate" max="32767" attributes="0"/>
-                          <Component id="panelOption" pref="0" max="32767" attributes="0"/>
+                          <Component id="panelOption" pref="118" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Component id="jPanel2" min="-2" max="-2" attributes="0"/>

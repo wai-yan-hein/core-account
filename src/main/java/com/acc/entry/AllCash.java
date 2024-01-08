@@ -325,7 +325,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
-        tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
+        //tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
         tblCash.setCellSelectionEnabled(true);
         tblCash.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCash.getColumnModel().getColumn(0).setPreferredWidth(20);// Date

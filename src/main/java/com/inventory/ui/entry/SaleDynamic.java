@@ -21,6 +21,7 @@ import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inventory.editor.BatchCellEditor;
 import com.inventory.editor.CarNoAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -48,6 +49,7 @@ import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.WeightHis;
+import com.inventory.ui.common.SaleByBatchTableModel;
 import com.inventory.ui.common.SalePaddyTableModel;
 import com.inventory.ui.common.SaleRiceTableModel;
 import com.inventory.ui.entry.dialog.AccountOptionDialog;
@@ -100,11 +102,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     public static final int EXPORT = 2;
     public static final int RICE = 3;
     public static final int PADDY = 4;
+    public static final int BATCH = 5;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleByWeightTableModel saleTableModel = new SaleByWeightTableModel();
     private final SaleExportTableModel saleExportTableModel = new SaleExportTableModel();
     private final SaleRiceTableModel saleRiceTableModel = new SaleRiceTableModel();
     private final SalePaddyTableModel salePaddyTableModel = new SalePaddyTableModel();
+    private final SaleByBatchTableModel saleByBatchTableModel = new SaleByBatchTableModel();
     private SaleHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
@@ -244,6 +248,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case PADDY -> {
                 return salePaddyTableModel.getObject(row);
             }
+            case BATCH -> {
+                return saleByBatchTableModel.getObject(row);
+            }
         }
         return null;
     }
@@ -261,6 +268,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case PADDY -> {
                 initPaddy();
+            }
+            case BATCH -> {
+                initBatchTable();
             }
         }
     }
@@ -390,6 +400,36 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
     }
 
+    private void initBatchTable() {
+        tblSale.setModel(saleByBatchTableModel);
+        saleByBatchTableModel.setLblRecord(lblRec);
+        saleByBatchTableModel.setParent(tblSale);
+        saleByBatchTableModel.setSale(this);
+        saleByBatchTableModel.addNewRow();
+        saleByBatchTableModel.setObserver(this);
+        saleByBatchTableModel.setVouDate(txtSaleDate);
+        saleByBatchTableModel.setInventoryRepo(inventoryRepo);
+        saleByBatchTableModel.setDialog(stockBalanceDialog);
+        tblSale.getTableHeader().setFont(Global.tblHeaderFont);
+        tblSale.setCellSelectionEnabled(true);
+        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//batch
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(150);//sup
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(50);//Code
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(200);//Name
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(80);//qty
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(5);//unit
+        tblSale.getColumnModel().getColumn(6).setPreferredWidth(80);//price
+        tblSale.getColumnModel().getColumn(7).setPreferredWidth(100);//amt
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new BatchCellEditor(inventoryRepo));//
+        tblSale.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(3).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        }).subscribe();
+        tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
+    }
+
     private void initTable() {
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
@@ -512,6 +552,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 salePaddyTableModel.removeListDetail();
                 salePaddyTableModel.clearDelList();
             }
+            case BATCH -> {
+                saleByBatchTableModel.removeListDetail();
+                saleByBatchTableModel.clearDelList();
+            }
         }
     }
 
@@ -528,6 +572,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case PADDY -> {
                 salePaddyTableModel.addNewRow();
+            }
+            case BATCH -> {
+                saleByBatchTableModel.addNewRow();
             }
         }
     }
@@ -548,7 +595,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoAutoCompleter.setAutoText(null);
         projectAutoCompleter.setProject(null);
         progress.setIndeterminate(false);
-        if(focus){
+        if (focus) {
             txtCus.requestFocus();
         }
     }
@@ -572,6 +619,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case PADDY -> {
                 return salePaddyTableModel.isValidEntry();
+            }
+            case BATCH -> {
+                return saleByBatchTableModel.isValidEntry();
             }
         }
         return false;
@@ -601,7 +651,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     if (!Util1.isNullOrEmpty(t.getWeightVouNo())) {
                         printWeightVoucher(t);
                     } else {
-                        printVoucher(t.getKey().getVouNo(), chkVou.isSelected());
+                        printVoucher(t, chkVou.isSelected());
                     }
                 } else {
                     clear(true);
@@ -672,8 +722,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(p.getReference(), t.getTraderName()));
+            param.put("p_cus_name", t.getTraderName());
             param.put("p_trader_address", t.getAddress());
-            param.put("p_trader_phone", t.getRemark());
+            param.put("p_trader_phone", t.getPhone());
         }
         return param;
     }
@@ -708,12 +759,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             JOptionPane.showMessageDialog(this, "Choose Trader.",
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
             status = false;
-            txtLocation.requestFocus();
+            txtCus.requestFocus();
         } else if (Util1.getDouble(txtVouTotal.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Amount.",
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
-            txtLocation.requestFocus();
+            txtVouTotal.requestFocus();
         } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
             JOptionPane.showMessageDialog(this, "Invalid Date.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
@@ -827,7 +878,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleRiceTableModel.delete(row);
             case PADDY ->
                 salePaddyTableModel.delete(row);
-
+            case BATCH ->
+                saleByBatchTableModel.delete(row);
         }
     }
 
@@ -841,7 +893,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleRiceTableModel.addSale(sd);
             case PADDY ->
                 salePaddyTableModel.addSale(sd);
-
+            case BATCH ->
+                saleByBatchTableModel.addSale(sd);
         }
     }
 
@@ -858,6 +911,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case PADDY -> {
                 return salePaddyTableModel.getListDetail();
+            }
+            case BATCH -> {
+                return saleByBatchTableModel.getListDetail();
             }
             default ->
                 throw new AssertionError();
@@ -877,6 +933,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case PADDY -> {
                 salePaddyTableModel.getDelList();
+            }
+            case BATCH -> {
+                saleByBatchTableModel.getDelList();
             }
         }
         return null;
@@ -1040,6 +1099,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 salePaddyTableModel.setListDetail(list);
                 salePaddyTableModel.addNewRow();
             }
+            case BATCH -> {
+                saleByBatchTableModel.setListDetail(list);
+                saleByBatchTableModel.addNewRow();
+            }
         }
     }
 
@@ -1063,10 +1126,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         setListDetail(listSaleDetail);
     }
 
-    private void printVoucher(String vouNo, boolean print) {
-        inventoryRepo.getSaleReport(vouNo).doOnSuccess((t) -> {
+    private void printVoucher(SaleHis sh, boolean print) {
+        inventoryRepo.getSaleReport(sh.getKey().getVouNo()).doOnSuccess((t) -> {
             if (t != null) {
-                viewReport(t, print);
+                viewReport(t, sh, print);
             }
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -1076,21 +1139,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }).subscribe();
     }
 
-    private void viewReport(List<VSale> list, boolean print) {
+    private void viewReport(List<VSale> list, SaleHis sh, boolean print) {
         try {
             String reportName = getReportName();
             if (reportName != null) {
                 VSale sale = list.getFirst();
-                Map<String, Object> param = new HashMap<>();
-                param.put("p_print_date", Util1.getTodayDateTime());
-                param.put("p_comp_name", Global.companyName);
-                param.put("p_comp_address", Global.companyAddress);
-                param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", ProUtil.logoPath());
-                param.put("p_balance", balance);
-                param.put("p_prv_balance", prvBal);
-                param.put("p_sub_report_dir", "report/");
-                param.put("p_trader_name", Util1.isNull(sale.getReference(), sale.getTraderName()));
+                Map<String, Object> param = getDefaultParam(sh);
                 if (!list.isEmpty()) {
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode n1 = mapper.readTree(Util1.gson.toJson(sale.getListDiscount()));

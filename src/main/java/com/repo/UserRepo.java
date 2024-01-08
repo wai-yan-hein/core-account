@@ -783,8 +783,13 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/getUserByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
-                .retrieve().bodyToFlux(AppUser.class)
-                .collectList();
+                .retrieve()
+                .bodyToFlux(AppUser.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getAppUserByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<BusinessType>> getBusinessTypeByDate(String updatedDate) {
@@ -793,7 +798,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(BusinessType.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getBusinessTypeByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<CompanyInfo>> getCompanyInfoByDate(String updatedDate) {
@@ -802,7 +811,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(CompanyInfo.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getCompanyInfoByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Currency>> getCurrencyByDate(String updatedDate) {
@@ -811,7 +824,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(Currency.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getCurrencyByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<DepartmentUser>> getDepartmentByDate(String updatedDate) {
@@ -820,7 +837,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(DepartmentUser.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getDepartmentByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<ExchangeRate>> getExchangeRateByDate(String updatedDate) {
@@ -829,7 +850,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(ExchangeRate.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getExchangeRateByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<ExchangeRate>> getExchangeRate() {
@@ -847,7 +872,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(MachineProperty.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getMacPropertyByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<MachineInfo>> getMachineInfoByDate(String updatedDate) {
@@ -856,7 +885,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(MachineInfo.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getMachineInfoByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Menu>> getMenuByDate(String updatedDate) {
@@ -865,7 +898,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(Menu.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getMenuByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<PrivilegeCompany>> getPCByDate(String updatedDate) {
@@ -874,7 +911,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(PrivilegeCompany.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getPCByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<PrivilegeMenu>> getPMByDate(String updatedDate) {
@@ -883,7 +924,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(PrivilegeMenu.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getPMByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Project>> getProjectByDate(String updatedDate) {
@@ -892,7 +937,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(Project.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getProjectByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<AppRole>> getRoleByDate(String updatedDate) {
@@ -901,7 +950,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(AppRole.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getRoleByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<RoleProperty>> getRolePropByDate(String updatedDate) {
@@ -910,7 +963,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(RoleProperty.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getRolePropByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<SysProperty>> getSystemPropertyByDate(String updatedDate) {
@@ -919,7 +976,12 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(SysProperty.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getSystemPropertyByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
+
     }
 
     public Mono<List<DateLock>> getDateLockByDate(String updatedDate) {
@@ -928,7 +990,11 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(DateLock.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getDateLockByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<AppUser> login(String userName, String password) {

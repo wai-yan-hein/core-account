@@ -5,9 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import lombok.Data;
 
 @Entity
@@ -21,9 +21,9 @@ public class DateLock {
     @Column(name = "remark")
     private String remark;
     @Column(name = "start_date", columnDefinition = "DATE")
-    private Date startDate;
+    private LocalDate startDate;
     @Column(name = "end_date", columnDefinition = "DATE")
-    private Date endDate;
+    private LocalDate endDate;
     @Column(name = "date_lock")
     private boolean dateLock;
     @Column(name = "created_by")

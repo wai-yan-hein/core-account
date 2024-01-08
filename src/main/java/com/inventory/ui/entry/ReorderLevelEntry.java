@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.entry;
 
-import com.common.ColorCellRender;
+import com.common.ReOrderCellRender;
 import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
@@ -185,7 +185,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         tblOrder.getColumnModel().getColumn(5).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(7).setCellRenderer(new RightCellRender());
-        tblOrder.getColumnModel().getColumn(9).setCellRenderer(new ColorCellRender());
+        tblOrder.getColumnModel().getColumn(9).setCellRenderer(new ReOrderCellRender());
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

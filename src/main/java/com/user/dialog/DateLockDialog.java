@@ -16,6 +16,7 @@ import com.user.model.DateLockKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import javax.swing.AbstractAction;
@@ -111,8 +112,8 @@ public class DateLockDialog extends javax.swing.JDialog {
     private void setData(DateLock dl) {
         dateLock = dl;
         txtRemark.setText(dl.getRemark());
-        txtStartDate.setDate(dl.getStartDate());
-        txtEndDate.setDate(dl.getEndDate());
+        txtStartDate.setDate(Util1.convertToDate(dl.getStartDate()));
+        txtEndDate.setDate(Util1.convertToDate(dl.getEndDate()));
         chkLock.setSelected(dl.isDateLock());
         lblCreateName.setText(Global.hmUser.get(dl.getCreatedBy()));
         lblUpdateName.setText(Global.hmUser.get(dl.getUpdatedBy()));
@@ -185,8 +186,8 @@ public class DateLockDialog extends javax.swing.JDialog {
             }
             dateLock.setUpdatedBy(Global.loginUser.getUserCode());
             dateLock.setUpdatedDate(LocalDateTime.now());
-            dateLock.setStartDate(txtStartDate.getDate());
-            dateLock.setEndDate(txtEndDate.getDate());
+            dateLock.setStartDate(Util1.toLocalDate(txtStartDate.getDate()));
+            dateLock.setEndDate(Util1.toLocalDate(txtEndDate.getDate()));
             dateLock.setRemark(txtRemark.getText());
             dateLock.setDateLock(chkLock.isSelected());
         }

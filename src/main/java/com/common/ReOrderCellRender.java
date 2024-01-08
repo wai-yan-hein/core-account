@@ -15,18 +15,27 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author Lenovo
  */
-public class ColorCellRender extends DefaultTableCellRenderer {
+public class ReOrderCellRender extends DefaultTableCellRenderer {
 
-    private Color color;
-
-    public ColorCellRender(Color color) {
-        this.color = color;
+    public ReOrderCellRender() {
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        ((JLabel) c).setForeground(color);
+        if (value instanceof String str) {
+            switch (str) {
+                case "Below-Min" ->
+                    ((JLabel) c).setForeground(Color.red);
+                case "Over-Min" ->
+                    ((JLabel) c).setForeground(Color.green);
+                case "Below-Max" ->
+                    ((JLabel) c).setForeground(Color.yellow);
+                default ->
+                    ((JLabel) c).setForeground(Color.blue);
+            }
+        }
+        ((JLabel) c).setFont(Global.lableFont);
         return c;
     }
 

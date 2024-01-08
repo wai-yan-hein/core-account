@@ -8,8 +8,8 @@ import com.repo.UserRepo;
 import com.common.Global;
 import com.common.Util1;
 import com.user.model.DateLock;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -59,11 +59,11 @@ public class DateLockTableModel extends AbstractTableModel {
                     return p.getRemark();
                 }
                 case 1 -> {
-                    Date d = p.getStartDate();
+                    LocalDate d = p.getStartDate();
                     return d == null ? null : Util1.toDateStr(d, Global.dateFormat);
                 }
                 case 2 -> {
-                    Date d = p.getEndDate();
+                    LocalDate d = p.getEndDate();
                     return d == null ? null : Util1.toDateStr(d, Global.dateFormat);
                 }
                 case 3 -> {

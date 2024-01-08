@@ -81,10 +81,10 @@ import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.PurOrderHisEntry;
-import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.StockIssRecEntry;
+import com.inventory.ui.entry.StockPaymentEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
 import com.inventory.ui.entry.WeightLossEntry;
@@ -393,6 +393,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         String cName = split[0]; // group name
         String srcAcc = split[1];
         String menuName = split[2];
+        int version = Util1.getInteger(split[3]);
         if (hmPanel.containsKey(menuName)) {
             return hmPanel.get(menuName);
         }
@@ -428,19 +429,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 orderDynamic.initMain();
                 return orderDynamic;
             }
-            case "Sale By Batch" -> {
-                SaleByBatch saleByBatch = new SaleByBatch();
-                saleByBatch.setName(menuName);
-                saleByBatch.setObserver(this);
-                saleByBatch.setProgress(progress);
-                saleByBatch.setStockBalanceDialog(stockBalanceFrame);
-                saleByBatch.setUserRepo(userRepo);
-                saleByBatch.setInventoryRepo(inventoryRepo);
-                saleByBatch.setAccountRepo(accounRepo);
-                saleByBatch.initMain();
-                return saleByBatch;
-            }
-            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy" -> {
+            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch" -> {
                 int type = getSaleType(menuName);
                 SaleDynamic s = new SaleDynamic(type);
                 s.setUserRepo(userRepo);
@@ -476,7 +465,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return purchase;
             }
             case "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy" -> {
-                int type = getPurType(menuName);
+                int type = getPurType(menuName, version);
                 PurchaseDynamic p = new PurchaseDynamic(type);
                 p.setName(menuName);
                 p.setUserRepo(userRepo);
@@ -784,6 +773,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return payment;
             }
             case "Stock Issue" -> {
+                StockPaymentEntry payment = new StockPaymentEntry("C");
+                payment.setUserRepo(userRepo);
+                payment.setInventoryRepo(inventoryRepo);
+                payment.setAccountRepo(accounRepo);
+                payment.setName(menuName);
+                payment.setObserver(this);
+                payment.setProgress(progress);
+                payment.initMain();
+                return payment;
+            }
+            case "Consign Issue" -> {
                 StockIssRecEntry stockIss = new StockIssRecEntry("I");
                 stockIss.setUserRepo(userRepo);
                 stockIss.setInventoryRepo(inventoryRepo);
@@ -793,7 +793,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 stockIss.initMain();
                 return stockIss;
             }
-            case "Stock Receive" -> {
+            case "Consign Receive" -> {
                 StockIssRecEntry stockRec = new StockIssRecEntry("R");
                 stockRec.setUserRepo(userRepo);
                 stockRec.setInventoryRepo(inventoryRepo);
@@ -1107,6 +1107,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.RICE;
             case "Sale Paddy" ->
                 SaleDynamic.PADDY;
+            case "Sale By Batch" ->
+                SaleDynamic.BATCH;
             default ->
                 0;
         };
@@ -1147,20 +1149,23 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         };
     }
 
-    private int getPurType(String menuName) {
+    private int getPurType(String menuName, int version) {
         //"Purchase By Weight", "Purchase Rice", "Purchase Export"
-        return switch (menuName) {
+        int purchaseType;
+        switch (menuName) {
             case "Purchase By Weight" ->
-                PurchaseDynamic.WEIGHT;
+                purchaseType = PurchaseDynamic.WEIGHT;
             case "Purchase Rice" ->
-                PurchaseDynamic.RICE;
+                purchaseType = (version == 1) ? PurchaseDynamic.RICE_BAG : PurchaseDynamic.RICE;
             case "Purchase Export" ->
-                PurchaseDynamic.EXPORT;
+                purchaseType = PurchaseDynamic.EXPORT;
             case "Purchase Paddy" ->
-                PurchaseDynamic.PADDY;
+                purchaseType = PurchaseDynamic.PADDY;
             default ->
-                0;
-        };
+                purchaseType = 0;
+        }
+
+        return purchaseType;
     }
 
     private int getStockIOType(String menuName) {
@@ -1393,9 +1398,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     if (!vrMenu.getChild().isEmpty()) {
                         JMenu menu = new JMenu();
                         menu.setFont(Global.menuFont);
-                        menu.setName(vrMenu.getMenuClass() + ","
-                                + Util1.isNull(vrMenu.getAccount(), "-") + ","
-                                + vrMenu.getMenuName());
+                        menu.setName(getMenuName(vrMenu));
                         menu.setText(Util1.isNull(vrMenu.getMenuNameMM(), vrMenu.getMenuName()));
                         //Need to add action listener
                         //====================================
@@ -1405,18 +1408,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         JMenuItem menuItem = new JMenuItem();
                         menuItem.addActionListener(menuListener);
                         menuItem.setFont(Global.menuFont);
-                        menuItem.setName(vrMenu.getMenuClass() + ","
-                                + Util1.isNull(vrMenu.getAccount(), "-") + ","
-                                + vrMenu.getMenuName());
+                        menuItem.setName(getMenuName(vrMenu));
                         menuItem.setText(Util1.isNull(vrMenu.getMenuNameMM(), vrMenu.getMenuName()));
                         //====================================
                         parent.add(menuItem);
                     }
                 } else {  //No Child
                     JMenuItem menuItem = new JMenuItem();
-                    menuItem.setName(vrMenu.getMenuClass() + ","
-                            + Util1.isNull(vrMenu.getAccount(), "-") + ","
-                            + vrMenu.getMenuName());                    //Need to add action listener
+                    menuItem.setName(getMenuName(vrMenu));                    //Need to add action listener
                     menuItem.addActionListener(menuListener);
                     menuItem.setFont(Global.menuFont);
                     menuItem.setText(Util1.isNull(vrMenu.getMenuNameMM(), vrMenu.getMenuName()));
