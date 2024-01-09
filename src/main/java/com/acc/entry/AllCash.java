@@ -756,6 +756,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtClosing.setValue(closing);
         txtDr.setValue(drAmt);
         txtCr.setValue(crAmt);
+       
     }
 
     private void clearModel() {

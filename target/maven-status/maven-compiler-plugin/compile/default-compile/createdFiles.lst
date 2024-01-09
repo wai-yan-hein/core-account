@@ -323,6 +323,7 @@ com\acc\model\OpeningBalance.class
 com\inventory\ui\setup\dialog\SaleManSetupDialog$2.class
 com\inventory\model\Pattern.class
 com\inventory\ui\entry\dialog\StockIOHistoryDialog$10.class
+com\inventory\ui\entry\SaleDynamic$36.class
 com\inventory\ui\entry\ReturnOut$7.class
 com\acc\entry\AllCash$20.class
 com\user\common\BusinessTypeTableModel.class
@@ -1107,6 +1108,7 @@ com\inventory\editor\RegionAutoCompleter$1.class
 com\inventory\ui\entry\dialog\OPHistoryDialog$12.class
 com\inventory\ui\setup\LanguageSetup$5.class
 com\inventory\ui\entry\dialog\PurchaseWeightLossPriceDialog$4.class
+com\inventory\ui\entry\SaleDynamic$35.class
 com\inventory\ui\setup\dialog\common\LanguageTableModel.class
 com\inventory\ui\entry\dialog\BatchSearchDialog.class
 com\inventory\ui\entry\OrderDynamic$6.class
@@ -2343,7 +2345,6 @@ com\user\editor\RoleAutoCompleter$6.class
 com\inventory\ui\setup\dialog\StockTypeSetupDialog$9.class
 com\inventory\ui\setup\StockSetup$43.class
 com\ui\management\StockPayable$6.class
-com\inventory\ui\entry\Transfer$3.class
 com\inventory\ui\entry\ReturnIn$18.class
 com\acc\model\BusinessType.class
 com\inventory\ui\entry\ReturnIn$15.class

@@ -531,18 +531,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void disableForm(boolean status) {
-        tblRet.setEnabled(status);
-        txtVouDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtLocation.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtVouPaid.setEnabled(status);
-        txtTax.setEnabled(status);
-        txtVouTaxP.setEnabled(status);
-        txtVouDiscP.setEnabled(status);
-        txtVouDiscount.setEnabled(status);
-        txtGrandTotal.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);

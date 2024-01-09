@@ -179,6 +179,9 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private void initProperty() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
+        txtDrAmt.setFont(Global.menuFont);
+        txtCrAmt.setFont(Global.menuFont);
+        txtOFB.setFont(Global.menuFont);
     }
 
     private void initTable() {
@@ -303,17 +306,15 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     // calculate dr-amt and cr-amt and total
     private void calTotalAmt() {
         List<OpeningBalance> listOpening = openingTableModel.getListOpening();
-        double drAmt = 0.0;
-        double crAmt = 0.0;
-        for (OpeningBalance opening : listOpening) {
-            drAmt += Util1.getDouble(opening.getDrAmt());
-            crAmt += Util1.getDouble(opening.getCrAmt());
-        }
-        txtFDrAmt.setValue(drAmt);
-        txtFCrAmt.setValue(crAmt);
+        double drAmt = listOpening.stream().mapToDouble((t) -> t.getDrAmt()).sum();
+        double crAmt = listOpening.stream().mapToDouble((t) -> t.getCrAmt()).sum();
         double op = drAmt - crAmt;
-        txtFOB.setValue(op);
+        txtDrAmt.setValue(drAmt);
+        txtCrAmt.setValue(crAmt);
+        txtOFB.setValue(op);
+        txtOFB.setForeground(op == 0 ? Color.black : Color.red);
         lblCount.setText(listOpening.size() - 1 + "");
+
     }
 
     private void printOpening() {
@@ -434,11 +435,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         jPanel3 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        txtFCrAmt = new javax.swing.JFormattedTextField();
+        txtCrAmt = new javax.swing.JFormattedTextField();
         jLabel7 = new javax.swing.JLabel();
-        txtFOB = new javax.swing.JFormattedTextField();
+        txtOFB = new javax.swing.JFormattedTextField();
         lblCount = new javax.swing.JLabel();
-        txtFDrAmt = new javax.swing.JFormattedTextField();
+        txtDrAmt = new javax.swing.JFormattedTextField();
         jLabel9 = new javax.swing.JLabel();
         lblMessage = new javax.swing.JLabel();
 
@@ -574,32 +575,32 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jLabel8.setFont(Global.lableFont);
+        jLabel8.setFont(Global.menuFont);
         jLabel8.setText("Cr-Amt");
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Total Count :");
 
-        txtFCrAmt.setEditable(false);
-        txtFCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFCrAmt.setFont(Global.amtFont);
+        txtCrAmt.setEditable(false);
+        txtCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtCrAmt.setFont(Global.amtFont);
 
-        jLabel7.setFont(Global.lableFont);
+        jLabel7.setFont(Global.menuFont);
         jLabel7.setText("Dr-Amt");
 
-        txtFOB.setEditable(false);
-        txtFOB.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFOB.setFont(Global.amtFont);
+        txtOFB.setEditable(false);
+        txtOFB.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtOFB.setFont(Global.amtFont);
 
         lblCount.setFont(Global.lableFont);
         lblCount.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCount.setText("0");
 
-        txtFDrAmt.setEditable(false);
-        txtFDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFDrAmt.setFont(Global.amtFont);
+        txtDrAmt.setEditable(false);
+        txtDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtDrAmt.setFont(Global.amtFont);
 
-        jLabel9.setFont(Global.lableFont);
+        jLabel9.setFont(Global.menuFont);
         jLabel9.setText("Out Of Balance");
 
         lblMessage.setFont(Global.lableFont);
@@ -620,7 +621,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 523, Short.MAX_VALUE)
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -628,8 +629,8 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFOB, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFCrAmt, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtOFB, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCrAmt, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -641,12 +642,12 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(lblCount)
                     .addComponent(jLabel7)
                     .addComponent(jLabel8)
-                    .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(txtFOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtOFB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblMessage))
                 .addContainerGap())
         );
@@ -716,12 +717,12 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel lblMessage;
     private javax.swing.JTable tblOpening;
     private javax.swing.JTextField txtCOA;
+    private javax.swing.JFormattedTextField txtCrAmt;
     private javax.swing.JTextField txtCurrency;
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtDept;
-    private javax.swing.JFormattedTextField txtFCrAmt;
-    private javax.swing.JFormattedTextField txtFDrAmt;
-    private javax.swing.JFormattedTextField txtFOB;
+    private javax.swing.JFormattedTextField txtDrAmt;
+    private javax.swing.JFormattedTextField txtOFB;
     private javax.swing.JTextField txtProjectNo;
     // End of variables declaration//GEN-END:variables
 

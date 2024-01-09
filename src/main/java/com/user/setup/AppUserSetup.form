@@ -21,7 +21,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="285" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" pref="278" max="32767" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="panelEntry" max="32767" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -106,14 +106,12 @@
                       </Group>
                       <Component id="txtRole" min="-2" pref="247" max="-2" attributes="0"/>
                       <Component id="txtEmail" min="-2" pref="247" max="-2" attributes="0"/>
-                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="chkAtive" max="32767" attributes="0"/>
-                          <Component id="cboDep" pref="247" max="32767" attributes="0"/>
-                          <Component id="cboLocation" pref="247" max="32767" attributes="0"/>
-                          <Component id="cboDepAcc" pref="247" max="32767" attributes="0"/>
-                      </Group>
+                      <Component id="chkAtive" min="-2" pref="247" max="-2" attributes="0"/>
+                      <Component id="txtDep" min="-2" pref="247" max="-2" attributes="0"/>
+                      <Component id="txtDepAcc" min="-2" pref="247" max="-2" attributes="0"/>
+                      <Component id="txtLoc" min="-2" pref="247" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="13" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -151,19 +149,19 @@
                       <Component id="txtRole" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="cboDep" max="32767" attributes="0"/>
-                      <Component id="jLabel12" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel12" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                      <Component id="txtDep" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="cboDepAcc" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jLabel14" alignment="0" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel14" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                      <Component id="txtDepAcc" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="cboLocation" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jLabel13" alignment="0" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel13" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                      <Component id="txtLoc" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -292,19 +290,6 @@
             <Property name="text" type="java.lang.String" value="Department"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cboDep">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
-            </Property>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;DepartmentUser&gt;"/>
-          </AuxValues>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel13">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -312,19 +297,6 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Location"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JComboBox" name="cboLocation">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
-            </Property>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;Location&gt;"/>
-          </AuxValues>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel14">
           <Properties>
@@ -334,18 +306,26 @@
             <Property name="text" type="java.lang.String" value="Department Account"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cboDepAcc">
+        <Component class="javax.swing.JTextField" name="txtDep">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtDepAcc">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
             </Property>
           </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;DepartmentA&gt;"/>
-          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtLoc">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

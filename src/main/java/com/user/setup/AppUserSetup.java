@@ -5,7 +5,7 @@
  */
 package com.user.setup;
 
-import com.acc.common.DepartmentAccComboBoxModel;
+import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DepartmentA;
 import com.common.ComponentUtil;
 import com.common.Global;
@@ -14,14 +14,14 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.MessageType;
-import com.inventory.ui.setup.common.LocationComboModel;
 import com.repo.AccountRepo;
 import com.repo.InventoryRepo;
-import com.user.common.DepartmentComboBoxModel;
 import com.user.model.AppUser;
 import com.user.common.UserTableModel;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.user.editor.RoleAutoCompleter;
 import com.user.model.DepartmentUser;
 import java.awt.event.KeyEvent;
@@ -43,9 +43,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private int selectRow = -1;
     private AppUser appUser = new AppUser();
     private final UserTableModel userTableModel = new UserTableModel();
-    private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
-    private final DepartmentAccComboBoxModel departmentAccComboBoxModel = new DepartmentAccComboBoxModel();
-    private final LocationComboModel locationComboModel = new LocationComboModel();
+    private DepartmentUserAutoCompleter departmentUserAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
+    private LocationAutoCompleter locationAutoCompleter;
 
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
@@ -90,24 +90,22 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void initCombo() {
+        departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDepAcc, null, false, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, false, false);
         userRepo.getAppRole().subscribe((t) -> {
             roleAutoCompleter = new RoleAutoCompleter(txtRole, t, null, false);
             roleAutoCompleter.setAppRole(null);
         });
-        userRepo.getDeparment(true).subscribe((t) -> {
-            t.add(new DepartmentUser());
-            departmentComboBoxModel.setData(t);
-            cboDep.setModel(departmentComboBoxModel);
-        });
-        accountRepo.getDepartment().subscribe((t) -> {
-            t.add(new DepartmentA());
-            departmentAccComboBoxModel.setData(t);
-            cboDepAcc.setModel(departmentAccComboBoxModel);
-        });
-        inventoryRepo.getLocation().subscribe((t) -> {
-            locationComboModel.setData(t);
-            cboLocation.setModel(locationComboModel);
-        });
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
+            locationAutoCompleter.setListLocation(t);
+        }).subscribe();
 
     }
 
@@ -153,25 +151,16 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             roleAutoCompleter.setAppRole(t);
         }).subscribe();
         Integer deptId = user.getDeptId();
-        if (deptId != null) {
-            userRepo.findDepartment(deptId).doOnSuccess((t) -> {
-                departmentComboBoxModel.setSelectedItem(t);
-                cboDep.repaint();
-            }).subscribe();
-        }
-        if (user.getDeptCode() != null) {
-            accountRepo.findDepartment(user.getDeptCode()).doOnSuccess((t) -> {
-                departmentAccComboBoxModel.setSelectedItem(t);
-                cboDepAcc.repaint();
-            }).subscribe();
-        }
+        userRepo.findDepartment(deptId).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setDepartment(t);
+        }).subscribe();
+        accountRepo.findDepartment(user.getDeptCode()).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
         String locCode = user.getLocCode();
-        if (locCode != null) {
-            inventoryRepo.findLocation(locCode).doOnSuccess((t) -> {
-                locationComboModel.setSelectedItem(t);
-                cboLocation.repaint();
-            }).subscribe();
-        }
+        inventoryRepo.findLocation(locCode).doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
+        }).subscribe();
         lblStatus.setText("EDIT");
     }
 
@@ -215,23 +204,12 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             txtRole.requestFocus();
             return false;
         } else {
-            if (cboDep.getSelectedItem() instanceof DepartmentUser dep) {
-                if (dep.getKey() != null) {
-                    appUser.setDeptId(dep.getKey().getDeptId());
-                } else {
-                    appUser.setDeptId(null);
-                }
-            }
-            if (cboDepAcc.getSelectedItem() instanceof DepartmentA dep) {
-                if (dep.getKey() != null) {
-                    appUser.setDeptCode(dep.getKey().getDeptCode());
-                } else {
-                    appUser.setDeptCode(null);
-                }
-            }
-            if (cboLocation.getSelectedItem() instanceof Location loc) {
-                appUser.setLocCode(loc.getKey().getLocCode());
-            }
+            DepartmentUser dep = departmentUserAutoCompleter.getDepartment();
+            DepartmentA depAcc = departmentAutoCompleter.getDepartment();
+            Location location = locationAutoCompleter.getLocation();
+            appUser.setDeptId(location == null ? null : dep.getKey().getDeptId());
+            appUser.setDeptCode(depAcc == null ? null : depAcc.getKey().getDeptCode());
+            appUser.setLocCode(location == null ? null : location.getKey().getLocCode());
             appUser.setUserCode(txtUserCode.getText());
             appUser.setUserLongName(txtUserName.getText());
             appUser.setUserShortName(txtUserShort.getText());
@@ -255,12 +233,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtUserName.requestFocus();
         appUser = new AppUser();
         roleAutoCompleter.setAppRole(null);
-        departmentComboBoxModel.setSelectedItem(null);
-        cboDep.repaint();
-        departmentAccComboBoxModel.setSelectedItem(null);
-        cboDepAcc.repaint();
-        locationComboModel.setSelectedItem(null);
-        cboLocation.repaint();
+        departmentAutoCompleter.setDepartment(null);
+        departmentUserAutoCompleter.setDepartment(null);
+        locationAutoCompleter.setLocation(null);
     }
 
     private void observeMain() {
@@ -299,11 +274,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         jLabel11 = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
         jLabel12 = new javax.swing.JLabel();
-        cboDep = new javax.swing.JComboBox<>();
         jLabel13 = new javax.swing.JLabel();
-        cboLocation = new javax.swing.JComboBox<>();
         jLabel14 = new javax.swing.JLabel();
-        cboDepAcc = new javax.swing.JComboBox<>();
+        txtDep = new javax.swing.JTextField();
+        txtDepAcc = new javax.swing.JTextField();
+        txtLoc = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -370,17 +345,17 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         jLabel12.setFont(Global.lableFont);
         jLabel12.setText("Department");
 
-        cboDep.setFont(Global.textFont);
-
         jLabel13.setFont(Global.lableFont);
         jLabel13.setText("Location");
-
-        cboLocation.setFont(Global.textFont);
 
         jLabel14.setFont(Global.lableFont);
         jLabel14.setText("Department Account");
 
-        cboDepAcc.setFont(Global.textFont);
+        txtDep.setFont(Global.textFont);
+
+        txtDepAcc.setFont(Global.textFont);
+
+        txtLoc.setFont(Global.textFont);
 
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
@@ -408,12 +383,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                         .addComponent(txtUserShort, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtRole, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(chkAtive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cboDep, 0, 247, Short.MAX_VALUE)
-                        .addComponent(cboLocation, 0, 247, Short.MAX_VALUE)
-                        .addComponent(cboDepAcc, 0, 247, Short.MAX_VALUE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkAtive, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDepAcc, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
         panelEntryLayout.setVerticalGroup(
             panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -443,17 +417,17 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jLabel10)
                     .addComponent(txtRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cboDep)
-                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cboDepAcc)
-                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDepAcc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cboLocation)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkAtive)
@@ -467,7 +441,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -490,9 +464,6 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<DepartmentUser> cboDep;
-    private javax.swing.JComboBox<DepartmentA> cboDepAcc;
-    private javax.swing.JComboBox<Location> cboLocation;
     private javax.swing.JCheckBox chkAtive;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -507,7 +478,10 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelEntry;
     private javax.swing.JTable tblUser;
+    private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtDepAcc;
     private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtLoc;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtRole;
     private javax.swing.JTextField txtUserCode;

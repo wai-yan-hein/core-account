@@ -22,8 +22,8 @@ public class OpeningBalance {
     private String sourceAccId;
     private String srcAccName;
     private String curCode;
-    private Double crAmt;
-    private Double drAmt;
+    private double crAmt;
+    private double drAmt;
     private String userCode;
     private LocalDateTime createdDate;
     private String deptCode;

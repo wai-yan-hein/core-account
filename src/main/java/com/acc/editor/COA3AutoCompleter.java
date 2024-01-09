@@ -94,8 +94,7 @@ public final class COA3AutoCompleter implements KeyListener {
             }
             case 3 -> {
                 table.setModel(cOA3TableModel);
-                table.getColumnModel().getColumn(2).setPreferredWidth(120);//Name
-                table.getColumnModel().getColumn(3).setPreferredWidth(120);//Name
+                table.getColumnModel().getColumn(3).setPreferredWidth(100);//Name
             }
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
@@ -106,8 +105,9 @@ public final class COA3AutoCompleter implements KeyListener {
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
-        table.getColumnModel().getColumn(0).setPreferredWidth(70);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
+        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
+        table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {

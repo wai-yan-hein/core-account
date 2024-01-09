@@ -153,10 +153,10 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     return opening.getCurCode();
                 }
                 case 7 -> {
-                    return Util1.getDouble(opening.getDrAmt()) == 0 ? null : Util1.getDouble(opening.getDrAmt());
+                    return Util1.toNull(opening.getDrAmt());
                 }
                 case 8 -> {
-                    return Util1.getDouble(opening.getCrAmt()) == 0 ? null : Util1.getDouble(opening.getCrAmt());
+                    return Util1.toNull(opening.getCrAmt());
                 }
                 default -> {
                     return null;
@@ -235,10 +235,10 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     double drAmt = Util1.getDouble(value);
                     if (drAmt > 0) {
                         opening.setDrAmt(drAmt);
-                        opening.setCrAmt(null);
+                        opening.setCrAmt(0);
                     } else {
                         opening.setCrAmt(drAmt);
-                        opening.setDrAmt(null);
+                        opening.setDrAmt(0);
                     }
 
                 }
@@ -246,10 +246,10 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     double crAmt = Util1.getDouble(value);
                     if (crAmt > 0) {
                         opening.setCrAmt(crAmt);
-                        opening.setDrAmt(null);
+                        opening.setDrAmt(0);
                     } else {
                         opening.setDrAmt(crAmt);
-                        opening.setCrAmt(null);
+                        opening.setCrAmt(0);
                     }
 
                 }

@@ -882,6 +882,9 @@ public class InventoryRepo {
     }
 
     public Mono<Location> findLocation(String locCode) {
+        if(Util1.isNullOrEmpty(locCode)){
+            return Mono.empty();
+        }
         LocationKey key = new LocationKey();
         key.setCompCode(Global.compCode);
         key.setLocCode(locCode);

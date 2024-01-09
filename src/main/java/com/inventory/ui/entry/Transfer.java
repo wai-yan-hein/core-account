@@ -136,19 +136,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
-        txtDate.getDateEditor().getUiComponent().addFocusListener(fa);
         txtVou.addKeyListener(this);
         txtRemark.addKeyListener(this);
         txtRefNo.addKeyListener(this);
         txtFrom.addKeyListener(this);
         txtTo.addKeyListener(this);
+        ComponentUtil.addFocusListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            ((JTextFieldDateEditor) e.getSource()).selectAll();
-        }
-    };
 
     private void actionMapping() {
         String solve = "delete";

@@ -79,7 +79,7 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,##0;(###,##0)";
+    public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
     public static final String DECIMAL_FORMAT1 = "###,##0.0;(###,##0.0)";
     public static final String DECIMAL_FORMAT2 = "###,##0.00;(###,##0.00)";
     public static final String DECIMAL_FORMAT3 = "###,##0.000;(###,##0.000)";
