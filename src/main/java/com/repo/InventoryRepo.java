@@ -104,6 +104,8 @@ import com.inventory.model.StockIssRecDetail;
 import com.inventory.model.StockIssueReceive;
 import com.inventory.model.StockIssueReceiveKey;
 import com.inventory.model.StockKey;
+import com.inventory.model.StockPayment;
+import com.inventory.model.StockPaymentDetail;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
 import com.inventory.model.StockUnit;
@@ -882,7 +884,7 @@ public class InventoryRepo {
     }
 
     public Mono<Location> findLocation(String locCode) {
-        if(Util1.isNullOrEmpty(locCode)){
+        if (Util1.isNullOrEmpty(locCode)) {
             return Mono.empty();
         }
         LocationKey key = new LocationKey();
@@ -3150,6 +3152,15 @@ public class InventoryRepo {
                 .collectList();
     }
 
+    public Flux<StockPayment> getStockPaymentHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/stockPayment/getPaymentHistory")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(StockPayment.class);
+    }
+
     public Flux<LabourPaymentDto> getLabourPaymentHistory(FilterObject filter) {
         return inventoryApi
                 .post()
@@ -3166,6 +3177,20 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(LabourPaymentDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<StockPaymentDetail>> getStockPaymentDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/stockPayment/getPaymentDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(StockPaymentDetail.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -3511,6 +3536,14 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<StockPayment> saveStockPayment(StockPayment ph) {
+        return inventoryApi.post()
+                .uri("/stockPayment/savePayment")
+                .body(Mono.just(ph), StockPayment.class)
+                .retrieve()
+                .bodyToMono(StockPayment.class);
+    }
+
     public Mono<LabourPaymentDto> saveLabourPayment(LabourPaymentDto dto) {
         return inventoryApi.post()
                 .uri("/labourPayment")
@@ -3841,6 +3874,37 @@ public class InventoryRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("getCustomerBalance :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<StockPaymentDetail>> getTraderStockBalanceQty(String traderCode, String tranOption) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/stockPayment/getTraderStockBalanceQty")
+                .queryParam("traderCode", traderCode)
+                .queryParam("tranOption", tranOption)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockPaymentDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getTraderStockBalance :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+     public Mono<List<StockPaymentDetail>> getTraderStockBalanceBag(String traderCode, String tranOption) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/stockPayment/getTraderStockBalanceBag")
+                .queryParam("traderCode", traderCode)
+                .queryParam("tranOption", tranOption)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockPaymentDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getTraderStockBalance :" + e.getMessage());
                     return Mono.empty();
                 });
     }
@@ -4286,6 +4350,20 @@ public class InventoryRepo {
     public Mono<Boolean> restoreLabourPayment(String vouNo) {
         return inventoryApi.put()
                 .uri("labourPayment/restore/{fileId}/{compCode}", vouNo, Global.compCode)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<Boolean> deleteStockPayment(String vouNo) {
+        return inventoryApi.delete()
+                .uri("stockPayment/delete/{vouNo}/{compCode}", vouNo, Global.compCode)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<Boolean> restoreStockPayment(String vouNo) {
+        return inventoryApi.put()
+                .uri("stockPayment/restore/{vouNo}/{compCode}", vouNo, Global.compCode)
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }

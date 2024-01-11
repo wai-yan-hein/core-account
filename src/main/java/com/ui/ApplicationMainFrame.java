@@ -772,11 +772,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 payment.initMain();
                 return payment;
             }
-            case "Stock Issue" -> {
-                StockPaymentEntry payment = new StockPaymentEntry("C");
-                payment.setUserRepo(userRepo);
+            case "Paddy Issue", "Rice Issue" -> {
+                int type = 0;
+                switch (menuName) {
+                    case "Paddy Issue" ->
+                        type = StockPaymentEntry.QTY;
+                    case "Rice Issue" ->
+                        type = StockPaymentEntry.BAG;
+                }
+                StockPaymentEntry payment = new StockPaymentEntry("C", type);
                 payment.setInventoryRepo(inventoryRepo);
-                payment.setAccountRepo(accounRepo);
                 payment.setName(menuName);
                 payment.setObserver(this);
                 payment.setProgress(progress);

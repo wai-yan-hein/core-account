@@ -4,8 +4,8 @@
  */
 package com.inventory.ui.entry;
 
-import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
+import com.common.ColumnColorCellRenderer;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.Global;
@@ -14,24 +14,26 @@ import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.PaymentHis;
+import com.inventory.model.Location;
 import com.inventory.model.PaymentHisKey;
+import com.inventory.model.StockPayment;
+import com.inventory.model.StockPaymentDetail;
+import com.inventory.model.StockPaymentDetailKey;
 import com.inventory.model.Trader;
+import com.inventory.ui.common.StockPaymentBagTableModel;
 import com.repo.InventoryRepo;
-import com.inventory.ui.common.PaymentTableModel;
-import com.inventory.ui.entry.dialog.PaymentHistoryDialog;
+import com.inventory.ui.common.StockPaymentQtyTableModel;
+import com.inventory.ui.entry.dialog.StockPaymentHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.repo.UserRepo;
-import com.user.editor.CurrencyAutoCompleter;
-import com.user.editor.ProjectAutoCompleter;
-import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.JList;
@@ -54,19 +56,20 @@ import net.sf.jasperreports.view.JasperViewer;
 @Slf4j
 public class StockPaymentEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
-    private final PaymentTableModel tableModel = new PaymentTableModel();
+    public static final int QTY = 1;
+    public static final int BAG = 2;
+    private final StockPaymentQtyTableModel qtyTableModel = new StockPaymentQtyTableModel();
+    private final StockPaymentBagTableModel bagTableModel = new StockPaymentBagTableModel();
     private SelectionObserver observer;
     private JProgressBar progress;
-    private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
-    private AccountRepo accountRepo;
     private TraderAutoCompleter traderAutoCompleter;
-    private ProjectAutoCompleter projectAutoCompleter;
-    private CurrencyAutoCompleter currencyAutoCompleter;
+    private LocationAutoCompleter locationAutoCompleter;
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
-    private PaymentHis ph = new PaymentHis();
-    private PaymentHistoryDialog dialog;
+    private StockPayment ph = new StockPayment();
+    private StockPaymentHistoryDialog dialog;
     private String tranOption;
+    private int type;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -76,25 +79,19 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         this.progress = progress;
     }
 
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
     }
 
     /**
      * Creates new form ReceiveEntry
      *
      * @param tranOption
+     * @param type
      */
-    public StockPaymentEntry(String tranOption) {
+    public StockPaymentEntry(String tranOption, int type) {
         this.tranOption = tranOption;
+        this.type = type;
         initComponents();
         initFocusAdapter();
         initFormat();
@@ -136,7 +133,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Payment Transaction delete.", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
-                    tableModel.delete(row);
+                    delete(row);
                     calTotalPayment();
                 }
             }
@@ -145,15 +142,28 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         }
     }
 
+    private void delete(int row) {
+        switch (tranOption) {
+            case "C" -> {
+                switch (type) {
+                    case QTY ->
+                        qtyTableModel.delete(row);
+                    case BAG ->
+                        bagTableModel.delete(row);
+                }
+            }
+        }
+    }
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
-        userRepo.getCurrency().doOnSuccess((t) -> {
-            currencyAutoCompleter.setListCurrency(t);
-        }).subscribe();
-        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
-            currencyAutoCompleter.setCurrency(c);
-        }).subscribe();
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, false, false);
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
+            locationAutoCompleter.setListLocation(t);
+        }).then(inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
+        })).subscribe();
     }
 
     private void initFocusAdapter() {
@@ -164,6 +174,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         initDate();
         initCombo();
         initTable();
+        initModel();
         initRowHeader();
     }
 
@@ -177,35 +188,103 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         scroll.setRowHeaderView(list);
     }
 
+    private void initModel() {
+        switch (tranOption) {
+            case "C" -> {
+                switch (type) {
+                    case QTY ->
+                        initTableQty();
+                    case BAG ->
+                        initTableBag();
+                }
+            }
+        }
+    }
+
     private void initTable() {
-        tableModel.setObserver(this);
-        tableModel.setTable(tblPayment);
-        tblPayment.setModel(tableModel);
         tblPayment.getTableHeader().setFont(Global.tblHeaderFont);
         tblPayment.setCellSelectionEnabled(true);
         tblPayment.setRowHeight(Global.tblRowHeight);
         tblPayment.setShowGrid(true);
         tblPayment.setFont(Global.textFont);
-        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(50);//Date
-        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(100);//VouNo
-        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(100);//Remark
-        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(100);//Ref
-        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(20);//VouNo
-        tblPayment.getColumnModel().getColumn(5).setPreferredWidth(60);//Total
-        tblPayment.getColumnModel().getColumn(6).setPreferredWidth(60);//Oustanting
-        tblPayment.getColumnModel().getColumn(7).setPreferredWidth(60);//Payment
-        tblPayment.getColumnModel().getColumn(8).setPreferredWidth(1);//paid
-        tblPayment.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+    }
+
+    private void initTableQty() {
+        qtyTableModel.setObserver(this);
+        qtyTableModel.setTable(tblPayment);
+        tblPayment.setModel(qtyTableModel);
+        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(20);//Date
+        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(40);//VouNo
+        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(40);//con
+        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(100);//Remark
+        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(100);//Ref
+        tblPayment.getColumnModel().getColumn(5).setPreferredWidth(40);//stock
+        tblPayment.getColumnModel().getColumn(6).setPreferredWidth(150);//stockName
+        tblPayment.getColumnModel().getColumn(7).setPreferredWidth(60);//qty
+        tblPayment.getColumnModel().getColumn(8).setPreferredWidth(60);//bal
+        tblPayment.getColumnModel().getColumn(9).setPreferredWidth(60);//Payment
+        tblPayment.getColumnModel().getColumn(10).setPreferredWidth(1);//paid
+        tblPayment.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(8).setCellRenderer(new ColumnColorCellRenderer(Color.red));
+        tblPayment.getColumnModel().getColumn(9).setCellRenderer(new ColumnColorCellRenderer(Color.green));
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
-    private void searchTraderBalance() {
-        Trader t = traderAutoCompleter.getTrader();
-        if (t != null) {
+    private void initTableBag() {
+        bagTableModel.setObserver(this);
+        bagTableModel.setTable(tblPayment);
+        tblPayment.setModel(bagTableModel);
+        tblPayment.getColumnModel().getColumn(0).setPreferredWidth(20);//Date
+        tblPayment.getColumnModel().getColumn(1).setPreferredWidth(40);//VouNo
+        tblPayment.getColumnModel().getColumn(2).setPreferredWidth(40);//con
+        tblPayment.getColumnModel().getColumn(3).setPreferredWidth(100);//Remark
+        tblPayment.getColumnModel().getColumn(4).setPreferredWidth(100);//Ref
+        tblPayment.getColumnModel().getColumn(5).setPreferredWidth(40);//stock
+        tblPayment.getColumnModel().getColumn(6).setPreferredWidth(150);//stockName
+        tblPayment.getColumnModel().getColumn(7).setPreferredWidth(60);//qty
+        tblPayment.getColumnModel().getColumn(8).setPreferredWidth(60);//bal
+        tblPayment.getColumnModel().getColumn(9).setPreferredWidth(60);//Payment
+        tblPayment.getColumnModel().getColumn(10).setPreferredWidth(1);//paid
+        tblPayment.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(8).setCellRenderer(new ColumnColorCellRenderer(Color.red));
+        tblPayment.getColumnModel().getColumn(9).setCellRenderer(new ColumnColorCellRenderer(Color.green));
+        tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+
+    private void calTraderBalance() {
+        Trader trader = traderAutoCompleter.getTrader();
+        if (trader != null) {
             if (lblStatus.getText().equals("NEW")) {
                 progress.setIndeterminate(true);
+                String traderCode = trader.getKey().getCode();
+                switch (tranOption) {
+                    case "C" -> {
+                        switch (type) {
+                            case QTY ->
+                                inventoryRepo.getTraderStockBalanceQty(traderCode, tranOption).doOnSuccess((t) -> {
+                                    qtyTableModel.setListDetail(t);
+                                }).doOnTerminate(() -> {
+                                    calTotalPayment();
+                                    progress.setIndeterminate(false);
+                                }).subscribe();
+                            case BAG ->
+                                inventoryRepo.getTraderStockBalanceBag(traderCode, tranOption).doOnSuccess((t) -> {
+                                    bagTableModel.setListDetail(t);
+                                }).doOnTerminate(() -> {
+                                    calTotalPayment();
+                                    progress.setIndeterminate(false);
+                                }).subscribe();
+                            default ->
+                                throw new AssertionError();
+                        }
+                    }
+                    default ->
+                        throw new AssertionError();
+                }
 
             } else {
                 JOptionPane.showMessageDialog(this, "Create New Payment Voucher.");
@@ -214,12 +293,62 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void calTotalPayment() {
+        int size = getListDelete().size();
+        txtRecord.setValue(size);
+        lblMessage.setForeground(Color.red);
+        lblMessage.setText(size == 0 ? "No Data Records." : "");
+    }
 
-        txtRecord.setValue(tableModel.getListDetail().size());
+    private boolean isValidDetail() {
+        return switch (tranOption) {
+            case "C" ->
+                switch (type) {
+                    case QTY ->
+                        qtyTableModel.isValidEntry();
+                    case BAG ->
+                        bagTableModel.isValidEntry();
+                    default ->
+                        false; // Handle unexpected values for 'type'
+                };
+            default ->
+                false; // Handle unexpected values for 'tranOption'
+        };
+    }
+
+    private List<StockPaymentDetail> getPaymentList() {
+        return switch (tranOption) {
+            case "C" ->
+                switch (type) {
+                    case QTY ->
+                        qtyTableModel.getListDetail();
+                    case BAG ->
+                        bagTableModel.getListDetail();
+                    default ->
+                        null;
+                };
+            default ->
+                null;
+        };
+    }
+
+    private List<StockPaymentDetailKey> getListDelete() {
+        return switch (tranOption) {
+            case "C" ->
+                switch (type) {
+                    case QTY ->
+                        qtyTableModel.getListDelete();
+                    case BAG ->
+                        bagTableModel.getListDelete();
+                    default ->
+                        null;
+                };
+            default ->
+                null;
+        };
     }
 
     private void savePayment(boolean print) {
-        if (isValidEntry() && tableModel.isValidEntry()) {
+        if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
                 DateLockUtil.showMessage(this);
                 txtVouDate.requestFocus();
@@ -227,19 +356,16 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             }
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            ph.setListDetail(tableModel.getPaymentList());
-            ph.setListDelete(tableModel.getListDelete());
+            ph.setListDetail(getPaymentList());
+            ph.setListDelete(getListDelete());
             ph.setTranOption(tranOption);
-            inventoryRepo.savePayment(ph).subscribe((t) -> {
+            inventoryRepo.saveStockPayment(ph).doOnSuccess((t) -> {
                 clear();
-                if (print) {
-                    printVoucher(t.getKey());
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
+            }).doOnError((e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
-            });
+            }).subscribe();
         }
     }
 
@@ -279,6 +405,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
 
     private boolean isValidEntry() {
         Trader t = traderAutoCompleter.getTrader();
+        Location l = locationAutoCompleter.getLocation();
         if (t == null) {
             JOptionPane.showMessageDialog(this, "Invalid Trader.");
             txtTrader.requestFocus();
@@ -297,19 +424,21 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             txtVouDate.requestFocus();
             return false;
+        } else if (l == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Location.");
+            txtLoc.requestFocus();
+            return false;
         } else {
-            ph.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
+            ph.setCalculate(chkCal.isSelected());
             ph.setTraderCode(t.getKey().getCode());
+            ph.setLocCode(l.getKey().getLocCode());
             ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ph.setDeleted(false);
             ph.setRemark(txtRemark.getText());
             ph.setMacId(Global.macId);
-
             if (lblStatus.getText().equals("NEW")) {
-                PaymentHisKey key = new PaymentHisKey();
-                key.setCompCode(Global.compCode);
+                ph.setCompCode(Global.compCode);
                 ph.setDeptId(Global.deptId);
-                ph.setKey(key);
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setCreatedDate(LocalDateTime.now());
             } else {
@@ -321,28 +450,39 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
 
     private void clear() {
         traderAutoCompleter.setTrader(null);
-        projectAutoCompleter.setProject(null);
         coaComboModel.setSelectedItem(null);
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
         txtRemark.setText(null);
+        chkCal.setSelected(true);
         txtRecord.setValue(0);
-        tableModel.clear();
+        clearModel();
         lblStatus.setForeground(Color.green);
         lblStatus.setText("NEW");
         lblMessage.setText("");
         enableForm(true);
-        ph = new PaymentHis();
+        ph = new StockPayment();
+    }
+
+    private void clearModel() {
+        switch (tranOption) {
+            case "C" -> {
+                switch (type) {
+                    case QTY ->
+                        qtyTableModel.clear();
+                    case BAG ->
+                        bagTableModel.clear();
+                }
+            }
+        }
     }
 
     private void historyPayment() {
         if (dialog == null) {
-            dialog = new PaymentHistoryDialog(Global.parentForm, tranOption);
+            dialog = new StockPaymentHistoryDialog(Global.parentForm, tranOption);
             dialog.setObserver(this);
-            dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
-            dialog.setAccountRepo(accountRepo);
-            dialog.setTitle(String.format("%s Payment History Dialog", tranOption.equals("C") ? "Customer" : "Supplier"));
+            dialog.setTitle(String.format("%s History Dialog", tranOption.equals("C") ? "Stock Issue" : "Stock Received"));
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
@@ -350,31 +490,25 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         dialog.search();
     }
 
-    private void setVoucherDetail(PaymentHis ph) {
+    private void setVoucherDetail(StockPayment ph) {
         this.ph = ph;
-        int deptId = ph.getDeptId();
-        String compCode = ph.getKey().getCompCode();
-        String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.findTrader(ph.getTraderCode()).subscribe((t) -> {
+        String vouNo = ph.getVouNo();
+        inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
-        accountRepo.findCOA(ph.getAccount()).subscribe((t) -> {
-            coaComboModel.setSelectedItem(t);
-        });
-        userRepo.find(new ProjectKey(ph.getProjectNo(), compCode)).subscribe((t) -> {
-            projectAutoCompleter.setProject(t);
-        });
-        userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
-            currencyAutoCompleter.setCurrency(t);
-        });
+        }).subscribe();
+        inventoryRepo.findLocation(ph.getLocCode()).doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
+        }).subscribe();
         txtVouNo.setText(vouNo);
         txtVouDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtRemark.setText(ph.getRemark());
+        chkCal.setSelected(ph.isCalculate());
         ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
         if (ph.isDeleted()) {
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
             enableForm(false);
+            observer.selected("delete", true);
         } else if (!ProUtil.isPaymentEdit()) {
             lblStatus.setText("No Permission.");
             lblStatus.setForeground(Color.RED);
@@ -395,11 +529,26 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             lblStatus.setForeground(Color.blue);
             enableForm(true);
         }
-        inventoryRepo.getPaymentDetail(vouNo, deptId).subscribe((t) -> {
-            tableModel.setListDetail(t);
+        inventoryRepo.getStockPaymentDetail(vouNo).doOnSuccess((t) -> {
+            setListDetail(t);
+        }).doOnTerminate(() -> {
             calTotalPayment();
+            progress.setIndeterminate(false);
             tblPayment.requestFocus();
-        });
+        }).subscribe();
+    }
+
+    private void setListDetail(List<StockPaymentDetail> list) {
+        switch (tranOption) {
+            case "C" -> {
+                switch (type) {
+                    case QTY ->
+                        qtyTableModel.setListDetail(list);
+                    case BAG ->
+                        bagTableModel.setListDetail(list);
+                }
+            }
+        }
     }
 
     private void enableForm(boolean status) {
@@ -416,12 +565,10 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Payment Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
-                        if (t) {
-                            calTotalPayment();
-                            clear();
-                        }
-                    });
+                    inventoryRepo.deleteStockPayment(ph.getVouNo()).doOnSuccess((t) -> {
+                        calTotalPayment();
+                        clear();
+                    }).subscribe();
                 }
             }
             case "DELETED" -> {
@@ -429,21 +576,17 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                         "Are you sure to restore?", "Payment Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     ph.setDeleted(false);
-                    inventoryRepo.restore(ph.getKey()).subscribe((t) -> {
-                        if (t) {
-                            lblStatus.setText("EDIT");
-                            lblStatus.setForeground(Color.blue);
-                            enableForm(true);
-                        }
-                    });
+                    inventoryRepo.restoreStockPayment(ph.getVouNo()).doOnSuccess((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        enableForm(true);
+                    }).subscribe();
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
-    
 
     private void observeMain() {
         observer.selected("control", this);
@@ -470,13 +613,16 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         txtVouDate = new com.toedter.calendar.JDateChooser();
         jLabel4 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
-        lblMessage = new javax.swing.JLabel();
+        chkCal = new javax.swing.JRadioButton();
+        txtLoc = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
         scroll = new javax.swing.JScrollPane();
         tblPayment = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         lblTrader = new javax.swing.JLabel();
         txtTrader = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
+        lblMessage = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
@@ -512,8 +658,13 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
 
         txtRemark.setFont(Global.textFont);
 
-        lblMessage.setFont(Global.lableFont);
-        lblMessage.setForeground(Global.selectionColor);
+        chkCal.setSelected(true);
+        chkCal.setText("Calculate");
+
+        txtLoc.setFont(Global.textFont);
+
+        jLabel2.setFont(Global.lableFont);
+        jLabel2.setText("Location");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -521,46 +672,50 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblDate, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtRemark))
+                        .addComponent(jLabel1)
+                        .addGap(313, 815, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 110, Short.MAX_VALUE)
-                .addComponent(lblMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(313, 313, 313))
+                            .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(lblDate)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 303, Short.MAX_VALUE)
+                                .addComponent(chkCal))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap())))
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtRemark, txtVouDate, txtVouNo});
-
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblDate, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblMessage))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtRemark)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtVouNo)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkCal))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel4)
+                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtLoc, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 6, Short.MAX_VALUE))
         );
 
         tblPayment.setModel(new javax.swing.table.DefaultTableModel(
@@ -595,18 +750,21 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .addComponent(lblTrader)
                 .addGap(12, 12, 12)
                 .addComponent(txtTrader, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblStatus)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTrader, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtTrader)
-                    .addComponent(lblStatus))
+                    .addComponent(lblStatus)
+                    .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -636,7 +794,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtRecord)
-                    .addComponent(jLabel10))
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -661,7 +819,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -679,8 +837,10 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton chkCal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -691,6 +851,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JLabel lblTrader;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblPayment;
+    private javax.swing.JTextField txtLoc;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtTrader;
@@ -703,11 +864,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         if (source.equals("CAL_PAYMENT")) {
             calTotalPayment();
         } else if (source.equals("PAYMENT_HISTORY")) {
-            if (selectObj instanceof PaymentHis p) {
+            if (selectObj instanceof StockPayment p) {
                 setVoucherDetail(p);
             }
         } else if (source != null) {
-            searchTraderBalance();
+            calTraderBalance();
         }
     }
 

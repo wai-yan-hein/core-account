@@ -152,44 +152,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initTextFormat() {
-        txtLoadAmt.setFormatterFactory(Util1.getDecimalFormat2());
-        txtOutputAmt.setFormatterFactory(Util1.getDecimalFormat2());
-        txtOutputQty.setFormatterFactory(Util1.getDecimalFormat2());
-        txtOutputWeight.setFormatterFactory(Util1.getDecimalFormat2());
-        txtLoadQty.setFormatterFactory(Util1.getDecimalFormat2());
-        txtLoadWeight.setFormatterFactory(Util1.getDecimalFormat2());
-        txtWtLoss.setFormatterFactory(Util1.getDecimalFormat2());
-        txtLoadExpense.setFormatterFactory(Util1.getDecimalFormat2());
-        txtLoadCost.setFormatterFactory(Util1.getDecimalFormat2());
-        txtEffQty.setFormatterFactory(Util1.getDecimalFormat2());
-        txtEffWt.setFormatterFactory(Util1.getDecimalFormat2());
-        txtQtyLoss.setFormatterFactory(Util1.getDecimalFormat2());
-        //font
-        txtLoadAmt.setFont(Global.amtFont);
-        txtOutputAmt.setFont(Global.amtFont);
-        txtOutputQty.setFont(Global.amtFont);
-        txtOutputWeight.setFont(Global.amtFont);
-        txtLoadQty.setFont(Global.amtFont);
-        txtLoadWeight.setFont(Global.amtFont);
-        txtWtLoss.setFont(Global.amtFont);
-        txtLoadExpense.setFont(Global.amtFont);
-        txtLoadCost.setFont(Global.amtFont);
-        txtEffQty.setFont(Global.amtFont);
-        txtEffWt.setFont(Global.amtFont);
-        txtQtyLoss.setFont(Global.amtFont);
-        //align
-        txtLoadAmt.setHorizontalAlignment(JTextField.RIGHT);
-        txtOutputAmt.setHorizontalAlignment(JTextField.RIGHT);
-        txtOutputQty.setHorizontalAlignment(JTextField.RIGHT);
-        txtOutputWeight.setHorizontalAlignment(JTextField.RIGHT);
-        txtLoadQty.setHorizontalAlignment(JTextField.RIGHT);
-        txtLoadWeight.setHorizontalAlignment(JTextField.RIGHT);
-        txtWtLoss.setHorizontalAlignment(JTextField.RIGHT);
-        txtLoadExpense.setHorizontalAlignment(JTextField.RIGHT);
-        txtLoadCost.setHorizontalAlignment(JTextField.RIGHT);
-        txtEffQty.setHorizontalAlignment(JTextField.RIGHT);
-        txtEffWt.setHorizontalAlignment(JTextField.RIGHT);
-        txtQtyLoss.setHorizontalAlignment(JTextField.RIGHT);
+        ComponentUtil.setTextProperty(this);
         txtEffWt.setForeground(Color.green);
         txtEffQty.setForeground(Color.red);
     }
@@ -233,23 +196,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private void initDateListner() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
-        txtSaleDate.getDateEditor().getUiComponent().addFocusListener(fa);
-        txtCurrency.addFocusListener(fa);
-        txtCus.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtReference.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     public void initMain() {
         initCombo();
@@ -960,7 +908,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel17 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
-        txtVouNo = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtSaleDate = new com.toedter.calendar.JDateChooser();
@@ -981,6 +928,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtJob = new javax.swing.JTextField();
         jLabel25 = new javax.swing.JLabel();
         txtVouStatus = new javax.swing.JTextField();
+        txtVouNo = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRaw = new javax.swing.JTable();
@@ -1060,11 +1008,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 txtCusActionPerformed(evt);
             }
         });
-
-        txtVouNo.setEditable(false);
-        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtVouNo.setFont(Global.textFont);
-        txtVouNo.setName("txtVouNo"); // NOI18N
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Milling Date");
@@ -1191,6 +1134,26 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         txtVouStatus.setFont(Global.textFont);
 
+        txtVouNo.setEditable(false);
+        txtVouNo.setFont(Global.textFont);
+        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtVouNo.setName("txtCus"); // NOI18N
+        txtVouNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtVouNoFocusGained(evt);
+            }
+        });
+        txtVouNo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtVouNoMouseExited(evt);
+            }
+        });
+        txtVouNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtVouNoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1217,9 +1180,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                             .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtSaleDate, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelSaleLayout.createSequentialGroup()
@@ -1246,7 +1209,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(jLabel25)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnTransfer, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
                             .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -1257,7 +1220,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel10, jLabel15});
 
-        panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCurrency, txtCus, txtJob, txtLocation, txtProjectNo, txtReference, txtRemark, txtSaleDate, txtVouNo});
+        panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCurrency, txtCus, txtJob, txtLocation, txtProjectNo, txtReference, txtRemark, txtSaleDate});
 
         panelSaleLayout.setVerticalGroup(
             panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1266,13 +1229,13 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel17)
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel6)
                         .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel10)
                         .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel25))
+                        .addComponent(jLabel25)
+                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1757,6 +1720,18 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         // TODO add your handling code here:
     }//GEN-LAST:event_txtJobActionPerformed
 
+    private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoFocusGained
+
+    private void txtVouNoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtVouNoMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoMouseExited
+
+    private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -2012,7 +1987,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
     private com.toedter.calendar.JDateChooser txtSaleDate;
-    private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouNo;
     private javax.swing.JTextField txtVouStatus;
     private javax.swing.JFormattedTextField txtWtLoss;
     // End of variables declaration//GEN-END:variables

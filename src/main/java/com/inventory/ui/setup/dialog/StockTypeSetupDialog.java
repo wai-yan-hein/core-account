@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.MessageType;
+import com.inventory.model.StockGroupEnum;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
 import com.repo.InventoryRepo;
@@ -119,6 +120,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         txtAccount.setText(stockType.getAccount());
         rdoFinish.setSelected(stockType.isFinishedGroup());
         chkActive.setSelected(stockType.isActive());
+        cboType.setSelectedItem(StockGroupEnum.values()[item.getGroupType()]);
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
         txtUserCode.requestFocus();
@@ -128,18 +130,19 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            inventoryRepo.saveStockType(stockType).subscribe((t) -> {
+            inventoryRepo.saveStockType(stockType).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listStockType.set(selectRow, t);
                 } else {
                     listStockType.add(t);
                 }
-                clear();
-                sendMessage(t.getStockTypeName());
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
-            });
+            }).doOnTerminate(() -> {
+                sendMessage(stockType.getStockTypeName());
+                clear();
+            }).subscribe();
 
         }
     }
@@ -163,6 +166,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         txtUserCode.setEnabled(true);
+        cboType.setSelectedItem(StockGroupEnum.NONE);
         stockType = new StockType();
         stockTypeTableModel.refresh();
         txtUserCode.requestFocus();
@@ -176,11 +180,13 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     "Invalid Name.", JOptionPane.ERROR_MESSAGE);
             txtName.requestFocus();
         } else {
+            StockGroupEnum type = (StockGroupEnum) cboType.getSelectedItem();
             stockType.setUserCode(txtUserCode.getText().trim());
             stockType.setStockTypeName(txtName.getText());
             stockType.setAccount(txtAccount.getText());
             stockType.setFinishedGroup(rdoFinish.isSelected());
             stockType.setActive(chkActive.isSelected());
+            stockType.setGroupType(type.ordinal());
             if (lblStatus.getText().equals("NEW")) {
                 StockTypeKey key = new StockTypeKey();
                 key.setCompCode(Global.compCode);
@@ -216,7 +222,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         try {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(
                     new FileInputStream(path), "UTF8"))) {
-                while ((line = br.readLine()) != null) //returns a Boolean value
+                while (null != (line = br.readLine())) //returns a Boolean value
                 {
                     StockType t = new StockType();
                     String[] data = line.split(splitBy);    // use comma as separator
@@ -276,6 +282,8 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         txtAccount = new javax.swing.JTextField();
         rdoFinish = new javax.swing.JRadioButton();
         chkActive = new javax.swing.JRadioButton();
+        cboType = new javax.swing.JComboBox<>(StockGroupEnum.values());
+        jLabel5 = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -395,6 +403,11 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         chkActive.setSelected(true);
         chkActive.setText("Active");
 
+        cboType.setFont(Global.textFont);
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Type");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -404,7 +417,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -414,17 +427,22 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
-                        .addGap(12, 12, 12)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName)
                             .addComponent(txtUserCode)
                             .addComponent(txtAccount)
-                            .addComponent(rdoFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(cboType, javax.swing.GroupLayout.Alignment.TRAILING, 0, 268, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkActive)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(rdoFinish)))))
                 .addContainerGap())
         );
 
@@ -446,9 +464,13 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(jLabel4)
                     .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkActive)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cboType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
                 .addGap(7, 7, 7)
-                .addComponent(rdoFinish)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rdoFinish)
+                    .addComponent(chkActive))
                 .addGap(7, 7, 7)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -456,7 +478,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 172, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 173, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnSave1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -474,7 +496,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtFilter)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -490,7 +512,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -559,10 +581,12 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSave1;
+    private javax.swing.JComboBox<StockGroupEnum> cboType;
     private javax.swing.JRadioButton chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;

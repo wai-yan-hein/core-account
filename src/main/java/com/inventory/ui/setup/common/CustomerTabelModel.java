@@ -8,6 +8,7 @@ import com.inventory.model.Trader;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +16,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author wai yan
  */
+@Slf4j
 public class CustomerTabelModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(CustomerTabelModel.class);
     private List<Trader> listCustomer = new ArrayList();
-    private String[] columnNames = {"No.", "Code", "Name", "Active"};
+    private String[] columnNames = {"Code", "Name", "Active"};
 
     @Override
     public String getColumnName(int column) {
@@ -49,12 +50,10 @@ public class CustomerTabelModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    String.valueOf(row + 1 + ". ");
-                case 1 ->
                     customer.getUserCode();
-                case 2 ->
+                case 1 ->
                     customer.getTraderName();
-                case 3 ->
+                case 2 ->
                     customer.isActive();
                 default ->
                     null;

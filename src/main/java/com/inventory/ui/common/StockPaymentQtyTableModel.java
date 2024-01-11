@@ -7,8 +7,8 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.PaymentHisDetail;
-import com.inventory.model.PaymentHisDetailKey;
+import com.inventory.model.StockPaymentDetail;
+import com.inventory.model.StockPaymentDetailKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -21,20 +21,21 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class PaymentTableModel extends AbstractTableModel {
+public class StockPaymentQtyTableModel extends AbstractTableModel {
 
-    private List<PaymentHisDetail> listDetail = new ArrayList<>();
-    private List<PaymentHisDetailKey> listDelete = new ArrayList<>();
-    private final String[] columnNames = {"Date", "Vou No", "Remark", "Reference", "Currency", "Vou Total", "Outstanding",
-        "Partial Payment", "Single Payment"};
+    private List<StockPaymentDetail> listDetail = new ArrayList<>();
+    private List<StockPaymentDetailKey> listDelete = new ArrayList<>();
+    private final String[] columnNames = {"Date", "Vou No", "Contract No", "Remark",
+        "Reference", "Stock Code", "Stock Name", "Qty", "Balance Qty", "Issue Qty",
+        "Single Issue"};
     private JTable table;
     private SelectionObserver observer;
 
-    public List<PaymentHisDetailKey> getListDelete() {
+    public List<StockPaymentDetailKey> getListDelete() {
         return listDelete;
     }
 
-    public void setListDelete(List<PaymentHisDetailKey> listDelete) {
+    public void setListDelete(List<StockPaymentDetailKey> listDelete) {
         this.listDelete = listDelete;
     }
 
@@ -54,7 +55,7 @@ public class PaymentTableModel extends AbstractTableModel {
         this.table = table;
     }
 
-    public PaymentTableModel() {
+    public StockPaymentQtyTableModel() {
     }
 
     @Override
@@ -65,7 +66,7 @@ public class PaymentTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 7, 8 -> {
+            case 9, 10 -> {
                 return true;
             }
         }
@@ -75,27 +76,26 @@ public class PaymentTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 5, 6, 7 -> {
-                return Float.class;
+            case 7, 8, 9 -> {
+                return Double.class;
             }
-            case 8 -> {
+            case 10 -> {
                 return Boolean.class;
             }
         }
         return String.class;
     }
 
-    public List<PaymentHisDetail> getPaymentList() {
-        listDetail.removeIf(p -> Util1.getFloat(p.getPayAmt()) == 0f);
-        return listDetail;
-
-    }
-
-    public List<PaymentHisDetail> getListDetail() {
+    public List<StockPaymentDetail> getPaymentList() {
+        listDetail.removeIf(p -> Util1.getDouble(p.getPayQty()) == 0);
         return listDetail;
     }
 
-    public void setListDetail(List<PaymentHisDetail> listDetail) {
+    public List<StockPaymentDetail> getListDetail() {
+        return listDetail;
+    }
+
+    public void setListDetail(List<StockPaymentDetail> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
@@ -106,25 +106,29 @@ public class PaymentTableModel extends AbstractTableModel {
             return null;
         }
         try {
-            PaymentHisDetail b = listDetail.get(row);
+            StockPaymentDetail b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    Util1.toDateStr(b.getSaleDate(), "dd/MM/yyyy");
+                    Util1.toDateStr(b.getRefDate(), "dd/MM/yyyy");
                 case 1 ->
-                    b.getSaleVouNo();
+                    b.getRefNo();
                 case 2 ->
-                    b.getRemark();
+                    b.getProjectNo();
                 case 3 ->
-                    b.getReference();
+                    b.getRemark();
                 case 4 ->
-                    b.getCurCode();
+                    b.getReference();
                 case 5 ->
-                    b.getVouTotal();
+                    b.getStockUserCode();
                 case 6 ->
-                    b.getVouBalance();
+                    b.getStockName();
                 case 7 ->
-                    b.getPayAmt();
+                    Util1.toNull(b.getQty());
                 case 8 ->
+                    Util1.toNull(b.getBalQty());
+                case 9 ->
+                    Util1.toNull(b.getPayQty());
+                case 10 ->
                     b.isFullPaid();
                 default ->
                     null;
@@ -141,18 +145,18 @@ public class PaymentTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             if (value != null) {
-                PaymentHisDetail obj = listDetail.get(row);
+                StockPaymentDetail obj = listDetail.get(row);
                 switch (column) {
-                    case 7 -> {
-                        float amt = Util1.getFloat(value);
-                        float out = Util1.getFloat(obj.getVouBalance());
-                        obj.setPayAmt(amt);
-                        obj.setFullPaid(amt == out);
+                    case 9 -> {
+                        double qty = Util1.getDouble(value);
+                        double out = Util1.getDouble(obj.getBalQty());
+                        obj.setPayQty(qty);
+                        obj.setFullPaid(qty == out);
                     }
-                    case 8 -> {
+                    case 10 -> {
                         if (value instanceof Boolean paid) {
                             obj.setFullPaid(paid);
-                            obj.setPayAmt(paid ? obj.getVouBalance() : 0.0f);
+                            obj.setPayQty(paid ? obj.getBalQty() : 0.0);
                         }
                     }
                 }
@@ -167,18 +171,21 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        PaymentHisDetail pd = listDetail.get(row);
-        listDelete.add(pd.getKey());
+        StockPaymentDetail pd = listDetail.get(row);
+        StockPaymentDetailKey key = new StockPaymentDetailKey();
+        key.setCompCode(pd.getCompCode());
+        key.setVouNo(pd.getVouNo());
+        listDelete.add(key);
         listDetail.remove(row);
         fireTableRowsDeleted(row, row);
     }
 
-    public void setPayment(PaymentHisDetail t, int row) {
+    public void setPayment(StockPaymentDetail t, int row) {
         listDetail.set(row, t);
         fireTableRowsUpdated(row, row);
     }
 
-    public void addPayment(PaymentHisDetail t) {
+    public void addPayment(StockPaymentDetail t) {
         listDetail.add(t);
         fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
     }
@@ -197,7 +204,7 @@ public class PaymentTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public PaymentHisDetail getPayment(int row) {
+    public StockPaymentDetail getPayment(int row) {
         if (listDetail == null) {
             return null;
         } else if (listDetail.isEmpty()) {
@@ -223,7 +230,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         return listDetail.stream()
-                .filter(pd -> Util1.getFloat(pd.getVouBalance()) < 0)
+                .filter(pd -> Util1.getDouble(pd.getBalQty()) < 0)
                 .peek(pd -> {
                     JOptionPane.showMessageDialog(table, "Invalid Pay Amount.");
                     int index = listDetail.indexOf(pd);

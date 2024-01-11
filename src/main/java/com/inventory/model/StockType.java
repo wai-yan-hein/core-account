@@ -51,6 +51,8 @@ public class StockType {
     private boolean deleted;
     @Column(name = "active")
     private boolean active;
+    @Column(name = "group_type")
+    private int groupType;
 
     public StockType() {
     }

@@ -180,24 +180,22 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void assignDefault() {
-        accountRepo.findCOA(ProUtil.getProperty(ProUtil.DEBTOR_ACC)).subscribe((tt) -> {
+        accountRepo.findCOA(ProUtil.getProperty(ProUtil.DEBTOR_ACC)).doOnSuccess((tt) -> {
             cOAAutoCompleter.setCoa(tt);
-        });
+        }).subscribe();
     }
 
     private void initTable() {
         tblCustomer.setModel(customerTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(5);// Code
-        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(80);// Code
-        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(320);// Name
-        tblCustomer.getColumnModel().getColumn(3).setPreferredWidth(40);// Active   
+        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(60);// Code
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(300);// Name
+        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(5);// Active   
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
-        sorter.toggleSortOrder(1);
     }
 
     private void searchCustomer() {
@@ -709,7 +707,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addGroup(panelEntryLayout.createSequentialGroup()
                                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
-                                        .addComponent(txtRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                                        .addComponent(txtRegion)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(txtRFID)
@@ -718,7 +716,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                                     .addComponent(txtSysCode)
                                     .addComponent(txtCusName)
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
-                                        .addComponent(txtCountry, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                                        .addComponent(txtCountry)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(txtPrice)
@@ -743,7 +741,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                                             .addComponent(txtAccount, javax.swing.GroupLayout.Alignment.TRAILING)
                                             .addComponent(txtCusCode, javax.swing.GroupLayout.Alignment.TRAILING)
                                             .addGroup(panelEntryLayout.createSequentialGroup()
-                                                .addComponent(txtGroup, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                                                .addComponent(txtGroup)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(btnGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                     .addGroup(panelEntryLayout.createSequentialGroup()
@@ -898,16 +896,19 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE))
-                    .addComponent(txtFilter)
-                    .addComponent(scroll))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 501, Short.MAX_VALUE)
+                        .addGap(561, 561, 561))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtFilter, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(scroll, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

@@ -2225,10 +2225,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     boolean local = s.isLocal();
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).doOnSuccess((t) -> {
                         t.setLocal(local);
                         setSaleVoucher(t);
-                    });
+                    }).subscribe();
                 }
             }
             case "TR-HISTORY" -> {

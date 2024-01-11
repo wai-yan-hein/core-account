@@ -1398,4 +1398,8 @@ public class Util1 {
         log.info("Text copied to clipboard: " + text);
     }
 
+    public static String getStar(String vouNo) {
+        return "*" + vouNo + "*";
+    }
+
 }

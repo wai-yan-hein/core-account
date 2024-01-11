@@ -299,7 +299,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
         double opening = accountRepo.getOpening(getOPFilter(coaCode, null)).block().getOpening();
         double closing = drAmt - crAmt + opening;
-        Row row = sheet.createRow(data.size());
+        Row row = sheet.createRow(data.size() + 1);
         row.createCell(8).setCellValue(drAmt);
         row.createCell(9).setCellValue(crAmt);
         row.createCell(10).setCellValue(opening);
@@ -357,7 +357,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
         double opening = accountRepo.getOpening(getOPFilter(coaCode, traderCode)).block().getOpening();
         double closing = drAmt - crAmt + opening;
-        Row row = sheet.createRow(data.size());
+        Row row = sheet.createRow(data.size()+1);
         row.createCell(7).setCellValue(drAmt);
         row.createCell(8).setCellValue(crAmt);
         row.createCell(9).setCellValue(opening);

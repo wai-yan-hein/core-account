@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SaleRiceTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Std-Weight", "Avg-Weight", "Qty", "Total Weight", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Std-Weight", "Avg-Weight", "Bag", "Total Weight", "Price", "Amount"};
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -125,8 +125,8 @@ public class SaleRiceTableModel extends AbstractTableModel {
                     return Util1.toNull(sd.getStdWeight());
                 }
                 case 4 -> {
-                    //qty
-                    return Util1.toNull(sd.getQty());
+                    //bag
+                    return Util1.toNull(sd.getBag());
                 }
                 case 5 -> {
                     return Util1.toNull(sd.getTotalWeight());
@@ -163,7 +163,7 @@ public class SaleRiceTableModel extends AbstractTableModel {
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0);
+                            sd.setBag(1.0);
                             sd.setWeight(Util1.getDouble(s.getWeight()));
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(Util1.isNull(s.getSaleUnitCode(), "-"));
@@ -182,37 +182,19 @@ public class SaleRiceTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                                if (sd.getUnitCode() == null) {
-                                    setSelection(row, 6);
-                                } else {
-                                    setSelection(row, 7);
-                                }
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double bag = Util1.getDouble(value);
+                        if (bag > 0) {
+                            sd.setBag(bag);
+                            setSelection(row, 6);
                         }
                     }
                     case 6 -> {
                         //price
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                sd.setOrgPrice(Util1.getDouble(value));
-                                setSelection(row + 1, 0);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            setSelection(row, column);
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            sd.setPrice(Util1.getDouble(value));
+                            sd.setOrgPrice(Util1.getDouble(value));
+                            setSelection(row + 1, 0);
                         }
                     }
                     case 7 -> {
@@ -292,23 +274,17 @@ public class SaleRiceTableModel extends AbstractTableModel {
 
     private void calculateAmount(SaleHisDetail s) {
         double orgPrice = Util1.getDouble(s.getOrgPrice());
-        double qty = Util1.getDouble(s.getQty());
+        double bag = Util1.getDouble(s.getBag());
         double weight = s.getWeight();
         double stdWt = s.getStdWeight();
         if (s.getStockCode() != null && weight > 0 && orgPrice > 0) {
             stdWt = stdWt == 0 ? weight : stdWt;
             double price = stdWt / weight * orgPrice;
-            double amount = qty * price;
+            double amount = bag * price;
             s.setPrice(price);
             s.setAmount(amount);
         }
-        if (s.getQty() > 0 && s.getWeight() > 0) {
-            s.setTotalWeight(Util1.getDouble(s.getQty()) * Util1.getDouble(s.getWeight()));
-        }
-    }
-
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(Global.parentForm, text);
+        s.setTotalWeight(bag * weight);
     }
 
     public boolean isValidEntry() {
