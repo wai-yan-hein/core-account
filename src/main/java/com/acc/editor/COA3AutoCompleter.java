@@ -85,12 +85,14 @@ public final class COA3AutoCompleter implements KeyListener {
         switch (this.level) {
             case 0 -> {
                 table.setModel(cOATableModel);
+                table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
             }
             case 1 -> {
                 table.setModel(cOA1TableModel);
             }
             case 2 -> {
                 table.setModel(cOA2TableModel);
+                table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
             }
             case 3 -> {
                 table.setModel(cOA3TableModel);
@@ -107,7 +109,6 @@ public final class COA3AutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
-        table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
