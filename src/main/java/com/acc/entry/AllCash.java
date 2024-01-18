@@ -47,7 +47,6 @@ import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -656,7 +655,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             enableToolBar(true);
             requestFoucsTable();
             accountRepo.getOpening(getOPFilter()).doOnSuccess((t) -> {
-                txtOpening.setValue(t.getOpening());
+                txtOpening.setValue(t == null ? 0 : t.getOpening());
             }).doOnTerminate(() -> {
                 calculateClosing();
             }).subscribe();
@@ -756,7 +755,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtClosing.setValue(closing);
         txtDr.setValue(drAmt);
         txtCr.setValue(crAmt);
-       
+
     }
 
     private void clearModel() {

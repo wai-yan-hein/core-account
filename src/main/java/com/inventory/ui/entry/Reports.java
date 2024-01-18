@@ -141,6 +141,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     public void initMain() {
         ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
         initExcel();
         initTableReport();
         initRowHeader();

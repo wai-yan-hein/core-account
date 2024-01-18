@@ -83,7 +83,7 @@ import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.PurOrderHisEntry;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
-import com.inventory.ui.entry.StockIssRecEntry;
+import com.inventory.ui.entry.ConsignEntry;
 import com.inventory.ui.entry.StockPaymentEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
@@ -92,7 +92,8 @@ import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.JobSetup;
 import com.inventory.ui.setup.LanguageSetup;
-import com.inventory.ui.setup.OpeningSetup;
+import com.inventory.ui.setup.OpeningDynamic;
+import com.inventory.ui.setup.OpeningDynamic;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
@@ -538,9 +539,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 setup.initMain();
                 return setup;
             }
-            case "Stock Opening", "Stock Opening Payable", "Stock Opening Paddy" -> {
+            case "Stock Opening", "Stock Opening Payable", "Stock Opening Paddy", "Consign Opening" -> {
                 int type = getOpeningType(menuName);
-                OpeningSetup openingSetup = new OpeningSetup(type);
+                OpeningDynamic openingSetup = new OpeningDynamic(type);
                 openingSetup.setInventoryRepo(inventoryRepo);
                 openingSetup.setUserRepo(userRepo);
                 openingSetup.setName(menuName);
@@ -789,7 +790,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return payment;
             }
             case "Consign Issue" -> {
-                StockIssRecEntry stockIss = new StockIssRecEntry("I");
+                ConsignEntry stockIss = new ConsignEntry("I");
                 stockIss.setUserRepo(userRepo);
                 stockIss.setInventoryRepo(inventoryRepo);
                 stockIss.setName(menuName);
@@ -799,7 +800,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return stockIss;
             }
             case "Consign Receive" -> {
-                StockIssRecEntry stockRec = new StockIssRecEntry("R");
+                ConsignEntry stockRec = new ConsignEntry("R");
                 stockRec.setUserRepo(userRepo);
                 stockRec.setInventoryRepo(inventoryRepo);
                 stockRec.setName(menuName);
@@ -1133,11 +1134,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private int getOpeningType(String menuName) {
         return switch (menuName) {
             case "Stock Opening" ->
-                OpeningSetup.STKOPENING;
+                OpeningDynamic.OPENING;
             case "Stock Opening Payable" ->
-                OpeningSetup.STKOPENINGPAYABLE;
+                OpeningDynamic.PAYABLE;
             case "Stock Opening Paddy" ->
-                OpeningSetup.STKOPENINGPADDY;
+                OpeningDynamic.PADDY;
+            case "Consign Opening" ->
+                OpeningDynamic.CONSIGN;
             default ->
                 0;
         };

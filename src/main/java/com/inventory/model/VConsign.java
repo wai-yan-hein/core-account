@@ -16,7 +16,7 @@ import java.time.ZonedDateTime;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class VStockIssueReceive {
+public class VConsign {
     private String vouNo;
     private String vouDate;
     private String createdBy;

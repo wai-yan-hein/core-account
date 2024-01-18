@@ -4,7 +4,6 @@
  */
 package com.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.myanmartools.TransliterateZ2U;
@@ -88,6 +87,7 @@ public class Util1 {
     public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
             .create();
     public static HashMap<String, String> hmSysProp = new HashMap<>();
@@ -1093,10 +1093,9 @@ public class Util1 {
 
     public static <T> byte[] listToByteArray(List<T> obj) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonString = mapper.writeValueAsString(obj);
+            String jsonString = gson.toJson(obj);
             return jsonString.getBytes();
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error("Failed to convert list to byte array: " + e.getMessage());
         }
         return null; // Handle the failure to convert to byte array

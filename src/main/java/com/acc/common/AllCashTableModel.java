@@ -385,6 +385,13 @@ public class AllCashTableModel extends AbstractTableModel {
                 parent.setColumnSelectionInterval(6, 6);
                 parent.setRowSelectionInterval(row, row);
             }
+        } else if (Util1.isNull(gl.getCurCode())) {
+            status = false;
+            if (column > 9) {
+                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Currency.");
+                parent.setColumnSelectionInterval(9, 9);
+                parent.setRowSelectionInterval(row, row);
+            }
         } else if (Util1.getDouble(gl.getDrAmt()) + Util1.getDouble(gl.getCrAmt()) <= 0) {
             status = false;
         } else if (Util1.isNull(gl.getDeptCode())) {

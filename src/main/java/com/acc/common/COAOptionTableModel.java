@@ -6,9 +6,11 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
+import com.common.SelectionObserver;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,6 +22,8 @@ public class COAOptionTableModel extends AbstractTableModel {
 
     private List<ChartOfAccount> listCOA = new ArrayList();
     private final String[] columnNames = {"Code", "Name", "Group", "Select"};
+    @Setter
+    private SelectionObserver observer;
 
     @Override
     public int getRowCount() {
@@ -93,6 +97,7 @@ public class COAOptionTableModel extends AbstractTableModel {
                             coa.setActive((Boolean) value);
                     }
                 }
+                observer.selected("CAL", "CAL");
                 fireTableRowsUpdated(row, row);
             }
         } catch (Exception e) {
@@ -117,6 +122,5 @@ public class COAOptionTableModel extends AbstractTableModel {
         this.listCOA = listCOA;
         fireTableDataChanged();
     }
-    
 
 }

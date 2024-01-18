@@ -7,7 +7,10 @@ package com.inventory.ui.entry;
 import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
+import com.common.ColumnColorCellRenderer;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
+import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -30,6 +33,7 @@ import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -115,11 +119,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initFormat() {
-        txtRecord.setFormatterFactory(Util1.getDecimalFormat());
-        txtAmount.setFormatterFactory(Util1.getDecimalFormat());
-        txtOutstanding.setFormatterFactory(Util1.getDecimalFormat());
-        txtCreditAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtDifAmt.setFormatterFactory(Util1.getDecimalFormat());
+        ComponentUtil.setTextProperty(this);
     }
 
     private void actionMapping() {
@@ -175,11 +175,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initFocusAdapter() {
-        txtAmount.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtTrader.addFocusListener(fa);
-        txtVouDate.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
 
     public void initMain() {
@@ -188,18 +184,6 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         initTable();
         initRowHeader();
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JFormattedTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void initDate() {
         txtVouDate.setDate(Util1.getTodayDate());
@@ -230,9 +214,13 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         tblPayment.getColumnModel().getColumn(7).setPreferredWidth(60);//Payment
         tblPayment.getColumnModel().getColumn(8).setPreferredWidth(1);//paid
         tblPayment.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblPayment.getColumnModel().getColumn(6).setCellRenderer(new ColumnColorCellRenderer(Color.red));
+        tblPayment.getColumnModel().getColumn(7).setCellRenderer(new ColumnColorCellRenderer(Color.green));
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblPayment.setDefaultRenderer(String.class, new DecimalFormatRender());
+        tblPayment.setDefaultRenderer(Double.class, new DecimalFormatRender());
     }
 
     private void searchTraderBalance() {
@@ -424,7 +412,6 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void setVoucherDetail(PaymentHis ph) {
         this.ph = ph;
-        int deptId = ph.getDeptId();
         String compCode = ph.getKey().getCompCode();
         String vouNo = ph.getKey().getVouNo();
         inventoryRepo.findTrader(ph.getTraderCode()).subscribe((t) -> {
@@ -468,11 +455,14 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             lblStatus.setForeground(Color.blue);
             enableForm(true);
         }
-        inventoryRepo.getPaymentDetail(vouNo, deptId).subscribe((t) -> {
+        progress.setIndeterminate(true);
+        inventoryRepo.getPaymentDetail(vouNo).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
+        }).doOnTerminate(() -> {
             calTotalPayment();
+            progress.setIndeterminate(false);
             tblPayment.requestFocus();
-        });
+        }).subscribe();
     }
 
     private void enableForm(boolean status) {

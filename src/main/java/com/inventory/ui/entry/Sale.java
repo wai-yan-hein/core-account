@@ -801,7 +801,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void historySale() {
         if (dialog == null) {
-            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog = new SaleHistoryDialog(Global.parentForm,1);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);

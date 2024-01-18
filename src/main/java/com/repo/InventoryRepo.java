@@ -100,9 +100,9 @@ import com.inventory.model.StockFormulaQty;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
-import com.inventory.model.StockIssRecDetail;
-import com.inventory.model.StockIssueReceive;
-import com.inventory.model.StockIssueReceiveKey;
+import com.inventory.model.ConsignHisDetail;
+import com.inventory.model.ConsignHis;
+import com.inventory.model.ConsignHisKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockPayment;
 import com.inventory.model.StockPaymentDetail;
@@ -128,7 +128,7 @@ import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
 import com.inventory.model.VStockIO;
-import com.inventory.model.VStockIssueReceive;
+import com.inventory.model.VConsign;
 import com.inventory.model.VTransfer;
 import com.inventory.model.VouDiscount;
 import com.inventory.model.VouStatus;
@@ -3142,14 +3142,17 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<PaymentHis>> getPaymentHistory(FilterObject filter) {
+    public Flux<PaymentHis> getPaymentHistory(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/payment/getPaymentHistory")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(PaymentHis.class)
-                .collectList();
+                .onErrorResume((e) -> {
+                    log.error("getPaymentHistory : " + e.getMessage());
+                    return Flux.empty();
+                });
     }
 
     public Flux<StockPayment> getStockPaymentHistory(FilterObject filter) {
@@ -3709,12 +3712,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<PaymentHisDetail>> getPaymentDetail(String vouNo, int deptId) {
+    public Mono<List<PaymentHisDetail>> getPaymentDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/payment/getPaymentDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(PaymentHisDetail.class)
@@ -3893,7 +3895,8 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-     public Mono<List<StockPaymentDetail>> getTraderStockBalanceBag(String traderCode, String tranOption) {
+
+    public Mono<List<StockPaymentDetail>> getTraderStockBalanceBag(String traderCode, String tranOption) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/stockPayment/getTraderStockBalanceBag")
                 .queryParam("traderCode", traderCode)
@@ -4173,22 +4176,18 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockIssueReceive> saveStockIssRec(StockIssueReceive his) {
+    public Mono<ConsignHis> saveStockIssRec(ConsignHis his) {
         return inventoryApi.post()
                 .uri("stockIssRec/saveStockIssRec")
-                .body(Mono.just(his), StockIssueReceive.class)
+                .body(Mono.just(his), ConsignHis.class)
                 .retrieve()
-                .bodyToMono(StockIssueReceive.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(ConsignHis.class);
     }
 
-    public Mono<Boolean> delete(StockIssueReceiveKey key) {
+    public Mono<Boolean> delete(ConsignHisKey key) {
         return inventoryApi.post()
                 .uri("/stockIssRec/deleteStockIssRec")
-                .body(Mono.just(key), StockIssueReceiveKey.class)
+                .body(Mono.just(key), ConsignHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
@@ -4197,10 +4196,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> restore(StockIssueReceiveKey key) {
+    public Mono<Boolean> restore(ConsignHisKey key) {
         return inventoryApi.post()
                 .uri("/stockIssRec/restoreStockIssRec")
-                .body(Mono.just(key), StockIssueReceiveKey.class)
+                .body(Mono.just(key), ConsignHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
@@ -4209,26 +4208,26 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<VStockIssueReceive> getStockIssRecHistory(FilterObject filter) {
+    public Flux<VConsign> getStockIssRecHistory(FilterObject filter) {
         return inventoryApi
                 .post()
                 .uri("/stockIssRec/getStockIssRecHistory")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToFlux(VStockIssueReceive.class)
+                .bodyToFlux(VConsign.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Flux.empty();
                 });
     }
 
-    public Mono<List<StockIssRecDetail>> getStockIssRecDetail(String vouNo) {
+    public Mono<List<ConsignHisDetail>> getStockIssRecDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/stockIssRec/getStockIssRecDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(StockIssRecDetail.class)
+                .retrieve().bodyToFlux(ConsignHisDetail.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -4236,15 +4235,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockIssueReceive> findStockIR(String vouNo, boolean local) {
-        StockIssueReceiveKey key = new StockIssueReceiveKey();
+    public Mono<ConsignHis> findStockIR(String vouNo, boolean local) {
+        ConsignHisKey key = new ConsignHisKey();
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);
         return inventoryApi.post()
                 .uri("/stockIssRec/findStockIR")
-                .body(Mono.just(key), StockIssueReceiveKey.class)
+                .body(Mono.just(key), ConsignHisKey.class)
                 .retrieve()
-                .bodyToMono(StockIssueReceive.class)
+                .bodyToMono(ConsignHis.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();

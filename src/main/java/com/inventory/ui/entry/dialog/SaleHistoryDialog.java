@@ -28,10 +28,12 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
+import com.inventory.ui.entry.dialog.common.SalePaddySearchTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -54,6 +56,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
      *
      */
     private final SaleVouSearchTableModel saleVouTableModel = new SaleVouSearchTableModel();
+    private final SalePaddySearchTableModel salePaddySearchTableModel = new SalePaddySearchTableModel();
     private InventoryRepo inventoryRepo;
     private CloudIntegration integration;
     private TraderAutoCompleter traderAutoCompleter;
@@ -70,6 +73,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
     private TaskExecutor taskExecutor;
+    private int type;
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
@@ -91,18 +95,28 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         this.observer = observer;
     }
 
-    public SaleHistoryDialog(JFrame frame) {
+    public SaleHistoryDialog(JFrame frame, int type) {
         super(frame, true);
+        this.type = type;
         initComponents();
         initKeyListener();
         initProperty();
     }
 
-
     public void initMain() {
         initCombo();
-        initTableVoucher();
+        initModel();
+        initTable();
         setTodayDate();
+    }
+
+    private void initModel() {
+        switch (type) {
+            case 1 ->
+                initTableVoucher();
+            case 2 ->
+                initTablePaddy();
+        }
     }
 
     private void initProperty() {
@@ -161,12 +175,30 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(15);
         tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
         tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(100);
+    }
+
+    private void initTablePaddy() {
+        tblVoucher.setModel(salePaddySearchTableModel);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);//d
+        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(40);//v
+        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);//c
+        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);//r
+        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);//r
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(20);//q
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(20);//b
+        tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(100);//p
+        tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(100);//v
+    }
+
+    private void initTable() {
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
+        tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
+
     }
 
     private void setTodayDate() {
@@ -220,13 +252,13 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         filter.setCurCode(getCurCode());
         filter.setNullBatch(chkBatch.isSelected());
         filter.setLocal(chkLocal.isSelected());
-        saleVouTableModel.clear();
+        clearModel();
         txtRecord.setValue(0);
         txtTotalAmt.setValue(0);
         txtPaid.setValue(0);
         inventoryRepo.getSaleHistory(filter)
                 .doOnNext(obj -> btnSearch.setEnabled(false))
-                .doOnNext(saleVouTableModel::addObject)
+                .doOnNext(this::addObject)
                 .doOnNext(obj -> calTotal())
                 .doOnError(e -> {
                     progress.setIndeterminate(false);
@@ -242,10 +274,42 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
     }
 
+    private void clearModel() {
+        switch (type) {
+            case 1 ->
+                saleVouTableModel.clear();
+            case 2 ->
+                salePaddySearchTableModel.clear();
+        }
+    }
+
+    private void addObject(VSale obj) {
+        switch (type) {
+            case 1 ->
+                saleVouTableModel.addObject(obj);
+            case 2 ->
+                salePaddySearchTableModel.addObject(obj);
+        }
+    }
+
     private void calTotal() {
-        txtPaid.setValue(saleVouTableModel.getPaidTotal());
-        txtTotalAmt.setValue(saleVouTableModel.getVouTotal());
-        txtRecord.setValue(saleVouTableModel.getSize());
+        switch (type) {
+            case 1 -> {
+                txtPaid.setValue(saleVouTableModel.getPaidTotal());
+                txtTotalAmt.setValue(saleVouTableModel.getVouTotal());
+                txtRecord.setValue(saleVouTableModel.getSize());
+                txtQty.setValue(saleVouTableModel.getQty());
+                txtBag.setValue(saleVouTableModel.getBag());
+            }
+            case 2 -> {
+                txtPaid.setValue(salePaddySearchTableModel.getPaidTotal());
+                txtTotalAmt.setValue(salePaddySearchTableModel.getVouTotal());
+                txtRecord.setValue(salePaddySearchTableModel.getSize());
+                txtQty.setValue(salePaddySearchTableModel.getQty());
+                txtBag.setValue(salePaddySearchTableModel.getBag());
+            }
+        }
+
     }
 
     private void select() {
@@ -376,15 +440,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         txtPaid = new javax.swing.JFormattedTextField();
-        btnSelect = new javax.swing.JButton();
         lblTtlAmount1 = new javax.swing.JLabel();
-        btnSearch = new javax.swing.JButton();
         lblTtlRecord = new javax.swing.JLabel();
         txtTotalAmt = new javax.swing.JFormattedTextField();
         txtRecord = new javax.swing.JFormattedTextField();
         lblTtlAmount = new javax.swing.JLabel();
-        btnSearch1 = new javax.swing.JButton();
+        lblTtlAmount2 = new javax.swing.JLabel();
+        txtBag = new javax.swing.JFormattedTextField();
+        lblTtlAmount3 = new javax.swing.JLabel();
+        txtQty = new javax.swing.JFormattedTextField();
         progress = new javax.swing.JProgressBar();
+        btnSearch1 = new javax.swing.JButton();
+        btnSearch = new javax.swing.JButton();
 
         setTitle("Sale Voucher Search");
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -749,32 +816,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         txtPaid.setEditable(false);
+        txtPaid.setForeground(Color.green);
         txtPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtPaid.setFont(Global.amtFont);
 
-        btnSelect.setFont(Global.lableFont);
-        btnSelect.setText("Select");
-        btnSelect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSelectActionPerformed(evt);
-            }
-        });
-
         lblTtlAmount1.setFont(Global.lableFont);
-        lblTtlAmount1.setText("Total Paid :");
-
-        btnSearch.setFont(Global.lableFont);
-        btnSearch.setText("Search");
-        btnSearch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
-            }
-        });
+        lblTtlAmount1.setText("Paid");
 
         lblTtlRecord.setFont(Global.lableFont);
-        lblTtlRecord.setText("Total Record :");
+        lblTtlRecord.setText("Records :");
 
         txtTotalAmt.setEditable(false);
+        txtTotalAmt.setForeground(Color.red);
         txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtTotalAmt.setFont(Global.amtFont);
 
@@ -783,7 +836,68 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtRecord.setFont(Global.amtFont);
 
         lblTtlAmount.setFont(Global.lableFont);
-        lblTtlAmount.setText("Total Amount :");
+        lblTtlAmount.setText("Vou Total :");
+
+        lblTtlAmount2.setFont(Global.lableFont);
+        lblTtlAmount2.setText("Bag :");
+
+        txtBag.setEditable(false);
+        txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBag.setFont(Global.amtFont);
+
+        lblTtlAmount3.setFont(Global.lableFont);
+        lblTtlAmount3.setText("Qty :");
+
+        txtQty.setEditable(false);
+        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtQty.setFont(Global.amtFont);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblTtlRecord)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlAmount3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtQty, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlAmount2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtBag, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlAmount1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtPaid, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlAmount)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtRecord)
+                    .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlAmount3)
+                    .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlAmount2)
+                    .addComponent(lblTtlAmount1)
+                    .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTotalAmt)
+                    .addComponent(lblTtlAmount))
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {lblTtlAmount, lblTtlAmount1, lblTtlRecord, txtPaid, txtRecord, txtTotalAmt});
 
         btnSearch1.setFont(Global.lableFont);
         btnSearch1.setText("Print");
@@ -793,50 +907,15 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
             }
         });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblTtlRecord)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblTtlAmount1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtPaid, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblTtlAmount)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                .addGap(115, 115, 115)
-                .addComponent(btnSearch1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSearch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSelect)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTtlAmount1)
-                    .addComponent(lblTtlAmount)
-                    .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtRecord)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addComponent(btnSearch1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addComponent(txtTotalAmt))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnSearch, btnSelect, lblTtlAmount, lblTtlAmount1, lblTtlRecord, txtPaid, txtRecord, txtTotalAmt});
+        btnSearch.setBackground(Global.selectionColor);
+        btnSearch.setFont(Global.lableFont);
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -850,11 +929,15 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter))
+                                .addComponent(txtFilter)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSearch1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSearch))
+                            .addComponent(jScrollPane1)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
@@ -868,7 +951,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
+                            .addComponent(jLabel1)
+                            .addComponent(btnSearch1)
+                            .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -879,15 +964,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        search();
-
-    }//GEN-LAST:event_btnSearchActionPerformed
-
-    private void btnSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectActionPerformed
-        select();
-    }//GEN-LAST:event_btnSelectActionPerformed
 
     private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
         // TODO add your handling code here:
@@ -982,6 +1058,11 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         print();
     }//GEN-LAST:event_btnSearch1ActionPerformed
 
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        search();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -989,7 +1070,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSearch1;
-    private javax.swing.JButton btnSelect;
     private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
@@ -1016,9 +1096,12 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblTtlAmount;
     private javax.swing.JLabel lblTtlAmount1;
+    private javax.swing.JLabel lblTtlAmount2;
+    private javax.swing.JLabel lblTtlAmount3;
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtBatchNo;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
@@ -1028,6 +1111,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
     private javax.swing.JTextField txtProjectNo;
+    private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRemark;

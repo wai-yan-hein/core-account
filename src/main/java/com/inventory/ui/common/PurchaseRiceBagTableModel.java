@@ -196,9 +196,9 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                                 pd.setStockCode(s.getKey().getStockCode());
                                 pd.setStockName(s.getStockName());
                                 pd.setUserCode(s.getUserCode());
-                                pd.setRelName(s.getRelName());
-                                pd.setQty(1.0);
-                                pd.setUnitCode(s.getPurUnitCode());
+                                pd.setWeight(s.getWeight());
+                                pd.setBag(1);
+                                pd.setUnitCode("-");
                                 addNewRow();
                             }
                         }

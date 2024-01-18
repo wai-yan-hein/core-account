@@ -99,7 +99,7 @@ public final class COA3AutoCompleter implements KeyListener {
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
@@ -107,7 +107,6 @@ public final class COA3AutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
-        table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {

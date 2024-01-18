@@ -16,6 +16,7 @@ public class StockPayment {
     private String traderCode;
     private String locCode;
     private String remark;
+    private String reference;
     private boolean deleted;
     private boolean calculate;
     private LocalDateTime createdDate;
@@ -25,6 +26,7 @@ public class StockPayment {
     private Integer macId;
     private String tranOption;
     private double payQty;
+    private double payBag;
     private List<StockPaymentDetail> listDetail;
     private List<StockPaymentDetailKey> listDelete;
     private boolean vouLock;

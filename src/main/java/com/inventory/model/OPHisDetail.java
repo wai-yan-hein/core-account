@@ -30,7 +30,7 @@ public class OPHisDetail {
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty")
-    private Double qty;
+    private double qty;
     @Column(name = "price")
     private double price;
     @Column(name = "amount")
@@ -44,7 +44,7 @@ public class OPHisDetail {
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")
-    private Double totalWeight;
+    private double totalWeight;
     @Column(name = "wet")
     private double wet;
     @Column(name = "rice")

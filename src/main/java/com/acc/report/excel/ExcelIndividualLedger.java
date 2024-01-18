@@ -56,7 +56,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     private String lastPath = "";
     private static final String[] HEADERS_COA = {
         "Date", "Dep :", "Description", "Reference", "Ref No", "Trader Name",
-        "Account", "Currency", "Dr Amt", "Cr Amt", "Opening", "Closing"
+        "Account", "Currency", "Dr Amt", "Cr Amt", "Opening", "Closing", "Tran Id", "Src Id", "Acc Id"
     };
     private static final String[] HEADERS_TRADER = {
         "Date", "Dep :", "Description", "Reference", "Ref No", "Account", "Currency", "Dr Amt", "Cr Amt", "Opening", "Closing"
@@ -290,6 +290,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             row.createCell(7).setCellValue(gl.getCurCode());
             row.createCell(8).setCellValue(Util1.getDouble(gl.getDrAmt()));
             row.createCell(9).setCellValue(Util1.getDouble(gl.getCrAmt()));
+            row.createCell(12).setCellValue(gl.getKey().getGlCode());
+            row.createCell(13).setCellValue(gl.getSrcAccCode());
+            row.createCell(14).setCellValue(gl.getAccCode());
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }
@@ -357,7 +360,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
         double opening = accountRepo.getOpening(getOPFilter(coaCode, traderCode)).block().getOpening();
         double closing = drAmt - crAmt + opening;
-        Row row = sheet.createRow(data.size()+1);
+        Row row = sheet.createRow(data.size() + 1);
         row.createCell(7).setCellValue(drAmt);
         row.createCell(8).setCellValue(crAmt);
         row.createCell(9).setCellValue(opening);
@@ -468,6 +471,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Date");
 
+        btnExport.setBackground(Global.selectionColor);
+        btnExport.setFont(Global.lableFont);
+        btnExport.setForeground(new java.awt.Color(255, 255, 255));
         btnExport.setText("Export");
         btnExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -481,6 +487,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         jLabel3.setFont(Global.lableFont);
         jLabel3.setText("Currency");
 
+        jButton2.setFont(Global.lableFont);
         jButton2.setText("Show In Folder");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

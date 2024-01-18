@@ -65,8 +65,9 @@ public class ComponentUtil {
 
     public static void setTextProperty(Component component) {
         switch (component) {
-            case JDateChooser dateChooser ->
+            case JDateChooser dateChooser -> {
                 dateChooser.setFont(Global.textFont);
+            }
             case JFormattedTextField textField -> {
                 textField.setFont(Global.amtFont);
                 textField.setHorizontalAlignment(JTextField.RIGHT);
@@ -93,8 +94,8 @@ public class ComponentUtil {
     public static void enableForm(Container container, boolean status) {
         for (Component component : container.getComponents()) {
             component.setEnabled(status);
-            if (component instanceof Container) {
-                enableForm((Container) component, status);
+            if (component instanceof Container c) {
+                enableForm(c, status);
             }
         }
     }

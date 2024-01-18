@@ -230,9 +230,9 @@ public class StockPaymentQtyTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         return listDetail.stream()
-                .filter(pd -> Util1.getDouble(pd.getBalQty()) < 0)
+                .filter(pd -> pd.getBalQty() <= 0)
                 .peek(pd -> {
-                    JOptionPane.showMessageDialog(table, "Invalid Pay Amount.");
+                    JOptionPane.showMessageDialog(table, "Invalid Pay Qty.");
                     int index = listDetail.indexOf(pd);
                     table.setRowSelectionInterval(index, index);
                     table.setColumnSelectionInterval(7, 7);

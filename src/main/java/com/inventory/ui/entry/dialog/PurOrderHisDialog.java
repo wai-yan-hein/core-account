@@ -20,7 +20,7 @@ import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurOrder;
-import com.inventory.model.VStockIssueReceive;
+import com.inventory.model.VConsign;
 import com.inventory.ui.entry.dialog.common.PurOrderHisVouSearchTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIssRecVouSearchTableModel;

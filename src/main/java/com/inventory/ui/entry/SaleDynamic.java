@@ -960,7 +960,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     public void historySale() {
         if (dialog == null) {
-            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog = new SaleHistoryDialog(Global.parentForm, 2);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
@@ -1000,6 +1000,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             disableForm(false);
         } else if (!ProUtil.isSaleEdit()) {
             lblStatus.setText("No Permission.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+            observer.selected("print", true);
+        } else if (sh.isPost()) {
+            lblStatus.setText("This Vocher Already Payment.");
             lblStatus.setForeground(Color.RED);
             disableForm(false);
             observer.selected("print", true);
@@ -1140,13 +1145,15 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     private String getReportName() {
-        if (chkVou.isSelected()) {
+        if (type == RICE) {
+            return "SaleVoucherA5Bag";
+        } else if (type == PADDY) {
+            return "SaleVoucherA5Qty";
+        } else if (chkVou.isSelected()) {
             return ProUtil.getProperty(ProUtil.SALE_VOU);
-        }
-        if (chkA4.isSelected()) {
+        } else if (chkA4.isSelected()) {
             return ProUtil.getProperty(ProUtil.SALE_VOU_A4);
-        }
-        if (chkA5.isSelected()) {
+        } else if (chkA5.isSelected()) {
             return ProUtil.getProperty(ProUtil.SALE_VOU_A5);
         }
         return null;

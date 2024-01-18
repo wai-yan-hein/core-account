@@ -5,12 +5,12 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.PaymentHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,7 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentSearchTableModel extends AbstractTableModel {
 
     private List<PaymentHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Vou Date", "Vou No", "Name", "Remark", "Payment", "Created By"};
+    private final String[] columnNames = {"Vou Date", "Vou No", "Name", "Remark", "Payment"};
+    @Getter
+    private int size;
+    @Getter
+    private double payment;
 
     @Override
     public String getColumnName(int column) {
@@ -49,7 +53,7 @@ public class PaymentSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         if (column == 4) {
-            return Float.class;
+            return Double.class;
         }
         return String.class;
     }
@@ -78,10 +82,6 @@ public class PaymentSearchTableModel extends AbstractTableModel {
                     case 4 -> {
                         return his.getAmount();
                     }
-                    case 5 -> {
-                        //user
-                        return Global.hmUser.get(his.getCreatedBy());
-                    }
                 }
             }
         } catch (Exception ex) {
@@ -108,15 +108,21 @@ public class PaymentSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public void addObject(PaymentHis g) {
-        listDetail.add(g);
-    }
-
-    public int getSize() {
-        return listDetail.size();
+    public void addObject(PaymentHis t) {
+        listDetail.add(t);
+        payment += t.getAmount();
+        size += 1;
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void clear() {
+        payment = 0;
+        size = 0;
         listDetail.clear();
         fireTableDataChanged();
     }

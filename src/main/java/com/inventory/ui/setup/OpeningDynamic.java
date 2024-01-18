@@ -23,13 +23,14 @@ import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
 import com.repo.InventoryRepo;
-import com.inventory.ui.common.OpeningTableModel;
+import com.inventory.ui.setup.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.OPHisDetailKey;
-import com.inventory.ui.common.OpeningPaddyTableModel;
+import com.inventory.ui.setup.common.OpeningConsignTableModel;
+import com.inventory.ui.setup.common.OpeningPaddyTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.FileDialog;
@@ -59,14 +60,16 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Slf4j
-public class OpeningSetup extends javax.swing.JPanel implements PanelControl, SelectionObserver {
+public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
-    public static final int STKOPENING = 1;
-    public static final int STKOPENINGPAYABLE = 2;
-    public static final int STKOPENINGPADDY = 3;
+    public static final int OPENING = 1;
+    public static final int PAYABLE = 2;
+    public static final int PADDY = 3;
+    public static final int CONSIGN = 4;
     private final int type;
     private final OpeningTableModel openingTableModel = new OpeningTableModel();
     private final OpeningPaddyTableModel openingPaddyTableModel = new OpeningPaddyTableModel();
+    private final OpeningConsignTableModel consignTableModel = new OpeningConsignTableModel();
     private LocationAutoCompleter locationAutoCompleter;
     private CurrencyAutoCompleter currencyAAutoCompleter;
     private InventoryRepo inventoryRepo;
@@ -105,7 +108,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
      *
      * @param type
      */
-    public OpeningSetup(int type) {
+    public OpeningDynamic(int type) {
         this.type = type;
         initComponents();
         initTextBoxFormat();
@@ -182,11 +185,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void initModel() {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 initOpeningTable();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 initOpeningPaddyTable();
+            }
+            case CONSIGN -> {
+                initTableConsign();
             }
         }
     }
@@ -244,6 +250,27 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//price
     }
 
+    private void initTableConsign() {
+        consignTableModel.setObserver(this);
+        consignTableModel.setParent(tblOpening);
+        consignTableModel.addNewRow();
+        tblOpening.setModel(consignTableModel);
+        tblOpening.setCellSelectionEnabled(true);
+        tblOpening.getColumnModel().getColumn(0).setPreferredWidth(50);//code
+        tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
+        tblOpening.getColumnModel().getColumn(2).setPreferredWidth(100);//moi
+        tblOpening.getColumnModel().getColumn(3).setPreferredWidth(50);//rice       
+        tblOpening.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
+        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//bag
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+
+        tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//moi
+        tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
+        tblOpening.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
+        tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//bag
+    }
+
     private void initTable() {
         tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
         tblOpening.setRowHeight(Global.tblRowHeight);
@@ -257,13 +284,17 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void clearModel() {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 openingTableModel.clear();
                 openingTableModel.addNewRow();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 openingPaddyTableModel.clear();
                 openingPaddyTableModel.addNewRow();
+            }
+            case CONSIGN -> {
+                consignTableModel.clear();
+                consignTableModel.addNewRow();
             }
         }
 
@@ -286,11 +317,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private List<OPHisDetail> getListDetail() {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 return openingTableModel.getListDetail();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 return openingPaddyTableModel.getListDetail();
+            }
+            case CONSIGN -> {
+                return consignTableModel.getListDetail();
             }
         }
         return null;
@@ -298,11 +332,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private List<OPHisDetailKey> getDeleteList() {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 return openingTableModel.getDelList();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 return openingPaddyTableModel.getDelList();
+            }
+            case CONSIGN -> {
+                return consignTableModel.getDelList();
             }
         }
         return null;
@@ -310,11 +347,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private boolean isValidDetail() {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 return openingTableModel.isValidEntry();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 return openingPaddyTableModel.isValidEntry();
+            }
+            case CONSIGN -> {
+                return consignTableModel.isValidEntry();
             }
         }
         return false;
@@ -366,11 +406,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private int getListSize() {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 return openingTableModel.getListDetail().size();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 return openingPaddyTableModel.getListDetail().size();
+            }
+            case CONSIGN -> {
+                return consignTableModel.getListDetail().size();
             }
         }
         return 0;
@@ -397,7 +440,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             txtOPDate.requestFocus();
             return false;
-        } else if (type == STKOPENINGPAYABLE) {
+        } else if (type == PAYABLE) {
             if (traderAutoCompleter.getTrader() == null) {
                 JOptionPane.showMessageDialog(this, "Invalid Trader");
                 txtLocation.requestFocus();
@@ -483,13 +526,17 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void setListDetail(List<OPHisDetail> list) {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 openingTableModel.setListDetail(list);
                 openingTableModel.addNewRow();
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 openingPaddyTableModel.setListDetail(list);
                 openingPaddyTableModel.addNewRow();
+            }
+            case CONSIGN -> {
+                consignTableModel.setListDetail(list);
+                consignTableModel.addNewRow();
             }
         }
     }
@@ -550,27 +597,26 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void delete(int row) {
         switch (type) {
-            case STKOPENING, STKOPENINGPAYABLE -> {
+            case OPENING, PAYABLE -> {
                 openingTableModel.delete(row);
             }
-            case STKOPENINGPADDY -> {
+            case PADDY -> {
                 openingPaddyTableModel.delete(row);
+            }
+            case CONSIGN -> {
+                consignTableModel.delete(row);
             }
         }
     }
 
     private void calculatAmount() {
-        double ttlQty = 0.0;
-        double ttlAmt = 0.0;
         List<OPHisDetail> listDetail = getListDetail();
-        if (!listDetail.isEmpty()) {
-            for (OPHisDetail op : listDetail) {
-                ttlQty += Util1.getDouble(op.getQty());
-                ttlAmt += Util1.getDouble(op.getAmount());
-            }
-        }
+        double ttlQty = listDetail.stream().mapToDouble((t) -> t.getQty()).sum();
+        double ttlAmt = listDetail.stream().mapToDouble((t) -> t.getAmount()).sum();
+        double ttlBag = listDetail.stream().mapToDouble((t) -> t.getBag()).sum();
         txtQty.setValue(ttlQty);
         txtAmount.setValue(ttlAmt);
+        txtBag.setValue(ttlBag);
         lblRecord.setText(String.valueOf(listDetail.size() - 1));
     }
 
@@ -605,11 +651,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .setIgnoreHeaderCase(true)
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(in);
-            records.forEach((row) -> {
+            records.forEach((CSVRecord row) -> {
                 OPHisDetail op = new OPHisDetail();
                 op.setStockCode(row.isMapped("SystemCode") ? Util1.convertToUniCode(row.get("SystemCode")) : "");
                 op.setStockName(row.isMapped("StockName") ? Util1.convertToUniCode(row.get("StockName")) : "");
-                op.setWeight(row.isMapped("Weight") ? Double.valueOf(row.get("Weight")) : 0.0);
+                op.setWeight(row.isMapped("Weight") ? Double.parseDouble(row.get("Weight")) : 0.0);
                 op.setWeightUnit(row.isMapped("WeightUnit") ? Util1.convertToUniCode(row.get("WeightUnit")) : "");
                 op.setQty(row.isMapped("Qty") ? Double.valueOf(row.get("Qty")) : 0.0);
                 op.setUnitCode(row.isMapped("Unit") ? Util1.convertToUniCode(row.get("Unit")) : "");
@@ -717,6 +763,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         btnImport = new javax.swing.JButton();
         btnExport = new javax.swing.JButton();
         lblMessage = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        txtBag = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -926,6 +974,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         lblMessage.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblMessage.setText("-");
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Total Bag");
+
+        txtBag.setEditable(false);
+        txtBag.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBag.setFont(Global.amtFont);
+        txtBag.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBagActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -938,7 +999,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -949,6 +1010,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -972,7 +1037,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addComponent(lblRecord)
                     .addComponent(btnImport)
                     .addComponent(btnExport)
-                    .addComponent(lblMessage))
+                    .addComponent(lblMessage)
+                    .addComponent(jLabel9)
+                    .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1017,6 +1084,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         //inventoryRepo.getCustomer().subscribe()
     }//GEN-LAST:event_txtCusActionPerformed
 
+    private void txtBagActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBagActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBagActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExport;
@@ -1029,6 +1100,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblCusName;
     private javax.swing.JLabel lblMessage;
@@ -1037,6 +1109,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblOpening;
     private javax.swing.JFormattedTextField txtAmount;
+    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtLocation;

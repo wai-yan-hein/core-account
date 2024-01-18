@@ -2,12 +2,16 @@ package com;
 
 import com.common.Global;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
 import com.ui.LoginDialog;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -31,6 +35,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
@@ -130,6 +136,7 @@ public class CoreAccountApplication {
                 Global.tblHeaderFont = font.deriveFont(Font.BOLD, fontSize + 1);
                 Global.tblRowHeight = fontSize + 15;
                 Global.fontName = "font" + File.separator + font.getName();
+                initJasper(font);
                 log.info(Global.fontName);
             }
 
@@ -182,13 +189,8 @@ public class CoreAccountApplication {
             System.setProperty("flatlaf.menuBarEmbedded", "true");
             System.setProperty("flatlaf.animation", "true");
             System.setProperty("flatlaf.uiScale.enabled", "true");
-            boolean darkMode = isDarkModeEnabled();
-            if (darkMode) {
-                //UIManager.put("TextField.disabledForeground", Color.white);
-                UIManager.setLookAndFeel(new FlatMacDarkLaf());
-            } else {
-                UIManager.setLookAndFeel(new FlatMacLightLaf());
-            }
+            Util1.DARK_MODE = isDarkModeEnabled();
+            UIManager.setLookAndFeel(Util1.DARK_MODE ? new FlatMacDarkLaf(): new FlatMacLightLaf());
             Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
             UIManager.put("TableHeader.background", Global.selectionColor);
             UIManager.put("Table.selectionBackground", Global.selectionColor);
@@ -201,7 +203,6 @@ public class CoreAccountApplication {
             UIManager.put("TabbedPane.showTabSeparators", true);
             UIManager.put("TableHeader.foreground", Color.WHITE);
             UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
-            Util1.DARK_MODE = darkMode;
             log.info("theme end.");
         } catch (UnsupportedLookAndFeelException ex) {
             log.error("Failed to initialize LaF");
@@ -243,4 +244,22 @@ public class CoreAccountApplication {
         }
         return isDarkModeEnabled;
     }
+
+    public static void initJasper(Font font) {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(font);
+
+        // Set JasperReports default font
+        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
+        jc.setProperty("net.sf.jasperreports.default.font.name", font.getName()); // Set font name, not the string "Pyidaungsu"
+        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", font.getName()); // Set PDF font name
+        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
+        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
+        jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
+        jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
+        jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
+        jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
+    }
+
 }

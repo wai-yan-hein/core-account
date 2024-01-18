@@ -8,6 +8,7 @@ import com.acc.common.COAComboBoxModel;
 import com.common.ColumnColorCellRenderer;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
+import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -17,7 +18,6 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.PaymentHisKey;
 import com.inventory.model.StockPayment;
 import com.inventory.model.StockPaymentDetail;
 import com.inventory.model.StockPaymentDetailKey;
@@ -207,6 +207,8 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         tblPayment.setRowHeight(Global.tblRowHeight);
         tblPayment.setShowGrid(true);
         tblPayment.setFont(Global.textFont);
+        tblPayment.setDefaultRenderer(Object.class, new DecimalFormatRender());
+        tblPayment.setDefaultRenderer(Double.class, new DecimalFormatRender());
     }
 
     private void initTableQty() {
@@ -293,7 +295,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void calTotalPayment() {
-        int size = getListDelete().size();
+        int size = getPaymentList().size();
         txtRecord.setValue(size);
         lblMessage.setForeground(Color.red);
         lblMessage.setText(size == 0 ? "No Data Records." : "");
@@ -308,10 +310,10 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                     case BAG ->
                         bagTableModel.isValidEntry();
                     default ->
-                        false; // Handle unexpected values for 'type'
+                        false;
                 };
             default ->
-                false; // Handle unexpected values for 'tranOption'
+                false;
         };
     }
 
@@ -360,11 +362,15 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             ph.setListDelete(getListDelete());
             ph.setTranOption(tranOption);
             inventoryRepo.saveStockPayment(ph).doOnSuccess((t) -> {
-                clear();
+                if (print) {
+                    printVoucher(t);
+                }
             }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
+            }).doOnTerminate(() -> {
+                clear();
             }).subscribe();
         }
     }
@@ -377,30 +383,64 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         observer.selected("history", true);
     }
 
-    private void printVoucher(PaymentHisKey key) {
-        enableToolBar(false);
-        inventoryRepo.paymentReport(key).subscribe((t) -> {
-            try {
-                byte[] data = Util1.listToByteArray(t);
-                String reportName = "PaymentVoucher";
-                Map<String, Object> param = new HashMap<>();
-                param.put("p_print_date", Util1.getTodayDateTime());
-                param.put("p_comp_name", Global.companyName);
-                param.put("p_comp_address", Global.companyAddress);
-                param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_logo_path", ProUtil.logoPath());
-                param.put("p_tran_option", tranOption);
-                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-                ByteArrayInputStream stream = new ByteArrayInputStream(data);
-                JsonDataSource ds = new JsonDataSource(stream);
-                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                JasperViewer.viewReport(jp, false);
-                enableToolBar(true);
-            } catch (JRException ex) {
-                enableToolBar(true);
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        });
+    private String getReportName() {
+        return switch (tranOption) {
+            case "C" ->
+                switch (type) {
+                    case QTY ->
+                        "StockIssueQtyVoucherA5";
+                    case BAG ->
+                        "StockIssueBagVoucherA5";
+                    default ->
+                        null;
+                };
+            default ->
+                null;
+        };
+    }
+
+    private void printVoucher(StockPayment spd) {
+        try {
+            enableToolBar(false);
+            List<StockPaymentDetail> detail = spd.getListDetail();
+            byte[] data = Util1.listToByteArray(detail);
+            String reportName = getReportName();
+            Map<String, Object> param = getDefaultParam(ph);
+            String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+            ByteArrayInputStream stream = new ByteArrayInputStream(data);
+            JsonDataSource ds = new JsonDataSource(stream);
+            JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+            JasperViewer.viewReport(jp, false);
+            enableToolBar(true);
+        } catch (JRException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+
+    private Map<String, Object> getDefaultParam(StockPayment p) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("p_print_date", Util1.getTodayDateTime());
+        param.put("p_comp_name", Global.companyName);
+        param.put("p_comp_address", Global.companyAddress);
+        param.put("p_comp_phone", Global.companyPhone);
+        param.put("p_logo_path", ProUtil.logoPath());
+        param.put("p_remark", p.getRemark());
+        param.put("p_vou_no", p.getVouNo());
+        param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
+        param.put("SUBREPORT_DIR", "report/");
+        param.put("p_sub_report_dir", "report/");
+        param.put("p_vou_date", Util1.getDate(p.getVouDate()));
+        param.put("p_vou_time", Util1.getTime(p.getVouDate()));
+        param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
+        param.put("p_tran_option",tranOption);
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            param.put("p_trader_name", Util1.isNull(p.getReference(), t.getTraderName()));
+            param.put("p_cus_name", t.getTraderName());
+            param.put("p_trader_address", t.getAddress());
+            param.put("p_trader_phone", t.getPhone());
+        }
+        return param;
     }
 
     private boolean isValidEntry() {
@@ -436,6 +476,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             ph.setDeleted(false);
             ph.setRemark(txtRemark.getText());
             ph.setMacId(Global.macId);
+            ph.setReference(txtReference.getText());
             if (lblStatus.getText().equals("NEW")) {
                 ph.setCompCode(Global.compCode);
                 ph.setDeptId(Global.deptId);
@@ -454,6 +495,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
         txtRemark.setText(null);
+        txtReference.setText(null);
         chkCal.setSelected(true);
         txtRecord.setValue(0);
         clearModel();
@@ -502,6 +544,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         txtVouNo.setText(vouNo);
         txtVouDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtRemark.setText(ph.getRemark());
+        txtReference.setText(ph.getReference());
         chkCal.setSelected(ph.isCalculate());
         ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
         if (ph.isDeleted()) {
@@ -616,6 +659,8 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         chkCal = new javax.swing.JRadioButton();
         txtLoc = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        txtReference = new javax.swing.JTextField();
         scroll = new javax.swing.JScrollPane();
         tblPayment = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -666,6 +711,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Location");
 
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Reference");
+
+        txtReference.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -694,6 +744,10 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel5)
+                                .addGap(3, 3, 3)
+                                .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
@@ -711,6 +765,9 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel5)
+                        .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel4)
                         .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -819,7 +876,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -842,6 +899,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -853,6 +911,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JTable tblPayment;
     private javax.swing.JTextField txtLoc;
     private javax.swing.JFormattedTextField txtRecord;
+    private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtTrader;
     private com.toedter.calendar.JDateChooser txtVouDate;

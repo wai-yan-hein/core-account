@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.acc.editor.DepartmentAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -14,7 +13,6 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -22,13 +20,12 @@ import com.user.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
-import com.inventory.model.VStockIssueReceive;
+import com.inventory.model.VConsign;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIssRecVouSearchTableModel;
 import com.user.editor.DepartmentUserAutoCompleter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -109,14 +106,14 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
-        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(40);
-        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(50);
-        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
+        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(60);//vou
+        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);//name
+        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(100);//remark
+        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(80);//location
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);//bag
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
-        tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);
@@ -180,12 +177,13 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
 
     private void calTotal() {
         txtRecord.setValue(tableModel.getSize());
+        txtBag.setValue(tableModel.getBag());
     }
 
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VStockIssueReceive stkIR = tableModel.getSelectVou(row);
+            VConsign stkIR = tableModel.getSelectVou(row);
             stkIR.setLocal(chkLocal.isSelected());
             observer.selected("ISSREC-HISTORY", stkIR);
             setVisible(false);
@@ -257,6 +255,8 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         txtRecord = new javax.swing.JFormattedTextField();
         btnSearch = new javax.swing.JButton();
         btnSelect = new javax.swing.JButton();
+        lblTtlRecord1 = new javax.swing.JLabel();
+        txtBag = new javax.swing.JFormattedTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock Voucher Search Dialog");
@@ -517,6 +517,13 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
             }
         });
 
+        lblTtlRecord1.setFont(Global.lableFont);
+        lblTtlRecord1.setText("Total Bag :");
+
+        txtBag.setEditable(false);
+        txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBag.setFont(Global.amtFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -525,8 +532,12 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 310, Short.MAX_VALUE)
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 303, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSelect)
@@ -537,6 +548,9 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblTtlRecord1)
+                        .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblTtlRecord)
                         .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -669,9 +683,11 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblTtlRecord;
+    private javax.swing.JLabel lblTtlRecord1;
     private javax.swing.JLabel lblVouNo;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;

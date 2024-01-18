@@ -5,13 +5,12 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.VStockIO;
-import com.inventory.model.VStockIssueReceive;
+import com.inventory.model.VConsign;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,13 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockIssRecVouSearchTableModel extends AbstractTableModel {
 
-    private List<VStockIssueReceive> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Location", "Remark", "Trader", "Created By"};
+    private List<VConsign> listDetail = new ArrayList();
+    private final String[] columnNames = {"Date", "Vou No", "Name", "Remark", "Location", "Total Bag"};
+    @Getter
     private int size;
-
-    public int getSize() {
-        return size;
-    }
+    @Getter
+    private double bag;
 
     @Override
     public String getColumnName(int column) {
@@ -51,13 +49,16 @@ public class StockIssRecVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
+        if (column == 5) {
+            return Double.class;
+        }
         return String.class;
     }
 
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            VStockIssueReceive his = listDetail.get(row);
+            VConsign his = listDetail.get(row);
             switch (column) {
                 case 0 -> {
                     //date
@@ -72,16 +73,16 @@ public class StockIssRecVouSearchTableModel extends AbstractTableModel {
                     }
                 }
                 case 2 -> {
-                    return his.getLocation();
+                    return his.getTraderName();
                 }
                 case 3 -> {
                     return his.getRemark();
                 }
                 case 4 -> {
-                    return his.getTraderName();
+                    return his.getLocation();
                 }
                 case 5 -> {
-                    return Global.hmUser.get(his.getCreatedBy());
+                    return his.getBag();
                 }
             }
         } catch (Exception ex) {
@@ -90,22 +91,23 @@ public class StockIssRecVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VStockIssueReceive> getListDetail() {
+    public List<VConsign> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<VStockIssueReceive> listDetail) {
+    public void setListDetail(List<VConsign> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public VStockIssueReceive getSelectVou(int row) {
+    public VConsign getSelectVou(int row) {
         return listDetail.get(row);
     }
 
-    public void addObject(VStockIssueReceive t) {
+    public void addObject(VConsign t) {
         listDetail.add(t);
         size += 1;
+        bag += t.getBag();
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
             fireTableRowsInserted(lastIndex, lastIndex);
@@ -117,6 +119,7 @@ public class StockIssRecVouSearchTableModel extends AbstractTableModel {
     public void clear() {
         listDetail.clear();
         size = 0;
+        bag = 0;
         fireTableDataChanged();
     }
 }
