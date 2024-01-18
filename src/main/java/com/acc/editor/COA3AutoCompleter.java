@@ -85,12 +85,14 @@ public final class COA3AutoCompleter implements KeyListener {
         switch (this.level) {
             case 0 -> {
                 table.setModel(cOATableModel);
+                table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
             }
             case 1 -> {
                 table.setModel(cOA1TableModel);
             }
             case 2 -> {
                 table.setModel(cOA2TableModel);
+                table.getColumnModel().getColumn(2).setPreferredWidth(100);//Name
             }
             case 3 -> {
                 table.setModel(cOA3TableModel);
