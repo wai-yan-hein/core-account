@@ -167,9 +167,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     private void initData() {
-        progress.setIndeterminate(true);
         searchStock();
-        progress.setIndeterminate(false);
     }
 
     private void initTable() {

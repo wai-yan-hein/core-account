@@ -111,6 +111,8 @@ public class SaleHis {
     private String deptCode;
     @Column(name = "weight_vou_no")
     private String weightVouNo;
+    @Column(name = "post")
+    private boolean post;
     @Transient
     private String localVouNo;
     @Transient
@@ -123,7 +125,7 @@ public class SaleHis {
     private transient boolean local = false;
     private transient List<SaleExpense> listExpense;
     private transient List<SaleExpenseKey> listDelExpense;
-    
+
     @Transient
     private List<VouDiscount> listVouDiscount;
     @Transient

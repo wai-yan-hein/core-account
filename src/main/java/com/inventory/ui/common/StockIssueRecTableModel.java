@@ -11,8 +11,8 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Stock;
-import com.inventory.model.StockIssRecDetail;
-import com.inventory.model.StockIssRecDetailKey;
+import com.inventory.model.ConsignHisDetail;
+import com.inventory.model.ConsignHisDetailKey;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,16 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockIssueRecTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight",
-        "Qty", "Bag", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight", "Bag", "Total Weight"};
     private JTable parent;
-    private List<StockIssRecDetail> listDetail = new ArrayList();
+    private List<ConsignHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<StockIssRecDetailKey> deleteList = new ArrayList();
+    private final List<ConsignHisDetailKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-//    private StockIssRecEntry stockIssRec;
 
     public JLabel getLblRec() {
         return lblRec;
@@ -115,7 +113,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case  8 ->
+            case 6 ->
                 false;
             default ->
                 true;
@@ -126,7 +124,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                StockIssRecDetail record = listDetail.get(row);
+                ConsignHisDetail record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
@@ -146,16 +144,10 @@ public class StockIssueRecTableModel extends AbstractTableModel {
                         return Util1.toNull(record.getWeight());
                     }
                     case 5 -> {
-                        return Util1.toNull(record.getQty());
-                    }
-                    case 6 -> {
                         return Util1.toNull(record.getBag());
                     }
-                    case 7 -> {
-                        return Util1.toNull(record.getPrice());
-                    }
-                    case 8 -> {
-                        return Util1.toNull(record.getAmount());
+                    case 6 -> {
+                        return Util1.toNull(record.getTotalWeight());
                     }
                     default -> {
                         return new Object();
@@ -170,20 +162,20 @@ public class StockIssueRecTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
-        try {  
-            if (value != null) {  
-                StockIssRecDetail pd = listDetail.get(row);
+        try {
+            if (value != null) {
+                ConsignHisDetail pd = listDetail.get(row);
                 switch (column) {
                     case 0, 1 -> {
                         //Code
-                            if (value instanceof Stock s) {
-                                pd.setStockCode(s.getKey().getStockCode());
-                                pd.setStockName(s.getStockName());
-                                pd.setUserCode(s.getUserCode());
-                                pd.setWeight(Util1.getDouble(s.getWeight()));
-                                pd.setQty(1.0);                               
-                            } 
-                             addNewRow();
+                        if (value instanceof Stock s) {
+                            pd.setStockCode(s.getKey().getStockCode());
+                            pd.setStockName(s.getStockName());
+                            pd.setUserCode(s.getUserCode());
+                            pd.setWeight(Util1.getDouble(s.getWeight()));
+                            pd.setQty(1.0);
+                        }
+                        addNewRow();
                         parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
@@ -205,25 +197,13 @@ public class StockIssueRecTableModel extends AbstractTableModel {
                         }
                     }
                     case 5 -> {
-                        double qty = Util1.getDouble(value);
-                        if (qty > 0) {
-                            pd.setQty(qty);
-                        }
-                    }
-                    case 6 -> {
                         double bag = Util1.getDouble(value);
                         if (bag > 0) {
                             pd.setBag(bag);
                         }
                     }
-                    case 7 -> {
-                        double price = Util1.getDouble(value);
-                        if (price > 0) {
-                            pd.setPrice(price);
-                        }
-                    }
                 }
-                calculateAmount(pd);               
+                calculateAmount(pd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
                 observer.selected("CAL-TOTAL", "CAL-TOTAL");
@@ -234,19 +214,6 @@ public class StockIssueRecTableModel extends AbstractTableModel {
         }
     }
 
-//    private void assignLocation(StockIssRecDetail sd) {
-//        if (sd.getLocCode() == null) {
-//            LocationAutoCompleter completer = stockIssRec.getLocationAutoCompleter();
-//            if (completer != null) {
-//                Location l = completer.getLocation();
-//                if (l != null) {
-//                    sd.setLocCode(l.getKey().getLocCode());
-//                    sd.setLocName(l.getLocName());
-//                }
-//            }
-//        }
-//    }
-
     private void setRecord(int size) {
         if (lblRec != null) {
             lblRec.setText("Records : " + size);
@@ -256,7 +223,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                StockIssRecDetail pd = new StockIssRecDetail();
+                ConsignHisDetail pd = new ConsignHisDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -266,7 +233,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            StockIssRecDetail get = listDetail.get(listDetail.size() - 1);
+            ConsignHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -274,43 +241,25 @@ public class StockIssueRecTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<StockIssRecDetail> getListDetail() {
+    public List<ConsignHisDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<StockIssRecDetail> listDetail) {
+    public void setListDetail(List<ConsignHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
-//        addNewRow();
         fireTableDataChanged();
     }
 
-    private void calculateAmount(StockIssRecDetail pur) {
-        double price = Util1.getDouble(pur.getPrice());
-        double qty = Util1.getDouble(pur.getQty());
-        if (pur.getStockCode() != null) {
-            double amount = qty * price;
-            int roundAmt = (int) amount;
-            pur.setPrice(price);
-            if (ProUtil.isPurRDDis()) {
-                int netAmt = Util1.roundDownToNearest100(roundAmt);
-                double discount = roundAmt - netAmt;
-                observer.selected("DISCOUNT", discount);
-            }
-            pur.setAmount(roundAmt);
-        }
-    }
-
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(Global.parentForm, text);
+    private void calculateAmount(ConsignHisDetail pur) {
+        pur.setTotalWeight(pur.getWeight() * pur.getBag());
     }
 
     public boolean isValidEntry() {
-        for (StockIssRecDetail sdh : listDetail) {
+        for (ConsignHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-//                sdh.setUnitCode("-");
-                if (Util1.getDouble(sdh.getAmount()) <= 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
+                if (Util1.getDouble(sdh.getBag()) <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Bag.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     parent.requestFocus();
                     return false;
@@ -320,7 +269,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
         return true;
     }
 
-    public List<StockIssRecDetailKey> getDelList() {
+    public List<ConsignHisDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -331,7 +280,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        StockIssRecDetail sdh = listDetail.get(row);
+        ConsignHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
@@ -346,14 +295,14 @@ public class StockIssueRecTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addStockIssRec(StockIssRecDetail sd) {
+    public void addStockIssRec(ConsignHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public StockIssRecDetail getObject(int row) {
+    public ConsignHisDetail getObject(int row) {
         return listDetail.get(row);
     }
 
@@ -364,9 +313,10 @@ public class StockIssueRecTableModel extends AbstractTableModel {
         }
     }
 
-    public StockIssRecDetail getSelectVou(int row) {
+    public ConsignHisDetail getSelectVou(int row) {
         return listDetail.get(row);
     }
+
     public void updateRow(int row) {
         fireTableRowsUpdated(row, row);
     }

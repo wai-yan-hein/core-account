@@ -101,7 +101,7 @@ public final class COA3AutoCompleter implements KeyListener {
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());

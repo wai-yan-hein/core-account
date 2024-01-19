@@ -7,6 +7,7 @@ package com.inventory.ui.entry.dialog;
 
 import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
+import com.common.ComponentUtil;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -24,14 +25,11 @@ import com.inventory.model.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.PaymentSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -48,18 +46,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
      * Creates new form SaleVouSearchDialog
      *
      */
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusLost(FocusEvent e) {
-        }
-
-        @Override
-        public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            jtf.selectAll();
-        }
-
-    };
     private final PaymentSearchTableModel tableModel = new PaymentSearchTableModel();
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
@@ -111,15 +97,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void initFocus() {
-        txtAccount.addFocusListener(fa);
-        txtVouNo.addFocusListener(fa);
-        txtSaleVouNo.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtCus.addFocusListener(fa);
-        txtAccount.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtUser.addFocusListener(fa);
-        txtCurrency.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
 
     private void initCombo() {
@@ -131,12 +109,12 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         stockAutoCompleter = new StockAutoCompleter(txtAccount, inventoryRepo, null, true);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
 
     }
 
@@ -148,9 +126,8 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);//cus
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);//remark
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(180);//cre
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(15);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
-        tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);
@@ -172,7 +149,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
 
     public void search() {
         tableModel.clear();
-        txtTotalRecord.setValue(0);
+        txtRecord.setValue(0);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -187,19 +164,31 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setAccount(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
         filter.setTranOption(tranOption);
         progress.setIndeterminate(true);
+        tableModel.clear();
+        txtPayment.setValue(0);
+        txtRecord.setValue(0);
         inventoryRepo.getPaymentHistory(filter)
-                .subscribe((t) -> {
-                    tableModel.setListDetail(t);
-                    txtTotalRecord.setValue(t.size());
+                .doOnNext(obj -> btnSearch.setEnabled(false))
+                .doOnNext(tableModel::addObject)
+                .doOnNext(obj -> calTotal())
+                .doOnError(e -> {
                     progress.setIndeterminate(false);
-                }, (e) -> {
-                    progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                }, () -> {
+                })
+                .doOnTerminate(() -> {
                     progress.setIndeterminate(false);
+                    btnSearch.setEnabled(true);
+                    tblVoucher.requestFocus();
                     setVisible(true);
-                });
+                })
+                .subscribe();
 
+    }
+
+    private void calTotal() {
+        txtPayment.setValue(tableModel.getPayment());
+        txtRecord.setValue(tableModel.getSize());
     }
 
     private void select() {
@@ -275,7 +264,9 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         btnSelect = new javax.swing.JButton();
         btnSearch = new javax.swing.JButton();
         lblTtlRecord = new javax.swing.JLabel();
-        txtTotalRecord = new javax.swing.JFormattedTextField();
+        txtRecord = new javax.swing.JFormattedTextField();
+        lblTtlRecord1 = new javax.swing.JLabel();
+        txtPayment = new javax.swing.JFormattedTextField();
         progress = new javax.swing.JProgressBar();
 
         setTitle("Payment History Dialog");
@@ -546,9 +537,16 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Total Record :");
 
-        txtTotalRecord.setEditable(false);
-        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalRecord.setFont(Global.amtFont);
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.amtFont);
+
+        lblTtlRecord1.setFont(Global.lableFont);
+        lblTtlRecord1.setText("Total Payment :");
+
+        txtPayment.setEditable(false);
+        txtPayment.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPayment.setFont(Global.amtFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -558,7 +556,11 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -570,14 +572,16 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblTtlRecord1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtPayment)
                     .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtTotalRecord)
+                    .addComponent(txtRecord)
                     .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnSearch, btnSelect, lblTtlRecord, txtTotalRecord});
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnSearch, btnSelect, lblTtlRecord, txtRecord});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -710,6 +714,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTtlRecord;
+    private javax.swing.JLabel lblTtlRecord1;
     private javax.swing.JLabel lblVouNo;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
@@ -718,11 +723,12 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JFormattedTextField txtPayment;
     private javax.swing.JTextField txtProjectNo;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtSaleVouNo;
     private com.toedter.calendar.JDateChooser txtToDate;
-    private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables

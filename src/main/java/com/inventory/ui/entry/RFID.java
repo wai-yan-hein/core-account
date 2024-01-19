@@ -365,7 +365,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void historySale() {
         if (dialog == null) {
-            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog = new SaleHistoryDialog(Global.parentForm, 1);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);

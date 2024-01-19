@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.VSale;
 import java.util.ArrayList;
@@ -19,20 +18,20 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class SaleVouSearchTableModel extends AbstractTableModel {
+public class SalePaddySearchTableModel extends AbstractTableModel {
 
     private List<VSale> listSaleHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Qty", "Bag", "Paid Amt", "V-Total"};
     @Getter
     private double vouTotal;
     @Getter
     private double paidTotal;
     @Getter
+    private int size;
+    @Getter
     private double qty;
     @Getter
     private double bag;
-    @Getter
-    private int size;
 
     @Override
     public String getColumnName(int column) {
@@ -60,7 +59,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6, 7 -> {
+            case 5, 6, 7, 8 -> {
                 return Double.class;
             }
         }
@@ -101,13 +100,17 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //user
-                        return Global.hmUser.get(his.getCreatedBy());
+                        return his.getQty();
                     }
                     case 6 -> {
+                        //user
+                        return his.getBag();
+                    }
+                    case 7 -> {
                         //paid
                         return his.getPaid();
                     }
-                    case 7 -> {
+                    case 8 -> {
                         return his.getVouTotal();
                     }
                 }

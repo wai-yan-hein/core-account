@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.OPHis;
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OPVouSearchTableModel extends AbstractTableModel {
 
     private List<OPHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Opening Date", "Vou No", "Location", "Remark", "Amount", "Created By"};
+    private final String[] columnNames = {"Opening Date", "Vou No", "Location", "Remark", "Qty", "Bag", "Amount",};
     private JTable parent;
 
     public JTable getParent() {
@@ -55,7 +54,12 @@ public class OPVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 4 ? Float.class : String.class;
+        return switch (column) {
+            case 4, 5, 6 ->
+                Double.class;
+            default ->
+                String.class;
+        };
     }
 
     @Override
@@ -85,11 +89,13 @@ public class OPVouSearchTableModel extends AbstractTableModel {
                     return his.getRemark();
                 }
                 case 4 -> {
-                    return Util1.getFloat(his.getOpAmt());
+                    return Util1.getDouble(his.getQty());
                 }
                 case 5 -> {
-                    //user
-                    return Global.hmUser.get(his.getCreatedBy());
+                    return Util1.getDouble(his.getBag());
+                }
+                case 6 -> {
+                    return Util1.getDouble(his.getOpAmt());
                 }
             }
         } catch (Exception ex) {

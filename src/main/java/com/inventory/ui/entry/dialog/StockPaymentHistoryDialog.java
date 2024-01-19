@@ -5,14 +5,12 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.repo.AccountRepo;
 import com.common.ComponentUtil;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -97,6 +95,7 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);//cus
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(180);//remark
         tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);//cre
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);//cre
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -145,6 +144,7 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
 
     private void calTotal() {
         txtQty.setValue(tableModel.getQty());
+        txtBag.setValue(tableModel.getBag());
         txtRecord.setValue(tableModel.getSize());
     }
 
@@ -217,6 +217,8 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
         txtRecord = new javax.swing.JFormattedTextField();
         txtQty = new javax.swing.JFormattedTextField();
         lblTtlRecord1 = new javax.swing.JLabel();
+        lblTtlRecord2 = new javax.swing.JLabel();
+        txtBag = new javax.swing.JFormattedTextField();
         progress = new javax.swing.JProgressBar();
 
         setTitle("Payment History Dialog");
@@ -464,6 +466,13 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
         lblTtlRecord1.setFont(Global.lableFont);
         lblTtlRecord1.setText("Total Qty :");
 
+        lblTtlRecord2.setFont(Global.lableFont);
+        lblTtlRecord2.setText("Total Bag :");
+
+        txtBag.setEditable(false);
+        txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBag.setFont(Global.amtFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -477,6 +486,10 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
                 .addComponent(lblTtlRecord1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -493,7 +506,9 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
                     .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtRecord)
                     .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(lblTtlRecord2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtBag))
                 .addContainerGap())
         );
 
@@ -620,10 +635,12 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JLabel lblTtlRecord1;
+    private javax.swing.JLabel lblTtlRecord2;
     private javax.swing.JLabel lblVouNo;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtAccount;
+    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;

@@ -216,7 +216,6 @@ public class AccountRepo {
                                 "Offline", JOptionPane.YES_NO_OPTION,
                                 JOptionPane.WARNING_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(gl);
                         }
                         return Mono.error(e);
                     }
@@ -245,7 +244,6 @@ public class AccountRepo {
                                 "Offline", JOptionPane.YES_NO_OPTION,
                                 JOptionPane.WARNING_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(gl);
                         }
                         return Mono.error(e);
                     }
@@ -405,8 +403,7 @@ public class AccountRepo {
                 .queryParam("coaCode", coaCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(ChartOfAccount.class
-                );
+                .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
     public Mono<List<ChartOfAccount>> getCOAByGroup(String groupCode) {
@@ -420,15 +417,11 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(ChartOfAccount.class
-                )
+                .bodyToFlux(ChartOfAccount.class)
                 .onErrorResume((e) -> {
-                    log.error(
-                            "getCOAByGroup : " + e.getMessage());
+                    log.error("getCOAByGroup : " + e.getMessage());
                     return Mono.empty();
-                }
-                )
-                .collectList();
+                }).collectList();
     }
 
     public Mono<List<ChartOfAccount>> getCashBank() {

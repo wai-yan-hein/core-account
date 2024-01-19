@@ -49,6 +49,7 @@ public class VSale {
     private String stockCode;
     private String expiredDate;
     private double qty;
+    private double bag;
     private String saleUnit;
     private double salePrice;
     private double saleAmount;

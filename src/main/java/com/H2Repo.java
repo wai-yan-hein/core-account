@@ -29,7 +29,6 @@ import com.h2.service.DateLockService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
-import com.h2.service.GlService;
 import com.h2.service.JobService;
 import com.h2.service.LabourGroupService;
 import com.h2.service.LocationService;
@@ -283,8 +282,6 @@ public class H2Repo {
     private WeightLossService weightLossService;
     @Autowired
     private ReportService reportService;
-    @Autowired
-    private GlService glService;
     @Autowired
     private SaleHisDetailService saleHisDetailService;
     @Autowired
@@ -814,13 +811,6 @@ public class H2Repo {
         return dateFilterRepo.findAll();
     }
 
-    public Mono<Gl> save(Gl gl) {
-        return Mono.justOrEmpty(glService.save(gl, false));
-    }
-
-    public Mono<ReturnObject> save(List<Gl> glList) {
-        return Mono.justOrEmpty(glService.save(glList));
-    }
 
     public ChartOfAccount save(ChartOfAccount obj) {
         return coaService.save(obj);

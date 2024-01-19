@@ -50,7 +50,7 @@ public class OPHis {
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "op_amt")
-    private float opAmt;
+    private double opAmt;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
     @Column(name = "deleted")
@@ -63,6 +63,8 @@ public class OPHis {
     private String traderCode;
     @Column(name = "tran_source")
     private int tranSource;
+    private double qty;
+    private double bag;
     @Transient
     private List<OPHisDetail> detailList;
     @Transient

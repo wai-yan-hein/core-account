@@ -93,6 +93,7 @@ public class ReportFilter {
     private boolean active;
     private String labourGroupCode;
     private String warehouseCode;
+    private List<String> listCOAGroup;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

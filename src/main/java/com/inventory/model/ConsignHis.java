@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 package com.inventory.model;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -19,19 +19,19 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Data
-@Table(name = "iss_rec_his")
-public class StockIssueReceive implements Serializable {
+@Table(name = "consign_his")
+public class ConsignHis {
 
     @EmbeddedId
-    private StockIssueReceiveKey key;
+    private ConsignHisKey key;
     @Column(name = "dept_id")
     private Integer deptId;
-     @Column(name = "location")
-    private String location;
+    @Column(name = "locCode")
+    private String locCode;
     @Column(name = "remark")
     private String remark;
     @Column(name = "description")
-    private String description;    
+    private String description;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
     @Column(name = "created_by")
@@ -39,10 +39,10 @@ public class StockIssueReceive implements Serializable {
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
-    private LocalDateTime createdDate;    
+    private LocalDateTime createdDate;
     @Column(name = "mac_id")
     private Integer macId;
-    @Column(name = "vou_date",columnDefinition = "TIMESTAMP")
+    @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime vouDate;
     @Column(name = "deleted")
     private boolean deleted;
@@ -65,9 +65,9 @@ public class StockIssueReceive implements Serializable {
     @Transient
     private String status = "STATUS";
     @Transient
-    private List<StockIssRecDetail> listIRDetail;
+    private List<ConsignHisDetail> listIRDetail;
     @Transient
-    private List<StockIssRecDetailKey> listDel;
+    private List<ConsignHisDetailKey> listDel;
     @Transient
     private List<LocationKey> keys;
     @Transient

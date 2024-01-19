@@ -10,6 +10,7 @@ import com.inventory.model.StockPayment;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,18 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 public class StockPaymentSearchTableModel extends AbstractTableModel {
 
     private List<StockPayment> listDetail = new ArrayList();
-    private final String[] columnNames = {"Vou Date", "Vou No", "Contract No", "Name", "Remark", "Qty"};
+    private final String[] columnNames = {"Vou Date", "Vou No", "Contract No", "Name", "Remark", "Qty", "Bag"};
+    @Getter
     private double qty;
+    @Getter
+    private double bag;
+    @Getter
     private int size;
-
-    public int getSize() {
-        return size;
-    }
-
-    public double getQty() {
-        return qty;
-    }
-
 
     @Override
     public String getColumnName(int column) {
@@ -59,7 +55,7 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 5 ->
+            case 5, 6 ->
                 Double.class;
             default ->
                 String.class;
@@ -77,7 +73,7 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
                         return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
-                        if(his.isDeleted()){
+                        if (his.isDeleted()) {
                             return Util1.getStar(his.getVouNo());
                         }
                         //vou date
@@ -96,6 +92,9 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         return his.getPayQty();
+                    }
+                    case 6 -> {
+                        return his.getPayBag();
                     }
                 }
             }
@@ -126,6 +125,7 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
     public void addObject(StockPayment t) {
         listDetail.add(t);
         qty += t.getPayQty();
+        bag += t.getPayBag();
         size += 1;
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
@@ -138,6 +138,7 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
     public void clear() {
         qty = 0;
         size = 0;
+        bag = 0;
         listDetail.clear();
         fireTableDataChanged();
     }
