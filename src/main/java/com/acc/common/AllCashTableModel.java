@@ -283,15 +283,15 @@ public class AllCashTableModel extends AbstractTableModel {
                 case 8 -> {
                     if (value != null) {
                         if (value instanceof ChartOfAccount coa) {
-                            if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
-                                gl.setAccCode(coa.getKey().getCoaCode());
-                                gl.setAccName(coa.getCoaNameEng());
-                                if (Util1.isNull(gl.getCurCode())) {
-                                    parent.setColumnSelectionInterval(7, 7);
-                                } else {
-                                    parent.setColumnSelectionInterval(8, 8);
-                                }
+//                            if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
+                            gl.setAccCode(coa.getKey().getCoaCode());
+                            gl.setAccName(coa.getCoaNameEng());
+                            if (Util1.isNull(gl.getCurCode())) {
+                                parent.setColumnSelectionInterval(7, 7);
+                            } else {
+                                parent.setColumnSelectionInterval(8, 8);
                             }
+//                            }
                         }
 
                     }
@@ -378,11 +378,18 @@ public class AllCashTableModel extends AbstractTableModel {
 
     private boolean isValidEntry(Gl gl, int row, int column) {
         boolean status = true;
-        if (Util1.isNull(gl.getAccCode())) {
+        if (gl.getAccCode().equals(sourceAccId)) {
             status = false;
-            if (column > 6) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Account is the same with Source Account.");
+            gl.setAccCode(null);
+            gl.setAccName(null);
+            parent.setColumnSelectionInterval(8, 8);
+            parent.setRowSelectionInterval(row, row);
+        } else if (Util1.isNull(gl.getAccCode())) {
+            status = false;
+            if (column > 8) {
                 JOptionPane.showMessageDialog(Global.parentForm, "Account missing.");
-                parent.setColumnSelectionInterval(6, 6);
+                parent.setColumnSelectionInterval(8, 8);
                 parent.setRowSelectionInterval(row, row);
             }
         } else if (Util1.getDouble(gl.getDrAmt()) + Util1.getDouble(gl.getCrAmt()) <= 0) {

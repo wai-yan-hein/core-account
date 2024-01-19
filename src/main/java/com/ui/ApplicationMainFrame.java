@@ -80,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.OrderDynamic;
+import com.inventory.ui.entry.OrderNoteEntry;
 import com.inventory.ui.entry.PurOrderHisEntry;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
@@ -678,6 +679,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 drive.setDmsRepo(dmsRepo);
                 drive.initMain();
                 return drive;
+            }
+            case "Order Note" -> {
+                OrderNoteEntry orderNoteEntry = new OrderNoteEntry();
+                orderNoteEntry.setProgress(progress);
+                orderNoteEntry.setObserver(this);
+                orderNoteEntry.setDmsRepo(dmsRepo);
+                orderNoteEntry.setInventoryRepo(inventoryRepo);
+                orderNoteEntry.initMain();
+                return orderNoteEntry;
             }
             case "Pattern Setup" -> {
                 PatternSetup patternSetup = new PatternSetup();

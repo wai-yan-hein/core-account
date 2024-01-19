@@ -56,8 +56,6 @@ import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
@@ -1817,6 +1815,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }).doOnTerminate(() -> {
                 milling.setJobNo(oh.getKey().getJobNo());
                 txtJob.setText(oh.getJobName());
+                milingExpenseTableModel.addNewRow();
                 millingRawTableModel.addNewRow();
                 millingOutTableModel.addNewRow();
                 setMillingUsage();
