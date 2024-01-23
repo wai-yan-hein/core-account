@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
-
+    
     private DefaultMutableTreeNode treeRoot;
     private JProgressBar progress;
     private DMSRepo dmsRepo;
@@ -70,24 +71,24 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private Map<String, ImageIcon> hmIcon = new HashMap<>();
     private CVFile lastFile;
     private OrderNote orderNote;
-    private List<OrderFileJoin> orderDetail;
-
+    private List<OrderFileJoin> orderDetail = new ArrayList<>();
+    
     private TraderAutoCompleter traderAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private InventoryRepo inventoryRepo;
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setDmsRepo(DMSRepo dmsRepo) {
         this.dmsRepo = dmsRepo;
     }
@@ -100,7 +101,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         initKeyListener();
         initDateListner();
     }
-
+    
     public void initMain() {
         initCombo();
         initNewPopup();
@@ -108,12 +109,13 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         initTrashPopup();
         initTree();
         initTable();
+        assignDefaultValue();
         getHeadFolder();
         getStorageInfo();
         txtOrderDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
@@ -124,32 +126,41 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     };
-
+    
     private void initDateListner() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtCus.addFocusListener(fa);
         txtStock.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtReference.addFocusListener(fa);
+        txtOrderCode.addFocusListener(fa);
+        txtOrderName.addFocusListener(fa);
     }
-
+    
     private void initKeyListener() {
+        txtOrderDate.getDateEditor().getUiComponent().setName("txtOrderDate");
+        txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtCus.addKeyListener(this);
         txtStock.addKeyListener(this);
     }
-
+    
+    private void assignDefaultValue() {
+        progress.setIndeterminate(false);
+        if (!lblStatus.getText().equals("NEW")) {
+            txtOrderDate.setDate(Util1.getTodayDate());
+        }
+    }
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
-
+        
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
     }
-
+    
     private void initNewPopup() {
         newPopup = new JPopupMenu("Edit");
         newPopup.setFont(Global.textFont);
@@ -164,7 +175,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         newPopup.add(file);
         newPopup.add(fu);
     }
-
+    
     private void initMorePopup() {
         morePopup = new JPopupMenu("More");
         morePopup.setFont(Global.textFont);
@@ -185,7 +196,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         morePopup.addSeparator();
         morePopup.add(trash);
     }
-
+    
     private void initTrashPopup() {
         trashPopup = new JPopupMenu("Edit");
         trashPopup.setFont(Global.textFont);
@@ -221,11 +232,11 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     deleteForever();
                 case "Download" ->
                     downloadFile();
-
+                
             }
         }
     };
-
+    
     private void viewFile() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -233,7 +244,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             openWebBrowser(url);
         }
     }
-
+    
     private void downloadFile() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -241,7 +252,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             openWebBrowser(url);
         }
     }
-
+    
     private CVFile getSelectFile() {
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
         if (row >= 0) {
@@ -249,7 +260,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         }
         return null;
     }
-
+    
     private void copyLink() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -257,7 +268,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             Util1.copyToClipboard(url);
         }
     }
-
+    
     private void renameFile() {
         if (fileRenameDialog == null) {
             fileRenameDialog = new FileRenameDialog(Global.parentForm);
@@ -279,7 +290,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void moveToTrash() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -289,7 +300,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void restore() {
         progress.setIndeterminate(true);
         CVFile file = getSelectFile();
@@ -302,7 +313,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void deleteForever() {
         progress.setIndeterminate(true);
         CVFile file = getSelectFile();
@@ -315,7 +326,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void openWebBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
@@ -330,14 +341,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             JOptionPane.showMessageDialog(this, "Desktop is not supported on this platform.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void initTree() {
         CVFile head = new CVFile();
         head.setFileId("head");
         head.setFileDescription("Drive");
         treeRoot = new DefaultMutableTreeNode(head);
     }
-
+    
     private void initTable() {
         fileTableModel.setDmsRepo(dmsRepo);
         fileTableModel.setTable(tblChild);
@@ -357,7 +368,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         tblChild.getColumnModel().getColumn(3).setPreferredWidth(70);
         tblChild.setTransferHandler(new FileDropHandler());
     }
-
+    
     private void getHeadFolder() {
         treeRoot.removeAllChildren();
         progress.setIndeterminate(true);
@@ -367,14 +378,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void getStorageInfo() {
         dmsRepo.getStorageInfo().doOnSuccess((t) -> {
             int total = Util1.getInteger(t.getTotalSpace() / 1024 / 1024);
             int used = Util1.getInteger(t.getUsedSpace() / 1024 / 1024);
         }).subscribe();
     }
-
+    
     private void addChildMenu(DefaultMutableTreeNode parent, List<CVFile> listVRM) {
         listVRM.forEach((menu) -> {
             if (menu.getChild() != null) {
@@ -392,7 +403,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         });
     }
-
+    
     private void searchChild(MouseEvent e) {
         if (e.getClickCount() == 1) {
 //            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
@@ -405,7 +416,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
 //            }
         }
     }
-
+    
     private void getFile(String parentId) {
         dmsRepo.getFile(parentId).doOnSuccess((t) -> {
             log.info(t.size() + "");
@@ -414,7 +425,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void getTrash() {
         progress.setIndeterminate(true);
         dmsRepo.getTrash().doOnSuccess((t) -> {
@@ -425,7 +436,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void setFileDetail(CVFile file) {
         if (file != null) {
             lastFile = file;
@@ -438,7 +449,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblCreated.setText(Util1.toDateStr(file.getCreatedDate(), "dd/MM/yyyy hh:mm:ss a"));
         }
     }
-
+    
     public ImageIcon getFileIcon(String extension) {
         if (extension == null) {
             return null;
@@ -456,7 +467,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void createFolder() {
         String input = JOptionPane.showInputDialog(this, "New Folder");
         if (!Util1.isNullOrEmpty(input)) {
@@ -474,7 +485,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void createFile() {
         FileDialog d = new FileDialog(Global.parentForm, "Choose CSV File", FileDialog.LOAD);
         d.setVisible(true);
@@ -484,11 +495,19 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         progress.setIndeterminate(true);
         dmsRepo.createFile(id, Path.of(directory)).doOnSuccess((t) -> {
             fileTableModel.addObjectFirst(t.getBody());
+            addOrderFileJoin(t.getBody());
         }).doOnTerminate(() -> {
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
+    private void addOrderFileJoin(CVFile file) {
+        OrderFileJoin fJ = OrderFileJoin.builder().build();
+        fJ.setFileId(file.getFileId());
+        fJ.setCompCode(Global.compCode);
+        orderDetail.add(fJ);
+    }
+    
     private void setFileInfo(MouseEvent e) {
         int count = e.getClickCount();
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
@@ -510,11 +529,11 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void showPopup(MouseEvent e) {
 //        newPopup.show(btnNew, e.getX(), e.getY());
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -523,13 +542,47 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void saveOrder() {
         if (isValidEntry()) {
-
+            progress.setIndeterminate(true);
+            orderNote = OrderNote.builder().build();
+            if (orderNote.getVouNo() == null) {
+                lblStatus.setText("New");
+                lblStatus.setForeground(Color.green);
+                orderNote.setVouNo(null);
+                orderNote.setCreatedBy(Global.loginUser.getUserCode());                
+                orderNote.setUpdatedBy(Global.loginUser.getUserCode());
+                orderNote.setCreatedDate(Util1.getTodayLocalDateTime());
+            } else {
+                lblStatus.setText("Edit");
+                orderNote.setUpdatedBy(Global.loginUser.getUserCode());
+            }
+            orderNote.setVouDate(Util1.convertToLocalDateTime(txtOrderDate.getDate()));
+            orderNote.setCompCode(Global.compCode);
+            orderNote.setDeptId(Global.deptId);
+            orderNote.setMacId(Global.macId);
+            orderNote.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            orderNote.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
+            orderNote.setOrderCode(txtOrderCode.getText());
+            orderNote.setOrderName(txtOrderName.getText());
+            orderNote.setDeleted(false);
+            orderNote.setDetailList(orderDetail);
+            inventoryRepo.save(orderNote).doOnSuccess((t) -> {
+                progress.setIndeterminate(false);
+//                if (print) {
+//                    printVoucher(t);
+//                } else {
+                clear(true);
+//                }
+            }).doOnError((e) -> {
+                observeMain();
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            }).subscribe();
         }
     }
-
+    
     private boolean isValidEntry() {
         if (lblStatus.getText().equals("DELETED")) {
             clear(true);
@@ -539,30 +592,31 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
             txtCus.requestFocus();
             return false;
+        } else if (stockAutoCompleter.getStock() == null) {
+            JOptionPane.showMessageDialog(this, "Choose Stock.",
+                    "No Trader.", JOptionPane.ERROR_MESSAGE);
+            txtCus.requestFocus();
+            return false;
         }
         return true;
     }
-
+    
     private void clear(boolean foucs) {
         disableForm(true);
-//        saleTableModel.removeListDetail();
-//        saleTableModel.clearDelList();
-//        saleTableModel.setChange(false);
-//        saleExpenseFrame.clear();
-//        initTextBoxValue();
-//        assignDefaultValue();
-//        saleHis = new SaleHis();
+        assignDefaultValue();
+        fileTableModel.clear();
+        orderNote = OrderNote.builder().build();
+        orderDetail = new ArrayList<>();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
-        txtRemark.setText(null);
-        txtReference.setText(null);
-//        projectAutoCompleter.setProject(null);
+        txtOrderCode.setText(null);
+        txtOrderName.setText(null);
         if (foucs) {
             txtCus.requestFocus();
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
@@ -585,9 +639,9 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         jLabel2 = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
-        txtRemark = new javax.swing.JTextField();
+        txtOrderCode = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        txtReference = new javax.swing.JTextField();
+        txtOrderName = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
@@ -660,26 +714,26 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         });
 
         jLabel21.setFont(Global.lableFont);
-        jLabel21.setText("Remark");
+        jLabel21.setText("Order Code");
 
-        txtRemark.setFont(Global.textFont);
-        txtRemark.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtRemark.setName("txtRemark"); // NOI18N
-        txtRemark.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtOrderCode.setFont(Global.textFont);
+        txtOrderCode.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtOrderCode.setName("txtOrderCode"); // NOI18N
+        txtOrderCode.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtRemarkFocusGained(evt);
+                txtOrderCodeFocusGained(evt);
             }
         });
 
         jLabel10.setFont(Global.lableFont);
-        jLabel10.setText("Reference");
+        jLabel10.setText("Order Name");
 
-        txtReference.setFont(Global.textFont);
-        txtReference.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtReference.setName("txtRemark"); // NOI18N
-        txtReference.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtOrderName.setFont(Global.textFont);
+        txtOrderName.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtOrderName.setName("txtRemark"); // NOI18N
+        txtOrderName.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtReferenceFocusGained(evt);
+                txtOrderNameFocusGained(evt);
             }
         });
 
@@ -713,24 +767,24 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtOrderDate, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                .addComponent(txtOrderDate, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtCus, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE)
+                .addComponent(txtCus)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtStock, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                .addComponent(txtStock)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE)
+                .addComponent(txtOrderCode)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtReference, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                .addGap(170, 170, 170))
+                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(txtOrderName)
+                .addGap(230, 230, 230))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -738,15 +792,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel21)
-                        .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel10))
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel2)
                         .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel3))
+                        .addComponent(jLabel3)
+                        .addComponent(txtOrderCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel21)
+                        .addComponent(txtOrderName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel10))
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(txtOrderDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -772,7 +825,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addComponent(lblPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -784,7 +837,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblPath, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblStatus))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -916,7 +969,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     .addComponent(lblCreated))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
-                .addContainerGap(56, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -982,14 +1035,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         //inventoryRepo.getCustomer().subscribe()
     }//GEN-LAST:event_txtCusActionPerformed
 
-    private void txtRemarkFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRemarkFocusGained
+    private void txtOrderCodeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtOrderCodeFocusGained
 
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtRemarkFocusGained
+    }//GEN-LAST:event_txtOrderCodeFocusGained
 
-    private void txtReferenceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtReferenceFocusGained
+    private void txtOrderNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtOrderNameFocusGained
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtReferenceFocusGained
+    }//GEN-LAST:event_txtOrderNameFocusGained
 
     private void txtStockFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockFocusGained
         // TODO add your handling code here:
@@ -1042,60 +1095,60 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel lblUpdate;
     private javax.swing.JTable tblChild;
     private javax.swing.JTextField txtCus;
+    private javax.swing.JTextField txtOrderCode;
     private com.toedter.calendar.JDateChooser txtOrderDate;
-    private javax.swing.JTextField txtReference;
-    private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtOrderName;
     private javax.swing.JTextField txtStock;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void selected(Object source, Object selectObj) {
     }
-
+    
     @Override
     public void save() {
         saveOrder();
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         getHeadFolder();
         getStorageInfo();
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObject = e.getSource();
@@ -1105,10 +1158,12 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         } else if (sourceObject instanceof JTextFieldDateEditor jTextFieldDateEditor) {
             controlName = jTextFieldDateEditor.getName();
         }
-
+        
         switch (controlName) {
             case "txtOrderDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String date = ((JTextFieldDateEditor) sourceObject).getText();
+                    txtOrderDate.setDate(Util1.formatDate(date));
                     txtCus.requestFocus();
                 }
             }
@@ -1119,14 +1174,15 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
             case "txtStock" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    txtRemark.requestFocus();
+                    txtOrderCode.requestFocus();
                 }
             }
             case "txtRemark" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    txtReference.requestFocus();
+                    txtOrderName.requestFocus();
                 }
             }
+            
         }
     }
 }

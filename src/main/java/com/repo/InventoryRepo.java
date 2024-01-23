@@ -103,6 +103,7 @@ import com.inventory.model.StockInOutDetail;
 import com.inventory.model.ConsignHisDetail;
 import com.inventory.model.ConsignHis;
 import com.inventory.model.ConsignHisKey;
+import com.inventory.model.OrderNote;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockPayment;
 import com.inventory.model.StockPaymentDetail;
@@ -3359,6 +3360,27 @@ public class InventoryRepo {
                                 JOptionPane.ERROR_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
                             return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<OrderNote> save(OrderNote sh) {
+        return inventoryApi.post()
+                .uri("/orderNote/saveOrderNote")
+                .body(Mono.just(sh), OrderNote.class)
+                .retrieve()
+                .bodyToMono(OrderNote.class)
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.ERROR_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+//                            return h2Repo.save(sh);
                         }
                         return Mono.error(e);
                     }
