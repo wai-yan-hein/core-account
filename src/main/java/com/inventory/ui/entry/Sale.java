@@ -902,7 +902,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
-
     }
 
     private void setAllLocation() {
