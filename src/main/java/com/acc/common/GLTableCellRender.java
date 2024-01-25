@@ -6,6 +6,7 @@
 package com.acc.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.Util1;
 import java.awt.Color;
 import java.awt.Component;
@@ -27,14 +28,12 @@ public class GLTableCellRender extends DefaultTableCellRenderer {
     private double crAmt = 0.0;
     private int row1;
     private int row2;
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT1);
-
-    public GLTableCellRender() {
-    }
+    private DecimalFormat formatter;
 
     public GLTableCellRender(int row1, int row2) {
         this.row1 = row1;
         this.row2 = row2;
+        formatter = ProUtil.getDecimalFormat();
     }
 
     @Override

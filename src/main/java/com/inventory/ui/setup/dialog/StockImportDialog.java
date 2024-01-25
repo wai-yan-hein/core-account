@@ -209,8 +209,6 @@ public class StockImportDialog extends javax.swing.JDialog {
                     t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
                     t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getDouble(r.get("SalePrice")) : Util1.getDouble("0"));
                     t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup"), t.getDeptId()) : "");
-                    t.setGroupName(r.isMapped("StockGroup") ? r.get("StockGroup") : "");
-                    t.setTypeCode(r.isMapped("GroupId") ? r.get("GroupId") : null);
                     log.info(t.getTypeCode());
                     t.setCatCode(r.isMapped("Category") ? getCategoryCode(r.get("Category"), t.getDeptId()) : "");
                     t.setCatName(r.isMapped("Category") ? Util1.convertToUniCode(r.get("Category")) : "");

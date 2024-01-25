@@ -62,9 +62,8 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -694,6 +693,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                         printLandingVoucher(t);
                     } else if (!Util1.isNullOrEmpty(weightVouNo)) {
                         printWeightVoucher(t);
+                    } else if (type == 5) {
+                        printFixVoucher(t);
                     } else {
                         printVoucher(t);
                     }
@@ -1120,6 +1121,22 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }).doOnTerminate(() -> {
             clear(false);
         }).subscribe();
+    }
+
+    private void printFixVoucher(PurHis ph) {
+        try {
+            String reportName = "PurchaseVoucherA5Bag";
+            List<PurHisDetail> detail = ph.getListPD().stream().filter((t) -> t.getStockCode() != null).toList();
+            Map<String, Object> param = getDefaultParam(ph);
+            String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+            ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(detail));
+            JsonDataSource ds = new JsonDataSource(stream);
+            JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+            JasperViewer.viewReport(jp, false);
+            clear(false);
+        } catch (HeadlessException | JRException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
     }
 
     private void printWeightVoucher(PurHis ph) {

@@ -84,7 +84,7 @@ public class ReportFilter {
     private String openingDate;
     private String deptCode;
     private String traderType;
-    private boolean closing;
+    private boolean netChange;
     private String tranSource;
     private String glVouNo;
     private boolean local;
@@ -94,7 +94,8 @@ public class ReportFilter {
     private String labourGroupCode;
     private String warehouseCode;
     private List<String> listCOAGroup;
-
+    private List<String> listPl;
+    private List<String> listBs;
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;

@@ -41,7 +41,7 @@ public class ChartOfAccount {
     @Column(name = "coa_parent")
     private String coaParent;
     @Column(name = "coa_option")
-    private String option;
+    private String coaOption;
     @Column(name = "coa_level")
     private Integer coaLevel;
     @Column(name = "coa_code_usr")
@@ -68,6 +68,7 @@ public class ChartOfAccount {
     private Integer sortOrderId;
     @Column(name = "bank_no")
     private String bankNo;
+    private String branchName;
     @Transient
     private String groupCode;
     @Transient
@@ -82,6 +83,8 @@ public class ChartOfAccount {
     private String headName;
     @Transient
     private List<ChartOfAccount> child;
+    @Transient
+    private String brandName;
 
     public ChartOfAccount(COAKey key, String coaNameEng) {
         this.key = key;

@@ -4,7 +4,7 @@
  */
 package com.ui.management;
 
-import com.common.ColorCellRender;
+import com.common.ColumnColorCellRenderer;
 import com.common.ComponentUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -112,15 +112,15 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         tblBalance.getColumnModel().getColumn(11).setPreferredWidth(20);//out
         tblBalance.getColumnModel().getColumn(12).setPreferredWidth(20);//cl
         tblBalance.getColumnModel().getColumn(13).setPreferredWidth(40);//cl
-        tblBalance.getColumnModel().getColumn(4).setCellRenderer(new ColorCellRender(Color.green));
-        tblBalance.getColumnModel().getColumn(5).setCellRenderer(new ColorCellRender(Color.green));
-        tblBalance.getColumnModel().getColumn(6).setCellRenderer(new ColorCellRender(Color.green));
-        tblBalance.getColumnModel().getColumn(7).setCellRenderer(new ColorCellRender(Color.green));
+        tblBalance.getColumnModel().getColumn(4).setCellRenderer(new ColumnColorCellRenderer(Color.green));
+        tblBalance.getColumnModel().getColumn(5).setCellRenderer(new ColumnColorCellRenderer(Color.green));
+        tblBalance.getColumnModel().getColumn(6).setCellRenderer(new ColumnColorCellRenderer(Color.green));
+        tblBalance.getColumnModel().getColumn(7).setCellRenderer(new ColumnColorCellRenderer(Color.green));
 
-        tblBalance.getColumnModel().getColumn(8).setCellRenderer(new ColorCellRender(Color.red));
-        tblBalance.getColumnModel().getColumn(9).setCellRenderer(new ColorCellRender(Color.red));
-        tblBalance.getColumnModel().getColumn(10).setCellRenderer(new ColorCellRender(Color.red));
-        tblBalance.getColumnModel().getColumn(11).setCellRenderer(new ColorCellRender(Color.red));
+        tblBalance.getColumnModel().getColumn(8).setCellRenderer(new ColumnColorCellRenderer(Color.red));
+        tblBalance.getColumnModel().getColumn(9).setCellRenderer(new ColumnColorCellRenderer(Color.red));
+        tblBalance.getColumnModel().getColumn(10).setCellRenderer(new ColumnColorCellRenderer(Color.red));
+        tblBalance.getColumnModel().getColumn(11).setCellRenderer(new ColumnColorCellRenderer(Color.red));
 
     }
 

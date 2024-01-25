@@ -39,6 +39,7 @@ import com.inventory.ui.common.ReportTableModel;
 import com.repo.UserRepo;
 import com.ui.management.model.ClosingBalance;
 import com.user.editor.CurrencyAutoCompleter;
+import com.user.editor.DepartmentUserAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import cv.api.common.StockValue;
@@ -101,6 +102,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private ProjectAutoCompleter projectAutoCompleter;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private WareHouseAutoCompleter wareHouseAutoCompleter;
+    private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private ReportFilter filter;
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -263,6 +265,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
             labourGroupAutoCompleter.setListObject(t);
         }).subscribe();
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setListDepartment(t);
+        }).subscribe();
     }
 
     private void initCombo() {
@@ -286,6 +291,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, true);
         labourGroupAutoCompleter.setObserver(this);
         wareHouseAutoCompleter = new WareHouseAutoCompleter(txtWH, null, true);
+        departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
+        departmentUserAutoCompleter.setObserver(this);
     }
 
     private void report(boolean excel) {
@@ -323,6 +330,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
                     filter.setWarehouseCode(wareHouseAutoCompleter.getObject().getKey().getCode());
                     filter.setLabourGroupCode(labourGroupAutoCompleter.getObject().getKey().getCode());
+                    filter.setDeptId(departmentUserAutoCompleter.getDepartment().getKey().getDeptId());
                     filter.setCalSale(Util1.getBoolean(ProUtil.isDisableSale()));
                     filter.setCalPur(Util1.getBoolean(ProUtil.isDisablePur()));
                     filter.setCalRI(Util1.getBoolean(ProUtil.isDisableRetIn()));
@@ -348,6 +356,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     param.put("p_location", txtLocation.getText());
                     param.put("p_logo_path", ProUtil.logoPath());
                     param.put("p_divider", new BigDecimal(Util1.getFloatOne(ProUtil.getProperty(ProUtil.DIVIDER))));
+                    param.put("p_dep_name", txtDep.getText());
                     printReport(reportUrl, reportUrl, param, excel);
                 }
                 isReport = false;
@@ -611,6 +620,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtLG = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
         txtWH = new javax.swing.JTextField();
+        jLabel21 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         txtFilter = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
@@ -843,6 +854,20 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             }
         });
 
+        jLabel21.setFont(Global.lableFont);
+        jLabel21.setText("Department");
+
+        txtDep.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDepFocusGained(evt);
+            }
+        });
+        txtDep.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtDepKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -863,7 +888,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel17)
-                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel21, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -894,7 +920,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel20)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)))
+                        .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE))
+                    .addComponent(txtDep))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -914,6 +941,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         .addComponent(txtFromDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtToDueDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtDep)
+                    .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtTrader)
@@ -1274,6 +1305,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         // TODO add your handling code here:
     }//GEN-LAST:event_txtWHKeyReleased
 
+    private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepFocusGained
+
+    private void txtDepKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtDepKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExcel;
@@ -1291,6 +1330,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1310,6 +1350,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JTextField txtCategory;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtDate;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private com.toedter.calendar.JDateChooser txtFromDueDate;

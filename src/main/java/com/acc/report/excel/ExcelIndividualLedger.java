@@ -146,7 +146,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
     private void searchCOA() {
         progress.setIndeterminate(true);
-        accountRepo.getChartOfAccount().doOnSuccess((t) -> {
+        accountRepo.getChartOfAccount(3).doOnSuccess((t) -> {
             selectCOA(t);
             progress.setIndeterminate(false);
         }).doOnError((e) -> {

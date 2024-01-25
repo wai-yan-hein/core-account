@@ -231,6 +231,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     public void search() {
+        setVisible(true);
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
@@ -269,7 +270,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     tblVoucher.requestFocus();
-                    setVisible(true);
+                   // setVisible(true);
                 }).subscribe();
 
     }
@@ -312,10 +313,21 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
     }
 
+    private VSale getSale(int row) {
+        return switch (type) {
+            case 1 ->
+                saleVouTableModel.getSelectVou(row);
+            case 2 ->
+                salePaddySearchTableModel.getSelectVou(row);
+            default ->
+                null;
+        };
+    }
+
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VSale his = saleVouTableModel.getSelectVou(row);
+            VSale his = getSale(row);
             his.setLocal(chkLocal.isSelected());
             observer.selected("SALE-HISTORY", his);
             setVisible(false);
@@ -328,7 +340,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private void print() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VSale his = saleVouTableModel.getSelectVou(row);
+            VSale his = getSale(row);
             his.setLocal(chkLocal.isSelected());
             observer.selected("PRINT", his);
         } else {

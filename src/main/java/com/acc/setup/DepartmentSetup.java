@@ -64,7 +64,6 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -239,35 +238,36 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     private void saveDepartment() {
-        DepartmentA dep = new DepartmentA();
-        DepartmentAKey key = new DepartmentAKey();
-        key.setCompCode(Global.compCode);
-        key.setDeptCode(txtSystemCode.getText());
-        dep.setKey(key);
-        dep.setDeptName(txtName.getText());
-        dep.setUserCode(txtUserCode.getText());
-        dep.setActive(chkActive.isSelected());
-        dep.setMacId(Global.macId);
-        if (isValidDepartment(dep)) {
-            progress.setIndeterminate(true);
-            observer.selected("save", false);
-            accountRepo.saveDepartment(dep).subscribe((t) -> {
-                if (t != null) {
-                    selectedNode.setUserObject(t);
-                    TreePath path = treeDep.getSelectionPath();
-                    DefaultTreeModel model = (DefaultTreeModel) treeDep.getModel();
-                    model.nodeChanged(selectedNode);
-                    treeDep.setSelectionPath(path);
-                    setEnabledControl(false);
-                    clear();
-                    sendMessage(dep.getDeptName());
-                }
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                observer.selected("save", true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+        if (selectedNode.getUserObject() instanceof DepartmentA dep) {
+            DepartmentAKey key = new DepartmentAKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptCode(txtSystemCode.getText());
+            dep.setKey(key);
+            dep.setDeptName(txtName.getText());
+            dep.setUserCode(txtUserCode.getText());
+            dep.setActive(chkActive.isSelected());
+            dep.setMacId(Global.macId);
+            if (isValidDepartment(dep)) {
+                progress.setIndeterminate(true);
+                observer.selected("save", false);
+                accountRepo.saveDepartment(dep).doOnSuccess((t) -> {
+                    if (t != null) {
+                        selectedNode.setUserObject(t);
+                        TreePath path = treeDep.getSelectionPath();
+                        DefaultTreeModel model = (DefaultTreeModel) treeDep.getModel();
+                        model.nodeChanged(selectedNode);
+                        treeDep.setSelectionPath(path);
+                        setEnabledControl(false);
+                        clear();
+                        sendMessage(dep.getDeptName());
+                    }
+                }).doOnError((e) -> {
+                    progress.setIndeterminate(false);
+                    observer.selected("save", true);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }).subscribe();
 
+            }
         }
     }
 

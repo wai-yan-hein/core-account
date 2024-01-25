@@ -280,7 +280,7 @@ public class COAGroupTableModel extends AbstractTableModel {
                 coa.setCreatedBy(Global.loginUser.getUserCode());
                 coa.setCreatedDate(LocalDateTime.now());
                 coa.setMacId(Global.macId);
-                coa.setOption("USR");
+                coa.setCoaOption("USR");
             } else {
                 coa.setModifiedBy(Global.loginUser.getUserCode());
             }

@@ -294,7 +294,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void initStockIOPaddy() {
-        paddyTableModel.setVouDate(txtDate);
         paddyTableModel.setInventoryRepo(inventoryRepo);
         paddyTableModel.setLblRec(lblRec);
         paddyTableModel.addNewRow();

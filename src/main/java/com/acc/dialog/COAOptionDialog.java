@@ -68,7 +68,7 @@ public class COAOptionDialog extends javax.swing.JDialog implements SelectionObs
     }
 
     public void searchCOA() {
-        accountRepo.getCOAByGroup("-").doOnSuccess((t) -> {
+        accountRepo.getChartOfAccount(2).doOnSuccess((t) -> {
             tableModel.setListCOA(t);
         }).doOnTerminate(() -> {
             setVisible(true);

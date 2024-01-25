@@ -52,7 +52,7 @@ public class StockType {
     @Column(name = "active")
     private boolean active;
     @Column(name = "group_type")
-    private int groupType;
+    private Integer groupType;
 
     public StockType() {
     }

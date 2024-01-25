@@ -433,7 +433,9 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             }
         });
 
+        btnEntry.setBackground(Global.selectionColor);
         btnEntry.setFont(Global.lableFont);
+        btnEntry.setForeground(new java.awt.Color(255, 255, 255));
         btnEntry.setText("New Journal");
         btnEntry.setToolTipText("New Journal");
         btnEntry.setName("btnEntry"); // NOI18N

@@ -98,19 +98,10 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         initComponents();
         initKeyListener();
         keyMapping();
-        ComponentUtil.setTextProperty(panelFooter);
     }
 
     private void batchLock(boolean lock) {
-        tblJournal.setEnabled(lock);
-        btnSave.setEnabled(lock);
-        txtVouDate.setEnabled(lock);
-        txtRefrence.setEnabled(lock);
-        btnSave.setEnabled(lock);
-        btnPrint.setEnabled(lock);
-        txtNa.setEnabled(lock);
-        txtFor.setEnabled(lock);
-        txtFrom.setEnabled(lock);
+        ComponentUtil.enableForm(this, lock);
     }
 
     private void keyMapping() {
@@ -127,9 +118,14 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     public void initMain() {
         batchLock(!Global.batchLock);
+        initTextBox();
         initCompleter();
         initTable();
         initRowHeader();
+    }
+
+    private void initTextBox() {
+        ComponentUtil.setTextProperty(panelFooter);
     }
 
     private void initRowHeader() {

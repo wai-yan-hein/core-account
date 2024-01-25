@@ -17,6 +17,7 @@ import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.model.DateModel;
 import com.acc.model.Gl;
 import com.acc.model.TmpOpening;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReportFilter;
@@ -25,6 +26,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.repo.UserRepo;
 import com.user.model.Currency;
+import java.awt.Component;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
@@ -149,19 +151,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private void initKeyListener() {
-        txtDesp.addFocusListener(fa);
-        txtReference.addFocusListener(fa);
-        txtDate.addFocusListener(fa);
-        txtDep.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
@@ -191,11 +182,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private void initFormat() {
-        txtOpening.setFormatterFactory(Util1.getDecimalFormat1());
-        txtClosing.setFormatterFactory(Util1.getDecimalFormat1());
-        txtDrAmt.setFormatterFactory(Util1.getDecimalFormat1());
-        txtCrAmt.setFormatterFactory(Util1.getDecimalFormat1());
-        txtNetChange.setFormatterFactory(Util1.getDecimalFormat1());
+        ComponentUtil.setTextProperty(this);
     }
 
     private List<String> getListDep() {
@@ -225,7 +212,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             progress.setIndeterminate(false);
         }).doOnTerminate(() -> {
             getOpening().doOnSuccess((t) -> {
-                double opAmt = Util1.getDouble(t.getOpening());
+                double opAmt = t == null ? 0 : t.getOpening();
                 double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
                 double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
                 double closingAmt = opAmt + drAmt - crAmt;
