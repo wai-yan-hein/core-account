@@ -141,6 +141,7 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void search() {
+        setVisible(true);
         progress.setIndeterminate(true);
         tableModel.clear();
         txtTotalRecord.setValue(0);
@@ -166,13 +167,11 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                })
-                .doOnTerminate(() -> {
-                    progress.setIndeterminate(false);
-                    btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
-                    setVisible(true);
-                }).subscribe();
+                }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+            btnSearch.setEnabled(true);
+            tblVoucher.requestFocus();
+        }).subscribe();
     }
 
     private void calTotal() {

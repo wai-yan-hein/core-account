@@ -146,19 +146,7 @@ public class COAManagment extends javax.swing.JPanel implements
         multiCurrency();
         initTree();
         initCombo();
-        initText();
     }
-
-    private void initText() {
-        try {
-            MaskFormatter maskFormatter = new MaskFormatter("####-####-####-#####");
-            DefaultFormatterFactory formatterFactory = new DefaultFormatterFactory(maskFormatter);
-            txtNo.setFormatterFactory(formatterFactory);
-        } catch (ParseException ex) {
-            log.error("initText: " + ex.getMessage());
-        }
-    }
-
     private void batchLock(boolean lock) {
         ComponentUtil.enableForm(this, lock);
         observer.selected("save", lock);
@@ -232,13 +220,14 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setCoaLevel(level);
                 coa.setModifiedBy(Global.loginUser.getUserCode());
                 coa.setModifiedDate(LocalDateTime.now());
-                coa.setOption(option);
+                coa.setCoaOption(option);
                 coa.setActive(chkActive.isSelected());
                 coa.setMarked(chkDefault.isSelected());
                 coa.setCredit(chkCredit.isSelected());
                 coa.setCurCode(Util1.isNull(txtCurrency.getText(), null));
                 coa.setMacId(Global.macId);
                 coa.setBankNo(txtNo.getText());
+                coa.setBranchName(txtBranch.getText());
                 progress.setIndeterminate(true);
                 observer.selected("save", false);
                 accountRepo.saveCOA(coa).doOnSuccess((t) -> {
@@ -398,7 +387,8 @@ public class COAManagment extends javax.swing.JPanel implements
         txtCurrency.setText(coa.getCurCode());
         chkDefault.setSelected(coa.isMarked());
         chkCredit.setSelected(coa.isCredit());
-        txtNo.setValue(coa.getBankNo());
+        txtNo.setText(coa.getBankNo());
+        txtBranch.setText(coa.getBranchName());
         lblStatus.setText("EDIT");
         if (coa.getCoaLevel() != null) {
             if (coa.getCoaLevel() == 3) {
@@ -418,7 +408,8 @@ public class COAManagment extends javax.swing.JPanel implements
         txtUsrCode.setText(null);
         chkActive.setSelected(false);
         txtCurrency.setText(null);
-        txtNo.setValue(null);
+        txtNo.setText(null);
+        txtBranch.setText(null);
         treeCOA.requestFocus();
         chkCredit.setSelected(false);
         coa = new ChartOfAccount();
@@ -508,7 +499,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 key.setCompCode(Global.compCode);
                 coa.setKey(key);
                 coa.setCoaCodeUsr(userCode);
-                coa.setOption("USR");
+                coa.setCoaOption("USR");
                 coa.setCoaLevel(3);
                 coa.setCoaParent(parentCode);
                 coa.setCoaNameEng(getZawgyiText(coaName));
@@ -577,7 +568,7 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void searchCOAStandard() {
         log.info("searchCOAStandard");
-        accountRepo.getChartOfAccount().subscribe((t) -> {
+        accountRepo.getChartOfAccount(3).subscribe((t) -> {
             standardCOATableModel.setListCOA(t);
         }, (e) -> {
             log.error("searchCOAStandard : " + e.getMessage());
@@ -586,7 +577,7 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void searchCOAView() {
         log.info("searchCOAView");
-        accountRepo.getChartOfAccount().subscribe((t) -> {
+        accountRepo.getChartOfAccount(3).subscribe((t) -> {
             cOAViewTableModel.setListCOA(t);
             txtRecord.setValue(t.size());
         }, (e) -> {
@@ -643,7 +634,9 @@ public class COAManagment extends javax.swing.JPanel implements
         chkDefault = new javax.swing.JCheckBox();
         chkCredit = new javax.swing.JCheckBox();
         lblCurrency1 = new javax.swing.JLabel();
-        txtNo = new javax.swing.JFormattedTextField();
+        lblCurrency2 = new javax.swing.JLabel();
+        txtNo = new javax.swing.JTextField();
+        txtBranch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         treeCOA = new javax.swing.JTree();
         jPanel2 = new javax.swing.JPanel();
@@ -819,10 +812,28 @@ public class COAManagment extends javax.swing.JPanel implements
         });
 
         lblCurrency1.setFont(Global.lableFont);
-        lblCurrency1.setText("Bank No");
+        lblCurrency1.setText("Acc / No");
 
-        txtNo.setEditable(false);
+        lblCurrency2.setFont(Global.lableFont);
+        lblCurrency2.setText("Branch");
+
         txtNo.setFont(Global.textFont);
+        txtNo.setEnabled(false);
+        txtNo.setName("txtName"); // NOI18N
+        txtNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtNoFocusGained(evt);
+            }
+        });
+
+        txtBranch.setFont(Global.textFont);
+        txtBranch.setEnabled(false);
+        txtBranch.setName("txtName"); // NOI18N
+        txtBranch.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtBranchFocusGained(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -839,8 +850,9 @@ public class COAManagment extends javax.swing.JPanel implements
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblCurrency1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(lblCurrency1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblCurrency2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName)
                             .addComponent(txtUsrCode)
@@ -852,8 +864,9 @@ public class COAManagment extends javax.swing.JPanel implements
                                 .addComponent(chkDefault)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(chkCredit)
-                                .addGap(0, 16, Short.MAX_VALUE))
-                            .addComponent(txtNo)))
+                                .addGap(0, 22, Short.MAX_VALUE))
+                            .addComponent(txtNo, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtBranch, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -887,6 +900,10 @@ public class COAManagment extends javax.swing.JPanel implements
                     .addComponent(txtNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblCurrency2)
+                    .addComponent(txtBranch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkActive)
                     .addComponent(lblStatus)
                     .addComponent(chkDefault)
@@ -897,7 +914,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 .addComponent(panelMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addContainerGap(73, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
 
         treeCOA.setFont(Global.textFont);
@@ -1187,6 +1204,14 @@ public class COAManagment extends javax.swing.JPanel implements
         // TODO add your handling code here:
     }//GEN-LAST:event_chkCreditActionPerformed
 
+    private void txtNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNoFocusGained
+
+    private void txtBranchFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBranchFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBranchFocusGained
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
@@ -1209,6 +1234,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel lblCurrency;
     private javax.swing.JLabel lblCurrency1;
+    private javax.swing.JLabel lblCurrency2;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panel1;
     private javax.swing.JPanel panelMenu;
@@ -1216,11 +1242,12 @@ public class COAManagment extends javax.swing.JPanel implements
     private javax.swing.JTable tblCOA;
     private javax.swing.JTable tblStandCOA;
     private javax.swing.JTree treeCOA;
+    private javax.swing.JTextField txtBranch;
     private javax.swing.JTextField txtCOASearch;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtMenu;
     private javax.swing.JTextField txtName;
-    private javax.swing.JFormattedTextField txtNo;
+    private javax.swing.JTextField txtNo;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtSysCode;
     private javax.swing.JTextField txtUsrCode;

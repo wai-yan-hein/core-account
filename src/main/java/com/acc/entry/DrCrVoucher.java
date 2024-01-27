@@ -268,7 +268,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 filter.setListDepartment(getListDep());
                 filter.setCoaCode(coa.getKey().getCoaCode());
                 accountRepo.getOpening(filter).doOnSuccess((t) -> {
-                    txtOpening.setValue(t.getOpening());
+                    txtOpening.setValue(t == null ? 0 : t.getOpening());
                 }).doOnTerminate(() -> {
                     calculateClosing();
                     progress.setIndeterminate(false);

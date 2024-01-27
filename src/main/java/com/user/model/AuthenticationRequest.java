@@ -17,5 +17,6 @@ public class AuthenticationRequest {
 
     private String serialNo;
     private String password;
+    
 
 }

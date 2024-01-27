@@ -9,16 +9,15 @@ import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
+@Slf4j
 public class GLListingTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(GLListingTableModel.class);
     private List<VTriBalance> listTBal = new ArrayList();
     private String[] columnNames = {"Code", "Chart Of Account", "Currency", "Dr-Amt", "Cr-Amt"};
 
@@ -61,10 +60,10 @@ public class GLListingTableModel extends AbstractTableModel {
                     return apar.getCurCode();
                 }
                 case 3 -> {
-                    return Util1.getDouble(apar.getDrAmt()) == 0 ? null : apar.getDrAmt();
+                    return Util1.toNull(apar.getDrAmt());
                 }
                 case 4 -> {
-                    return Util1.getDouble(apar.getCrAmt()) == 0 ? null : apar.getCrAmt();
+                    return Util1.toNull(apar.getCrAmt());
 
                 }
             }

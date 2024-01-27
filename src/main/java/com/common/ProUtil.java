@@ -7,7 +7,9 @@ package com.common;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
@@ -316,6 +318,24 @@ public class ProUtil {
             default ->
                 new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(Util1.DECIMAL_FORMAT)));
         };
+    }
+
+    public static List<String> getListPl() {
+        List<String> list = new ArrayList<>();
+        list.add(getProperty(INCOME));
+        list.add(getProperty(OTHER_INCOME));
+        list.add(getProperty(PURCHASE));
+        list.add(getProperty(EXPENSE));
+        return list;
+    }
+
+    public static List<String> getListBS() {
+        List<String> list = new ArrayList<>();
+        list.add(getProperty(FIXED));
+        list.add(getProperty(CURRENT));
+        list.add(getProperty(LIA));
+        list.add(getProperty(CAPITAL));
+        return list;
     }
 
     public static DecimalFormat getDecimalFormat() {

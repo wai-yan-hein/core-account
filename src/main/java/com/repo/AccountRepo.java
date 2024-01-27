@@ -136,12 +136,13 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<ChartOfAccount>> getChartOfAccount() {
+    public Mono<List<ChartOfAccount>> getChartOfAccount(Integer coaLevel) {
         if (localDatabase) {
             return h2Repo.getChartofAccount().collectList();
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCoa")
+                .queryParam("coaLevel", coaLevel)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -453,11 +454,9 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToFlux(ChartOfAccount.class)
                 .onErrorResume((e) -> {
-                    log.error(
-                            "getCOAByHead : " + e.getMessage());
+                    log.error("getCOAByHead : " + e.getMessage());
                     return Mono.empty();
-                }
-                )
+                })
                 .collectList();
     }
 
@@ -554,7 +553,7 @@ public class AccountRepo {
                 .onErrorResume((e) -> {
                     log.info("getOpening " + e.getMessage());
                     return Mono.empty();
-                });
+                }).defaultIfEmpty(new TmpOpening());
     }
 
     public Mono<StockOP> save(StockOP op) {
@@ -615,7 +614,6 @@ public class AccountRepo {
     public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
         if (localDatabase) {
             return h2Repo.searchCOA(str, level);
-
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/searchCOA")

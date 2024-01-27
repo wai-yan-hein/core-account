@@ -26,6 +26,7 @@ import com.inventory.model.VStockIO;
 import com.inventory.model.VouStatus;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIOVouSearchTableModel;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -88,9 +89,18 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
 
     public void initMain() {
         ComponentUtil.addFocusListener(panelFilter);
+        initTextBox();
         initTableVoucher();
         setTodayDate();
         initCombo();
+    }
+
+    private void initTextBox() {
+        ComponentUtil.setTextProperty(panelFoot);
+        txtInQty.setForeground(Color.green);
+        txtInBag.setForeground(Color.green);
+        txtOutBag.setForeground(Color.red);
+        txtOutQty.setForeground(Color.red);
     }
 
     private void initCombo() {
@@ -121,13 +131,15 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
-        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
+        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);//vouno
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
-        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(50);
+        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(100);
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
-        tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);
@@ -158,6 +170,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     public void search() {
+        setVisible(true);
         progress.setIndeterminate(true);
         txtRecord.setValue(0);
         tableModel.clear();
@@ -178,6 +191,10 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             filter.setJobNo(getJob().getKey().getJobNo());
         }
         txtRecord.setValue(0);
+        txtInBag.setValue(0);
+        txtInQty.setValue(0);
+        txtOutQty.setValue(0);
+        txtOutBag.setValue(0);
         inventoryRepo.getStockIO(filter)
                 .doOnNext(obj -> btnSearch.setEnabled(false))
                 .doOnNext(tableModel::addObject)
@@ -186,19 +203,19 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                })
-                .doOnTerminate(() -> {
-                    progress.setIndeterminate(false);
-                    btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
-                    setVisible(true);
-                })
-                .subscribe();
-
+                }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+            btnSearch.setEnabled(true);
+            tblVoucher.requestFocus();
+        }).subscribe();
     }
 
     private void calTotal() {
         txtRecord.setValue(tableModel.getSize());
+        txtInQty.setValue(tableModel.getInQty());
+        txtInBag.setValue(tableModel.getInBag());
+        txtOutQty.setValue(tableModel.getOutQty());
+        txtOutBag.setValue(tableModel.getOutBag());
     }
 
     private void select() {
@@ -291,11 +308,18 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         progress = new javax.swing.JProgressBar();
         txtFilter = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        btnSearch = new javax.swing.JButton();
-        btnSelect = new javax.swing.JButton();
+        panelFoot = new javax.swing.JPanel();
         lblTtlRecord = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
+        lblTtlRecord1 = new javax.swing.JLabel();
+        txtInQty = new javax.swing.JFormattedTextField();
+        lblTtlRecord2 = new javax.swing.JLabel();
+        txtInBag = new javax.swing.JFormattedTextField();
+        txtOutQty = new javax.swing.JFormattedTextField();
+        lblTtlRecord3 = new javax.swing.JLabel();
+        txtOutBag = new javax.swing.JFormattedTextField();
+        lblTtlRecord4 = new javax.swing.JLabel();
+        btnSearch = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock In/Out Voucher Search Dialog");
@@ -586,25 +610,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Search Bar");
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        btnSearch.setFont(Global.lableFont);
-        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
-        btnSearch.setText("Search");
-        btnSearch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
-            }
-        });
-
-        btnSelect.setFont(Global.lableFont);
-        btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
-        btnSelect.setText("Select");
-        btnSelect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSelectActionPerformed(evt);
-            }
-        });
+        panelFoot.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Total Record :");
@@ -613,36 +619,88 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtRecord.setFont(Global.amtFont);
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        lblTtlRecord1.setFont(Global.lableFont);
+        lblTtlRecord1.setText("In Qty :");
+
+        txtInQty.setEditable(false);
+        txtInQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtInQty.setFont(Global.amtFont);
+
+        lblTtlRecord2.setFont(Global.lableFont);
+        lblTtlRecord2.setText("In Bag :");
+
+        txtInBag.setEditable(false);
+        txtInBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtInBag.setFont(Global.amtFont);
+
+        txtOutQty.setEditable(false);
+        txtOutQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtOutQty.setFont(Global.amtFont);
+
+        lblTtlRecord3.setFont(Global.lableFont);
+        lblTtlRecord3.setText("Out Qty :");
+
+        txtOutBag.setEditable(false);
+        txtOutBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtOutBag.setFont(Global.amtFont);
+
+        lblTtlRecord4.setFont(Global.lableFont);
+        lblTtlRecord4.setText("Out Bag :");
+
+        javax.swing.GroupLayout panelFootLayout = new javax.swing.GroupLayout(panelFoot);
+        panelFoot.setLayout(panelFootLayout);
+        panelFootLayout.setHorizontalGroup(
+            panelFootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFootLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnSearch)
+                .addComponent(txtRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSelect)
+                .addComponent(lblTtlRecord1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtInQty)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtInBag)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtOutQty)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtOutBag)
                 .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        panelFootLayout.setVerticalGroup(
+            panelFootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFootLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblTtlRecord)
-                                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(btnSearch))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(btnSelect, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addGroup(panelFootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTtlRecord)
+                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlRecord1)
+                    .addComponent(txtInQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlRecord2)
+                    .addComponent(txtInBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtOutQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlRecord3)
+                    .addComponent(txtOutBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlRecord4))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        btnSearch.setBackground(Global.selectionColor);
+        btnSearch.setFont(Global.lableFont);
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -656,12 +714,14 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                         .addComponent(panelFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter))
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addComponent(txtFilter)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSearch))
+                            .addComponent(panelFoot, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -674,11 +734,13 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
+                            .addComponent(jLabel1)
+                            .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(panelFoot, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
                     .addComponent(panelFilter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
@@ -689,10 +751,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         search();
 
     }//GEN-LAST:event_btnSearchActionPerformed
-
-    private void btnSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectActionPerformed
-        select();
-    }//GEN-LAST:event_btnSelectActionPerformed
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         if (evt.getClickCount() == 2) {
@@ -768,7 +826,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
-    private javax.swing.JButton btnSelect;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
@@ -784,20 +841,28 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JLabel lblTtlRecord;
+    private javax.swing.JLabel lblTtlRecord1;
+    private javax.swing.JLabel lblTtlRecord2;
+    private javax.swing.JLabel lblTtlRecord3;
+    private javax.swing.JLabel lblTtlRecord4;
     private javax.swing.JPanel panelFilter;
+    private javax.swing.JPanel panelFoot;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtDesp;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JFormattedTextField txtInBag;
+    private javax.swing.JFormattedTextField txtInQty;
     private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLocation;
+    private javax.swing.JFormattedTextField txtOutBag;
+    private javax.swing.JFormattedTextField txtOutQty;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;

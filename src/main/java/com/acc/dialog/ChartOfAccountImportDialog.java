@@ -109,7 +109,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                     coa.setCreatedBy(Global.loginUser.getUserCode());
                     coa.setCreatedDate(LocalDateTime.now());
                     coa.setModifiedDate(LocalDateTime.now());
-                    coa.setOption("USR");
+                    coa.setCoaOption("USR");
                     if (coaParent != null) {
                         coa.setCoaParent(coaParent.getKey().getCoaCode());
                         coa.setCoaLevel(coaParent.getCoaLevel() + 1);
@@ -130,7 +130,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                 hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
-        List<ChartOfAccount> list = accountRepo.getChartOfAccount().block();
+        List<ChartOfAccount> list = accountRepo.getChartOfAccount(3).block();
         list.forEach((t) -> {
             hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
         });
@@ -166,7 +166,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                     coa.setCreatedBy(Global.loginUser.getUserCode());
                     coa.setMacId(Global.macId);
                     coa.setCoaLevel(Util1.getInteger(txtLevel.getText()));
-                    coa.setOption("USR");
+                    coa.setCoaOption("USR");
                     listCOA.add(coa);
                 }
             }

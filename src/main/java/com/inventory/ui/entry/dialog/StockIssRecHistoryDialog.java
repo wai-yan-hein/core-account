@@ -140,6 +140,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
     }
 
     public void search() {
+        setVisible(true);
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -164,14 +165,11 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                })
-                .doOnTerminate(() -> {
-                    progress.setIndeterminate(false);
-                    btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
-                    setVisible(true);
-                })
-                .subscribe();
+                }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+            btnSearch.setEnabled(true);
+            tblVoucher.requestFocus();
+        }).subscribe();
 
     }
 

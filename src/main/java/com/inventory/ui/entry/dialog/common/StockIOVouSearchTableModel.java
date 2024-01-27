@@ -5,14 +5,12 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.VStockIO;
-import com.inventory.model.VTransfer;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,13 +21,17 @@ import lombok.extern.slf4j.Slf4j;
 public class StockIOVouSearchTableModel extends AbstractTableModel {
 
     private List<VStockIO> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Description", "Remark", "Voucher Type", "Created By"};
-    private JTable parent;
+    private final String[] columnNames = {"Date", "Vou No", "Description", "Remark", "Voucher Type", "In Qty", "Out Qty"};
+    @Getter
     private int size;
-
-    public int getSize() {
-        return size;
-    }
+    @Getter
+    private double inBag;
+    @Getter
+    private double inQty;
+    @Getter
+    private double outBag;
+    @Getter
+    private double outQty;
 
     @Override
     public String getColumnName(int column) {
@@ -53,7 +55,12 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return String.class;
+        return switch (column) {
+            case 5, 6 ->
+                Double.class;
+            default ->
+                String.class;
+        };
     }
 
     @Override
@@ -87,7 +94,11 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
                 }
                 case 5 -> {
                     //v-total
-                    return Global.hmUser.get(his.getCreatedBy());
+                    return his.getInQty();
+                }
+                case 6 -> {
+                    //v-total
+                    return his.getOutQty();
                 }
             }
         } catch (Exception ex) {
@@ -112,6 +123,10 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     public void addObject(VStockIO t) {
         listDetail.add(t);
         size += 1;
+        inBag += t.getInBag();
+        inQty += t.getInQty();
+        outBag += t.getOutBag();
+        outQty += t.getOutQty();
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
             fireTableRowsInserted(lastIndex, lastIndex);
@@ -123,6 +138,10 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     public void clear() {
         listDetail.clear();
         size = 0;
+        inBag = 0;
+        inQty = 0;
+        outBag = 0;
+        outQty = 0;
         fireTableDataChanged();
     }
 }

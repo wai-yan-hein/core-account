@@ -179,6 +179,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
                     filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
                     filter.setCashGroup(ProUtil.getProperty("cash.group"));
+                    filter.setListCOAGroup(dialog == null ? null : dialog.getSelectCOA());
                     log.info("Report Date : " + stDate + " - " + enDate);
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
@@ -218,6 +219,12 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             if (cOA3AutoCompleter.getCOA().getKey().getCoaCode().equals("-")) {
                 JOptionPane.showMessageDialog(this, "Please select COA.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
                 txtCOA.requestFocus();
+                return false;
+            }
+        } else if (url.equals("CashBankSummary")) {
+            if (dialog == null || dialog.getSelectCOA().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Select COA Group.");
+                btnGroup.requestFocus();
                 return false;
             }
         }
@@ -347,7 +354,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         txtCOA = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        btnGroup = new javax.swing.JButton();
         lable2 = new javax.swing.JLabel();
         lblTime = new javax.swing.JLabel();
         lblMessage = new javax.swing.JLabel();
@@ -458,13 +465,13 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             }
         });
 
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("COA Group");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnGroup.setBackground(Global.selectionColor);
+        btnGroup.setFont(Global.lableFont);
+        btnGroup.setForeground(new java.awt.Color(255, 255, 255));
+        btnGroup.setText("COA Group");
+        btnGroup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnGroupActionPerformed(evt);
             }
         });
 
@@ -489,7 +496,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     .addGroup(panelFilterLayout.createSequentialGroup()
                         .addComponent(txtCOA)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(btnGroup)))
                 .addContainerGap())
         );
         panelFilterLayout.setVerticalGroup(
@@ -511,7 +518,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                 .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtCOA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(btnGroup))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -632,14 +639,14 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoKeyReleased
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
         // TODO add your handling code here:
         coaGroup();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnGroupActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnGroup;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel14;
@@ -701,7 +708,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     public void selected(Object source, Object selectObj) {
         if (source.equals("SELECT_GROUP")) {
             List<String> list = dialog.getSelectCOA();
-            filter.setListCOAGroup(list);
             lblMessage.setText("Selected Group : " + list.size());
         }
     }

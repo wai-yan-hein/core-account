@@ -17,6 +17,7 @@ import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DateModel;
 import com.acc.model.VTriBalance;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -26,8 +27,7 @@ import com.common.Util1;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
@@ -111,18 +110,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     public GLReport() {
         initComponents();
         initKeyListener();
-        initTextBox();
         initDateDecorator();
     }
-
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void initDateDecorator() {
         decorator = DateTableDecorator.decorate(panelDate);
@@ -144,21 +133,22 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         decorator.refreshButton(dateAutoCompleter.getDateModel().getStartDate());
     }
 
-    private void initTextBox() {
-        txtOB.setFormatterFactory(Util1.getDecimalFormat());
-    }
-
     private void initKeyListener() {
         txtDep.addKeyListener(this);
         txtCOA.addKeyListener(this);
         txtProjectNo.addKeyListener(this);
-        txtDep.addFocusListener(fa);
-        txtCOA.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
-        txtOption.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
+    }
+
+    private void initTextBox() {
+        ComponentUtil.setTextProperty(panelFooter);
+        txtDrAmt.setFont(Global.menuFont);
+        txtCrAmt.setFont(Global.menuFont);
+        txtOB.setFont(Global.menuFont);
     }
 
     public void initMain() {
+        initTextBox();
         initCombo();
         initTableModel();
         initTable();
@@ -168,8 +158,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void assingDefaultValue() {
-        txtOB.setFormatterFactory(Util1.getDecimalFormat());
-        progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
     }
 
@@ -250,7 +238,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setCoaLv2(coaLv2);
             filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
             filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
-            filter.setClosing(chkClosing.isSelected());
+            filter.setNetChange(txtNetChange.isSelected());
             filter.setCurCode(getCurCode());
             filter.setListDepartment(getListDep());
             filter.setTranSource(getTranSource());
@@ -300,24 +288,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void calGLTotlaAmount() {
-        List<VTriBalance> listTB = glListingTableModel.getListTBAL();
-        double ttlDrAmt = 0.0;
-        double ttlCrAmt = 0.0;
-        double ttlNet = 0.0;
-        double outBal;
-        for (VTriBalance tb : listTB) {
-            ttlDrAmt += Util1.getDouble(tb.getDrAmt());
-            ttlCrAmt += Util1.getDouble(tb.getCrAmt());
-        }
-        txtFTotalCrAmt.setValue(Util1.toFormatPattern(ttlCrAmt));
-        txtFTotalDrAmt.setValue(Util1.toFormatPattern(ttlDrAmt));
-        txtFNetChange.setValue(Util1.toFormatPattern(ttlNet));
-        if (ttlDrAmt > ttlCrAmt) {
-            outBal = ttlDrAmt - ttlCrAmt;
-        } else {
-            outBal = ttlCrAmt - ttlDrAmt;
-        }
+        List<VTriBalance> list = glListingTableModel.getListTBAL();
+        double ttlDrAmt = list.stream().mapToDouble((t) -> t.getDrAmt()).sum();
+        double ttlCrAmt = list.stream().mapToDouble((t) -> t.getCrAmt()).sum();
+        double outBal = ttlDrAmt - ttlCrAmt;
+        txtDrAmt.setValue(ttlDrAmt);
+        txtCrAmt.setValue(ttlCrAmt);
         txtOB.setValue(outBal);
+        txtOB.setForeground(outBal == 0 ? Color.green : Color.red);
     }
 
     private void initCombo() {
@@ -339,13 +317,12 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
-
+        }).subscribe();
     }
 
     private void printGLListing() {
@@ -423,17 +400,16 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         txtOption = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblGL = new javax.swing.JTable();
-        jPanel2 = new javax.swing.JPanel();
-        txtFTotalDrAmt = new javax.swing.JFormattedTextField();
-        txtFTotalCrAmt = new javax.swing.JFormattedTextField();
-        txtFNetChange = new javax.swing.JFormattedTextField();
+        panelFooter = new javax.swing.JPanel();
+        txtDrAmt = new javax.swing.JFormattedTextField();
+        txtCrAmt = new javax.swing.JFormattedTextField();
         txtOB = new javax.swing.JFormattedTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         lblCalTime = new javax.swing.JLabel();
         panelDate = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        chkClosing = new javax.swing.JCheckBox();
+        txtNetChange = new javax.swing.JCheckBox();
         chkActive = new javax.swing.JCheckBox();
         chkDetail = new javax.swing.JCheckBox();
 
@@ -600,19 +576,15 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         });
         jScrollPane1.setViewportView(tblGL);
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        panelFooter.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        txtFTotalDrAmt.setEditable(false);
-        txtFTotalDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFTotalDrAmt.setFont(Global.amtFont);
+        txtDrAmt.setEditable(false);
+        txtDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtDrAmt.setFont(Global.amtFont);
 
-        txtFTotalCrAmt.setEditable(false);
-        txtFTotalCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFTotalCrAmt.setFont(Global.amtFont);
-
-        txtFNetChange.setEditable(false);
-        txtFNetChange.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtFNetChange.setFont(Global.amtFont);
+        txtCrAmt.setEditable(false);
+        txtCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtCrAmt.setFont(Global.amtFont);
 
         txtOB.setEditable(false);
         txtOB.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -627,40 +599,38 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelFooterLayout = new javax.swing.GroupLayout(panelFooter);
+        panelFooter.setLayout(panelFooterLayout);
+        panelFooterLayout.setHorizontalGroup(
+            panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFooterLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 367, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelFooterLayout.createSequentialGroup()
+                        .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtFTotalCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(txtFNetChange, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                    .addComponent(txtOB))
+                        .addComponent(txtOB, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelFooterLayout.createSequentialGroup()
+                        .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        panelFooterLayout.setVerticalGroup(
+            panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelFooterLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFTotalCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFNetChange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6)
                     .addComponent(lblCalTime))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -681,13 +651,13 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        chkClosing.setFont(Global.lableFont);
-        chkClosing.setSelected(true);
-        chkClosing.setText("Net Change");
-        chkClosing.setBorderPaintedFlat(true);
-        chkClosing.addActionListener(new java.awt.event.ActionListener() {
+        txtNetChange.setFont(Global.lableFont);
+        txtNetChange.setSelected(true);
+        txtNetChange.setText("Net Change");
+        txtNetChange.setBorderPaintedFlat(true);
+        txtNetChange.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkClosingActionPerformed(evt);
+                txtNetChangeActionPerformed(evt);
             }
         });
 
@@ -716,7 +686,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chkClosing)
+                .addComponent(txtNetChange)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkActive)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -729,7 +699,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(chkClosing, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtNetChange, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkDetail, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -742,7 +712,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelFooter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -763,7 +733,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelFooter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -800,10 +770,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     }//GEN-LAST:event_tblGLKeyReleased
 
-    private void chkClosingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkClosingActionPerformed
+    private void txtNetChangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNetChangeActionPerformed
         // TODO add your handling code here:
         searchGLListing();
-    }//GEN-LAST:event_chkClosingActionPerformed
+    }//GEN-LAST:event_txtNetChangeActionPerformed
 
     private void chkActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkActiveActionPerformed
         // TODO add your handling code here:
@@ -838,7 +808,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
-    private javax.swing.JCheckBox chkClosing;
     private javax.swing.JCheckBox chkDetail;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -849,19 +818,19 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCalTime;
     private javax.swing.JPanel panelDate;
+    private javax.swing.JPanel panelFooter;
     private javax.swing.JTable tblGL;
     private javax.swing.JTextField txtCOA;
+    private javax.swing.JFormattedTextField txtCrAmt;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JFormattedTextField txtFNetChange;
-    private javax.swing.JFormattedTextField txtFTotalCrAmt;
-    private javax.swing.JFormattedTextField txtFTotalDrAmt;
+    private javax.swing.JFormattedTextField txtDrAmt;
+    private javax.swing.JCheckBox txtNetChange;
     private javax.swing.JFormattedTextField txtOB;
     private javax.swing.JTextField txtOption;
     private javax.swing.JTextField txtProjectNo;

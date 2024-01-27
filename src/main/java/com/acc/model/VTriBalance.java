@@ -19,8 +19,8 @@ public class VTriBalance implements java.io.Serializable {
     private String coaCode;
     private String curCode;
     private String compCode;
-    private Double drAmt;
-    private Double crAmt;
+    private double drAmt;
+    private double crAmt;
     private String coaName;
     private String coaUsrCode;
     private Integer macId;

@@ -297,13 +297,13 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="lblCalTime" min="-2" pref="59" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
-                          <Component id="txtFTotalDrAmt" min="-2" pref="200" max="-2" attributes="0"/>
+                          <Component id="txtDrAmt" min="-2" pref="200" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="txtFOFB" min="-2" pref="200" max="-2" attributes="0"/>
-                      <Component id="txtFTotalCrAmt" alignment="1" min="-2" pref="200" max="-2" attributes="0"/>
+                      <Component id="txtCrAmt" alignment="1" min="-2" pref="200" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -314,13 +314,13 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtFTotalCrAmt" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtCrAmt" min="-2" max="-2" attributes="0"/>
                       <Group type="103" alignment="1" groupAlignment="0" attributes="0">
                           <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                               <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblCalTime" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="txtFTotalDrAmt" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtDrAmt" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -334,7 +334,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JFormattedTextField" name="txtFTotalDrAmt">
+        <Component class="javax.swing.JFormattedTextField" name="txtDrAmt">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
@@ -346,7 +346,7 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtFTotalCrAmt">
+        <Component class="javax.swing.JFormattedTextField" name="txtCrAmt">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">

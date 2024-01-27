@@ -11,6 +11,7 @@ import com.acc.editor.COA3CellEditor;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.model.Gl;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -26,8 +27,6 @@ import com.user.editor.ProjectAutoCompleter;
 import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -99,20 +98,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initFocusListener() {
-        txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
-        txtRefrence.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextFieldDateEditor edit) {
-                edit.selectAll();
-            } else if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void keyMapping() {
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -168,15 +156,15 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         journalTablModel.setAccountRepo(accountRepo);
         tblJournal.getTableHeader().setFont(Global.lableFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        accountRepo.getDepartment().subscribe((t) -> {
+        accountRepo.getDepartment().doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
-        });
+        }).subscribe();
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyEditor(t));
-        });
+        }).subscribe();
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(0).setPreferredWidth(10);//dep
@@ -549,7 +537,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setFont(Global.menuFont);
         lblStatus.setText("NEW");
 
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
