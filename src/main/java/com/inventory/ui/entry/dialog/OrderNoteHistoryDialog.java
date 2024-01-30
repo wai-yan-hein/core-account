@@ -13,7 +13,6 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -21,9 +20,7 @@ import com.inventory.model.OrderNote;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.ui.entry.dialog.common.OrderNoteSearchTableModel;
-import com.inventory.ui.entry.dialog.common.SalePaddySearchTableModel;
 import com.repo.InventoryRepo;
-import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -46,13 +43,11 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
      *
      */
     private final OrderNoteSearchTableModel orderNoteTableModel = new OrderNoteSearchTableModel();
-    private final SalePaddySearchTableModel salePaddySearchTableModel = new SalePaddySearchTableModel();
     private InventoryRepo inventoryRepo;
     private CloudIntegration integration;
     private TraderAutoCompleter traderAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private SelectionObserver observer;
-    private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private TaskExecutor taskExecutor;
@@ -68,10 +63,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -110,14 +101,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-
-        if (inventoryRepo.localDatabase) {
-            chkLocal.setVisible(true);
-            btnUpload.setVisible(true);
-        } else {
-            chkLocal.setVisible(false);
-            btnUpload.setVisible(false);
-        }
     }
 
     private void initTableVoucher() {
@@ -127,22 +110,8 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
-        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(15);
-        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
-    }
-
-    private void initTablePaddy() {
-        tblVoucher.setModel(salePaddySearchTableModel);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);//d
-        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(40);//v
-        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);//c
-        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);//r
-        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);//r
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(20);//q
-        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(20);//b
-        tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(100);//p
-        tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(100);//v
+        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(80);
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(200);
     }
 
     private void initTable() {
@@ -159,16 +128,11 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     private void setTodayDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
-        chkLocal.setSelected(false);
     }
 
     public void search() {
         clearModel();
         txtRecord.setValue(0);
-        txtTotalAmt.setValue(0);
-        txtPaid.setValue(0);
-//        setVisible(true);
-//        progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -178,9 +142,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setOrderName(txtOrderName.getText());
         filter.setDeleted(chkDel.isSelected());
-        filter.setNullBatch(chkBatch.isSelected());
-        filter.setLocal(chkLocal.isSelected());
-        
         inventoryRepo.getOrderNoteHistory(filter)
                 .doOnNext(this::addObject)
                 .doOnNext(obj -> calTotal())
@@ -193,7 +154,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     tblVoucher.requestFocus();
-                     setVisible(true);
+                    setVisible(true);
                 }).subscribe();
 
     }
@@ -219,19 +180,8 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     private void calTotal() {
         switch (type) {
             case 1 -> {
-                txtPaid.setValue(orderNoteTableModel.getPaidTotal());
-                txtTotalAmt.setValue(orderNoteTableModel.getVouTotal());
                 txtRecord.setValue(orderNoteTableModel.getSize());
-                txtQty.setValue(orderNoteTableModel.getQty());
-                txtBag.setValue(orderNoteTableModel.getBag());
             }
-//            case 2 -> {
-//                txtPaid.setValue(salePaddySearchTableModel.getPaidTotal());
-//                txtTotalAmt.setValue(salePaddySearchTableModel.getVouTotal());
-//                txtRecord.setValue(salePaddySearchTableModel.getSize());
-//                txtQty.setValue(salePaddySearchTableModel.getQty());
-//                txtBag.setValue(salePaddySearchTableModel.getBag());
-//            }
         }
 
     }
@@ -297,7 +247,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
             MessageDialog dialog = new MessageDialog(this, "Uploading to server.");
             int yn = JOptionPane.showConfirmDialog(this, "Are you to upload sale voucher : " + count);
             if (yn == JOptionPane.YES_OPTION) {
-                btnUpload.setEnabled(false);
                 taskExecutor.execute(() -> {
                     try {
                         log.info("1");
@@ -305,10 +254,8 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                         JOptionPane.showMessageDialog(this, message);
                     } catch (Exception e) {
                         JOptionPane.showMessageDialog(this, e.getMessage());
-                        btnUpload.setEnabled(true);
                         dialog.setVisible(false);
                     }
-                    btnUpload.setEnabled(true);
                     dialog.setVisible(false);
                 });
                 dialog.setVisible(true);
@@ -338,9 +285,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         jSeparator2 = new javax.swing.JSeparator();
         jButton1 = new javax.swing.JButton();
         chkDel = new javax.swing.JCheckBox();
-        chkBatch = new javax.swing.JCheckBox();
-        chkLocal = new javax.swing.JCheckBox();
-        btnUpload = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
@@ -354,16 +298,8 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         tblVoucher = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        txtPaid = new javax.swing.JFormattedTextField();
-        lblTtlAmount1 = new javax.swing.JLabel();
         lblTtlRecord = new javax.swing.JLabel();
-        txtTotalAmt = new javax.swing.JFormattedTextField();
         txtRecord = new javax.swing.JFormattedTextField();
-        lblTtlAmount = new javax.swing.JLabel();
-        lblTtlAmount2 = new javax.swing.JLabel();
-        txtBag = new javax.swing.JFormattedTextField();
-        lblTtlAmount3 = new javax.swing.JLabel();
-        txtQty = new javax.swing.JFormattedTextField();
         progress = new javax.swing.JProgressBar();
         btnSearch1 = new javax.swing.JButton();
         btnSearch = new javax.swing.JButton();
@@ -415,30 +351,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         chkDel.setFont(Global.lableFont);
         chkDel.setText("Deleted");
 
-        chkBatch.setFont(Global.lableFont);
-        chkBatch.setText("No Batch");
-        chkBatch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkBatchActionPerformed(evt);
-            }
-        });
-
-        chkLocal.setFont(Global.lableFont);
-        chkLocal.setText("Local");
-        chkLocal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkLocalActionPerformed(evt);
-            }
-        });
-
-        btnUpload.setFont(Global.lableFont);
-        btnUpload.setText("Upload");
-        btnUpload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUploadActionPerformed(evt);
-            }
-        });
-
         jLabel7.setFont(Global.lableFont);
         jLabel7.setText("Customer");
 
@@ -489,37 +401,29 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkBatch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel12))
-                        .addGap(0, 9, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
-                            .addComponent(txtVouNo)
-                            .addComponent(txtCus)
-                            .addComponent(txtStock)
-                            .addComponent(txtOrderNo)
-                            .addComponent(txtOrderName))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(btnUpload, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                        .addComponent(txtVouNo)
+                        .addComponent(txtCus)
+                        .addComponent(txtStock)
+                        .addComponent(txtOrderNo)
+                        .addComponent(txtOrderName)
+                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkDel))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -554,19 +458,13 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel12)
                             .addComponent(txtOrderName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(314, 314, 314)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkBatch)
-                            .addComponent(btnUpload))
+                        .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkLocal)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jSeparator2))
-                .addContainerGap())
+                        .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.DEFAULT_SIZE, 512, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
@@ -603,42 +501,12 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        txtPaid.setEditable(false);
-        txtPaid.setForeground(Color.green);
-        txtPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtPaid.setFont(Global.amtFont);
-
-        lblTtlAmount1.setFont(Global.lableFont);
-        lblTtlAmount1.setText("Paid");
-
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Records :");
-
-        txtTotalAmt.setEditable(false);
-        txtTotalAmt.setForeground(Color.red);
-        txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalAmt.setFont(Global.amtFont);
 
         txtRecord.setEditable(false);
         txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtRecord.setFont(Global.amtFont);
-
-        lblTtlAmount.setFont(Global.lableFont);
-        lblTtlAmount.setText("Vou Total :");
-
-        lblTtlAmount2.setFont(Global.lableFont);
-        lblTtlAmount2.setText("Bag :");
-
-        txtBag.setEditable(false);
-        txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtBag.setFont(Global.amtFont);
-
-        lblTtlAmount3.setFont(Global.lableFont);
-        lblTtlAmount3.setText("Qty :");
-
-        txtQty.setEditable(false);
-        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtQty.setFont(Global.amtFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -648,24 +516,8 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblTtlAmount3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtQty, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblTtlAmount2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtBag, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblTtlAmount1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtPaid, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblTtlAmount)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -673,19 +525,11 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtRecord)
-                    .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTtlAmount3)
-                    .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTtlAmount2)
-                    .addComponent(lblTtlAmount1)
-                    .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtTotalAmt)
-                    .addComponent(lblTtlAmount))
+                    .addComponent(txtRecord))
                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {lblTtlAmount, lblTtlAmount1, lblTtlRecord, txtPaid, txtRecord, txtTotalAmt});
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {lblTtlRecord, txtRecord});
 
         btnSearch1.setFont(Global.lableFont);
         btnSearch1.setText("Print");
@@ -723,7 +567,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                         .addComponent(btnSearch1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSearch))
-                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -742,7 +586,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                             .addComponent(btnSearch1)
                             .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -775,18 +619,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
             select();
         }
     }//GEN-LAST:event_tblVoucherMouseClicked
-
-    private void chkBatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkBatchActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_chkBatchActionPerformed
-
-    private void chkLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_chkLocalActionPerformed
-
-    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        upload();
-    }//GEN-LAST:event_btnUploadActionPerformed
 
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         // TODO add your handling code here:
@@ -825,10 +657,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSearch1;
-    private javax.swing.JButton btnUpload;
-    private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
-    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -842,25 +671,17 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JLabel lblTtlAmount;
-    private javax.swing.JLabel lblTtlAmount1;
-    private javax.swing.JLabel lblTtlAmount2;
-    private javax.swing.JLabel lblTtlAmount3;
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
-    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtOrderName;
     private javax.swing.JTextField txtOrderNo;
-    private javax.swing.JFormattedTextField txtPaid;
-    private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
-    private javax.swing.JFormattedTextField txtTotalAmt;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables
 

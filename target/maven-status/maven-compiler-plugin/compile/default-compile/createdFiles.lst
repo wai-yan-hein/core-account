@@ -333,6 +333,7 @@ com\config\AppConfig.class
 com\inventory\model\SaleExpense.class
 com\acc\entry\Journal$4.class
 com\h2\service\RetOutDetailService.class
+com\common\ImageCache.class
 com\acc\model\OpeningBalance.class
 com\inventory\ui\setup\dialog\SaleManSetupDialog$2.class
 com\inventory\model\Pattern.class
@@ -370,7 +371,6 @@ com\inventory\ui\entry\dialog\OPHistoryDialog$6.class
 com\inventory\ui\entry\ReturnIn$16.class
 com\acc\dialog\VoucherEntryDailog$15.class
 com\inventory\ui\entry\OrderDynamic.class
-com\inventory\ui\entry\dialog\OrderNoteHistoryDialog$13.class
 com\user\dialog\MachineInfoDialog$1.class
 com\inventory\ui\entry\dialog\VouDiscountDialog.class
 com\acc\entry\DrCrVoucher$3.class
@@ -1683,7 +1683,6 @@ com\inventory\editor\JobAutoCompleter$4.class
 com\inventory\ui\entry\RFID$DeleteAction.class
 com\inventory\ui\setup\dialog\WareHouseSetupDialog$6.class
 com\user\common\MenuTreeTrasnferHandler.class
-com\inventory\ui\entry\dialog\OrderNoteHistoryDialog$12.class
 com\inventory\ui\entry\PaymentEntry$3.class
 com\inventory\editor\BrandAutoCompleter.class
 com\acc\dialog\JournalEntryDialog$4.class
@@ -1725,7 +1724,6 @@ com\h2\dao\StockCriteriaDao.class
 com\inventory\ui\entry\dialog\common\JobSearchTableModel.class
 com\inventory\ui\entry\Sale$12.class
 com\inventory\editor\StockCriteriaCompleter$6.class
-com\inventory\ui\entry\dialog\OrderNoteHistoryDialog$14.class
 com\inventory\editor\VouStatusAutoCompleter$4.class
 com\inventory\model\VOrder.class
 com\inventory\ui\entry\ConsignEntry$2.class
