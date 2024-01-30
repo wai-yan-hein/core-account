@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderNoteSearchTableModel extends AbstractTableModel {
 
     private List<OrderNote> list = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Stock Name", "Order No", "Order Name", "Created By",};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Stock Name", "Order No", "Order Name"};
     @Getter
     private double vouTotal;
     @Getter
@@ -59,11 +59,6 @@ public class OrderNoteSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-//        switch (column) {
-//            case 6, 7 -> {
-//                return Double.class;
-//            }
-//        }
         return String.class;
     }
 
@@ -104,10 +99,6 @@ public class OrderNoteSearchTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         return his.getOrderName();
-                    }
-                    case 6 -> {
-                        //user
-                        return Global.hmUser.get(his.getCreatedBy());
                     }
                 }
             }

@@ -683,13 +683,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
             case "Order Note" -> {
                 int type = getOrderNoteType(menuName);
-                OrderNoteEntry orderNoteEntry = new OrderNoteEntry(type);
-                orderNoteEntry.setProgress(progress);
-                orderNoteEntry.setObserver(this);
-                orderNoteEntry.setDmsRepo(dmsRepo);
-                orderNoteEntry.setInventoryRepo(inventoryRepo);
-                orderNoteEntry.initMain();
-                return orderNoteEntry;
+                OrderNoteEntry entry = new OrderNoteEntry(type);
+                entry.setProgress(progress);
+                entry.setObserver(this);
+                entry.setDmsRepo(dmsRepo);
+                entry.setInventoryRepo(inventoryRepo);
+                entry.setTaskExecutor(taskExecutor);
+                entry.initMain();
+                return entry;
             }
             case "Pattern Setup" -> {
                 PatternSetup patternSetup = new PatternSetup();
