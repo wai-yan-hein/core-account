@@ -128,6 +128,12 @@ public class DMSRepo {
                 .retrieve()
                 .bodyToMono(Resource.class);
     }
+    public Mono<CVFile> findFile(String fileId) {
+        return dmsApi.get().uri(builder -> builder.path("/file/findFile")
+                .queryParam("fileId", fileId).build())
+                .retrieve()
+                .bodyToMono(CVFile.class);
+    }
 
     public Mono<CVFileResponse> createFile(String parentId, Path filePath) {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();

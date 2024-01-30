@@ -103,6 +103,7 @@ import com.inventory.model.StockInOutDetail;
 import com.inventory.model.ConsignHisDetail;
 import com.inventory.model.ConsignHis;
 import com.inventory.model.ConsignHisKey;
+import com.inventory.model.OrderFileJoin;
 import com.inventory.model.OrderNote;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockPayment;
@@ -2314,6 +2315,21 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<OrderNote> findOrderNote(String vouNo) {
+//        if (local) {
+//            return h2Repo.findSale(key);
+//        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/orderNote/findOrderNote")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build()).retrieve().bodyToMono(OrderNote.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<MillingHis> findMilling(String vouNo, Integer deptId, boolean local) {
         MillingHisKey key = new MillingHisKey();
         key.setVouNo(vouNo);
@@ -3687,6 +3703,20 @@ public class InventoryRepo {
                 });
     }
 
+    public Flux<OrderFileJoin> getOrderNoteDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/orderNote/getOrderNoteDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(OrderFileJoin.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<MillingRawDetail>> getRawDetail(String vouNo, int deptId) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/milling/getRawDetail")
@@ -3859,6 +3889,18 @@ public class InventoryRepo {
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Flux.empty();
+                });
+    }
+
+    public Flux<OrderNote> getOrderNoteHistory(FilterObject filter) {
+        return inventoryApi.post()
+                .uri("/orderNote/getOrderNote")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(OrderNote.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Flux.empty();
