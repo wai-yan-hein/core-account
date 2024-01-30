@@ -107,6 +107,12 @@
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.5</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/net.imagej/ij -->
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>ij</artifactId>
+            <version>1.54h</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>core-account</finalName>

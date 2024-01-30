@@ -50,6 +50,8 @@ public class FilterObject {
     private boolean draft;
     private String jobNo;
     private String labourGroupCode;
+    private String orderNo;
+    private String orderName;
 
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;

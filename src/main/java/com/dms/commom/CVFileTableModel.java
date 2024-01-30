@@ -123,7 +123,7 @@ public class CVFileTableModel extends AbstractTableModel {
         int row = table.getSelectedRow();
         listDetail.set(row, file);
         fireTableRowsUpdated(row, row);
-        
+
     }
 
     public void deleteFile(CVFile file) {
@@ -134,6 +134,11 @@ public class CVFileTableModel extends AbstractTableModel {
 
     public void addObjectFirst(CVFile t) {
         listDetail.add(0, t);
+        fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
+    }
+
+    public void addObject(CVFile t) {
+        listDetail.add(t);
         fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
     }
 

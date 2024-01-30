@@ -682,7 +682,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return drive;
             }
             case "Order Note" -> {
-                OrderNoteEntry orderNoteEntry = new OrderNoteEntry();
+                int type = getOrderNoteType(menuName);
+                OrderNoteEntry orderNoteEntry = new OrderNoteEntry(type);
                 orderNoteEntry.setProgress(progress);
                 orderNoteEntry.setObserver(this);
                 orderNoteEntry.setDmsRepo(dmsRepo);
@@ -1125,6 +1126,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.PADDY;
             case "Sale By Batch" ->
                 SaleDynamic.BATCH;
+            default ->
+                0;
+        };
+    }
+    
+    private int getOrderNoteType(String menuName) {
+        return switch (menuName) {
+            case "Order Note" ->
+                OrderNoteEntry.ORDERNOTE;
             default ->
                 0;
         };
