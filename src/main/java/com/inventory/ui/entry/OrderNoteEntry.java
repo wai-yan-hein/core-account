@@ -33,8 +33,6 @@ import java.awt.Desktop;
 import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -632,6 +630,37 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             return false;
         }
         return true;
+    }
+
+    private void deleteOrderNote() {
+        String status = lblStatus.getText();
+        switch (status) {
+            case "EDIT" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                if (yes_no == 0) {
+                    orderNote.setDeleted(true);
+                    inventoryRepo.delete(orderNote).doOnSuccess((t) -> {
+                        clear(true);
+                    }).subscribe();
+                }
+            }
+            case "DELETED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to restore?", "OrderNote Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    orderNote.setDeleted(false);
+                    inventoryRepo.restore(orderNote).doOnSuccess((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    }).subscribe();
+
+                }
+            }
+            default ->
+                JOptionPane.showMessageDialog(this, "Voucher can't delete.");
+        }
     }
 
     private void clear(boolean foucs) {
@@ -1363,6 +1392,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
 
     @Override
     public void delete() {
+        deleteOrderNote();
     }
 
     @Override

@@ -2642,6 +2642,21 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> delete(OrderNote sh) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/orderNote/updateOrderNote")
+                .queryParam("vouNo", sh.getVouNo())
+                .queryParam("compCode", sh.getCompCode())
+                .queryParam("deleted", sh.getDeleted())
+                .build())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<Boolean> delete(OrderHisKey key) {
         return inventoryApi.post()
                 .uri("/order/deleteOrder")
@@ -2659,6 +2674,21 @@ public class InventoryRepo {
         return inventoryApi.post()
                 .uri("/sale/restoreSale")
                 .body(Mono.just(key), SaleHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> restore(OrderNote sh) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/orderNote/updateOrderNote")
+                .queryParam("vouNo", sh.getVouNo())
+                .queryParam("compCode", sh.getCompCode())
+                .queryParam("deleted", sh.getDeleted())
+                .build())
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
