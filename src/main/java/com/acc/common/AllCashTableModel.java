@@ -378,7 +378,7 @@ public class AllCashTableModel extends AbstractTableModel {
 
     private boolean isValidEntry(Gl gl, int row, int column) {
         boolean status = true;
-        if (gl.getAccCode().equals(sourceAccId)) {
+        if (Util1.isNull(gl.getAccCode(), "-").equals(sourceAccId)) {
             status = false;
             JOptionPane.showMessageDialog(Global.parentForm, "Account is the same with Source Account.");
             gl.setAccCode(null);

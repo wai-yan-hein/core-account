@@ -35,7 +35,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 //import com.cv.accountswing.util.Util1;
@@ -96,7 +95,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     private void batchLock(boolean lock) {
         tblOpening.setEnabled(lock);
-        btnGenerateZero.setEnabled(lock);
         observer.selected("save", lock);
         observer.selected("delete", lock);
     }
@@ -194,6 +192,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.setShowGrid(true);
         tblOpening.setRowHeight(Global.tblRowHeight);
         tblOpening.setCellSelectionEnabled(true);
+        tblOpening.setAutoCreateRowSorter(false);
         openingTableModel.setOpdate(txtDate);
         openingTableModel.setTradeAutoCompleter(tradeAutoCompleter);
         openingTableModel.setParent(tblOpening);
@@ -201,7 +200,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         openingTableModel.setAccountRepo(accountRepo);
         openingTableModel.setObserver(this);
         openingTableModel.setProgress(progress);
-        openingTableModel.addNewRow();
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(10);//dep
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(80);//code
         tblOpening.getColumnModel().getColumn(2).setPreferredWidth(200);//name
@@ -278,15 +276,16 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             lblMessage.setText("");
         }
         openingTableModel.clear();
-        accountRepo.getOpeningBalance(filter).doOnSuccess((t) -> {
-            openingTableModel.setListOpening(t);
+        accountRepo.getOpeningBalance(filter)
+                .doOnNext(openingTableModel::addObject)
+                .doOnNext(obj -> calTotal())
+                .doOnError((e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }).doOnTerminate(() -> {
+            calOB();
             openingTableModel.addNewRow();
-            btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
-            calTotalAmt();
             focusOnTable();
             progress.setIndeterminate(false);
-        }).doOnError((e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
         }).subscribe();
     }
 
@@ -304,17 +303,28 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     }
 
     // calculate dr-amt and cr-amt and total
-    private void calTotalAmt() {
-        List<OpeningBalance> listOpening = openingTableModel.getListOpening();
-        double drAmt = listOpening.stream().mapToDouble((t) -> t.getDrAmt()).sum();
-        double crAmt = listOpening.stream().mapToDouble((t) -> t.getCrAmt()).sum();
-        double op = drAmt - crAmt;
+    private void calTotal() {
+        double drAmt = openingTableModel.getDrAmt();
+        double crAmt = openingTableModel.getCrAmt();
+        int size = openingTableModel.getSize();
         txtDrAmt.setValue(drAmt);
         txtCrAmt.setValue(crAmt);
-        txtOFB.setValue(op);
-        txtOFB.setForeground(op == 0 ? Color.black : Color.red);
-        lblCount.setText(listOpening.size() - 1 + "");
+        txtRecord.setValue(size);
 
+    }
+
+    private void calDrCr() {
+        double drAmt = openingTableModel.getListOpening().stream().mapToDouble((t) -> t.getDrAmt()).sum();
+        double crAmt = openingTableModel.getListOpening().stream().mapToDouble((t) -> t.getCrAmt()).sum();
+        txtDrAmt.setValue(drAmt);
+        txtCrAmt.setValue(crAmt);
+        calOB();
+    }
+
+    private void calOB() {
+        double ob = Util1.getDouble(txtDrAmt.getValue()) - Util1.getDouble(txtCrAmt.getValue());
+        txtOFB.setValue(ob);
+        txtOFB.setForeground(ob == 0 ? Color.black : Color.red);
     }
 
     private void printOpening() {
@@ -355,7 +365,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     public void selected(Object source, Object selectObj) {
         if (selectObj != null) {
             if (source.equals("CAL-TOTAL")) {
-                calTotalAmt();
+                calDrCr();
             } else {
                 searchOpening();
             }
@@ -419,7 +429,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        btnGenerateZero = new javax.swing.JButton();
         txtDept = new javax.swing.JTextField();
         txtCOA = new javax.swing.JTextField();
         chkCus = new javax.swing.JCheckBox();
@@ -438,10 +447,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         txtCrAmt = new javax.swing.JFormattedTextField();
         jLabel7 = new javax.swing.JLabel();
         txtOFB = new javax.swing.JFormattedTextField();
-        lblCount = new javax.swing.JLabel();
         txtDrAmt = new javax.swing.JFormattedTextField();
         jLabel9 = new javax.swing.JLabel();
         lblMessage = new javax.swing.JLabel();
+        txtRecord = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -456,9 +465,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("COA");
-
-        btnGenerateZero.setFont(Global.lableFont);
-        btnGenerateZero.setText("Generate Zero");
 
         txtDept.setFont(Global.textFont);
 
@@ -510,30 +516,28 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtDept, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addComponent(txtDept, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
+                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkCus)
                 .addGap(18, 18, 18)
                 .addComponent(chkSup)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnGenerateZero)
-                .addGap(10, 10, 10))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -552,10 +556,9 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(jLabel5)
                             .addComponent(chkSup)
                             .addComponent(chkCus)
-                            .addComponent(btnGenerateZero)
                             .addComponent(jLabel6)
                             .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 1, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -576,36 +579,36 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel8.setFont(Global.menuFont);
-        jLabel8.setText("Cr-Amt");
+        jLabel8.setText("Credit Total :");
 
         jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Total Count :");
+        jLabel4.setText("Records");
 
         txtCrAmt.setEditable(false);
         txtCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtCrAmt.setFont(Global.amtFont);
 
         jLabel7.setFont(Global.menuFont);
-        jLabel7.setText("Dr-Amt");
+        jLabel7.setText("Debit Total :");
 
         txtOFB.setEditable(false);
         txtOFB.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtOFB.setFont(Global.amtFont);
-
-        lblCount.setFont(Global.lableFont);
-        lblCount.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblCount.setText("0");
 
         txtDrAmt.setEditable(false);
         txtDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtDrAmt.setFont(Global.amtFont);
 
         jLabel9.setFont(Global.menuFont);
-        jLabel9.setText("Out Of Balance");
+        jLabel9.setText("Out Of Balance :");
 
         lblMessage.setFont(Global.lableFont);
         lblMessage.setForeground(Color.red);
         lblMessage.setText(".");
+
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.amtFont);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -616,21 +619,21 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblCount, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 523, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtOFB, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtCrAmt, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtCrAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                    .addComponent(txtOFB))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -639,11 +642,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(lblCount)
                     .addComponent(jLabel7)
                     .addComponent(jLabel8)
                     .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
@@ -659,9 +662,9 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -698,7 +701,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnGenerateZero;
     private javax.swing.JCheckBox chkCus;
     private javax.swing.JCheckBox chkSup;
     private javax.swing.JLabel jLabel1;
@@ -713,7 +715,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lblCount;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JTable tblOpening;
     private javax.swing.JTextField txtCOA;
@@ -724,6 +725,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField txtDrAmt;
     private javax.swing.JFormattedTextField txtOFB;
     private javax.swing.JTextField txtProjectNo;
+    private javax.swing.JFormattedTextField txtRecord;
     // End of variables declaration//GEN-END:variables
 
 }

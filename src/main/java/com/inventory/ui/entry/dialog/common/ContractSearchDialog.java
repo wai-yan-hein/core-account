@@ -18,16 +18,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class StockPaymentSearchTableModel extends AbstractTableModel {
+public class ContractSearchDialog extends AbstractTableModel {
 
     private List<StockPayment> listDetail = new ArrayList();
-    private final String[] columnNames = {"Vou Date", "Vou No", "Contract No", "Name", "Remark", "Qty", "Bag"};
-    @Getter
-    private double qty;
-    @Getter
-    private double bag;
-    @Getter
-    private int size;
+    private final String[] columnNames = {"Contract Date", "Contract No", "Customer Name", "Remark"};
 
     @Override
     public String getColumnName(int column) {
@@ -124,9 +118,6 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
 
     public void addObject(StockPayment t) {
         listDetail.add(t);
-        qty += t.getPayQty();
-        bag += t.getPayBag();
-        size += 1;
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
             fireTableRowsInserted(lastIndex, lastIndex);
@@ -136,9 +127,6 @@ public class StockPaymentSearchTableModel extends AbstractTableModel {
     }
 
     public void clear() {
-        qty = 0;
-        size = 0;
-        bag = 0;
         listDetail.clear();
         fireTableDataChanged();
     }

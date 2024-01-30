@@ -455,13 +455,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     } else {
                         stockTableModel.setStock(selectRow, t);
                     }
-                    clear();
-                    sendMessage(t.getStockName() + " : " + "update.");
                 }
             }).doOnError((e) -> {
                 observer.selected("save", true);
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
+            }).doOnTerminate(() -> {
+                sendMessage(stock.getStockName() + " : " + "update.");
+                clear();
             }).subscribe();
         }
     }

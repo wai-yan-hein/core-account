@@ -680,13 +680,12 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<OpeningBalance>> getOpeningBalance(ReportFilter filter) {
+    public Flux<OpeningBalance> getOpeningBalance(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/getOpening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(OpeningBalance.class)
-                .collectList();
+                .bodyToFlux(OpeningBalance.class);
     }
 
     public Mono<ReturnObject> getReport(ReportFilter filter) {

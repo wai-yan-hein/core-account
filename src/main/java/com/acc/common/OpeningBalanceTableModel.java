@@ -29,6 +29,7 @@ import javax.swing.JTable;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,6 +47,12 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     private List<OpeningBalance> listOpening = new ArrayList();
     private JDateChooser opDate;
     private JProgressBar progress;
+    @Getter
+    private double drAmt;
+    @Getter
+    private double crAmt;
+    @Getter
+    private int size;
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -232,29 +239,29 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     }
                 }
                 case 7 -> {
-                    double drAmt = Util1.getDouble(value);
-                    if (drAmt > 0) {
-                        opening.setDrAmt(drAmt);
+                    double amt = Util1.getDouble(value);
+                    if (amt > 0) {
+                        opening.setDrAmt(amt);
                         opening.setCrAmt(0);
                     } else {
-                        opening.setCrAmt(drAmt);
+                        opening.setCrAmt(amt);
                         opening.setDrAmt(0);
                     }
 
                 }
                 case 8 -> {
-                    double crAmt = Util1.getDouble(value);
-                    if (crAmt > 0) {
-                        opening.setCrAmt(crAmt);
+                    double amt = Util1.getDouble(value);
+                    if (amt > 0) {
+                        opening.setCrAmt(amt);
                         opening.setDrAmt(0);
                     } else {
-                        opening.setDrAmt(crAmt);
+                        opening.setDrAmt(amt);
                         opening.setCrAmt(0);
                     }
 
                 }
             }
-            opening.setOpDate(opDate.getDate());
+            opening.setOpDate(Util1.toLocalDate(opDate.getDate()));
             if (isValidEntry(opening, columnIndex, rowIndex)) {
                 save(opening, rowIndex);
                 parent.requestFocus();
@@ -296,26 +303,28 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
 
     // save opening balance data from the grid view
     private void save(OpeningBalance opening, int row) {
-        if (opening.getKey().getOpId() == null) {
-            opening.setCreatedDate(LocalDateTime.now());
-        }
         progress.setIndeterminate(true);
-        accountRepo.saveCOAOpening(opening).subscribe((t) -> {
+        accountRepo.saveCOAOpening(opening).doOnSuccess((t) -> {
             if (t != null) {
                 opening.setKey(t.getKey());
                 listOpening.set(row, opening);
-                addNewRow();
                 double amt = Util1.getDouble(opening.getDrAmt()) + Util1.getDouble(opening.getCrAmt());
                 if (amt == 0) {
-                    parent.setColumnSelectionInterval(6, 6);
+                    setSelection(row, 6);
                 } else {
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(0, 0);
+                    setSelection(row + 1, 0);
                 }
-                selectionObserver.selected("CAL-TOTAL", "-");
             }
-        });
+        }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+            selectionObserver.selected("CAL-TOTAL", "-");
+            addNewRow();
+        }).subscribe();
+    }
 
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     public void addNewRow() {
@@ -324,7 +333,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
             OpeningKey key = new OpeningKey();
             key.setCompCode(Global.compCode);
             opening.setKey(key);
-            opening.setOpDate(opDate.getDate());
+            opening.setOpDate(Util1.toLocalDate(opDate.getDate()));
             OpeningBalance b = aboveObject();
             if (b != null) {
                 opening.setDeptUsrCode(b.getDeptUsrCode());
@@ -334,7 +343,6 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
             listOpening.add(opening);
             fireTableRowsInserted(listOpening.size() - 1, listOpening.size() - 1);
         }
-        progress.setIndeterminate(false);
     }
 
     private OpeningBalance aboveObject() {
@@ -350,7 +358,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
             return false;
         }
         OpeningBalance p = listOpening.get(listOpening.size() - 1);
-        return p.getKey().getOpId() == null;
+        return p.getKey().getCoaOpId() == null;
     }
 
     @Override
@@ -378,8 +386,17 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         }
     }
 
-    public void addOpening(OpeningBalance opening) {
-        listOpening.add(opening);
+    public void addObject(OpeningBalance t) {
+        listOpening.add(t);
+        drAmt += t.getDrAmt();
+        crAmt += t.getCrAmt();
+        size += 1;
+        int lastIndex = listOpening.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void setOpening(int rowIndex, OpeningBalance opening) {
@@ -391,6 +408,9 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
 
     public void clear() {
         if (listOpening != null) {
+            drAmt = 0;
+            crAmt = 0;
+            size = 0;
             listOpening.clear();
             fireTableDataChanged();
         }

@@ -4,9 +4,9 @@
  */
 package com.acc.model;
 
-import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class StockOP {
 
     private StockOPKey key;
-    private Date tranDate;
+    private LocalDate tranDate;
     private String coaCode;
     private String deptCode;
     private String curCode;

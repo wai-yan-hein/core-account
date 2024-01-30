@@ -8,6 +8,7 @@ package com.ui;
 import com.CloudIntegration;
 import com.MessageDialog;
 import com.CoreAccountApplication;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TokenFile;
@@ -62,20 +63,6 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     private TaskExecutor taskExecutor;
     @Autowired
     private ApplicationMainFrame mainFrame;
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(java.awt.event.FocusEvent evt) {
-            Object sourceObj = evt.getSource();
-            if (sourceObj instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-
-        @Override
-        public void focusLost(java.awt.event.FocusEvent evt) {
-
-        }
-    };
 
     /**
      * Creates new form LoginDialog
@@ -121,12 +108,12 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
             toDayKey = toDayKey.replaceAll("-", "");
             if (inputKey.equals(toDayKey)) {
-                register(serialNo).subscribe((response) -> {
+                register(serialNo).doOnSuccess((response) -> {
                     file.write(response);
+                }).doOnTerminate(() -> {
                     JOptionPane.showMessageDialog(this, "Logout");
                     logout();
-                });
-
+                }).subscribe();
             } else {
                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
                 System.exit(0);
@@ -308,8 +295,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     }
 
     private void initFocusListener() {
-        txtLoginName.addFocusListener(fa);
-        txtPassword.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
 
     /**

@@ -14,6 +14,7 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.model.DepartmentA;
 import com.acc.model.StockOP;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
@@ -26,8 +27,6 @@ import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
 import com.user.model.Currency;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -35,7 +34,6 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import reactor.core.publisher.Mono;
@@ -97,20 +95,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     }
 
     private void initListener() {
-        txtDep.addFocusListener(fa);
-        txtCur.addFocusListener(fa);
-        txtProjectNo.addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
         tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
     }
-
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void actionMapping() {
         String solve = "delete";
@@ -137,12 +124,12 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yn == 0) {
-                    accountRepo.delete(op.getKey()).subscribe((t) -> {
+                    accountRepo.delete(op.getKey()).doOnSuccess((t) -> {
                         if (t) {
                             tableModel.delete(selectRow);
                             focusOnTable();
                         }
-                    });
+                    }).subscribe();
                 }
             }
         }
@@ -210,10 +197,10 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     }
 
     private void initTable() {
-        tableModel.setParent(tblJournal);
-        accountRepo.getDefaultDepartment().subscribe((t) -> {
+        accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
             tableModel.setDepartment(t);
-        });
+        }).subscribe();
+        tableModel.setParent(tblJournal);
         tableModel.setProgress(progress);
         tableModel.setAccountRepo(accountRepo);
         tblJournal.setModel(tableModel);
@@ -221,12 +208,12 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         tblJournal.setRowHeight(Global.tblRowHeight);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblJournal.getColumnModel().getColumn(0).setPreferredWidth(5);//Date
-        tblJournal.getColumnModel().getColumn(1).setPreferredWidth(1);//Vou
-        tblJournal.getColumnModel().getColumn(2).setPreferredWidth(5);//Ref
-        tblJournal.getColumnModel().getColumn(3).setPreferredWidth(400);//Ref
+        tblJournal.getColumnModel().getColumn(1).setPreferredWidth(1);//dep
+        tblJournal.getColumnModel().getColumn(2).setPreferredWidth(5);//code
+        tblJournal.getColumnModel().getColumn(3).setPreferredWidth(450);//name
         tblJournal.getColumnModel().getColumn(4).setPreferredWidth(100);//project
         tblJournal.getColumnModel().getColumn(5).setPreferredWidth(1);//cur
-        tblJournal.getColumnModel().getColumn(6).setPreferredWidth(100);//amt
+        tblJournal.getColumnModel().getColumn(6).setPreferredWidth(150);//amt
         tblJournal.setShowGrid(true);
         tblJournal.setCellSelectionEnabled(true);
         tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)

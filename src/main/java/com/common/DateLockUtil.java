@@ -69,6 +69,20 @@ public class DateLockUtil {
         return false;
     }
 
+    public static boolean isLockDate(LocalDate date) {
+        if (listLock != null) {
+            for (DateLock dateLock : listLock) {
+                LocalDate startDate = dateLock.getStartDate();
+                LocalDate endDate = dateLock.getEndDate();
+                if ((date.isEqual(startDate) || date.isEqual(endDate))
+                        || (date.isAfter(startDate) && date.isBefore(endDate))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void showMessage(Component c) {
         JOptionPane.showMessageDialog(c, "Your entry date has been restricted by management.", "Restricted", JOptionPane.WARNING_MESSAGE);
     }

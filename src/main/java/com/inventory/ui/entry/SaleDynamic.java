@@ -2202,7 +2202,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        optionDialog();
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnBatch2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatch2ActionPerformed
@@ -2220,6 +2220,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        optionDialog();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     @Override

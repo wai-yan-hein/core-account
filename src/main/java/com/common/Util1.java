@@ -867,6 +867,29 @@ public class Util1 {
 
     }
 
+    public static LocalDate formatLocalDate(String input) {
+        DateTimeFormatter formatter = switch (input.length()) {
+            case 6 ->
+                DateTimeFormatter.ofPattern("ddMMyy");
+            case 8 ->
+                DateTimeFormatter.ofPattern("ddMMyyyy");
+            default ->
+                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        }; // For input format "010123"
+        // For input format "01012023"
+        // For input format "01/01/2023"
+
+        try {
+            return LocalDate.parse(input, formatter);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            // If none of the formats match, throw an exception or handle it accordingly
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date Format. Example ddMMyy,ddMMyyyy,dd/MM/yyyy");
+            return null;
+        }
+
+    }
+
     public static String toFormatDate(String obj, int length) {
         String[] arr = obj.split("(?<=\\G.{2})");
         if (length == 8) {

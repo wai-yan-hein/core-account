@@ -15,6 +15,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OpeningKey {
 
-    private String opId;
+    private String coaOpId;
     private String compCode;
 }

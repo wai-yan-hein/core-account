@@ -22,9 +22,9 @@
           <Group type="102" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
                   <Component id="jPanel3" alignment="0" max="32767" attributes="0"/>
                   <Component id="jScrollPane1" alignment="1" max="32767" attributes="0"/>
+                  <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
@@ -61,30 +61,28 @@
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtDate" pref="106" max="32767" attributes="0"/>
+                  <Component id="txtDate" pref="145" max="32767" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="txtDept" pref="106" max="32767" attributes="0"/>
+                  <Component id="txtDept" pref="127" max="32767" attributes="0"/>
                   <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="txtCurrency" pref="106" max="32767" attributes="0"/>
+                  <Component id="txtCurrency" pref="127" max="32767" attributes="0"/>
                   <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="txtCOA" pref="106" max="32767" attributes="0"/>
+                  <Component id="txtCOA" pref="127" max="32767" attributes="0"/>
                   <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="txtProjectNo" pref="104" max="32767" attributes="0"/>
-                  <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtProjectNo" pref="130" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkCus" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                   <Component id="chkSup" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="btnGenerateZero" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -105,11 +103,10 @@
                               <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="chkSup" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="chkCus" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnGenerateZero" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtProjectNo" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="1" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -132,14 +129,6 @@
               <Connection code="Global.lableFont" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="COA"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnGenerateZero">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Generate Zero"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtDept">
@@ -274,12 +263,12 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="lblCount" min="-2" pref="78" max="-2" attributes="0"/>
-                          <EmptySpace pref="523" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="txtRecord" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                           <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="txtDrAmt" min="-2" pref="157" max="-2" attributes="0"/>
+                          <Component id="txtDrAmt" min="-2" pref="200" max="-2" attributes="0"/>
                       </Group>
                       <Component id="lblMessage" max="32767" attributes="0"/>
                   </Group>
@@ -289,9 +278,9 @@
                       <Component id="jLabel8" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtOFB" alignment="0" min="-2" pref="157" max="-2" attributes="0"/>
-                      <Component id="txtCrAmt" alignment="1" min="-2" pref="157" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="txtCrAmt" pref="200" max="32767" attributes="0"/>
+                      <Component id="txtOFB" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -303,11 +292,11 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblCount" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtDrAmt" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtCrAmt" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtRecord" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -326,7 +315,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.menuFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Cr-Amt"/>
+            <Property name="text" type="java.lang.String" value="Credit Total :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel4">
@@ -334,7 +323,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Total Count :"/>
+            <Property name="text" type="java.lang.String" value="Records"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JFormattedTextField" name="txtCrAmt">
@@ -351,7 +340,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.menuFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Dr-Amt"/>
+            <Property name="text" type="java.lang.String" value="Debit Total :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JFormattedTextField" name="txtOFB">
@@ -361,15 +350,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.amtFont" type="code"/>
             </Property>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblCount">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="text" type="java.lang.String" value="0"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JFormattedTextField" name="txtDrAmt">
@@ -386,7 +366,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.menuFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Out Of Balance"/>
+            <Property name="text" type="java.lang.String" value="Out Of Balance :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblMessage">
@@ -398,6 +378,15 @@
               <Connection code="Color.red" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="."/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JFormattedTextField" name="txtRecord">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="horizontalAlignment" type="int" value="4"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.amtFont" type="code"/>
+            </Property>
           </Properties>
         </Component>
       </SubComponents>

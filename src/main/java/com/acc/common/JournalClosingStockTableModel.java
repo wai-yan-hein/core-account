@@ -16,6 +16,7 @@ import com.common.Util1;
 import com.user.model.Currency;
 import com.user.model.Project;
 import java.awt.HeadlessException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,26 +32,26 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JournalClosingStockTableModel extends AbstractTableModel {
-
+    
     private List<StockOP> listGV = new ArrayList();
     private final String[] columnNames = {"Stock Closing Date", "Dep :", "Code", "COA Name", "Project No", "Currency", "Closing Amount"};
     private JTable parent;
     private AccountRepo accountRepo;
     private DepartmentA department;
     private JProgressBar progress;
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setDepartment(DepartmentA department) {
         this.department = department;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     @Override
     public int getRowCount() {
         if (listGV == null) {
@@ -58,17 +59,17 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return listGV.size();
     }
-
+    
     @Override
     public int getColumnCount() {
         return columnNames.length;
     }
-
+    
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
     }
-
+    
     @Override
     public Object getValueAt(int row, int column) {
         try {
@@ -87,7 +88,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 case 5 ->
                     op.getCurCode();
                 case 6 ->
-                    op.getClAmt();
+                    Util1.toNull(op.getClAmt());
                 default ->
                     null;
             }; //Date
@@ -98,7 +99,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return null;
     }
-
+    
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
@@ -106,18 +107,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             if (op != null) {
                 switch (column) {
                     case 0 -> {
-                        if (Util1.isValidDateFormat(value.toString(), "dd/MM/yyyy")) {
-                            op.setTranDate(Util1.parseDate(value.toString(), "dd/MM/yyyy"));
-                        } else {
-                            int length = value.toString().length();
-                            if (length == 8 || length == 6) {
-                                String toFormatDate = Util1.toFormatDate(value.toString(), length);
-                                op.setTranDate(Util1.parseDate(toFormatDate, "dd/MM/yyyy"));
-                            } else {
-                                op.setTranDate(Util1.getTodayDate());
-                                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");
-                            }
-                        }
+                        op.setTranDate(Util1.formatLocalDate(value.toString()));
                     }
                     case 1 -> {
                         if (value instanceof DepartmentA dep) {
@@ -152,7 +142,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                     }
                     case 6 ->
                         op.setClAmt(Util1.getDouble(value));
-
+                    
                 }
                 save(op, row, column);
                 fireTableRowsUpdated(row, row);
@@ -162,16 +152,16 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
-
+    
     private void foucsTable(int row, int colum) {
         parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(colum, colum);
     }
-
+    
     public StockOP getGl(int row) {
         return listGV.get(row);
     }
-
+    
     @Override
     public Class getColumnClass(int column) {
         if (column == 6) {
@@ -179,54 +169,54 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return String.class;
     }
-
+    
     public List<StockOP> getListGV() {
         return listGV;
     }
-
+    
     public void setListGV(List<StockOP> listGV) {
         this.listGV = listGV;
         fireTableDataChanged();
     }
-
+    
     @Override
     public boolean isCellEditable(int row, int column) {
         StockOP op = listGV.get(row);
         return !op.isTranLock();
-
+        
     }
-
+    
     public void addGV(StockOP op) {
         listGV.add(op);
         fireTableRowsInserted(listGV.size() - 1, listGV.size() - 1);
     }
-
+    
     public void setGVGroup(int row, StockOP op) {
         if (!listGV.isEmpty()) {
             listGV.set(row, op);
             fireTableRowsUpdated(row, row);
         }
     }
-
+    
     public JTable getParent() {
         return parent;
     }
-
+    
     public void setParent(JTable parent) {
         this.parent = parent;
     }
-
+    
     public int getListSize() {
         return listGV.size();
     }
-
+    
     public void delete(int row) {
         if (!listGV.isEmpty()) {
             listGV.remove(row);
             fireTableRowsDeleted(row, row);
         }
     }
-
+    
     private void save(StockOP op, int row, int column) {
         op.setUpdatedDate(LocalDateTime.now());
         if (isValidEntry(op, column)) {
@@ -234,25 +224,24 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 DateLockUtil.showMessage(parent);
                 return;
             }
-            progress.setIndeterminate(true);
             if (op.getKey().getTranCode() == null) {
                 op.setCreatedBy(Global.loginUser.getUserCode());
             } else {
                 op.setUpdatedBy(Global.loginUser.getUserCode());
             }
-            accountRepo.save(op).subscribe((t) -> {
+            progress.setIndeterminate(true);
+            accountRepo.save(op).doOnSuccess((t) -> {
                 if (t != null) {
                     listGV.set(row, t);
-                    addNewRow();
                 }
-            }, (e) -> {
+            }).doOnTerminate(() -> {
+                addNewRow();
                 progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(parent, e.getMessage());
-            });
-
+            }).subscribe();
+            
         }
     }
-
+    
     private boolean isValidEntry(StockOP op, int column) {
         if (op.getTranDate() == null && column > 0) {
             JOptionPane.showMessageDialog(parent, "Invalid Closing Date.");
@@ -268,14 +257,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             return false;
         } else if (Util1.getDouble(op.getClAmt()) <= 0) {
             return false;
-        } else if (!Util1.isDateBetween(op.getTranDate())) {
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date.",
-                    "Validation.", JOptionPane.ERROR_MESSAGE);
-            return false;
         }
         return true;
     }
-
+    
     public boolean hasEmptyRow() {
         boolean status = true;
         if (listGV.isEmpty() || listGV == null) {
@@ -286,10 +271,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 status = false;
             }
         }
-
+        
         return status;
     }
-
+    
     public void addNewRow() {
         if (hasEmptyRow()) {
             StockOP op = new StockOP();
@@ -297,7 +282,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             key.setCompCode(Global.compCode);
             key.setDeptId(Global.deptId);
             op.setKey(key);
-            op.setTranDate(Util1.getTodayDate());
+            op.setTranDate(LocalDate.now());
             op.setCurCode(Global.currency);
             if (department != null) {
                 op.setDeptUsrCode(department.getUserCode());
@@ -305,9 +290,9 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             }
             listGV.add(op);
             fireTableRowsInserted(listGV.size() - 1, listGV.size() - 1);
-
+            
         }
         progress.setIndeterminate(false);
     }
-
+    
 }

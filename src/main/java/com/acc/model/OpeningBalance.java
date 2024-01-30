@@ -4,9 +4,9 @@
  */
 package com.acc.model;
 
-import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class OpeningBalance {
 
     private OpeningKey key;
-    private Date opDate;
+    private LocalDate opDate;
     private String sourceAccId;
     private String srcAccName;
     private String curCode;

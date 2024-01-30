@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class StockPaymentHistoryDialog extends javax.swing.JDialog implements KeyListener {
+public class ContractHistoryDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
      * Creates new form SaleVouSearchDialog
@@ -57,7 +57,7 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
         this.observer = observer;
     }
 
-    public StockPaymentHistoryDialog(JFrame frame, String tranOption) {
+    public ContractHistoryDialog(JFrame frame, String tranOption) {
         super(frame, true);
         this.tranOption = tranOption;
         initComponents();
