@@ -61,8 +61,54 @@ public class Global {
     public static String fontName;
     public static Map<String, String> hmRoleProperty = new HashMap<>();
     public static Map<String, String> hmUser = new HashMap<>();
-    public static Map<String,AccSetting> hmAcc = new HashMap<>();
+    public static Map<String, AccSetting> hmAcc = new HashMap<>();
     public static String currency;
     public static List<DateModel> listDate;
     public static double version = 2.0;
+
+    public static void clear() {
+        lableFont = new java.awt.Font("Arial", 1, 13);
+        amtFont = new java.awt.Font("Arial Nova Light", 1, 14);
+        textFont = new java.awt.Font("Zawgyi-One", 0, 13);
+        menuFont = new java.awt.Font("Zawgyi-One", 1, 14);
+        companyFont = new java.awt.Font("Zawgyi-One", 0, 18);
+        shortCutFont = new java.awt.Font("Arial Nova Light", 0, 3);
+        tblRowHeight = 25;
+        tblHeaderFont = new java.awt.Font("Arial Nova Light", 1, 14);
+        selectionColor = null;
+        uuid = null;
+        batchLock = false;
+        loginUser = null;
+        roleCode = null;
+        compCode = null;
+        sessionId = 0;
+        sessionName = null;
+        loginDate = null;
+        macId = null;
+        machineName = null;
+        deptId = null;
+        mqConStatus = false;
+        x = 0;
+        y = 0;
+        width = 0;
+        height = 0;
+        dateFormat = "dd/MM/yyyy";
+        parentForm = null;
+        dialog = null;
+        startDate = null;
+        endate = null;
+        companyName = null;
+        companyAddress = null;
+        companyPhone = null;
+        reportPath = "report";
+        accountRP = "report/account/";
+        fontName = null;
+        hmRoleProperty.clear();
+        hmUser.clear();
+        hmAcc.clear();
+        currency = null;
+        listDate = null;
+        version = 2.0;
+    }
+
 }

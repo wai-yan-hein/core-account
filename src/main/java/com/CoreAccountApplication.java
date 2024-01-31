@@ -2,9 +2,6 @@ package com;
 
 import com.common.Global;
 import com.common.Util1;
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLaf;
 import com.ui.LoginDialog;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
@@ -111,6 +108,7 @@ public class CoreAccountApplication {
     public static void restart() {
         ApplicationArguments args = context.getBean(ApplicationArguments.class);
         Thread thread = new Thread(() -> {
+            Global.clear();
             SpringApplication.exit(context, () -> 0);
             tray.removeTray();
             serverThread.shutDown();

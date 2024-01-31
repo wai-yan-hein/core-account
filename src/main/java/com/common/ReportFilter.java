@@ -96,6 +96,7 @@ public class ReportFilter {
     private List<String> listCOAGroup;
     private List<String> listPl;
     private List<String> listBs;
+    private boolean second;
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;

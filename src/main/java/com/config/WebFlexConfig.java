@@ -39,7 +39,6 @@ public class WebFlexConfig {
     private Environment environment;
     private final TokenFile<AuthenticationResponse> file = new TokenFile<>(AuthenticationResponse.class);
 
-    @Lazy
     @Bean
     public WebClient inventoryApi() {
         String url = environment.getProperty("inventory.url");
@@ -56,7 +55,6 @@ public class WebFlexConfig {
                 .build();
     }
 
-    @Lazy
     @Bean
     public WebClient accountApi() {
         String url = environment.getProperty("account.url");
@@ -69,6 +67,21 @@ public class WebFlexConfig {
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
+                .clientConnector(reactorClientHttpConnector())
+                .build();
+    }
+
+    @Bean
+    public WebClient accountApiSecond() {
+        String url = environment.getProperty("account.url");
+        return WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(100 * 1024 * 1024))
+                        .build())
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
+                .baseUrl(getUrl(url, 8080))
                 .clientConnector(reactorClientHttpConnector())
                 .build();
     }
@@ -90,7 +103,6 @@ public class WebFlexConfig {
                 .build();
     }
 
-    @Lazy
     @Bean
     public WebClient hmsApi() {
         String url = environment.getProperty("hms.url");
@@ -107,12 +119,11 @@ public class WebFlexConfig {
                 .build();
     }
 
-    @Lazy
     @Bean
     public WebClient dmsApi() {
         String url = environment.getProperty("dms.url");
         int port = Util1.getInteger(environment.getProperty("dms.port"));
-        String dmsUrl =getUrl(url, port);
+        String dmsUrl = getUrl(url, port);
         System.setProperty("dms.url", dmsUrl);
         return WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
