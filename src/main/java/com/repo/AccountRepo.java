@@ -57,6 +57,8 @@ public class AccountRepo {
     @Autowired
     private WebClient accountApi;
     @Autowired
+    private WebClient accountApiSecond;
+    @Autowired
     private boolean localDatabase;
     @Autowired
     private H2Repo h2Repo;
@@ -140,7 +142,7 @@ public class AccountRepo {
         if (localDatabase) {
             return h2Repo.getChartofAccount().collectList();
         }
-        return accountApi.get()
+        return accountApiSecond.get()
                 .uri(builder -> builder.path("/account/getCoa")
                 .queryParam("coaLevel", coaLevel)
                 .queryParam("compCode", Global.compCode)
@@ -689,6 +691,13 @@ public class AccountRepo {
     }
 
     public Mono<ReturnObject> getReport(ReportFilter filter) {
+        if (filter.isSecond()) {
+            return accountApiSecond.post()
+                    .uri("/report/getReport")
+                    .body(Mono.just(filter), ReportFilter.class)
+                    .retrieve()
+                    .bodyToMono(ReturnObject.class);
+        }
         return accountApi.post()
                 .uri("/report/getReport")
                 .body(Mono.just(filter), ReportFilter.class)

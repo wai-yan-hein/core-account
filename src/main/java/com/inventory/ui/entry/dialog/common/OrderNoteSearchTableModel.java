@@ -81,17 +81,9 @@ public class OrderNoteSearchTableModel extends AbstractTableModel {
                         }
                     }
                     case 2 -> {
-                        if (!Util1.isNullOrEmpty(his.getTraderCode())) {
-                            return String.format("%s - %s", his.getTraderCode(), his.getTraderName());
-                        }
-                        //customer
                         return his.getTraderName();
                     }
                     case 3 -> {
-                        if (!Util1.isNullOrEmpty(his.getStockCode())) {
-                            return String.format("%s - %s", his.getStockCode(), his.getStockName());
-                        }
-                        //customer
                         return his.getStockName();
                     }
                     case 4 -> {

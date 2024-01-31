@@ -2340,7 +2340,6 @@ com\inventory\editor\CategoryEditor.class
 com\common\ComponentUtil$1.class
 com\IconManager.class
 com\inventory\ui\entry\dialog\OrderHistoryDialog$8.class
-com\inventory\ui\entry\dialog\OrderNoteHistoryDialog$11.class
 com\h2\dao\SeqDaoImpl.class
 com\user\editor\TextAutoCompleter$1.class
 com\user\editor\TextAutoCompleter$7.class
