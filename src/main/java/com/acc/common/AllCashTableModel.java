@@ -374,6 +374,8 @@ public class AllCashTableModel extends AbstractTableModel {
     private void setSelection(int row, int column) {
         parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(column, column);
+        parent.scrollRectToVisible(parent.getCellRect(row, column, true));
+        parent.requestFocus();
     }
 
     private boolean isValidEntry(Gl gl, int row, int column) {

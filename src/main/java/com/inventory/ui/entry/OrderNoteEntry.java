@@ -89,8 +89,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private FileRenameDialog fileRenameDialog;
     private Map<String, ImageIcon> hmIcon = new HashMap<>();
     private CVFile lastFile;
-    private OrderNote orderNote;
-    private List<OrderFileJoin> orderDetail = new ArrayList<>();
+    private OrderNote note = OrderNote.builder().build();
     private TraderAutoCompleter traderAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private OrderNoteHistoryDialog dialog;
@@ -234,13 +233,6 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         }
     };
 
-//    private void viewFile() {
-//        CVFile file = getSelectFile();
-//        if (file != null) {
-//            String url = dmsRepo.getRootUrl() + "file/view/" + file.getFileId();
-//            openWebBrowser(url);
-//        }
-//    }
     private void viewFile() {
         progress.setIndeterminate(true);
         taskExecutor.execute(() -> {
@@ -484,6 +476,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblPath.setText(file.getFilePath());
             lblUpdate.setText(Util1.toDateStr(file.getUpdatedDate(), "dd/MM/yyyy hh:mm:ss a"));
             lblCreated.setText(Util1.toDateStr(file.getCreatedDate(), "dd/MM/yyyy hh:mm:ss a"));
+        } else {
+            lblFileIcon.setIcon(null);
+            lblFileName.setText(null);
+            lblFileType.setText(null);
+            lblFileSize.setText(null);
+            lblPath.setText(null);
+            lblUpdate.setText(null);
+            lblCreated.setText(null);
         }
     }
 
@@ -529,6 +529,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         d.setVisible(true);
         File[] listFile = d.getFiles();
         progress.setIndeterminate(true);
+        observer.selected("save", false);
         Flux.fromArray(listFile)
                 .flatMap(file -> {
                     String directory = file.getPath();
@@ -537,19 +538,15 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     return dmsRepo.createFile(id, Path.of(directory))
                             .doOnSuccess(t -> {
                                 fileTableModel.addObject(t.getBody());
-                                addOrderFileJoin(t.getBody());
-                            });
-                })
-                .doOnTerminate(() -> progress.setIndeterminate(false))
-                .collectList()
-                .subscribe();
-    }
-
-    private void addOrderFileJoin(CVFile file) {
-        OrderFileJoin fJ = OrderFileJoin.builder().build();
-        fJ.setFileId(file.getFileId());
-        fJ.setCompCode(Global.compCode);
-        orderDetail.add(fJ);
+                            }).doOnError((e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        observer.selected("save", true);
+                        progress.setIndeterminate(false);
+                    }).doOnTerminate(() -> {
+                        observer.selected("save", true);
+                        progress.setIndeterminate(false);
+                    });
+                }).collectList().subscribe();
     }
 
     private void setFileInfo(MouseEvent e) {
@@ -574,10 +571,6 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         }
     }
 
-    private void showPopup(MouseEvent e) {
-//        newPopup.show(btnNew, e.getX(), e.getY());
-    }
-
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -590,28 +583,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private void saveOrder() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
-            if (orderNote.getVouNo() == null) {
-                lblStatus.setText("New");
-                lblStatus.setForeground(Color.green);
-                orderNote.setVouNo(null);
-                orderNote.setCreatedBy(Global.loginUser.getUserCode());
-                orderNote.setUpdatedBy(Global.loginUser.getUserCode());
-                orderNote.setCreatedDate(Util1.getTodayLocalDateTime());
-            } else {
-                lblStatus.setText("Edit");
-                orderNote.setUpdatedBy(Global.loginUser.getUserCode());
-            }
-            orderNote.setVouDate(Util1.convertToLocalDateTime(txtOrderDate.getDate()));
-            orderNote.setCompCode(Global.compCode);
-            orderNote.setDeptId(Global.deptId);
-            orderNote.setMacId(Global.macId);
-            orderNote.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-            orderNote.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-            orderNote.setOrderCode(txtOrderCode.getText());
-            orderNote.setOrderName(txtOrderName.getText());
-            orderNote.setDeleted(false);
-            orderNote.setDetailList(orderDetail);
-            inventoryRepo.save(orderNote).doOnSuccess((t) -> {
+            inventoryRepo.save(note).doOnSuccess((t) -> {
                 clear(true);
             }).doOnError((e) -> {
                 observeMain();
@@ -637,8 +609,39 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
             txtCus.requestFocus();
             return false;
+        } else {
+            if (lblStatus.getText().equals("NEW")) {
+                note.setCreatedBy(Global.loginUser.getUserCode());
+            } else {
+                note.setUpdatedBy(Global.loginUser.getUserCode());
+            }
+            note.setVouNo(txtVouNo.getText());
+            note.setVouDate(Util1.convertToLocalDateTime(txtOrderDate.getDate()));
+            note.setCompCode(Global.compCode);
+            note.setDeptId(Global.deptId);
+            note.setMacId(Global.macId);
+            note.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            note.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
+            note.setOrderCode(txtOrderCode.getText());
+            note.setOrderName(txtOrderName.getText());
+            note.setDeleted(false);
+            note.setDetailList(getOrderFileJoin());
         }
         return true;
+    }
+
+    private List<OrderFileJoin> getOrderFileJoin() {
+        List<OrderFileJoin> listJoin = new ArrayList<>();
+        List<CVFile> listFile = fileTableModel.getListDetail();
+        listFile.forEach((t) -> {
+            var join = OrderFileJoin.builder()
+                    .vouNo(note.getVouNo())
+                    .compCode(note.getCompCode())
+                    .fileId(t.getFileId())
+                    .build();
+            listJoin.add(join);
+        });
+        return listJoin;
     }
 
     private void deleteOrderNote() {
@@ -648,8 +651,8 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    orderNote.setDeleted(true);
-                    inventoryRepo.delete(orderNote).doOnSuccess((t) -> {
+                    note.setDeleted(true);
+                    inventoryRepo.delete(note).doOnSuccess((t) -> {
                         clear(true);
                     }).subscribe();
                 }
@@ -658,8 +661,8 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to restore?", "OrderNote Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
-                    orderNote.setDeleted(false);
-                    inventoryRepo.restore(orderNote).doOnSuccess((t) -> {
+                    note.setDeleted(false);
+                    inventoryRepo.restore(note).doOnSuccess((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
@@ -675,14 +678,17 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private void clear(boolean foucs) {
         disableForm(true);
         assignDefaultValue();
+        setFileDetail(null);
         fileTableModel.clear();
-        orderNote = OrderNote.builder().build();
-        orderDetail = new ArrayList<>();
+        note = OrderNote.builder().build();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
         txtOrderCode.setText(null);
         txtOrderName.setText(null);
+        txtVouNo.setText(null);
+        traderAutoCompleter.setTrader(null);
+        stockAutoCompleter.setStock(null);
         if (foucs) {
             txtCus.requestFocus();
         }
@@ -733,7 +739,6 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         jPanel3 = new javax.swing.JPanel();
         lblPath = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        lblStatus = new javax.swing.JLabel();
         scroll = new javax.swing.JScrollPane();
         tblChild = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
@@ -757,6 +762,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         jLabel13 = new javax.swing.JLabel();
         proStorage = new javax.swing.JProgressBar();
         lblStorage = new javax.swing.JLabel();
+        lblStatus = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -881,32 +887,29 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtOrderDate, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtOrderDate, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtCus, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtStock, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtOrderCode, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtOrderCode, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtOrderName, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(txtOrderName, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
+                .addContainerGap())
         );
-
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCus, txtOrderCode, txtOrderDate, txtOrderName, txtStock, txtVouNo});
-
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -951,8 +954,6 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -963,8 +964,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblPath, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1)
-                    .addComponent(lblStatus))
+                    .addComponent(jButton1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1150,6 +1150,9 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        lblStatus.setFont(Global.menuFont);
+        lblStatus.setText("NEW");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1165,7 +1168,8 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1179,11 +1183,13 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 15, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(scroll, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1323,7 +1329,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     public void setSaleVoucher(OrderNote sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
-            orderNote = sh;
+            note = sh;
             setHeader(sh);
             setDetail(sh);
         }
@@ -1375,7 +1381,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblStatus.setForeground(Color.RED);
             disableForm(false);
             observer.selected("delete", true);
-        } else if (DateLockUtil.isLockDate(orderNote.getVouDate())) {
+        } else if (DateLockUtil.isLockDate(note.getVouDate())) {
             lblStatus.setText(DateLockUtil.MESSAGE);
             lblStatus.setForeground(Color.RED);
             disableForm(false);
@@ -1384,7 +1390,6 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblStatus.setForeground(Color.blue);
             disableForm(true);
         }
-
         txtVouNo.setText(on.getVouNo());
         txtOrderCode.setText(on.getOrderCode());
         txtOrderName.setText(on.getOrderName());
