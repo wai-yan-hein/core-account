@@ -14,8 +14,10 @@ import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.PurHis;
 import com.inventory.model.SaleHis;
+import com.inventory.model.Trader;
 import com.repo.AccountRepo;
 import javax.swing.JFrame;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,20 +27,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AccountOptionDialog extends javax.swing.JDialog {
 
+    @Setter
     private AccountRepo accountRepo;
     private DepartmentAutoCompleter departmentCompleter;
     private COAAutoCompleter cashCompleter;
     private COA3AutoCompleter purhcaseCompleter;
     private COA3AutoCompleter paybleCompleter;
     private Object object;
+    private Trader trader;
     private final String sale = "SALE";
     private final String purchase = "PURCHASE";
     private final String returnIn = "RETURN_IN";
     private final String returnOut = "RETURN_OUT";
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
 
     /**
      * Creates new form PurchaseMoreDialog
@@ -72,8 +72,9 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         }).subscribe();
     }
 
-    public void setObject(Object obj) {
+    public void setObject(Object obj, Trader trader) {
         this.object = obj;
+        this.trader = trader;
         switch (obj) {
             case PurHis p -> {
                 setTitle("Purchase Account Dialog");
@@ -202,9 +203,9 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     private String balanceAcc() {
         if (object instanceof SaleHis) {
-            return Global.hmAcc.get(sale).getBalanceAcc();
+            return Util1.isNull(trader.getAccount(), Global.hmAcc.get(sale).getBalanceAcc());
         } else if (object instanceof PurHis) {
-            return Global.hmAcc.get(purchase).getBalanceAcc();
+            return Util1.isNull(trader.getAccount(), Global.hmAcc.get(purchase).getBalanceAcc());
         }
         return null;
     }

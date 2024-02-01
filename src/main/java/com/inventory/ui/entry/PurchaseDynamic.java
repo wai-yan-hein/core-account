@@ -125,7 +125,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
-    private AccountOptionDialog moreDialog;
+    private AccountOptionDialog optionDialog;
     private WeightHistoryDialog weightHistoryDialog;
     private int type;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
@@ -1453,15 +1453,20 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
     }
 
-    private void moreDialog() {
-        if (moreDialog == null) {
-            moreDialog = new AccountOptionDialog(Global.parentForm);
-            moreDialog.setLocationRelativeTo(null);
-            moreDialog.setAccountRepo(accountRepo);
-            moreDialog.initMain();
+    private void optionDialog() {
+        Trader trader = traderAutoCompleter.getTrader();
+        if (trader != null) {
+            if (optionDialog == null) {
+                optionDialog = new AccountOptionDialog(Global.parentForm);
+                optionDialog.setLocationRelativeTo(null);
+                optionDialog.setAccountRepo(accountRepo);
+                optionDialog.initMain();
+            }
+            optionDialog.setObject(ph, trader);
+            optionDialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Trader.");
         }
-        moreDialog.setObject(ph);
-        moreDialog.setVisible(true);
     }
 
     private void weightDialog() {
@@ -2367,7 +2372,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        moreDialog();
+        optionDialog();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWeightActionPerformed

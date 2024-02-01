@@ -114,7 +114,7 @@ public class OpeningTableModel extends AbstractTableModel {
                     return record.getRelName();
                 }
                 case 3 -> {
-                    return Util1.getDouble(record.getWeight()) == 0 ? null : record.getWeight();
+                    return Util1.toNull(record.getWeight());
                 }
                 case 4 -> {
                     return record.getWeightUnit();
@@ -122,7 +122,7 @@ public class OpeningTableModel extends AbstractTableModel {
 
                 case 5 -> {
                     //qty
-                    return record.getQty();
+                    return Util1.toNull(record.getQty());
                 }
 
                 case 6 -> {
@@ -132,11 +132,11 @@ public class OpeningTableModel extends AbstractTableModel {
 
                 case 7 -> {
                     //price
-                    return Util1.getDouble(record.getPrice()) == 0 ? null : record.getPrice();
+                    return Util1.toNull(record.getPrice());
                 }
                 case 8 -> {
                     //amount
-                    return Util1.getDouble(record.getAmount()) == 0 ? null : record.getAmount();
+                    return Util1.toNull(record.getAmount());
                 }
                 default -> {
                     return new Object();

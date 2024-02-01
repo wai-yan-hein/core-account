@@ -11,6 +11,7 @@ import com.acc.dialog.CurrencyConversionDialog;
 import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.DeleteObj;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
@@ -58,6 +59,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private DepartmentAutoCompleter departmentAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private COA3AutoCompleter cOA3AutoCompleter;
+    private TraderAAutoCompleter traderAAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
     private JournalEntryDialog dialog;
@@ -174,6 +176,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         filter.setGlVouNo(txtVouNo.getText());
         filter.setProjectNo(getProjectNo());
         filter.setCoaCode(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
+        filter.setTraderCode(traderAAutoCompleter.getTrader().getKey().getCode());
         tableModel.clear();
         accountRepo.searchJournal(filter)
                 .doOnNext(tableModel::addObject)
@@ -220,6 +223,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         cOA3AutoCompleter.setObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
         departmentAutoCompleter.setObserver(this);
+        traderAAutoCompleter = new TraderAAutoCompleter(txtTrader, accountRepo, null, true);
+        traderAAutoCompleter.setObserver(this);
         accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
@@ -347,6 +352,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         jLabel8 = new javax.swing.JLabel();
         txtAccount = new javax.swing.JTextField();
         btnEntry1 = new javax.swing.JButton();
+        jLabel9 = new javax.swing.JLabel();
+        txtTrader = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -499,6 +506,18 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             }
         });
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel9.setText("Trader");
+
+        txtTrader.setFont(Global.shortCutFont);
+        txtTrader.setName("txtRefrence"); // NOI18N
+        txtTrader.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtTraderActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -529,6 +548,10 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtAccount)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtTrader)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtProjectNo)
@@ -555,7 +578,9 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                         .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel8)
                         .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnEntry1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnEntry1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel9)
+                        .addComponent(txtTrader, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -620,6 +645,10 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         conversionDialog(null);
     }//GEN-LAST:event_btnEntry1ActionPerformed
 
+    private void txtTraderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTraderActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtTraderActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntry;
@@ -633,6 +662,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane scroll;
@@ -644,6 +674,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRefrence;
+    private javax.swing.JTextField txtTrader;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables
 

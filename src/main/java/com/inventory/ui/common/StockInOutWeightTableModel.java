@@ -11,7 +11,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
-import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockInOutKey;
@@ -138,8 +137,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                     return Util1.toNull(io.getCostPrice());
                 }
                 case 10 -> {
-                    double amt = Util1.getDouble(io.getCostPrice()) * (Util1.getDouble(io.getInQty()) + Util1.getDouble(io.getOutQty()));
-                    return amt == 0 ? null : amt;
+                    return Util1.toNull(getAmount(io));
                 }
                 case 11 -> {
                     return Util1.toNull(io.getTotalWeight());
@@ -190,9 +188,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                             io.setOutUnitCode(s.getPurUnitCode());
                             io.setWeight(s.getWeight());
                             io.setWeightUnit(s.getWeightUnit());
-                            assignDefaultLocation(io, row);
-                            genPattern(s, io, row);
-
+                            addNewRow();
                         }
                     }
                     case 2 -> {
@@ -270,15 +266,12 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
             if (column != 9) {
                 if (Util1.getDouble(io.getCostPrice()) == 0) {
                     String stockCode = io.getStockCode();
-                    if (stockCode != null) {
-                        if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
-                            String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
-                            String vouDateStr = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
-                            inventoryRepo.getPrice(stockCode, vouDateStr, unit).doOnSuccess((t) -> {
-                                io.setCostPrice(t.getAmount());
-                                fireTableRowsUpdated(row, row);
-                            }).subscribe();
-                        }
+                    String locCode = io.getLocCode();
+                    if (stockCode != null && locCode != null) {
+                        inventoryRepo.getWeightAvgPrice(stockCode, locCode).doOnSuccess((t) -> {
+                            io.setCostPrice(t == null ? 0 : t.getAmount());
+                            fireTableRowsUpdated(row, row);
+                        }).subscribe();
                     }
                 }
             }
@@ -292,81 +285,15 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
         }
     }
 
-    private void assignDefaultLocation(StockInOutDetail io, int row) {
-        if (row > 1) {
-            StockInOutDetail up = listStock.get(row - 1);
-            io.setLocCode(up.getLocCode());
-            io.setLocName(up.getLocName());
-        } else {
-            inventoryRepo.getDefaultLocation().subscribe((l) -> {
-                io.setLocCode(l.getKey().getLocCode());
-                io.setLocName(l.getLocName());
-            });
-        }
-
+    private double getAmount(StockInOutDetail io) {
+        return io.getAmount() == 0 ? calAmount(io) : io.getAmount();
     }
 
-    private void genPattern(Stock s, StockInOutDetail iod, int row) {
-        boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
-        if (!disable) {
-            String stockCode = s.getKey().getStockCode();
-            boolean explode = s.isExplode();
-            String date = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
-            inventoryRepo.getPattern(stockCode, date).doOnSuccess((t) -> {
-                if (!t.isEmpty()) {
-                    String input = JOptionPane.showInputDialog("Enter Qty.");
-                    if (Util1.getDouble(input) > 0) {
-                        double totalPrice = 0.0f;
-                        double qty = Util1.getFloat(input);
-                        for (Pattern p : t) {
-                            StockInOutDetail io = new StockInOutDetail();
-                            io.setUserCode(p.getUserCode());
-                            if (explode) {
-                                io.setInQty(qty * p.getQty());
-                                io.setInUnitCode(p.getUnitCode());
-                            } else {
-                                io.setOutQty(qty * p.getQty());
-                                io.setOutUnitCode(p.getUnitCode());
-                            }
-                            double pPrice = Util1.getFloat(p.getPrice());
-                            io.setCostPrice(pPrice);
-                            io.setStockCode(p.getKey().getStockCode());
-                            io.setLocCode(p.getLocCode());
-                            io.setLocName(p.getLocName());
-                            io.setStockName(p.getStockName());
-                            addStockIO(io);
-                            totalPrice += Util1.getFloat(p.getAmount());
-                        }
-                        if (explode) {
-                            iod.setOutQty(qty);
-                            iod.setOutUnitCode(s.getPurUnitCode());
-                            iod.setInUnitCode(null);
-                        } else {
-                            iod.setInQty(qty);
-                            iod.setInUnitCode(s.getPurUnitCode());
-                            iod.setOutUnitCode(null);
-                        }
-                        setRecord(listStock.size());
-                        iod.setCostPrice(totalPrice);
-                    }
-                }
-                addNewRow();
-                focusOnTable();
-                observer.selected("CAL-TOTAL", "CAL-TOTAL");
-            }).subscribe();
-        } else {
-            setSelection(row, 3);
-            addNewRow();
-        }
-    }
-
-    private void focusOnTable() {
-        int rc = parent.getRowCount();
-        if (rc > 1) {
-            parent.setRowSelectionInterval(rc - 1, rc - 1);
-            parent.setColumnSelectionInterval(0, 0);
-            parent.requestFocus();
-        }
+    private double calAmount(StockInOutDetail io) {
+        double qty = io.getInQty() > 0 ? io.getInQty() : io.getOutQty();
+        double bag = io.getInBag() > 0 ? io.getInBag() : io.getOutBag();
+        double price = io.getCostPrice();
+        return qty > 0 ? qty * price : bag * price;
     }
 
     private void calWeight(StockInOutDetail io) {
@@ -450,8 +377,21 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
         if (listStock != null) {
             if (!hasEmptyRow()) {
                 StockInOutDetail pd = new StockInOutDetail();
-                listStock.add(pd);
-                fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
+                int row = listStock.size();
+                if (row > 1) {
+                    StockInOutDetail up = listStock.get(row - 1);
+                    pd.setLocCode(up.getLocCode());
+                    pd.setLocName(up.getLocName());
+                    listStock.add(pd);
+                    fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
+                } else {
+                    inventoryRepo.getDefaultLocation().doOnSuccess((l) -> {
+                        pd.setLocCode(l.getKey().getLocCode());
+                        pd.setLocName(l.getLocName());
+                        listStock.add(pd);
+                        fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
+                    }).subscribe();
+                }
             }
         }
     }

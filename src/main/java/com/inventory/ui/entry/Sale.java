@@ -801,7 +801,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void historySale() {
         if (dialog == null) {
-            dialog = new SaleHistoryDialog(Global.parentForm,1);
+            dialog = new SaleHistoryDialog(Global.parentForm, 1);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);
@@ -1142,14 +1142,19 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void optionDialog() {
-        if (optionDialog == null) {
-            optionDialog = new AccountOptionDialog(Global.parentForm);
-            optionDialog.setLocationRelativeTo(null);
-            optionDialog.setAccountRepo(accountRepo);
-            optionDialog.initMain();
+        Trader trader = traderAutoCompleter.getTrader();
+        if (trader != null) {
+            if (optionDialog == null) {
+                optionDialog = new AccountOptionDialog(Global.parentForm);
+                optionDialog.setLocationRelativeTo(null);
+                optionDialog.setAccountRepo(accountRepo);
+                optionDialog.initMain();
+            }
+            optionDialog.setObject(saleHis, trader);
+            optionDialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Trader.");
         }
-        optionDialog.setObject(saleHis);
-        optionDialog.setVisible(true);
     }
 
     /**

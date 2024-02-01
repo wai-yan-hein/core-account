@@ -604,14 +604,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 return;
             }
             observer.selected("save", false);
-            if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
-                String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                double balance = accountRepo.getTraderBalance(date, traderCode, saleHis.getCurCode(), Global.compCode);
-                if (balance != 0) {
-                    double prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                }
-            }
             progress.setIndeterminate(true);
             saleHis.setListSH(getListDetail());
             saleHis.setListDel(getListDel());
@@ -1247,14 +1239,19 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void optionDialog() {
-        if (optionDialog == null) {
-            optionDialog = new AccountOptionDialog(Global.parentForm);
-            optionDialog.setLocationRelativeTo(null);
-            optionDialog.setAccountRepo(accountRepo);
-            optionDialog.initMain();
+        Trader trader = traderAutoCompleter.getTrader();
+        if (trader != null) {
+            if (optionDialog == null) {
+                optionDialog = new AccountOptionDialog(Global.parentForm);
+                optionDialog.setLocationRelativeTo(null);
+                optionDialog.setAccountRepo(accountRepo);
+                optionDialog.initMain();
+            }
+            optionDialog.setObject(saleHis, trader);
+            optionDialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Trader.");
         }
-        optionDialog.setObject(saleHis);
-        optionDialog.setVisible(true);
     }
 
     private void weightDialog() {

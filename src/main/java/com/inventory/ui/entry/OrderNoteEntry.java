@@ -177,16 +177,19 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         morePopup.setFont(Global.textFont);
         JMenuItem copyLink = new JMenuItem("Copy Link");
         JMenuItem view = new JMenuItem("View");
+        JMenuItem viewBrowser = new JMenuItem("Open with Browser");
         JMenuItem download = new JMenuItem("Download");
         JMenuItem rename = new JMenuItem("Rename");
         JMenuItem trash = new JMenuItem("Move to trash");
         copyLink.addActionListener(menuListener);
         view.addActionListener(menuListener);
+        viewBrowser.addActionListener(menuListener);
         download.addActionListener(menuListener);
         rename.addActionListener(menuListener);
         trash.addActionListener(menuListener);
         morePopup.add(copyLink);
         morePopup.add(view);
+        morePopup.add(viewBrowser);
         morePopup.add(download);
         morePopup.add(rename);
         morePopup.addSeparator();
@@ -216,6 +219,8 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     createFolder();
                 case "View" ->
                     viewFile();
+                case "Open with Browser" ->
+                    openFileBrowser();
                 case "Rename" ->
                     renameFile();
                 case "Copy Link" ->
@@ -228,7 +233,6 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     deleteForever();
                 case "Download" ->
                     downloadFile();
-
             }
         }
     };
@@ -239,9 +243,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             Opener opener = new Opener();
             CVFile file = getSelectFile();
             if (file != null) {
-                progress.setIndeterminate(false);
                 String url = dmsRepo.getRootUrl() + "file/view/" + file.getFileId();
-
                 // Check if the image is already in the cache
                 ImagePlus cachedImage = ImageCache.getImage(url);
                 if (cachedImage != null) {
@@ -258,9 +260,12 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                         JOptionPane.showMessageDialog(this, "File not support viewing. Please download.", "Access Denied", JOptionPane.WARNING_MESSAGE);
                     }
                 }
+                progress.setIndeterminate(false);
             }
         });
     }
+
+   
 
     private void showImage(ImagePlus imagePlus) {
         // Display the ImagePlus instance
@@ -349,6 +354,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).doOnTerminate(() -> {
                 progress.setIndeterminate(false);
             }).subscribe();
+        }
+    }
+
+    private void openFileBrowser() {
+        CVFile file = getSelectFile();
+        if (file != null) {
+            String url = dmsRepo.getRootUrl() + "file/view/" + file.getFileId();
+            openWebBrowser(url);
         }
     }
 
@@ -530,6 +543,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         File[] listFile = d.getFiles();
         progress.setIndeterminate(true);
         observer.selected("save", false);
+        lblPath.setText("Please wait...");
         Flux.fromArray(listFile)
                 .flatMap(file -> {
                     String directory = file.getPath();
@@ -546,7 +560,9 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                         observer.selected("save", true);
                         progress.setIndeterminate(false);
                     });
-                }).collectList().subscribe();
+                }).collectList().doOnTerminate(() -> {
+            lblPath.setText("");
+        }).subscribe();
     }
 
     private void setFileInfo(MouseEvent e) {

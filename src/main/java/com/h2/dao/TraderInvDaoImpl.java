@@ -62,7 +62,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
             filter += "and (multi =true or type ='" + type + "')";
         }
         String sql = """
-                     select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days
+                     select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days,account
                      from trader
                      """ + filter + "\n" +
                 "order by user_code,trader_name\n" +
@@ -85,6 +85,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
                     t.setAddress(rs.getString("address"));
                     t.setCreditAmt(rs.getFloat("credit_amt"));
                     t.setCreditDays(rs.getInt("credit_days"));
+                    t.setAccount(rs.getString("account"));
                     list.add(t);
                 }
             }

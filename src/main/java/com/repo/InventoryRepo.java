@@ -2234,6 +2234,21 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<General> getWeightAvgPrice(String stockCode, String locCode) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getWeightAvgPrice")
+                .queryParam("stockCode", stockCode)
+                .queryParam("locCode", locCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<UnitRelationDetail>> getRelationDetail(String code, Integer deptId) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUnitRelationDetail")

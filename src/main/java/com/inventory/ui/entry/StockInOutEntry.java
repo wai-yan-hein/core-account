@@ -260,9 +260,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         weightTableModel.setVouDate(txtDate);
         weightTableModel.setInventoryRepo(inventoryRepo);
         weightTableModel.setLblRec(lblRec);
-        weightTableModel.addNewRow();
         weightTableModel.setParent(tblStock);
         weightTableModel.setObserver(this);
+        weightTableModel.addNewRow();
         tblStock.setModel(weightTableModel);
         monoLoc = inventoryRepo.getLocation();
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(80);//code
@@ -976,7 +976,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Total Out Qty");
 
-        lblStatus.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
+        lblStatus.setFont(Global.lableFont);
         lblStatus.setText("NEW");
 
         txtOutQty.setEditable(false);
@@ -1022,7 +1022,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addComponent(lblRec, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
                 .addComponent(txtInQty, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1056,7 +1056,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addComponent(jButton1)
                         .addComponent(lblWeight)
                         .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lblStatus))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1078,7 +1078,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())

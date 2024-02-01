@@ -778,6 +778,7 @@ com\inventory\ui\entry\AccountSettingEntry$4.class
 com\inventory\ui\entry\dialog\common\PurOrderHisVouSearchTableModel.class
 com\acc\entry\DrCrVoucher$9.class
 com\user\model\AuthenticationRequest.class
+com\acc\entry\Journal$10.class
 com\inventory\ui\setup\dialog\ExpenseSetupDialog$4.class
 com\inventory\editor\MachineInfoAutoCompleter$2.class
 com\inventory\model\SaleExpenseKey.class
