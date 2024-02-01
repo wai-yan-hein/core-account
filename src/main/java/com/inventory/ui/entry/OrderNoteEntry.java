@@ -703,6 +703,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         txtOrderCode.setText(null);
         txtOrderName.setText(null);
         txtVouNo.setText(null);
+        txtOrderDate.setDate(Util1.getTodayDate());
         traderAutoCompleter.setTrader(null);
         stockAutoCompleter.setStock(null);
         if (foucs) {
@@ -1406,6 +1407,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblStatus.setForeground(Color.blue);
             disableForm(true);
         }
+        txtOrderDate.setDate(Util1.convertToDate(on.getVouDate()));
         txtVouNo.setText(on.getVouNo());
         txtOrderCode.setText(on.getOrderCode());
         txtOrderName.setText(on.getOrderName());
