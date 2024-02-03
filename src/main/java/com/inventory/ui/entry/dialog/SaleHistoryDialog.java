@@ -231,7 +231,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     public void search() {
-        setVisible(true);
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
@@ -270,9 +269,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     tblVoucher.requestFocus();
-                   // setVisible(true);
+                    // setVisible(true);
                 }).subscribe();
-
+        setVisible(true);
     }
 
     private void clearModel() {

@@ -26,8 +26,8 @@ public class StockPaymentQtyTableModel extends AbstractTableModel {
     private List<StockPaymentDetail> listDetail = new ArrayList<>();
     private List<StockPaymentDetailKey> listDelete = new ArrayList<>();
     private final String[] columnNames = {"Date", "Vou No", "Contract No", "Remark",
-        "Reference", "Stock Code", "Stock Name", "Qty", "Balance Qty", "Issue Qty",
-        "Single Issue"};
+        "Reference", "Stock Code", "Stock Name", "Qty", "Balance Qty", "Qty",
+        "Single"};
     private JTable table;
     private SelectionObserver observer;
 
@@ -84,6 +84,10 @@ public class StockPaymentQtyTableModel extends AbstractTableModel {
             }
         }
         return String.class;
+    }
+
+    public void changeColumnName(int column, String name) {
+        columnNames[column] = name;
     }
 
     public List<StockPaymentDetail> getPaymentList() {

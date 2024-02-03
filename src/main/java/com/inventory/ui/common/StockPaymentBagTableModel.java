@@ -87,7 +87,7 @@ public class StockPaymentBagTableModel extends AbstractTableModel {
     }
 
     public List<StockPaymentDetail> getPaymentList() {
-        List<StockPaymentDetail> filter = listDetail.stream().filter((t)->t.getPayBag()>0).toList();
+        List<StockPaymentDetail> filter = listDetail.stream().filter((t) -> t.getPayBag() > 0).toList();
         return filter;
     }
 
@@ -178,6 +178,10 @@ public class StockPaymentBagTableModel extends AbstractTableModel {
         listDelete.add(key);
         listDetail.remove(row);
         fireTableRowsDeleted(row, row);
+    }
+
+    public void changeColumnName(int column, String name) {
+        columnNames[column] = name;
     }
 
     public void setPayment(StockPaymentDetail t, int row) {

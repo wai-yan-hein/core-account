@@ -301,7 +301,6 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
     }
 
     private void clear() {
-        txtOPDate.setDate(Util1.getTodayDate());
         txtRemark.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);

@@ -801,6 +801,22 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 payment.initMain();
                 return payment;
             }
+            case "Paddy Receive", "Rice Receive" -> {
+                int type = 0;
+                switch (menuName) {
+                    case "Paddy Receive" ->
+                        type = StockPaymentEntry.QTY;
+                    case "Rice Receive" ->
+                        type = StockPaymentEntry.BAG;
+                }
+                StockPaymentEntry payment = new StockPaymentEntry("S", type);
+                payment.setInventoryRepo(inventoryRepo);
+                payment.setName(menuName);
+                payment.setObserver(this);
+                payment.setProgress(progress);
+                payment.initMain();
+                return payment;
+            }
             case "Consign Issue" -> {
                 ConsignEntry stockIss = new ConsignEntry("I");
                 stockIss.setUserRepo(userRepo);
@@ -975,6 +991,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 gLReport.setProgress(progress);
                 gLReport.setAccountRepo(accounRepo);
                 gLReport.setUserRepo(userRepo);
+                gLReport.setTaskExecutor(taskExecutor);
                 gLReport.initMain();
                 return gLReport;
             }
@@ -985,6 +1002,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 aparReport.setProgress(progress);
                 aparReport.setAccountRepo(accounRepo);
                 aparReport.setUserRepo(userRepo);
+                aparReport.setTaskExecutor(taskExecutor);
                 aparReport.initMain();
                 return aparReport;
             }

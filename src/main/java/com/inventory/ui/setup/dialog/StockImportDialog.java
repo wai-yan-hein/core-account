@@ -289,6 +289,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         stockType.setCreatedBy(Global.loginUser.getUserCode());
         stockType.setCreatedDate(LocalDateTime.now());
         stockType.setMacId(Global.macId);
+        stockType.setActive(true);
         return inventoryRepo.saveStockType(stockType).block();
     }
 
@@ -322,6 +323,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         category.setMacId(Global.macId);
         category.setUserCode(Global.loginUser.getUserCode());//txtUserCode.getText()
         category.setCatName(str);
+        category.setActive(true);
         return inventoryRepo.saveCategory(category).block();
 
     }
@@ -355,6 +357,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         brand.setCreatedBy(Global.loginUser.getUserCode());
         brand.setCreatedDate(LocalDateTime.now());
         brand.setMacId(Global.macId);
+        brand.setActive(true);
         return inventoryRepo.saveBrand(brand).block();
     }
 

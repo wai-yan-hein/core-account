@@ -73,28 +73,32 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jLabel17" linkSize="14" alignment="0" min="-2" pref="50" max="-2" attributes="0"/>
-                      <Component id="jLabel2" linkSize="14" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabel4" linkSize="14" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="jLabel17" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel4" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel2" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="txtCus" max="32767" attributes="0"/>
-                      <Component id="txtSaleDate" alignment="1" pref="178" max="32767" attributes="0"/>
+                      <Component id="txtSaleDate" alignment="1" pref="187" max="32767" attributes="0"/>
                       <Component id="txtVouNo" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jLabel3" linkSize="14" min="-2" pref="57" max="-2" attributes="0"/>
-                      <Component id="jLabel22" linkSize="14" min="-2" pref="57" max="-2" attributes="0"/>
-                      <Component id="jLabel21" linkSize="14" min="-2" pref="57" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="jLabel22" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel3" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel21" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtRemark" pref="154" max="32767" attributes="0"/>
+                      <Component id="txtRemark" pref="163" max="32767" attributes="0"/>
                       <Component id="txtSaleman" max="32767" attributes="0"/>
-                      <Component id="txtLocation" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="txtLocation" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="rdoPay" min="-2" pref="77" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -102,9 +106,9 @@
                       <Component id="jLabel6" linkSize="14" max="32767" attributes="0"/>
                       <Component id="jLabel9" linkSize="14" min="-2" pref="62" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="txtDueDate" alignment="0" pref="176" max="32767" attributes="0"/>
+                      <Component id="txtDueDate" alignment="0" pref="185" max="32767" attributes="0"/>
                       <Component id="txtCurrency" max="32767" attributes="0"/>
                       <Component id="txtReference" max="32767" attributes="0"/>
                   </Group>
@@ -113,7 +117,7 @@
                       <Group type="102" attributes="0">
                           <Component id="carNoLabel" min="-2" pref="64" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtCarNo" pref="157" max="32767" attributes="0"/>
+                          <Component id="txtCarNo" pref="172" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
                           <Component id="carNoLabel1" min="-2" pref="64" max="-2" attributes="0"/>
@@ -144,6 +148,7 @@
                       <Component id="txtCarNo" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="carNoLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtVouNo" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdoPay" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -463,6 +468,18 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton3ActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JRadioButton" name="rdoPay">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="S - Pay"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdoPayActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

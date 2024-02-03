@@ -143,15 +143,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void delete(int row) {
-        switch (tranOption) {
-            case "C" -> {
-                switch (type) {
-                    case QTY ->
-                        qtyTableModel.delete(row);
-                    case BAG ->
-                        bagTableModel.delete(row);
-                }
-            }
+        switch (type) {
+            case QTY ->
+                qtyTableModel.delete(row);
+            case BAG ->
+                bagTableModel.delete(row);
         }
     }
 
@@ -189,15 +185,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void initModel() {
-        switch (tranOption) {
-            case "C" -> {
-                switch (type) {
-                    case QTY ->
-                        initTableQty();
-                    case BAG ->
-                        initTableBag();
-                }
-            }
+        switch (type) {
+            case QTY ->
+                initTableQty();
+            case BAG ->
+                initTableBag();
         }
     }
 
@@ -212,6 +204,8 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void initTableQty() {
+        qtyTableModel.changeColumnName(9, tranOption.equals("C") ? "Issue Qty" : "Receive Qty");
+        qtyTableModel.changeColumnName(10, tranOption.equals("C") ? "Single Isuue" : "Single Receive");
         qtyTableModel.setObserver(this);
         qtyTableModel.setTable(tblPayment);
         tblPayment.setModel(qtyTableModel);
@@ -235,6 +229,9 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void initTableBag() {
+
+        bagTableModel.changeColumnName(9, tranOption.equals("C") ? "Issue Qty" : "Receive Qty");
+        bagTableModel.changeColumnName(10, tranOption.equals("C") ? "Single Isuue" : "Single Receive");
         bagTableModel.setObserver(this);
         bagTableModel.setTable(tblPayment);
         tblPayment.setModel(bagTableModel);
@@ -263,27 +260,21 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             if (lblStatus.getText().equals("NEW")) {
                 progress.setIndeterminate(true);
                 String traderCode = trader.getKey().getCode();
-                switch (tranOption) {
-                    case "C" -> {
-                        switch (type) {
-                            case QTY ->
-                                inventoryRepo.getTraderStockBalanceQty(traderCode, tranOption).doOnSuccess((t) -> {
-                                    qtyTableModel.setListDetail(t);
-                                }).doOnTerminate(() -> {
-                                    calTotalPayment();
-                                    progress.setIndeterminate(false);
-                                }).subscribe();
-                            case BAG ->
-                                inventoryRepo.getTraderStockBalanceBag(traderCode, tranOption).doOnSuccess((t) -> {
-                                    bagTableModel.setListDetail(t);
-                                }).doOnTerminate(() -> {
-                                    calTotalPayment();
-                                    progress.setIndeterminate(false);
-                                }).subscribe();
-                            default ->
-                                throw new AssertionError();
-                        }
-                    }
+                switch (type) {
+                    case QTY ->
+                        inventoryRepo.getTraderStockBalanceQty(traderCode, tranOption).doOnSuccess((t) -> {
+                            qtyTableModel.setListDetail(t);
+                        }).doOnTerminate(() -> {
+                            calTotalPayment();
+                            progress.setIndeterminate(false);
+                        }).subscribe();
+                    case BAG ->
+                        inventoryRepo.getTraderStockBalanceBag(traderCode, tranOption).doOnSuccess((t) -> {
+                            bagTableModel.setListDetail(t);
+                        }).doOnTerminate(() -> {
+                            calTotalPayment();
+                            progress.setIndeterminate(false);
+                        }).subscribe();
                     default ->
                         throw new AssertionError();
                 }
@@ -302,48 +293,33 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private boolean isValidDetail() {
-        return switch (tranOption) {
-            case "C" ->
-                switch (type) {
-                    case QTY ->
-                        qtyTableModel.isValidEntry();
-                    case BAG ->
-                        bagTableModel.isValidEntry();
-                    default ->
-                        false;
-                };
+        return switch (type) {
+            case QTY ->
+                qtyTableModel.isValidEntry();
+            case BAG ->
+                bagTableModel.isValidEntry();
             default ->
                 false;
         };
     }
 
     private List<StockPaymentDetail> getPaymentList() {
-        return switch (tranOption) {
-            case "C" ->
-                switch (type) {
-                    case QTY ->
-                        qtyTableModel.getListDetail();
-                    case BAG ->
-                        bagTableModel.getListDetail();
-                    default ->
-                        null;
-                };
+        return switch (type) {
+            case QTY ->
+                qtyTableModel.getListDetail();
+            case BAG ->
+                bagTableModel.getListDetail();
             default ->
                 null;
         };
     }
 
     private List<StockPaymentDetailKey> getListDelete() {
-        return switch (tranOption) {
-            case "C" ->
-                switch (type) {
-                    case QTY ->
-                        qtyTableModel.getListDelete();
-                    case BAG ->
-                        bagTableModel.getListDelete();
-                    default ->
-                        null;
-                };
+        return switch (type) {
+            case QTY ->
+                qtyTableModel.getListDelete();
+            case BAG ->
+                bagTableModel.getListDelete();
             default ->
                 null;
         };
@@ -384,16 +360,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private String getReportName() {
-        return switch (tranOption) {
-            case "C" ->
-                switch (type) {
-                    case QTY ->
-                        "StockIssueQtyVoucherA5";
-                    case BAG ->
-                        "StockIssueBagVoucherA5";
-                    default ->
-                        null;
-                };
+        return switch (type) {
+            case QTY ->
+                "StockIssueQtyVoucherA5";
+            case BAG ->
+                "StockIssueBagVoucherA5";
             default ->
                 null;
         };
@@ -432,7 +403,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         param.put("p_vou_date", Util1.getDate(p.getVouDate()));
         param.put("p_vou_time", Util1.getTime(p.getVouDate()));
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
-        param.put("p_tran_option",tranOption);
+        param.put("p_tran_option", tranOption);
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(p.getReference(), t.getTraderName()));
@@ -507,15 +478,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void clearModel() {
-        switch (tranOption) {
-            case "C" -> {
-                switch (type) {
-                    case QTY ->
-                        qtyTableModel.clear();
-                    case BAG ->
-                        bagTableModel.clear();
-                }
-            }
+        switch (type) {
+            case QTY ->
+                qtyTableModel.clear();
+            case BAG ->
+                bagTableModel.clear();
         }
     }
 
@@ -582,15 +549,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void setListDetail(List<StockPaymentDetail> list) {
-        switch (tranOption) {
-            case "C" -> {
-                switch (type) {
-                    case QTY ->
-                        qtyTableModel.setListDetail(list);
-                    case BAG ->
-                        bagTableModel.setListDetail(list);
-                }
-            }
+        switch (type) {
+            case QTY ->
+                qtyTableModel.setListDetail(list);
+            case BAG ->
+                bagTableModel.setListDetail(list);
         }
     }
 

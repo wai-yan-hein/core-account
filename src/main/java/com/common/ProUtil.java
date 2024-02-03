@@ -79,6 +79,7 @@ public class ProUtil {
     public static final String DISABLE_PUR = "disable.calculate.purchase.stock";
     public static final String DISABLE_RETIN = "disable.calculate.returnin.stock";
     public static final String DISABLE_RETOUT = "disable.calculate.returnout.stock";
+    public static final String DISABLE_PATTERN_IO = "disable.pattern.stockio";
     public static final String STOCK_IO_A5 = "stockio.report.A5";
     public static final String SALE_PRICE_OPTION = "sale.price.option";
     public static final String DISABLE_DR_VOUCHER = "disable.dr.voucher";
@@ -102,6 +103,9 @@ public class ProUtil {
     public static final String SALE_VOU = "report.sale.voucher";
     public static final String SALE_VOU_A5 = "report.sale.voucher";
     public static final String SALE_VOU_A4 = "report.sale.A4";
+    public static final String STOCK_USE_WEIHGT = "stock.use.weight";
+    public static final String DEFAULT_STOCK_REC = "default.stock.receivable";
+    public static final String DEFAULT_STOCK_PAY = "default.stock.payable";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
@@ -200,7 +204,7 @@ public class ProUtil {
     }
 
     public static boolean isUseWeight() {
-        return Util1.getBoolean(Global.hmRoleProperty.get("stock.use.weight"));
+        return Util1.getBoolean(Global.hmRoleProperty.get(STOCK_USE_WEIHGT));
     }
 
     public static boolean isUseWeightPoint() {

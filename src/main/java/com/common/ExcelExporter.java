@@ -4,6 +4,8 @@
  */
 package com.common;
 
+import com.acc.model.VApar;
+import com.acc.model.VTriBalance;
 import com.inventory.model.General;
 import com.inventory.model.Stock;
 import com.inventory.model.VOpening;
@@ -1495,6 +1497,125 @@ public class ExcelExporter {
                 observer.selected(ERROR, e.getMessage());
             }
         });
+    }
+
+    public void exportTriBalance(List<VTriBalance> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createTriBalance(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete export in download foler.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createTriBalance(Workbook workbook, List<VTriBalance> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Code", "Chart of Account", "Currency", "Dr Amt", "Cr Amt"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (VTriBalance d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getCoaUsrCode());
+            row.createCell(1).setCellValue(d.getCoaName());
+            row.createCell(2).setCellValue(d.getCurCode());
+            row.createCell(3).setCellValue(d.getDrAmt());
+            row.createCell(4).setCellValue(d.getCrAmt());
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportArAp(List<VApar> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createArAp(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete export in download foler.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createArAp(Workbook workbook, List<VApar> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Code", "Name", "Account", "Currency", "Dr Amt", "Cr Amt"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (VApar d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getUserCode());
+            row.createCell(1).setCellValue(d.getTraderName());
+            row.createCell(2).setCellValue(d.getCoaName());
+            row.createCell(3).setCellValue(d.getCurCode());
+            row.createCell(4).setCellValue(d.getDrAmt());
+            row.createCell(5).setCellValue(d.getCrAmt());
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
     }
 
     private void createOpeningTemplate(Workbook workbook, List<Stock> data, String sheetName,

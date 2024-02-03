@@ -45,6 +45,8 @@ public class StockBrand {
     private String intgUpdStatus;
     @Column(name = "dept_id")
     private Integer deptId;
+    @Column(name = "active")
+    private boolean active;
 
     public StockBrand() {
     }

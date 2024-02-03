@@ -158,11 +158,8 @@ public class LandingHistoryDialog extends javax.swing.JDialog implements KeyList
             JOptionPane.showMessageDialog(this, e.getMessage());
         }).doOnTerminate(() -> {
             progress.setIndeterminate(false);
-            if (!isShowing()) {
-                setVisible(true);
-            }
         }).subscribe();
-
+        setVisible(true);
     }
 
     private void select() {

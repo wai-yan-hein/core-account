@@ -170,7 +170,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     public void search() {
-        setVisible(true);
         progress.setIndeterminate(true);
         txtRecord.setValue(0);
         tableModel.clear();
@@ -208,6 +207,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             btnSearch.setEnabled(true);
             tblVoucher.requestFocus();
         }).subscribe();
+        setVisible(true);
     }
 
     private void calTotal() {

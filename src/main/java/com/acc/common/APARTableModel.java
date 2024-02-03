@@ -9,6 +9,8 @@ import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class APARTableModel extends AbstractTableModel {
 
     private List<VApar> listAPAR = new ArrayList();
+    @Setter
+    @Getter
+    private List<VApar> listOrg = new ArrayList<>();
     private String[] columnNames = {"Code", "Trader Name", "Account", "Currency", "Dr-Amt", "Cr-Amt"};
 
     @Override
@@ -134,7 +139,7 @@ public class APARTableModel extends AbstractTableModel {
     }
 
     public void clear() {
-        listAPAR.clear();
+        listAPAR = new ArrayList<>();
         fireTableDataChanged();
     }
 

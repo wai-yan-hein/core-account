@@ -109,6 +109,10 @@ public class PurHis implements java.io.Serializable, Cloneable {
     private String deptCode;
     @Column(name = "grand_total")
     private double grandTotal;
+    @Column(name = "s_rec")
+    private boolean sRec;
+    @Column(name = "tran_source")
+    private int tranSource;
     @Transient
     private String status = "STATUS";
     @Transient

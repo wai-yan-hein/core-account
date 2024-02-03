@@ -17,6 +17,7 @@ import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.TraderA;
 import com.acc.model.VApar;
 import com.common.ComponentUtil;
+import com.common.ExcelExporter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -26,8 +27,6 @@ import com.common.Util1;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -42,8 +41,8 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
@@ -52,6 +51,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -65,7 +65,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     /**
      * Creates new form AparReport
      */
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
     private final APARTableModel aPARTableModel = new APARTableModel();
     private DateAutoCompleter dateAutoCompleter;
@@ -76,26 +78,15 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private ProjectAutoCompleter projectAutoCompleter;
     private TableFilterHeader filterHeader;
     private boolean isApPrCal = false;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
+    @Setter
+    private TaskExecutor taskExecutor;
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
+    private final ExcelExporter exporter = new ExcelExporter();
 
     public AparReport() {
         initComponents();
@@ -243,35 +234,39 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setCoaCode(getCoaCode());
             filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
             decorator.refreshButton(filter.getFromDate());
-            accountRepo.getArAp(filter).subscribe((t) -> {
+            accountRepo.getArAp(filter).doOnSuccess((t) -> {
+                aPARTableModel.setListOrg(t);
                 aPARTableModel.setListAPAR(t);
-                calTotal(t);
-                if (chkZero.isSelected()) {
-                    removeZero();
-                }
+            }).doOnError((e) -> {
+                isApPrCal = false;
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }).doOnTerminate(() -> {
+                calTotal();
+                removeZero();
                 isApPrCal = false;
                 progress.setIndeterminate(false);
                 long end = new GregorianCalendar().getTimeInMillis();
                 long pt = (end - start) / 1000;
                 lblCalTime.setText(pt + " s");
                 tblAPAR.requestFocus();
-            }, (e) -> {
-                isApPrCal = false;
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
         }
     }
 
     private void removeZero() {
-        List<VApar> listTBAL = aPARTableModel.getListAPAR();
-        if (!listTBAL.isEmpty()) {
-            listTBAL.removeIf((e) -> Util1.getDouble(e.getDrAmt()) + Util1.getDouble(e.getCrAmt()) == 0);
-            aPARTableModel.setListAPAR(listTBAL);
+        if (chkZero.isSelected()) {
+            List<VApar> mutableList = new ArrayList<>(aPARTableModel.getListAPAR());
+            List<VApar> listFilter = mutableList.stream().filter(t -> t.getDrAmt() + t.getCrAmt() != 0).toList();
+            aPARTableModel.setListAPAR(listFilter);
+
+        } else {
+            aPARTableModel.setListAPAR(aPARTableModel.getListOrg());
         }
     }
 
-    private void calTotal(List<VApar> list) {
+    private void calTotal() {
+        List<VApar> list = aPARTableModel.getListAPAR();
         double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
         double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
         txtDrAmt.setValue(drAmt);
@@ -289,17 +284,17 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         }).subscribe();
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, true);
         cOAAutoCompleter.setObserver(this);
-        accountRepo.getTraderAccount().collectList().subscribe((t) -> {
+        accountRepo.getTraderAccount().collectList().doOnSuccess((t) -> {
             cOAAutoCompleter.setListCOA(t);
-        });
+        }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
 
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
@@ -333,6 +328,12 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             log.error("printARAP : " + ex.getMessage());
         }
 
+    }
+
+    private void exportExcel() {
+        exporter.setObserver(this);
+        exporter.setTaskExecutor(taskExecutor);
+        exporter.exportArAp(aPARTableModel.getListAPAR(), "AR-AP");
     }
 
     public void clear() {
@@ -382,6 +383,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         lblCalTime = new javax.swing.JLabel();
+        btnExcel = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         chkZero = new javax.swing.JCheckBox();
         panelDate = new javax.swing.JPanel();
@@ -576,6 +579,16 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
+        btnExcel.setFont(Global.lableFont);
+        btnExcel.setText("Export Excel");
+        btnExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcelActionPerformed(evt);
+            }
+        });
+
+        lblMessage.setText(".");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -584,7 +597,10 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnExcel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel5))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel6)
@@ -612,7 +628,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtFOFB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel5)
+                    .addComponent(btnExcel)
+                    .addComponent(lblMessage))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -678,7 +696,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -736,15 +754,17 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     private void chkZeroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkZeroActionPerformed
         // TODO add your handling code here:
-        if (chkZero.isSelected()) {
-            removeZero();
-        } else {
-            searchAPAR();
-        }
+        removeZero();
     }//GEN-LAST:event_chkZeroActionPerformed
+
+    private void btnExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcelActionPerformed
+        // TODO add your handling code here:
+        exportExcel();
+    }//GEN-LAST:event_btnExcelActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExcel;
     private javax.swing.JCheckBox chkZero;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -759,6 +779,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCalTime;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JPanel panelDate;
     private javax.swing.JTable tblAPAR;
     private javax.swing.JTextField txtAccount;
@@ -780,8 +801,17 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 dateAutoCompleter.getDateModel().setStartDate(date);
                 dateAutoCompleter.getDateModel().setEndDate(date);
                 txtDate.setText(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
+            } else if (source.equals(ExcelExporter.MESSAGE)) {
+                lblMessage.setText(selectObj.toString());
+            } else if (source.equals(ExcelExporter.FINISH)) {
+                btnExcel.setEnabled(true);
+                lblMessage.setText(selectObj.toString());
+            } else if (source.equals(ExcelExporter.ERROR)) {
+                btnExcel.setEnabled(true);
+                lblMessage.setText(selectObj.toString());
+            } else {
+                searchAPAR();
             }
-            searchAPAR();
         }
     }
 

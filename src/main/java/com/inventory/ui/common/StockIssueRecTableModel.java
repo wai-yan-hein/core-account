@@ -7,7 +7,6 @@ package com.inventory.ui.common;
 
 import com.repo.InventoryRepo;
 import com.common.Global;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Stock;
@@ -16,7 +15,6 @@ import com.inventory.model.ConsignHisDetailKey;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -36,15 +34,6 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     private final List<ConsignHisDetailKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
-    private JLabel lblRec;
-
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
 
     public JDateChooser getVouDate() {
         return vouDate;
@@ -129,7 +118,6 @@ public class StockIssueRecTableModel extends AbstractTableModel {
                     case 0 -> {
                         //code
                         return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
-//                          return record.getUserCode();                          
                     }
                     case 1 -> {
                         return record.getStockName();
@@ -205,7 +193,6 @@ public class StockIssueRecTableModel extends AbstractTableModel {
                 }
                 calculateAmount(pd);
                 fireTableRowsUpdated(row, row);
-                setRecord(listDetail.size() - 1);
                 observer.selected("CAL-TOTAL", "CAL-TOTAL");
                 parent.requestFocus();
             }
@@ -213,13 +200,6 @@ public class StockIssueRecTableModel extends AbstractTableModel {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
-
-    private void setRecord(int size) {
-        if (lblRec != null) {
-            lblRec.setText("Records : " + size);
-        }
-    }
-
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
@@ -242,12 +222,12 @@ public class StockIssueRecTableModel extends AbstractTableModel {
     }
 
     public List<ConsignHisDetail> getListDetail() {
-        return listDetail;
+        List<ConsignHisDetail> filter = listDetail.stream().filter((t) -> !Util1.isNullOrEmpty(t.getStockCode())).toList();
+        return filter;
     }
 
     public void setListDetail(List<ConsignHisDetail> listDetail) {
         this.listDetail = listDetail;
-        setRecord(listDetail.size());
         fireTableDataChanged();
     }
 

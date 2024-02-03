@@ -38,6 +38,8 @@
                                       <Component id="jButton2" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="jButton4" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jButton5" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -97,6 +99,7 @@
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jButton2" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jButton4" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jButton5" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -134,7 +137,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtCustomer" pref="82" max="32767" attributes="0"/>
+                              <Component id="txtCustomer" pref="75" max="32767" attributes="0"/>
                               <Component id="txtSupplier" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
                               <Component id="txtDep" max="32767" attributes="0"/>
@@ -436,29 +439,13 @@
                               <Component id="txtPages" max="32767" attributes="0"/>
                           </Group>
                       </Group>
-                      <Component id="chkDisableSale" max="32767" attributes="0"/>
-                      <Component id="chkDisablePur" max="32767" attributes="0"/>
-                      <Component id="chkDisableRI" max="32767" attributes="0"/>
-                      <Component id="chkDisableRO" max="32767" attributes="0"/>
-                      <Component id="chkDisableStockIO" max="32767" attributes="0"/>
                       <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
-                      <Component id="chkDisableMill" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="chkSWB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="chkNoUnit" min="-2" max="-2" attributes="0"/>
-                              </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="chkPrint" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="chkAutoUpdate" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="chkWeight" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="chkWeightPoint" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Component id="chkMulti" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
@@ -466,8 +453,9 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="chkDepLock" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="chkNoUnit" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="0" pref="3" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -483,27 +471,7 @@
                       <Component id="chkAutoUpdate" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="chkSWB" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="chkNoUnit" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="chkWeight" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="chkWeightPoint" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisableSale" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisablePur" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisableRI" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisableRO" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDisableMill" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="chkDisableStockIO" min="-2" max="-2" attributes="0"/>
+                  <Component id="chkNoUnit" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jSeparator2" min="-2" pref="4" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -541,11 +509,6 @@
             <Property name="text" type="java.lang.String" value="Auto Print"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="chkSWB">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Stock Name With Brand"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JSeparator" name="jSeparator2">
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel1">
@@ -570,36 +533,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkWeight">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Weight"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisableSale">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Sale"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisablePur">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Purchase"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisableRI">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Return In"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisableRO">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Return Out"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisableStockIO">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Pattern in Stock I/O"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkDepFilter">
@@ -634,19 +567,9 @@
             <Property name="text" type="java.lang.String" value="Auto Update"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="chkWeightPoint">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Weight Point"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JCheckBox" name="chkDepLock">
           <Properties>
             <Property name="text" type="java.lang.String" value="Department Lock"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisableMill">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Milling"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkNoUnit">
@@ -690,7 +613,7 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="chkPriceChange" pref="93" max="32767" attributes="0"/>
+                              <Component id="chkPriceChange" max="32767" attributes="0"/>
                               <Component id="chkPricePopup" max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -911,7 +834,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="chkPurVouEdit" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="chkShowExpense" pref="151" max="32767" attributes="0"/>
+                          <Component id="chkShowExpense" pref="143" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -1134,7 +1057,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="chkDisableDrVoucher" max="32767" attributes="0"/>
-                              <Component id="chkDisableCrVoucher" pref="146" max="32767" attributes="0"/>
+                              <Component id="chkDisableCrVoucher" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -1687,6 +1610,23 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton4ActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="jButton5">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.selectionColor" type="code"/>
+        </Property>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="ff" red="ff" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Stock"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton5ActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

@@ -142,7 +142,7 @@ public class AccountRepo {
         if (localDatabase) {
             return h2Repo.getChartofAccount().collectList();
         }
-        return accountApiSecond.get()
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/getCoa")
                 .queryParam("coaLevel", coaLevel)
                 .queryParam("compCode", Global.compCode)

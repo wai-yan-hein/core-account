@@ -18,6 +18,7 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DateModel;
 import com.acc.model.VTriBalance;
 import com.common.ComponentUtil;
+import com.common.ExcelExporter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -43,6 +44,8 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
@@ -50,33 +53,29 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
 
     private int selectRow = -1;
-    private static final Logger log = LoggerFactory.getLogger(GLReport.class);
     private DateAutoCompleter dateAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
+    @Setter
+    private TaskExecutor taskExecutor;
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    private final ExcelExporter exporter = new ExcelExporter();
 
     /**
      * Creates new form AparGlReport
@@ -168,7 +167,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTable() {
-        tblGL.getTableHeader().setFont(Global.lableFont);
+        tblGL.setAutoCreateRowSorter(false);
+        tblGL.getTableHeader().setFont(Global.menuFont);
         tblGL.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblGL.getColumnModel().getColumn(0).setPreferredWidth(20);
         tblGL.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -245,24 +245,24 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
             log.info(filter.getFromDate() + "-" + filter.getToDate());
             decorator.refreshButton(filter.getFromDate());
-            accountRepo.getTri(filter).subscribe((t) -> {
+            accountRepo.getTri(filter).doOnSuccess((t) -> {
+                glListingTableModel.setListOrg(t);
                 glListingTableModel.setListTBAL(t);
+            }).doOnError((e) -> {
+                tblGL.requestFocus();
+                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                isGLCal = false;
+                progress.setIndeterminate(false);
+            }).doOnTerminate(() -> {
                 calGLTotlaAmount();
-                if (chkActive.isSelected()) {
-                    removeZero();
-                }
+                removeZero();
                 isGLCal = false;
                 progress.setIndeterminate(false);
                 long end = new GregorianCalendar().getTimeInMillis();
                 long pt = end - start;
                 lblCalTime.setText(pt / 1000 + " s");
                 tblGL.requestFocus();
-            }, (e) -> {
-                tblGL.requestFocus();
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                isGLCal = false;
-                progress.setIndeterminate(false);
-            });
+            }).subscribe();
 
         }
 
@@ -360,11 +360,20 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void removeZero() {
-        List<VTriBalance> listTBAL = glListingTableModel.getListTBAL();
-        if (!listTBAL.isEmpty()) {
-            listTBAL.removeIf((e) -> Util1.getDouble(e.getDrAmt()) + Util1.getDouble(e.getCrAmt()) == 0);
-            glListingTableModel.setListTBAL(listTBAL);
+        if (chkZero.isSelected()) {
+            List<VTriBalance> mutableList = new ArrayList<>(glListingTableModel.getListTBAL());
+            List<VTriBalance> listFilter = mutableList.stream().filter(t -> t.getDrAmt() + t.getCrAmt() != 0).toList();
+            glListingTableModel.setListTBAL(listFilter);
+
+        } else {
+            glListingTableModel.setListTBAL(glListingTableModel.getListOrg());
         }
+    }
+
+    private void exportExcel() {
+        exporter.setObserver(this);
+        exporter.setTaskExecutor(taskExecutor);
+        exporter.exportTriBalance(glListingTableModel.getListTBAL(), "TriBlance");
     }
 
     private void observeMain() {
@@ -407,10 +416,12 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         lblCalTime = new javax.swing.JLabel();
+        btnExcel = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
         panelDate = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         txtNetChange = new javax.swing.JCheckBox();
-        chkActive = new javax.swing.JCheckBox();
+        chkZero = new javax.swing.JCheckBox();
         chkDetail = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -599,25 +610,39 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
+        btnExcel.setFont(Global.lableFont);
+        btnExcel.setText("Export Excel");
+        btnExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcelActionPerformed(evt);
+            }
+        });
+
+        lblMessage.setText("-");
+
         javax.swing.GroupLayout panelFooterLayout = new javax.swing.GroupLayout(panelFooter);
         panelFooter.setLayout(panelFooterLayout);
         panelFooterLayout.setHorizontalGroup(
             panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelFooterLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblCalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelFooterLayout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtOB, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelFooterLayout.createSequentialGroup()
+                    .addGroup(panelFooterLayout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelFooterLayout.createSequentialGroup()
+                        .addComponent(btnExcel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtOB, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         panelFooterLayout.setVerticalGroup(
@@ -632,7 +657,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelFooterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel5)
+                    .addComponent(btnExcel)
+                    .addComponent(lblMessage))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -661,13 +688,13 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        chkActive.setFont(Global.lableFont);
-        chkActive.setSelected(true);
-        chkActive.setText("Zero");
-        chkActive.setBorderPaintedFlat(true);
-        chkActive.addActionListener(new java.awt.event.ActionListener() {
+        chkZero.setFont(Global.lableFont);
+        chkZero.setSelected(true);
+        chkZero.setText("Zero");
+        chkZero.setBorderPaintedFlat(true);
+        chkZero.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkActiveActionPerformed(evt);
+                chkZeroActionPerformed(evt);
             }
         });
 
@@ -688,7 +715,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(txtNetChange)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkActive)
+                .addComponent(chkZero)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkDetail)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -700,7 +727,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtNetChange, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(chkZero, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkDetail, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -727,7 +754,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -775,14 +802,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         searchGLListing();
     }//GEN-LAST:event_txtNetChangeActionPerformed
 
-    private void chkActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkActiveActionPerformed
+    private void chkZeroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkZeroActionPerformed
         // TODO add your handling code here:
-        if (chkActive.isSelected()) {
-            removeZero();
-        } else {
-            searchGLListing();
-        }
-    }//GEN-LAST:event_chkActiveActionPerformed
+        removeZero();
+    }//GEN-LAST:event_chkZeroActionPerformed
 
     private void chkDetailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkDetailActionPerformed
         // TODO add your handling code here:
@@ -805,10 +828,16 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtOptionActionPerformed
 
+    private void btnExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcelActionPerformed
+        // TODO add your handling code here:
+        exportExcel();
+    }//GEN-LAST:event_btnExcelActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chkActive;
+    private javax.swing.JButton btnExcel;
     private javax.swing.JCheckBox chkDetail;
+    private javax.swing.JCheckBox chkZero;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -821,6 +850,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCalTime;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JPanel panelDate;
     private javax.swing.JPanel panelFooter;
     private javax.swing.JTable tblGL;
@@ -846,8 +876,18 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 model.setEndDate(date);
                 model.setDescription(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
                 dateAutoCompleter.setDateModel(model);
+                searchGLListing();
+            } else if (source.equals(ExcelExporter.MESSAGE)) {
+                lblMessage.setText(selectObj.toString());
+            } else if (source.equals(ExcelExporter.FINISH)) {
+                btnExcel.setEnabled(true);
+                lblMessage.setText(selectObj.toString());
+            } else if (source.equals(ExcelExporter.ERROR)) {
+                btnExcel.setEnabled(true);
+                lblMessage.setText(selectObj.toString());
+            } else {
+                searchGLListing();
             }
-            searchGLListing();
         }
     }
 

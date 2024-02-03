@@ -180,10 +180,9 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
                     tblVoucher.requestFocus();
-                    setVisible(true);
                 })
                 .subscribe();
-
+        setVisible(true);
     }
 
     private void calTotal() {

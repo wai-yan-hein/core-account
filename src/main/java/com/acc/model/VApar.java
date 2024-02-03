@@ -23,6 +23,6 @@ public class VApar {
     private String coaName;
     private String userCode;
     private String traderName;
-    private Double drAmt;
-    private Double crAmt;
+    private double drAmt;
+    private double crAmt;
 }

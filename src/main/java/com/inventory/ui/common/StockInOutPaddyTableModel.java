@@ -14,7 +14,6 @@ import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockInOutKey;
-import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +175,7 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                             io.setCostPrice(0.0f);
                             io.setWeight(s.getWeight());
                             assignDefaultLocation(io, row);
-
+                            addNewRow();
                         }
                     }
                     case 2 -> {
@@ -257,7 +256,6 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                     case 10 -> {
                         if (Util1.isNumber(value)) {
                             io.setCostPrice(Util1.getDouble(value));
-                            addNewRow();
                             setSelection(row + 1, 0);
                         }
                     }

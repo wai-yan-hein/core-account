@@ -9,6 +9,8 @@ import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class GLListingTableModel extends AbstractTableModel {
 
     private List<VTriBalance> listTBal = new ArrayList();
+    @Getter
+    @Setter
+    private List<VTriBalance> listOrg;
     private String[] columnNames = {"Code", "Chart Of Account", "Currency", "Dr-Amt", "Cr-Amt"};
 
     @Override
@@ -44,6 +49,7 @@ public class GLListingTableModel extends AbstractTableModel {
                 String.class;
         };
     }
+
     @Override
     public Object getValueAt(int row, int column) {
 
@@ -137,7 +143,7 @@ public class GLListingTableModel extends AbstractTableModel {
     }
 
     public void clear() {
-        listTBal.clear();
+        listTBal = new ArrayList<>();
         fireTableDataChanged();
     }
 

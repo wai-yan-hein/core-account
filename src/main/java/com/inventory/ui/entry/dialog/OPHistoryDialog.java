@@ -177,8 +177,8 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         }).doOnTerminate(() -> {
             calAmt();
             progess.setIndeterminate(false);
-            setVisible(true);
         }).subscribe();
+        setVisible(true);
     }
 
     private void calAmt() {

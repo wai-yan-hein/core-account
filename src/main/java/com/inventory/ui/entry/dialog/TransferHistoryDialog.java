@@ -141,7 +141,6 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public void search() {
-        setVisible(true);
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -173,7 +172,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
             btnSearch.setEnabled(true);
             tblVoucher.requestFocus();
         }).subscribe();
-
+        setVisible(true);
     }
 
     private void calTotal() {

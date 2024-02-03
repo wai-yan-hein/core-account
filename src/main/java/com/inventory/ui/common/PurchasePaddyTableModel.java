@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,15 +43,8 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private JLabel lblRec;
     private PurchaseDynamic purchase;
+    @Setter
     private boolean edit;
-
-    public boolean isEdit() {
-        return edit;
-    }
-
-    public void setEdit(boolean edit) {
-        this.edit = edit;
-    }
 
     public PurchaseDynamic getPurchase() {
         return purchase;
@@ -136,7 +130,7 @@ public class PurchasePaddyTableModel extends AbstractTableModel {
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
             case 4, 5, 6 ->
-                isEdit();
+                edit;
             case 8 ->
                 false;
             default ->

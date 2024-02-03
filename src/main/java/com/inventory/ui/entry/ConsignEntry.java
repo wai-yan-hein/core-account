@@ -13,6 +13,7 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
@@ -23,6 +24,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Trader;
 import com.inventory.model.ConsignHis;
+import com.inventory.model.ConsignHisDetail;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockIssueRecTableModel;
 import com.inventory.ui.entry.dialog.StockIssRecHistoryDialog;
@@ -34,16 +36,23 @@ import com.inventory.model.VConsign;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -156,7 +165,6 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
 
     private void initTable() {
         tableModel.setVouDate(txtDate);
-        tableModel.setLblRec(lblRec);
         tableModel.setInventoryRepo(inventoryRepo);
         tableModel.addNewRow();
         tableModel.setParent(tblStockIR);
@@ -246,7 +254,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             io.setTranSource(tranSource.equals("I") ? 1 : 2);
             inventoryRepo.saveStockIssRec(io).doOnSuccess((t) -> {
                 if (print) {
-                    printVoucher(t.getKey().getVouNo());
+                    printVoucher(t);
                 }
             }).doOnError((e) -> {
                 observer.selected("save", true);
@@ -264,6 +272,8 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             locaitonCompleter.setLocation(tt);
         }).subscribe();
+        txtWt.setValue(0);
+        txtBag.setValue(0);
     }
 
     private void clear() {
@@ -383,9 +393,17 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         }).doOnTerminate(() -> {
+            calTotal();
             tableModel.addNewRow();
             progress.setIndeterminate(false);
         }).subscribe();
+    }
+
+    private void calTotal() {
+        double bag = tableModel.getListDetail().stream().mapToDouble((t) -> t.getBag()).sum();
+        double weight = tableModel.getListDetail().stream().mapToDouble((t) -> t.getTotalWeight()).sum();
+        txtBag.setValue(bag);
+        txtWt.setValue(weight);
     }
 
     private void disableForm(boolean status) {
@@ -404,31 +422,56 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         observer.selected("refresh", true);
     }
 
-    private void printVoucher(String vouNo) {
-//        inventoryRepo.getTransferReport(vouNo).doOnSuccess((t) -> {
-//            try {
-//                if (t != null) {
-//                    String a5 = ProUtil.getProperty(ProUtil.STOCK_IR_VOUCHER);
-//                    String reportName = rdoA4.isSelected() ? "StockIssRecVoucher" : Util1.isNull(a5, "StockIssRecVoucherA5");
-//                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-//                    Map<String, Object> param = new HashMap<>();
-//                    param.put("p_print_date", Util1.getTodayDateTime());
-//                    param.put("p_comp_name", Global.companyName);
-//                    param.put("p_comp_address", Global.companyAddress);
-//                    param.put("p_comp_phone", Global.companyPhone);
-//                    param.put("p_logo_path", logoPath);
-//                    param.put("p_logo_path", logoPath);
-//                    param.put("p_tran_option", tranSource);
-//                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
-//                    ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(t));
-//                    JsonDataSource ds = new JsonDataSource(jsonDataStream);
-//                    JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
-//                    JasperViewer.viewReport(js, false);
-//                }
-//            } catch (JRException ex) {
-//                JOptionPane.showMessageDialog(this, ex.getMessage());
-//            }
-//        }).subscribe();
+    private void enableToolBar(boolean status) {
+        progress.setIndeterminate(!status);
+        observer.selected("refresh", status);
+        observer.selected("print", status);
+        observer.selected("save", false);
+        observer.selected("history", true);
+    }
+
+    private void printVoucher(ConsignHis spd) {
+        try {
+            enableToolBar(false);
+            List<ConsignHisDetail> detail = spd.getListIRDetail();
+            byte[] data = Util1.listToByteArray(detail);
+            String reportName = spd.getTranSource() == 1 ? "StockConsignIssue" : "StockConsignReceive";
+            Map<String, Object> param = getDefaultParam(spd);
+            String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+            ByteArrayInputStream stream = new ByteArrayInputStream(data);
+            JsonDataSource ds = new JsonDataSource(stream);
+            JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+            JasperViewer.viewReport(jp, false);
+            enableToolBar(true);
+        } catch (JRException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
+
+    private Map<String, Object> getDefaultParam(ConsignHis p) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("p_print_date", Util1.getTodayDateTime());
+        param.put("p_comp_name", Global.companyName);
+        param.put("p_comp_address", Global.companyAddress);
+        param.put("p_comp_phone", Global.companyPhone);
+        param.put("p_logo_path", ProUtil.logoPath());
+        param.put("p_remark", p.getRemark());
+        param.put("p_vou_no", p.getKey().getVouNo());
+        param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
+        param.put("SUBREPORT_DIR", "report/");
+        param.put("p_sub_report_dir", "report/");
+        param.put("p_vou_date", Util1.getDate(p.getVouDate()));
+        param.put("p_vou_time", Util1.getTime(p.getVouDate()));
+        param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
+        param.put("p_tran_source", p.getTranSource());
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            param.put("p_trader_name", t.getTraderName());
+            param.put("p_cus_name", t.getTraderName());
+            param.put("p_trader_address", t.getAddress());
+            param.put("p_trader_phone", t.getPhone());
+        }
+        return param;
     }
 
     /**
@@ -457,7 +500,10 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         jLabel11 = new javax.swing.JLabel();
         txtLG = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
-        lblRec = new javax.swing.JLabel();
+        txtWt = new javax.swing.JFormattedTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        txtBag = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -584,8 +630,13 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         lblStatus.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         lblStatus.setText("NEW");
 
-        lblRec.setFont(Global.lableFont);
-        lblRec.setText("Records");
+        txtWt.setEditable(false);
+
+        jLabel1.setText("Total Weight :");
+
+        jLabel2.setText("Total Bag :");
+
+        txtBag.setEditable(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -596,13 +647,17 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblStatus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(scroll))
-                        .addContainerGap())))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtWt, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(scroll, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -610,11 +665,16 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtWt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel1)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2))))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -631,23 +691,26 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup chkGroupReport;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblVouNo;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblStockIR;
+    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtCustomer;
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtLG;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JFormattedTextField txtVou;
+    private javax.swing.JFormattedTextField txtWt;
     // End of variables declaration//GEN-END:variables
 
     @Override
