@@ -46,3 +46,4 @@ config/application.properties
 /update/
 log.txt
 *.class
+/nbproject/
