@@ -231,6 +231,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                     case 6 -> {
                         if (value instanceof StockUnit unit) {
                             io.setInUnitCode(unit.getKey().getUnitCode());
+                            io.setOutQty(0);
                             io.setOutUnitCode(null);
                             setSelection(row, 7);
                         }
@@ -250,6 +251,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                     case 8 -> {
                         if (value instanceof StockUnit unit) {
                             io.setOutUnitCode(unit.getKey().getUnitCode());
+                            io.setInQty(0);
                             io.setInUnitCode(null);
                             setSelection(row, 9);
                         }
