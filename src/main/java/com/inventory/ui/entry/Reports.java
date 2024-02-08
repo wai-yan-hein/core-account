@@ -377,7 +377,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private boolean isValidReport(String url) {
-        if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight")) {
+        if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight")
+               || url.equals("StockInOutPaddyDetailByLocation") || url.equals("StockInOutPaddyDetailByLocation1")) {
             if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
                 JOptionPane.showMessageDialog(this, "Please select stock code.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
                 txtStock.requestFocus();
