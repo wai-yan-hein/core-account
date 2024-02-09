@@ -163,9 +163,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.setModel(supplierTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(5);// Code
-        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(40);// Code
-        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(320);// Name
+        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(300);// Name
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(300);// Name
         tblCustomer.getColumnModel().getColumn(3).setPreferredWidth(40);// Active 
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
@@ -178,14 +178,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void searchSupplier() {
         progress.setIndeterminate(true);
         inventoryRepo.getSupplier()
-                .subscribe((t) -> {
+                .doOnSuccess((t) -> {
                     supplierTabelModel.setListCustomer(t);
                     lblRecord.setText(String.valueOf(t.size()));
-                    progress.setIndeterminate(false);
-                }, (e) -> {
+                })
+                .doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
-                });
+                })
+                .doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                })
+                .subscribe();
 
     }
 
@@ -552,7 +556,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtSysCode, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
-                                .addComponent(txtRegion)
+                                .addComponent(txtRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtCusPhone, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -570,7 +574,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelEntryLayout.createSequentialGroup()
-                                .addComponent(txtGroup)
+                                .addComponent(txtGroup, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtCusAddress, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -690,7 +694,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(s1)
                             .addComponent(txtFilter))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1006,7 +1010,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void delete() {
         if (selectRow >= 0) {
             Trader t = supplierTabelModel.getCustomer(selectRow);
-            inventoryRepo.deleteTrader(t.getKey()).subscribe((list) -> {
+            inventoryRepo.deleteTrader(t.getKey()).doOnSuccess((list) -> {
                 if (list.isEmpty()) {
                     supplierTabelModel.deleteCustomer(selectRow);
                     clear();
@@ -1017,7 +1021,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .collect(Collectors.joining()); // Concatenate the messages
                     JOptionPane.showMessageDialog(this, str);
                 }
-            });
+            }).subscribe();
 
         }
     }

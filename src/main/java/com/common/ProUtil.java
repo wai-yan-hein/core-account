@@ -351,6 +351,8 @@ public class ProUtil {
                 new DecimalFormat(Util1.DECIMAL_FORMAT2);
             case 3 ->
                 new DecimalFormat(Util1.DECIMAL_FORMAT3);
+            case 4 ->
+                new DecimalFormat(Util1.DECIMAL_FORMAT4);
             default ->
                 new DecimalFormat(Util1.DECIMAL_FORMAT);
         };

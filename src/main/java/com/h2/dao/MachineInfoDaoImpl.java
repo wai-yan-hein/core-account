@@ -7,8 +7,8 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.MachineInfo;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
  * @author Athu Sint
  */
 @Repository
+@Slf4j
 public class MachineInfoDaoImpl extends AbstractDao<Integer, MachineInfo> implements MachineInfoDao {
 
     @Override
@@ -33,11 +34,9 @@ public class MachineInfoDaoImpl extends AbstractDao<Integer, MachineInfo> implem
 
     @Override
     public MachineInfo getMachineInfo(String machineName) {
-        MachineInfo mac = new MachineInfo();
-        mac.setMacId(0);
-        String jpql = "select o from MachineInfo o where o.machineName ='" + machineName + "'";
+        String jpql = "select o from MachineInfo o where o.serialNo ='" + machineName.toLowerCase() + "'";
         List<MachineInfo> list = findHSQL(jpql);
-        return list.isEmpty() ? mac : list.get(0);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

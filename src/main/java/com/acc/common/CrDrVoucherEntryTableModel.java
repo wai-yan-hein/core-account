@@ -276,11 +276,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        switch (column) {
-            case 4 -> {
-                return ProUtil.isMultiCur();
-            }
-        }
         return true;
 
     }

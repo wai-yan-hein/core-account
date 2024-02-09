@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -120,10 +120,17 @@ public class CoreAccountApplication {
 
     public static void initFont(int fontSize) {
         try {
-            List<File> files = Files.list(Paths.get("font")).map(Path::toFile).filter(File::isFile).collect(Collectors.toList());
+            List<File> files;
+            try (Stream<Path> pathStream = Files.list(Paths.get("font"))) {
+                files = pathStream
+                        .map(Path::toFile)
+                        .filter(File::isFile)
+                        .toList();
+            }
             if (!files.isEmpty()) {
+                File file = files.getFirst();
                 InputStream inputStream = new BufferedInputStream(
-                        new FileInputStream(files.get(0).getPath()));
+                        new FileInputStream(file.getPath()));
                 Font font = Font.createFont(Font.TRUETYPE_FONT, inputStream);
                 Global.textFont = font.deriveFont(Font.PLAIN, fontSize);
                 Global.menuFont = font.deriveFont(Font.BOLD, fontSize + 2);
@@ -134,7 +141,7 @@ public class CoreAccountApplication {
                 Global.tblHeaderFont = font.deriveFont(Font.BOLD, fontSize + 1);
                 Global.tblRowHeight = fontSize + 15;
                 Global.fontName = "font" + File.separator + font.getName();
-                initJasper(font);
+                initJasper(font, file.getPath());
                 log.info(Global.fontName);
             }
 
@@ -188,7 +195,7 @@ public class CoreAccountApplication {
             System.setProperty("flatlaf.animation", "true");
             System.setProperty("flatlaf.uiScale.enabled", "true");
             Util1.DARK_MODE = isDarkModeEnabled();
-            UIManager.setLookAndFeel(Util1.DARK_MODE ? new FlatMacDarkLaf(): new FlatMacLightLaf());
+            UIManager.setLookAndFeel(Util1.DARK_MODE ? new FlatMacDarkLaf() : new FlatMacLightLaf());
             Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
             UIManager.put("TableHeader.background", Global.selectionColor);
             UIManager.put("Table.selectionBackground", Global.selectionColor);
@@ -243,14 +250,14 @@ public class CoreAccountApplication {
         return isDarkModeEnabled;
     }
 
-    public static void initJasper(Font font) {
+    public static void initJasper(Font font, String path) {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         ge.registerFont(font);
 
         // Set JasperReports default font
         JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-        jc.setProperty("net.sf.jasperreports.default.font.name", font.getName()); // Set font name, not the string "Pyidaungsu"
-        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", font.getName()); // Set PDF font name
+        jc.setProperty("net.sf.jasperreports.default.font.name", path); // Set font name, not the string "Pyidaungsu"
+        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", path); // Set PDF font name
         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
         jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
@@ -259,5 +266,4 @@ public class CoreAccountApplication {
         jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
         jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
     }
-
 }

@@ -92,46 +92,52 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             d.setLocationRelativeTo(null);
             d.setVisible(true);
         });
-        MachineInfo t = userRepo.checkSerialNo(serialNo).block();
-        if (t == null) {
-            JOptionPane.showMessageDialog(this, "Please Check Internet Connection.", "Connection Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
-        }
-        d.setVisible(false);
-        if (t.getMacId() == null) {
-            JFrame frame = new JFrame();
-            frame.setIconImage(appIcon);
-            SecurityDialog dialog = new SecurityDialog(frame);
-            dialog.setLocationRelativeTo(null);
-            dialog.setVisible(true);
-            String inputKey = dialog.getKey();
-            String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
-            toDayKey = toDayKey.replaceAll("-", "");
-            if (inputKey.equals(toDayKey)) {
-                register(serialNo).doOnSuccess((response) -> {
-                    file.write(response);
-                }).doOnTerminate(() -> {
-                    JOptionPane.showMessageDialog(this, "Logout");
-                    logout();
-                }).subscribe();
-            } else {
-                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
+        userRepo.checkLocalSerialNo(serialNo).doOnSuccess((t) -> {
+            if (t == null) {
+                JOptionPane.showMessageDialog(this, "Please Check Internet Connection.", "Connection Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
-        } else {
-            Global.macId = t.getMacId();
-            checkAndDeleteData(t);
-            saveMachine(t);
-            enableForm(false);
-            taskExecutor.execute(() -> {
-                setLocationRelativeTo(null);
-                focus();
-                setVisible(true);
-            });
-            lblStatus.setText("downloading...");
-            integration.setObserver(this);
-            integration.start();
-        }
+            d.setVisible(false);
+            if (t.getMacId() == null || t.getMacId() == 0) {
+                JFrame frame = new JFrame();
+                frame.setIconImage(appIcon);
+                SecurityDialog dialog = new SecurityDialog(frame);
+                dialog.setLocationRelativeTo(null);
+                dialog.setVisible(true);
+                String inputKey = dialog.getKey();
+                String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
+                toDayKey = toDayKey.replaceAll("-", "");
+                if (inputKey == null) {
+                    System.exit(0);
+                }
+                if (inputKey.equals(toDayKey)) {
+                    register(serialNo).doOnSuccess((response) -> {
+                        file.write(response);
+                    }).doOnTerminate(() -> {
+                        JOptionPane.showMessageDialog(this, "Logout");
+                        logout();
+                    }).subscribe();
+                } else {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
+                    System.exit(0);
+                }
+            } else {
+                Global.macId = t.getMacId();
+                log.info("mac id :" + Global.macId.toString());
+                checkAndDeleteData(t);
+                saveMachine(t);
+                enableForm(false);
+                taskExecutor.execute(() -> {
+                    setLocationRelativeTo(null);
+                    focus();
+                    setVisible(true);
+                });
+                integration.setObserver(this);
+                integration.start();
+                lblStatus.setText("downloading...");
+            }
+        }).subscribe();
+
     }
 
     private void checkAndDeleteData(MachineInfo info) {
@@ -467,9 +473,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         if (type.equals("download")) {
             enableCount += 1;
             lblStatus.setText(selectObj.toString());
-            if (enableCount > 14) {
-                enableForm(true);
-            }
+            enableForm(true);
         } else if (type.equals("enable")) {
             if (selectObj instanceof Boolean enable) {
                 enableForm(enable);

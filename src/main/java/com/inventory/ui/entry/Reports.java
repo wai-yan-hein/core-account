@@ -398,16 +398,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         if (excel) {
                             excel(t.getFile());
                         } else {
-                            JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                            jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
-                            jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
-                            jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
-                            jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                            jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
-                            jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
-                            jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
-                            jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
-                            jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
                             InputStream input = new ByteArrayInputStream(t.getFile());
                             JsonDataSource ds = new JsonDataSource(input);
                             int dataCount = ds.recordCount();

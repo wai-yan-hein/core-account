@@ -425,11 +425,10 @@ public class H2Repo {
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
-    
+
 //    public Mono<Language> save(Language sh) {
 //        return Mono.justOrEmpty(saleHisService.save(sh));
 //    } 
-
     public Mono<Job> save(Job sh) {
         return Mono.justOrEmpty(jobService.save(sh));
     }
@@ -598,8 +597,8 @@ public class H2Repo {
         return Mono.justOrEmpty(userService.login(userName, password));
     }
 
-    public Mono<MachineInfo> getMachineInfo(String machineName) {
-        return Mono.justOrEmpty(machineInfoService.getMachineInfo(machineName));
+    public MachineInfo getMachineInfo(String machineName) {
+        return machineInfoService.getMachineInfo(machineName);
     }
 
     public Mono<List<AppUser>> getAppUser() {
@@ -810,7 +809,6 @@ public class H2Repo {
     public List<DateModel> getDate() {
         return dateFilterRepo.findAll();
     }
-
 
     public ChartOfAccount save(ChartOfAccount obj) {
         return coaService.save(obj);

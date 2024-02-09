@@ -23,11 +23,11 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="s1" max="32767" attributes="0"/>
                           <Component id="txtFilter" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Component id="panelEntry" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
@@ -98,7 +98,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtSysCode" alignment="1" max="32767" attributes="0"/>
                               <Group type="102" alignment="1" attributes="0">
-                                  <Component id="txtRegion" max="32767" attributes="0"/>
+                                  <Component id="txtRegion" pref="125" max="32767" attributes="0"/>
                                   <EmptySpace min="-2" max="-2" attributes="0"/>
                                   <Component id="jButton2" linkSize="6" min="-2" pref="8" max="-2" attributes="0"/>
                               </Group>
@@ -119,7 +119,7 @@
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="txtGroup" max="32767" attributes="0"/>
+                                  <Component id="txtGroup" pref="125" max="32767" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="btnGroup" linkSize="6" min="-2" pref="17" max="-2" attributes="0"/>
                               </Group>

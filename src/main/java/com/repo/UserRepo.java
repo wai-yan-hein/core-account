@@ -126,20 +126,27 @@ public class UserRepo {
                 .retrieve().bodyToFlux(AppRole.class).collectList();
     }
 
+    public Mono<MachineInfo> checkLocalSerialNo(String serialNo) {
+        if (localdatabase) {
+            MachineInfo info = h2Repo.getMachineInfo(serialNo);
+            if (info == null) {
+                return checkSerialNo(serialNo);
+            } else {
+                return Mono.just(info);
+            }
+        } else {
+            return checkSerialNo(serialNo);
+        }
+    }
+
     public Mono<MachineInfo> checkSerialNo(String serialNo) {
+        log.info("checkSerialNo cloud.");
         return userApi.get()
                 .uri(builder -> builder.path("/auth/checkSerialNo")
                 .queryParam("serialNo", serialNo)
                 .build())
                 .retrieve()
-                .bodyToMono(MachineInfo.class)
-                .onErrorResume((e) -> {
-                    if (localdatabase) {
-                        return h2Repo.getMachineInfo(serialNo);
-                    }
-                    log.error("register : " + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(MachineInfo.class);
 
     }
 

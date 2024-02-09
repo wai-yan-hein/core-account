@@ -232,9 +232,9 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
-        if(!reportUrl.equals("CashBankSummary")){
-            filter.setSecond(true);
-        }
+//        if(!reportUrl.equals("CashBankSummary")){
+//            filter.setSecond(true);
+//        }
         filter.setReportName(reportName);
         long start = new GregorianCalendar().getTimeInMillis();
         accountRepo.getReport(filter)

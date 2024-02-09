@@ -53,6 +53,7 @@ public class WebFlexConfig {
                 .baseUrl(getUrl(url, port))
                 .clientConnector(reactorClientHttpConnector())
                 .build();
+
     }
 
     @Bean
@@ -169,8 +170,7 @@ public class WebFlexConfig {
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();
         WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
-        String token = authenticate(webClient, serialNo);
-        return token;
+        return authenticate(webClient, serialNo);
     }
 
     private String authenticate(WebClient client, String serialNo) {
@@ -202,8 +202,8 @@ public class WebFlexConfig {
                     // Return a fallback access token here
                     return Mono.just(file.read());
                 })
-                .map(AuthenticationResponse::getAccessToken) // Extract and return the access token
-                .block();
+                .map(AuthenticationResponse::getAccessToken)
+                .block(Duration.ofSeconds(3)); // Extract and return the access token
     }
 
     @Bean

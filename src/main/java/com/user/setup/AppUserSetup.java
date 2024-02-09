@@ -207,7 +207,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             DepartmentUser dep = departmentUserAutoCompleter.getDepartment();
             DepartmentA depAcc = departmentAutoCompleter.getDepartment();
             Location location = locationAutoCompleter.getLocation();
-            appUser.setDeptId(location == null ? null : dep.getKey().getDeptId());
+            appUser.setDeptId(dep == null ? null : dep.getKey().getDeptId());
             appUser.setDeptCode(depAcc == null ? null : depAcc.getKey().getDeptCode());
             appUser.setLocCode(location == null ? null : location.getKey().getLocCode());
             appUser.setUserCode(txtUserCode.getText());
