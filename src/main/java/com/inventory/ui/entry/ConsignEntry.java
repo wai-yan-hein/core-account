@@ -124,11 +124,12 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
-        txtVou.addKeyListener(this);
+        txtLocation.addKeyListener(this);
         txtRemark.addKeyListener(this);
         txtLocation.addKeyListener(this);
         txtLG.addKeyListener(this);
         ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     private void actionMapping() {
@@ -286,7 +287,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         tableModel.addNewRow();
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
-        txtVou.setText(null);
+        txtLocation.setText(null);
         traderAutoCompleter.setTrader(null);
         labourGroupAutoCompleter.setObject(null);
         disableForm(true);
@@ -337,7 +338,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             if (lblStatus.getText().equals("NEW")) {
                 ConsignHisKey key = new ConsignHisKey();
                 key.setCompCode(Global.compCode);
-                key.setVouNo(txtVou.getText());
+                key.setVouNo(txtLocation.getText());
                 io.setDeptId(Global.deptId);
                 io.setKey(key);
                 io.setCreatedBy(Global.loginUser.getUserCode());
@@ -364,7 +365,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             labourGroupAutoCompleter.setObject(t);
         }).subscribe();
         String vouNo = io.getKey().getVouNo();
-        txtVou.setText(vouNo);
+        txtLocation.setText(vouNo);
         txtDate.setDate(Util1.convertToDate(io.getVouDate()));
         txtRemark.setText(io.getRemark());
         io.setVouLock(!io.getDeptId().equals(Global.deptId));
@@ -490,7 +491,6 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         jLabel5 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
         lblVouNo = new javax.swing.JLabel();
-        txtVou = new javax.swing.JFormattedTextField();
         jLabel3 = new javax.swing.JLabel();
         txtDate = new com.toedter.calendar.JDateChooser();
         jLabel7 = new javax.swing.JLabel();
@@ -499,6 +499,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         txtCustomer = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         txtLG = new javax.swing.JTextField();
+        txtVou = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         txtWt = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -545,9 +546,6 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         lblVouNo.setFont(Global.lableFont);
         lblVouNo.setText("Vou No    ");
 
-        txtVou.setEditable(false);
-        txtVou.setFont(Global.textFont);
-
         jLabel3.setFont(Global.lableFont);
         jLabel3.setText("Date");
 
@@ -570,6 +568,10 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Labour Group");
 
+        txtVou.setEditable(false);
+        txtVou.setFont(Global.textFont);
+        txtVou.setName("txtLocation"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -582,7 +584,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
-                    .addComponent(txtVou))
+                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
@@ -608,10 +610,10 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblVouNo)
-                        .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel7)
                         .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel5))
+                        .addComponent(jLabel5)
+                        .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtRemark, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -625,15 +627,15 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtDate, txtVou});
-
         lblStatus.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         lblStatus.setText("NEW");
 
         txtWt.setEditable(false);
 
+        jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Total Weight :");
 
+        jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Total Bag :");
 
         txtBag.setEditable(false);
@@ -670,11 +672,11 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtWt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel1)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))))
+                        .addComponent(jLabel1)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -709,7 +711,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JTextField txtLG;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
-    private javax.swing.JFormattedTextField txtVou;
+    private javax.swing.JTextField txtVou;
     private javax.swing.JFormattedTextField txtWt;
     // End of variables declaration//GEN-END:variables
 

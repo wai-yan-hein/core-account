@@ -132,9 +132,9 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                     focus();
                     setVisible(true);
                 });
+                lblStatus.setText("downloading...");
                 integration.setObserver(this);
                 integration.start();
-                lblStatus.setText("downloading...");
             }
         }).subscribe();
 

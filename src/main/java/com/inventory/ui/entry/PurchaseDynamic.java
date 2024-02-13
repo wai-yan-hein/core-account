@@ -363,6 +363,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void initPaddyTable() {
         tblPur.setModel(purchasePaddyTableModel);
+        purchasePaddyTableModel.setEdit(true);
         purchasePaddyTableModel.setLblRec(lblRec);
         purchasePaddyTableModel.setInventoryRepo(inventoryRepo);
         purchasePaddyTableModel.setVouDate(txtPurDate);
@@ -1508,7 +1509,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         jLabel17 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
-        txtVouNo = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -1529,6 +1529,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         jButton2 = new javax.swing.JButton();
         txtLG = new javax.swing.JTextField();
         rdoRec = new javax.swing.JRadioButton();
+        txtVouNo = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
@@ -1600,11 +1601,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 txtCusActionPerformed(evt);
             }
         });
-
-        txtVouNo.setEditable(false);
-        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtVouNo.setFont(Global.textFont);
-        txtVouNo.setName("txtVouNo"); // NOI18N
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Pur Date");
@@ -1706,6 +1702,16 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         });
 
+        txtVouNo.setEditable(false);
+        txtVouNo.setFont(Global.textFont);
+        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtVouNo.setName("txtCurrency"); // NOI18N
+        txtVouNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtVouNoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelPurLayout = new javax.swing.GroupLayout(panelPur);
         panelPur.setLayout(panelPurLayout);
         panelPurLayout.setHorizontalGroup(
@@ -1719,8 +1725,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
-                    .addComponent(txtVouNo)
-                    .addComponent(txtCus))
+                    .addComponent(txtCus)
+                    .addComponent(txtVouNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1731,7 +1737,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     .addComponent(txtRemark)
                     .addComponent(txtCurrency)
                     .addGroup(panelPurLayout.createSequentialGroup()
-                        .addComponent(txtLocation)
+                        .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(rdoRec, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1751,7 +1757,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPurLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 84, Short.MAX_VALUE)
                         .addComponent(jButton2))
                     .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
                     .addComponent(txtLG, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE))
@@ -1764,11 +1770,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel17)
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel22)
                         .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel5)
-                        .addComponent(rdoRec))
+                        .addComponent(rdoRec)
+                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtDueDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel11)
@@ -1802,7 +1808,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
         panelPurLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel4, jLabel5});
 
-        panelPurLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtCurrency, txtCus, txtDueDate, txtLocation, txtPurDate, txtRemark, txtVouNo});
+        panelPurLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtCurrency, txtCus, txtDueDate, txtLocation, txtPurDate, txtRemark});
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -2392,6 +2398,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private void rdoRecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdoRecActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_rdoRecActionPerformed
+
+    private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -2659,7 +2669,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JFormattedTextField txtVouBalance;
     private javax.swing.JFormattedTextField txtVouDiscP;
     private javax.swing.JFormattedTextField txtVouDiscount;
-    private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouNo;
     private javax.swing.JFormattedTextField txtVouPaid;
     private javax.swing.JFormattedTextField txtVouTaxP;
     private javax.swing.JFormattedTextField txtVouTotal;

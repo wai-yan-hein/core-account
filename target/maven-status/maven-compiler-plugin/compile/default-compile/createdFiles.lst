@@ -757,6 +757,7 @@ com\user\editor\CurrencyAutoCompleter$4.class
 com\inventory\ui\entry\dialog\LandingHistoryDialog$9.class
 com\acc\editor\RefAutoCompleter$3.class
 com\inventory\ui\setup\dialog\common\ProcessTypeTableModel.class
+com\inventory\ui\entry\PurchaseDynamic$31.class
 com\user\dialog\FileOptionDialog.class
 com\acc\dialog\DatePickerDialog$8.class
 com\acc\editor\DepartmentCellEditor.class
