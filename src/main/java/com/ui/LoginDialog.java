@@ -136,6 +136,14 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 integration.setObserver(this);
                 integration.start();
             }
+        }).doOnError((e) -> {
+            d.setVisible(false);
+            int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+            if (yn == JOptionPane.YES_OPTION) {
+                checkMachineRegister();
+            } else {
+                System.exit(0);
+            }
         }).subscribe();
 
     }

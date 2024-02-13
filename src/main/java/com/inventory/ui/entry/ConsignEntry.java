@@ -365,9 +365,9 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             labourGroupAutoCompleter.setObject(t);
         }).subscribe();
         String vouNo = io.getKey().getVouNo();
-        txtLocation.setText(vouNo);
         txtDate.setDate(Util1.convertToDate(io.getVouDate()));
         txtRemark.setText(io.getRemark());
+        txtVou.setText(vouNo);
         io.setVouLock(!io.getDeptId().equals(Global.deptId));
         if (io.isVouLock()) {
             lblStatus.setText("Voucher is Lock.");
@@ -570,7 +570,6 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
 
         txtVou.setEditable(false);
         txtVou.setFont(Global.textFont);
-        txtVou.setName("txtLocation"); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -584,7 +583,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
-                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE))
+                    .addComponent(txtVou))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
