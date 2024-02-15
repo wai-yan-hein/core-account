@@ -37,9 +37,14 @@ public class MessageDialog extends javax.swing.JDialog {
 
         lblStatus = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Message");
         setFont(Global.textFont);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         lblStatus.setFont(Global.textFont);
         lblStatus.setText("Connecting to Server...");
@@ -63,6 +68,11 @@ public class MessageDialog extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments

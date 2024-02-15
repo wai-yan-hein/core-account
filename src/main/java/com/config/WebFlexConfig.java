@@ -87,7 +87,6 @@ public class WebFlexConfig {
                 .build();
     }
 
-    @Lazy
     @Bean
     public WebClient userApi() {
         String url = environment.getProperty("user.url");
