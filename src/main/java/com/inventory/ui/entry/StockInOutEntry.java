@@ -228,7 +228,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         outTableModel.setVouDate(txtDate);
         outTableModel.setInventoryRepo(inventoryRepo);
         outTableModel.setLblRec(lblRec);
-        outTableModel.addNewRow();
+//        outTableModel.addNewRow();
         outTableModel.setParent(tblStock);
         outTableModel.setObserver(this);
         tblStock.setModel(outTableModel);
@@ -262,7 +262,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         weightTableModel.setLblRec(lblRec);
         weightTableModel.setParent(tblStock);
         weightTableModel.setObserver(this);
-        weightTableModel.addNewRow();
+//        weightTableModel.addNewRow();
         tblStock.setModel(weightTableModel);
         monoLoc = inventoryRepo.getLocation();
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(80);//code
@@ -296,7 +296,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private void initStockIOPaddy() {
         paddyTableModel.setInventoryRepo(inventoryRepo);
         paddyTableModel.setLblRec(lblRec);
-        paddyTableModel.addNewRow();
+//        paddyTableModel.addNewRow();
         paddyTableModel.setParent(tblStock);
         paddyTableModel.setObserver(this);
         tblStock.setModel(paddyTableModel);

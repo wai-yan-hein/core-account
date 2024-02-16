@@ -259,6 +259,7 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                     case 9 -> {
                         if (Util1.isNumber(value)) {
                             io.setCostPrice(Util1.getDouble(value));
+                            io.setAmount(calAmount(io));
                             addNewRow();
                             setSelection(row + 1, 0);
                         }
