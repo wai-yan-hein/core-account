@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
 public class PurchaseOrderTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(PurchaseOrderTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit",
-        "Order Qty", "Actual Qty", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Description", "Design", "Order Qty", "Count"};
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
