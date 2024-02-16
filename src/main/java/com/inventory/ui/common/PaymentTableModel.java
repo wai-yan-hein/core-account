@@ -76,7 +76,7 @@ public class PaymentTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         switch (column) {
             case 5, 6, 7 -> {
-                return Float.class;
+                return Double.class;
             }
             case 8 -> {
                 return Boolean.class;
@@ -86,8 +86,8 @@ public class PaymentTableModel extends AbstractTableModel {
     }
 
     public List<PaymentHisDetail> getPaymentList() {
-        listDetail.removeIf(p -> Util1.getFloat(p.getPayAmt()) == 0f);
-        return listDetail;
+        List<PaymentHisDetail> listFilter = listDetail.stream().filter((t) -> Util1.getDouble(t.getPayAmt()) > 0).toList();
+        return listFilter;
 
     }
 
@@ -144,8 +144,8 @@ public class PaymentTableModel extends AbstractTableModel {
                 PaymentHisDetail obj = listDetail.get(row);
                 switch (column) {
                     case 7 -> {
-                        float amt = Util1.getFloat(value);
-                        float out = Util1.getFloat(obj.getVouBalance());
+                        double amt = Util1.getDouble(value);
+                        double out = Util1.getDouble(obj.getVouBalance());
                         obj.setPayAmt(amt);
                         obj.setFullPaid(amt == out);
                     }
@@ -223,7 +223,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         return listDetail.stream()
-                .filter(pd -> Util1.getFloat(pd.getVouBalance()) < 0)
+                .filter(pd -> Util1.getDouble(pd.getVouBalance()) < 0)
                 .peek(pd -> {
                     JOptionPane.showMessageDialog(table, "Invalid Pay Amount.");
                     int index = listDetail.indexOf(pd);

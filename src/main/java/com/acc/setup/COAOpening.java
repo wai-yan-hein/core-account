@@ -134,13 +134,14 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?");
                 if (yn == JOptionPane.YES_OPTION) {
                     accountRepo.delete(key).doOnSuccess((sucess) -> {
-                        if (sucess) {
-                            openingTableModel.deleteOpening(row);
-                        }
+                        openingTableModel.deleteOpening(row);
+                    }).doOnTerminate(() -> {
+                        calDrCr();
                     }).subscribe();
                 }
             } else {
                 openingTableModel.deleteOpening(row);
+                calDrCr();
             }
         }
     }

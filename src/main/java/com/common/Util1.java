@@ -534,6 +534,11 @@ public class Util1 {
         }
     }
 
+    public static double format2(double number) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return Double.parseDouble(df.format(number));
+    }
+
     public static double round(double number) {
         int value = Util1.getInteger(Global.hmRoleProperty.get("round.point"));
         return switch (value) {
@@ -1224,6 +1229,9 @@ public class Util1 {
     }
 
     public static String convertToLocalStorage(ZonedDateTime inputDateTime) {
+        if (inputDateTime == null) {
+            return null;
+        }
         // Get the system's default time zone (local time zone)
         ZoneId localZoneId = ZoneId.systemDefault();
         // Convert the input ZonedDateTime to LocalDateTime in the local time zone

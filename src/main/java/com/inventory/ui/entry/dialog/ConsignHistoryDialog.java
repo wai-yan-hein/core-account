@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author pann
  */
 @Slf4j
-public class StockIssRecHistoryDialog extends javax.swing.JDialog implements KeyListener {
+public class ConsignHistoryDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
      * Creates new form StockIssueReceiveHisSearch
@@ -69,7 +69,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         this.observer = observer;
     }
 
-    public StockIssRecHistoryDialog(JFrame frame, String tranSource) {
+    public ConsignHistoryDialog(JFrame frame, String tranSource) {
         super(frame, true);
         this.tranSource = tranSource;
         initComponents();
@@ -254,8 +254,7 @@ public class StockIssRecHistoryDialog extends javax.swing.JDialog implements Key
         txtBag = new javax.swing.JFormattedTextField();
         btnSearch = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Stock Voucher Search Dialog");
+        setTitle("Consign History Dialog");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 

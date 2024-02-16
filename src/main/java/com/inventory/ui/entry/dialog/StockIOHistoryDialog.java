@@ -321,7 +321,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         lblTtlRecord4 = new javax.swing.JLabel();
         btnSearch = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock In/Out Voucher Search Dialog");
 
         panelFilter.setBorder(javax.swing.BorderFactory.createTitledBorder(""));

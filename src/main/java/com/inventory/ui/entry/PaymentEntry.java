@@ -263,16 +263,17 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             ph.setListDetail(tableModel.getPaymentList());
             ph.setListDelete(tableModel.getListDelete());
             ph.setTranOption(tranOption);
-            inventoryRepo.savePayment(ph).subscribe((t) -> {
-                clear();
+            inventoryRepo.savePayment(ph).doOnSuccess((t) -> {
                 if (print) {
                     printVoucher(t.getKey());
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
-            });
+            }).doOnTerminate(() -> {
+                clear();
+            }).subscribe();
         }
     }
 
@@ -515,12 +516,12 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             p.setPayAmt(0.0f);
             p.setFullPaid(false);
         });
-        float payment = Util1.getFloat(txtAmount.getValue());
+        double payment = Util1.getFloat(txtAmount.getValue());
         double ttlBalance = Util1.getDouble(txtOutstanding.getValue());
         if (payment <= ttlBalance) {
             for (PaymentHisDetail p : list) {
                 if (payment > 0) {
-                    float balance = p.getVouBalance();
+                    double balance = p.getVouBalance();
                     if (payment >= balance) {
                         p.setPayAmt(balance);
                         p.setFullPaid(true);
@@ -632,6 +633,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         });
 
         txtOutstanding.setEditable(false);
+        txtOutstanding.setForeground(Color.red);
         txtOutstanding.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtOutstanding.setFont(Global.amtFont);
 

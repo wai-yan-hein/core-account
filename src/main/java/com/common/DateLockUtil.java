@@ -27,14 +27,14 @@ public class DateLockUtil {
 
     private final UserRepo userRepo;
     public static List<DateLock> listLock;
-    public static final String MESSAGE = "Access to certain data is now restricted by management.";
+    public static final String MESSAGE = "Data Lock by management.";
 
     public void initLockDate() {
         log.info("initLockDate.");
-        userRepo.getDateLock().subscribe((t) -> {
+        userRepo.getDateLock().doOnSuccess((t) -> {
             t.removeIf(c -> !c.isDateLock());
             listLock = t;
-        });
+        }).subscribe();
     }
 
     public static boolean isLockDate(Date date) {
@@ -84,6 +84,6 @@ public class DateLockUtil {
     }
 
     public static void showMessage(Component c) {
-        JOptionPane.showMessageDialog(c, "Your entry date has been restricted by management.", "Restricted", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(c, MESSAGE, "Restricted", JOptionPane.WARNING_MESSAGE);
     }
 }
