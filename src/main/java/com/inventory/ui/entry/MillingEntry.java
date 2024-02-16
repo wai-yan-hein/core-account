@@ -219,9 +219,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblRaw.setCellSelectionEnabled(true);
         tblRaw.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblRaw.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
-        tblRaw.getColumnModel().getColumn(2).setPreferredWidth(50);//weight
+        tblRaw.getColumnModel().getColumn(2).setPreferredWidth(30);//weight
         tblRaw.getColumnModel().getColumn(3).setPreferredWidth(30);//unit
-        tblRaw.getColumnModel().getColumn(4).setPreferredWidth(50);//qty
+        tblRaw.getColumnModel().getColumn(4).setPreferredWidth(30);//qty
         tblRaw.getColumnModel().getColumn(5).setPreferredWidth(30);//unit
         tblRaw.getColumnModel().getColumn(6).setPreferredWidth(50);//price
         tblRaw.getColumnModel().getColumn(7).setPreferredWidth(60);//amt
@@ -280,9 +280,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.setCellSelectionEnabled(true);
         tblOutput.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblOutput.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
-        tblOutput.getColumnModel().getColumn(2).setPreferredWidth(50);//Weight
+        tblOutput.getColumnModel().getColumn(2).setPreferredWidth(20);//Weight
         tblOutput.getColumnModel().getColumn(3).setPreferredWidth(20);//weight unt
-        tblOutput.getColumnModel().getColumn(4).setPreferredWidth(50);//qty
+        tblOutput.getColumnModel().getColumn(4).setPreferredWidth(20);//qty
         tblOutput.getColumnModel().getColumn(5).setPreferredWidth(20);//unit
         tblOutput.getColumnModel().getColumn(6).setPreferredWidth(50);//price
         tblOutput.getColumnModel().getColumn(7).setPreferredWidth(60);//amt
@@ -620,7 +620,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 millingRawTableModel.delete(row);
-                calculateMilling(false);
+                calculateMilling();
             }
         }
     }
@@ -635,7 +635,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 millingOutTableModel.delete(row);
-                calculateMilling(false);
+                calculateMilling();
             }
         }
     }
@@ -650,12 +650,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 milingExpenseTableModel.delete(row);
-                calculateMilling(false);
+                calculateMilling();
             }
         }
     }
 
-    private void calculateMilling(boolean firstRow) {
+    private void calculateMilling() {
         //cal raw
         listDetail = millingRawTableModel.getListDetail();
         double loadQty = listDetail.stream().mapToDouble((t) -> t.getQty()).sum();
@@ -687,25 +687,22 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     millingOutTableModel.setObject(i, t);
                 });
         // calculate price
-        if (!firstRow) {
-            double knowAmt = listOutDetail.stream()
-                    .skip(1) // Skip the first element
-                    .mapToDouble((t) -> t.getAmount())
-                    .sum();
-            double amt = costAmt - knowAmt;
-            if (listOutDetail != null && !listOutDetail.isEmpty()) {
-                MillingOutDetail mod = listOutDetail.get(0);
-                double qty = Util1.getDouble(mod.getQty());
-                if (qty > 0) {
-                    mod.setAmount(amt);
-                    mod.setPrice(amt / qty);
-                    millingOutTableModel.setObject(0, mod);
-                }
+        double knowAmt = listOutDetail.stream()
+                .filter((f) -> !f.isCalculate())
+                .mapToDouble((t) -> t.getAmount())
+                .sum();
+        double amt = costAmt - knowAmt;
+        List<MillingOutDetail> unknowList = listOutDetail.stream().filter((t) -> t.isCalculate()).toList();
+        double ttlQty = unknowList.stream().mapToDouble((t) -> t.getQty()).sum();
+        if (ttlQty > 0) {
+            double ttlPrice = Util1.format2(amt / ttlQty);
+            for (int i = 0; i < unknowList.size(); i++) {
+                MillingOutDetail mod = unknowList.get(i);
+                mod.setPrice(ttlPrice);
+                mod.setAmount(ttlPrice * mod.getQty());
+                millingOutTableModel.rowUpdate(i);
             }
-
         }
-
-        //cal output
         double outAmt = listOutDetail.stream().mapToDouble((t) -> t.getAmount()).sum();
         double outQty = listOutDetail.stream().mapToDouble((t) -> t.getQty()).sum();
         double outWt = listOutDetail.stream().mapToDouble((t) -> t.getTotalWeight()).sum();
@@ -1084,7 +1081,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
+        btnTransfer.setBackground(Global.selectionColor);
         btnTransfer.setFont(Global.lableFont);
+        btnTransfer.setForeground(new java.awt.Color(255, 255, 255));
         btnTransfer.setText("Job");
         btnTransfer.setInheritsPopupMenu(true);
         btnTransfer.addActionListener(new java.awt.event.ActionListener() {
@@ -1206,8 +1205,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel25)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                        .addComponent(txtJob)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnTransfer, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
                             .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -1218,7 +1217,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
         panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel10, jLabel15});
 
-        panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCurrency, txtCus, txtJob, txtLocation, txtProjectNo, txtReference, txtRemark, txtSaleDate});
+        panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCurrency, txtCus, txtLocation, txtProjectNo, txtReference, txtRemark, txtSaleDate});
 
         panelSaleLayout.setVerticalGroup(
             panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1741,13 +1740,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             case "TRADER" -> {
             }
             case "SALE-TOTAL" ->
-                calculateMilling(false);
+                calculateMilling();
             case "SALE-TOTAL-OUT" ->
-                calculateMilling(false);
-            case "SALE-TOTAL-SKIP" ->
-                calculateMilling(true);
+                calculateMilling();
             case "EXPENSE" ->
-                calculateMilling(false);
+                calculateMilling();
             case "MILLING-HISTORY" -> {
                 if (selectObj instanceof MillingHis s) {
                     boolean local = s.isLocal();
@@ -1819,7 +1816,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 millingRawTableModel.addNewRow();
                 millingOutTableModel.addNewRow();
                 setMillingUsage();
-                calculateMilling(false);
+                calculateMilling();
                 focusTable();
                 progress.setIndeterminate(false);
             }).subscribe();

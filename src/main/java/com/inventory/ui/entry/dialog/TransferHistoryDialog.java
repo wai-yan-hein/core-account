@@ -258,7 +258,6 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         btnSearch = new javax.swing.JButton();
         btnSelect = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Transfer Voucher Search Dialog");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));

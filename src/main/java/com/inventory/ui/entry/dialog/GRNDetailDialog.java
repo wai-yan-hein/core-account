@@ -93,7 +93,6 @@ public class GRNDetailDialog extends javax.swing.JDialog {
         tblGRN = new javax.swing.JTable();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("GRN Detail Dialog");
 
         tblGRN.setModel(new javax.swing.table.DefaultTableModel(

@@ -70,13 +70,10 @@ public class DateLockDialog extends javax.swing.JDialog {
     }
 
     public void search() {
-        userRepo.getDateLock().subscribe((t) -> {
+        userRepo.getDateLock().doOnSuccess((t) -> {
             dateLockTableModel.setList(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-            setVisible(true);
-        });
+        }).subscribe();
+        setVisible(true);
     }
 
     public void initMain() {
@@ -272,7 +269,9 @@ public class DateLockDialog extends javax.swing.JDialog {
         chkLock.setFont(Global.lableFont);
         chkLock.setText("Date Lock");
 
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
