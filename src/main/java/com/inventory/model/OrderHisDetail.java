@@ -44,6 +44,10 @@ public class OrderHisDetail {
     private Double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
+    @Column(name = "design")
+    private String design;
+    @Column(name = "size")
+    private String size;
     @Transient
     private Stock stock;
     @Transient
