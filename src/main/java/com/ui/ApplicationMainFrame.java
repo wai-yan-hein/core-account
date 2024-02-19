@@ -85,6 +85,7 @@ import com.inventory.ui.entry.PurOrderHisEntry;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.ConsignEntry;
+import com.inventory.ui.entry.SaleOrderEntry;
 import com.inventory.ui.entry.StockPaymentEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
@@ -93,7 +94,6 @@ import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.JobSetup;
 import com.inventory.ui.setup.LanguageSetup;
-import com.inventory.ui.setup.OpeningDynamic;
 import com.inventory.ui.setup.OpeningDynamic;
 import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
@@ -430,6 +430,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 orderDynamic.setProgress(progress);
                 orderDynamic.initMain();
                 return orderDynamic;
+            }
+            case "Sale Order" -> {
+                SaleOrderEntry saleOrderEntry = new SaleOrderEntry();
+                saleOrderEntry.setName(menuName);
+                saleOrderEntry.setInventoryRepo(inventoryRepo);
+                saleOrderEntry.setUserRepo(userRepo);
+                saleOrderEntry.setObserver(this);
+                saleOrderEntry.setProgress(progress);
+                saleOrderEntry.initMain();
+                return saleOrderEntry;
             }
             case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch" -> {
                 int type = getSaleType(menuName);
@@ -1149,7 +1159,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 0;
         };
     }
-    
+
     private int getOrderNoteType(String menuName) {
         return switch (menuName) {
             case "Order Note" ->
