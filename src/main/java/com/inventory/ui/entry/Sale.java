@@ -691,14 +691,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleHis.setCreatedBy(Global.loginUser.getUserCode());
                 saleHis.setSession(Global.sessionId);
             } else {
-                saleHis.setUpdatedBy(Global.loginUser.getUserCode());
-                String vouNo = saleHis.getKey().getVouNo();
-                boolean exist = inventoryRepo.checkPaymentExist(vouNo, traderCode, "C").block();
-                if (exist) {
-                    JOptionPane.showMessageDialog(this, "This voucher is already paid in Customer Payment.", "Message", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
+                saleHis.setUpdatedBy(Global.loginUser.getUserCode());            }
         }
         return true;
     }

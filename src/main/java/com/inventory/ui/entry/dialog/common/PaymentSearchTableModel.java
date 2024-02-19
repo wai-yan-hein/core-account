@@ -70,7 +70,7 @@ public class PaymentSearchTableModel extends AbstractTableModel {
                     }
                     case 1 -> {
                         //vou date
-                        return his.getKey().getVouNo();
+                        return his.getVouNo();
                     }
                     case 2 -> {
                         //remark

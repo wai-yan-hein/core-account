@@ -117,6 +117,7 @@ public class SaleHis {
     private boolean sPay;
     @Column(name = "tran_source")
     private int tranSource;
+    private double outstanding;
     @Transient
     private String localVouNo;
     @Transient

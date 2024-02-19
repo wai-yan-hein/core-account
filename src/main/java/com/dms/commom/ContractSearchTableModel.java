@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui.entry.dialog.common;
+package com.dms.commom;
 
 import com.common.Util1;
-import com.inventory.model.StockPayment;
+import com.dms.model.ContractDto;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -18,10 +18,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class ContractSearchDialog extends AbstractTableModel {
+public class ContractSearchTableModel extends AbstractTableModel {
 
-    private List<StockPayment> listDetail = new ArrayList();
-    private final String[] columnNames = {"Contract Date", "Contract No", "Customer Name", "Remark"};
+    private List<ContractDto> listDetail = new ArrayList();
+    private final String[] columnNames = {"Contract Date", "Contract No", "Contract Name", "Customer Name", "Remark"};
+    @Getter
+    private int size;
 
     @Override
     public String getColumnName(int column) {
@@ -48,34 +50,26 @@ public class ContractSearchDialog extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return switch (column) {
-            case 5, 6 ->
-                Double.class;
-            default ->
-                String.class;
-        };
+        return String.class;
     }
 
     @Override
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                StockPayment his = listDetail.get(row);
+                ContractDto his = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //vou no
-                        return Util1.convertToLocalStorage(his.getVouDateTime());
+                        return Util1.convertToLocalStorage(his.getZonedDateTime());
                     }
                     case 1 -> {
-                        if (his.isDeleted()) {
-                            return Util1.getStar(his.getVouNo());
-                        }
                         //vou date
-                        return his.getVouNo();
+                        return his.getContractNo();
                     }
                     case 2 -> {
                         //vou date
-                        return his.getProjectNo();
+                        return his.getContractName();
                     }
                     case 3 -> {
                         //remark
@@ -83,12 +77,6 @@ public class ContractSearchDialog extends AbstractTableModel {
                     }
                     case 4 -> {
                         return his.getRemark();
-                    }
-                    case 5 -> {
-                        return his.getPayQty();
-                    }
-                    case 6 -> {
-                        return his.getPayBag();
                     }
                 }
             }
@@ -98,16 +86,16 @@ public class ContractSearchDialog extends AbstractTableModel {
         return null;
     }
 
-    public List<StockPayment> getListDetail() {
+    public List<ContractDto> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<StockPayment> listDetail) {
+    public void setListDetail(List<ContractDto> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public StockPayment getSelectVou(int row) {
+    public ContractDto getSelectVou(int row) {
         if (listDetail != null) {
             if (!listDetail.isEmpty()) {
                 return listDetail.get(row);
@@ -116,8 +104,9 @@ public class ContractSearchDialog extends AbstractTableModel {
         return null;
     }
 
-    public void addObject(StockPayment t) {
+    public void addObject(ContractDto t) {
         listDetail.add(t);
+        size += 1;
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
             fireTableRowsInserted(lastIndex, lastIndex);
@@ -127,6 +116,7 @@ public class ContractSearchDialog extends AbstractTableModel {
     }
 
     public void clear() {
+        size = 0;
         listDetail.clear();
         fireTableDataChanged();
     }

@@ -57,7 +57,6 @@ import com.inventory.model.OutputCostKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PaymentHis;
 import com.inventory.model.PaymentHisDetail;
-import com.inventory.model.PaymentHisKey;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
@@ -3615,11 +3614,7 @@ public class InventoryRepo {
                 .uri("/payment/savePayment")
                 .body(Mono.just(ph), PaymentHis.class)
                 .retrieve()
-                .bodyToMono(PaymentHis.class)
-                .onErrorResume((e) -> {
-                    log.error("savePayment :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(PaymentHis.class);
     }
 
     public Mono<StockPayment> saveStockPayment(StockPayment ph) {
@@ -3642,26 +3637,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> checkPaymentExist(String vouNo, String traderCode, String tranOption) {
-        FilterObject obj = new FilterObject(Global.compCode, Global.deptId);
-        obj.setVouNo(vouNo);
-        obj.setTraderCode(traderCode);
-        obj.setTranOption(tranOption);
-        return inventoryApi.post()
-                .uri("/payment/checkPaymentExist")
-                .body(Mono.just(obj), FilterObject.class)
-                .retrieve()
-                .bodyToMono(Boolean.class)
-                .onErrorResume((e) -> {
-                    log.error("checkPaymentExist :" + e.getMessage());
-                    return Mono.just(false);
-                });
-    }
-
-    public Mono<List<VSale>> paymentReport(PaymentHisKey key) {
-        return inventoryApi.post()
-                .uri("/payment/paymentReport")
-                .body(Mono.just(key), PaymentHisKey.class)
+    public Mono<List<VSale>> paymentReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/payment/paymentReport")
+                .queryParam("compCode", Global.compCode)
+                .build())
                 .retrieve()
                 .bodyToFlux(VSale.class)
                 .collectList()
@@ -3989,6 +3969,21 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<PaymentHis> getTraderBalanceSummary(String traderCode, String tranOption) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/payment/getTraderBalanceSummary")
+                .queryParam("traderCode", traderCode)
+                .queryParam("tranOption", tranOption)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(PaymentHis.class)
+                .onErrorResume((e) -> {
+                    log.error("getTraderBalanceSummary :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<StockPaymentDetail>> getTraderStockBalanceQty(String traderCode, String tranOption) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/stockPayment/getTraderStockBalanceQty")
@@ -4031,10 +4026,13 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<Boolean> delete(PaymentHisKey key) {
-        return inventoryApi.post()
-                .uri("/payment/deletePayment")
-                .body(Mono.just(key), PaymentHisKey.class)
+    public Mono<Boolean> delete(String vouNo) {
+        return inventoryApi.delete()
+                .uri(uriBuilder -> uriBuilder
+                .path("/payment/deletePayment")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build(vouNo))
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
@@ -4043,10 +4041,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> restore(PaymentHisKey key) {
-        return inventoryApi.post()
-                .uri("/payment/restorePayment")
-                .body(Mono.just(key), PaymentHisKey.class)
+    public Mono<Boolean> restore(String vouNo) {
+        return inventoryApi.delete()
+                .uri(uriBuilder -> uriBuilder
+                .path("/payment/restorePayment")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {

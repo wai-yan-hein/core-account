@@ -182,7 +182,6 @@ public class Util1 {
     }
 
     public static boolean isDate(String str) {
-
         return str.length() == 10;
     }
 

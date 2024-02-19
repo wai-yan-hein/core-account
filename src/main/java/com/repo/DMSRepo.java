@@ -8,6 +8,7 @@ import com.common.Global;
 import com.common.Util1;
 import com.dms.model.CVFile;
 import com.dms.model.CVFileResponse;
+import com.dms.model.ContractDto;
 import com.dms.model.FileObject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -24,6 +25,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -128,6 +130,7 @@ public class DMSRepo {
                 .retrieve()
                 .bodyToMono(Resource.class);
     }
+
     public Mono<CVFile> findFile(String fileId) {
         return dmsApi.get().uri(builder -> builder.path("/file/findFile")
                 .queryParam("fileId", fileId).build())
@@ -163,4 +166,16 @@ public class DMSRepo {
                 .bodyToMono(Boolean.class);
     }
 
+    public Flux<ContractDto> getContract() {
+        return dmsApi.get()
+                .uri(builder -> builder.path("/contract/getContract")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(ContractDto.class)
+                .onErrorResume((e) -> {
+                    log.error("getContract : " + e.getMessage());
+                    return Flux.empty();
+                });
+    }
 }

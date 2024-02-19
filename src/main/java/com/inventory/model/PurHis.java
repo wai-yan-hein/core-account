@@ -113,6 +113,7 @@ public class PurHis implements java.io.Serializable, Cloneable {
     private boolean sRec;
     @Column(name = "tran_source")
     private int tranSource;
+    private double outstanding;
     @Transient
     private String status = "STATUS";
     @Transient

@@ -576,12 +576,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 ph.setMacId(Global.macId);
             } else {
                 ph.setUpdatedBy(Global.loginUser.getUserCode());
-                String vouNo = ph.getKey().getVouNo();
-                boolean exist = inventoryRepo.checkPaymentExist(vouNo, traderCode, "S").block();
-                if (exist) {
-                    JOptionPane.showMessageDialog(this, "This voucher is already paid in supplier payment.", "Message", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
             }
         }
         return status;
@@ -776,18 +770,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             lblStatus.setForeground(Color.RED);
             disableForm(false);
         } else {
-            inventoryRepo.checkPaymentExist(vouNo, ph.getTraderCode(), "S").subscribe((exist) -> {
-                if (exist) {
-                    lblStatus.setText("Voucher is locked because of payment.");
-                    lblStatus.setForeground(Color.red);
-                    disableForm(false);
-                } else {
-                    lblStatus.setForeground(Color.blue);
-                    lblStatus.setText("EDIT");
-                    disableForm(true);
-                }
-                btnBatch.setText("View");
-            });
+            lblStatus.setForeground(Color.blue);
+            lblStatus.setText("EDIT");
+            disableForm(true);
+            btnBatch.setText("View");
         }
         txtVouNo.setText(ph.getKey().getVouNo());
         txtDueDate.setDate(ph.getDueDate());

@@ -106,6 +106,7 @@ public class ProUtil {
     public static final String STOCK_USE_WEIHGT = "stock.use.weight";
     public static final String DEFAULT_STOCK_REC = "default.stock.receivable";
     public static final String DEFAULT_STOCK_PAY = "default.stock.payable";
+    public static final String TRADER_BAL_ACC = "trader.balance.account";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
@@ -165,6 +166,10 @@ public class ProUtil {
 
     public static String getProperty(String key) {
         return Global.hmRoleProperty.get(key);
+    }
+
+    public static boolean isTraderBalAcc() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(TRADER_BAL_ACC));
     }
 
     public static boolean isStockNoUnit() {

@@ -5,7 +5,8 @@
 package com.inventory.ui.entry;
 
 import com.repo.AccountRepo;
-import com.acc.common.COAComboBoxModel;
+import com.acc.editor.COAAutoCompleter;
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.ColumnColorCellRenderer;
 import com.common.ComponentUtil;
@@ -20,7 +21,6 @@ import com.common.Util1;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.PaymentHis;
 import com.inventory.model.PaymentHisDetail;
-import com.inventory.model.PaymentHisKey;
 import com.inventory.model.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.PaymentTableModel;
@@ -69,7 +69,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     private TraderAutoCompleter traderAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
-    private COAComboBoxModel coaComboModel = new COAComboBoxModel();
+    private COAAutoCompleter cOAAutoCompleter;
     private PaymentHis ph = new PaymentHis();
     private PaymentHistoryDialog dialog;
     private String tranOption;
@@ -155,16 +155,16 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         traderAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
         accountRepo.getCashBank().doOnSuccess((t) -> {
             t.add(new ChartOfAccount());
-            coaComboModel.setData(t);
-            cboCash.setModel(coaComboModel);
+            cOAAutoCompleter.setListCOA(t);
         }).subscribe();
     }
 
@@ -222,8 +222,8 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         if (t != null) {
             if (lblStatus.getText().equals("NEW")) {
                 progress.setIndeterminate(true);
-                Float creditAmt = Util1.getFloat(txtCreditAmt.getValue());
-                Float tmp = Util1.getFloat(ProUtil.getProperty(ProUtil.C_CREDIT_AMT));
+                double creditAmt = Util1.getDouble(txtCreditAmt.getValue());
+                double tmp = Util1.getDouble(ProUtil.getProperty(ProUtil.C_CREDIT_AMT));
                 txtCreditAmt.setValue(creditAmt == 0 ? tmp : creditAmt);
                 inventoryRepo.getTraderBalance(t.getKey().getCode(), tranOption)
                         .subscribe((payment) -> {
@@ -261,18 +261,18 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             observer.selected("save", false);
             progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());
-            ph.setListDelete(tableModel.getListDelete());
             ph.setTranOption(tranOption);
             inventoryRepo.savePayment(ph).doOnSuccess((t) -> {
                 if (print) {
-                    printVoucher(t.getKey());
+                    printVoucher(ph.getVouNo());
                 }
+                clear();
             }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
             }).doOnTerminate(() -> {
-                clear();
+                progress.setIndeterminate(false);
             }).subscribe();
         }
     }
@@ -285,9 +285,9 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         observer.selected("history", true);
     }
 
-    private void printVoucher(PaymentHisKey key) {
+    private void printVoucher(String vouNo) {
         enableToolBar(false);
-        inventoryRepo.paymentReport(key).subscribe((t) -> {
+        inventoryRepo.paymentReport(vouNo).subscribe((t) -> {
             try {
                 byte[] data = Util1.listToByteArray(t);
                 String reportName = "PaymentVoucher";
@@ -321,7 +321,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             JOptionPane.showMessageDialog(this, "Invalid Date.");
             txtVouDate.requestFocus();
             return false;
-        } else if (Util1.getFloat(txtAmount.getValue()) <= 0) {
+        } else if (Util1.getDouble(txtAmount.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Pay Amt.");
             txtAmount.requestFocus();
             return false;
@@ -340,9 +340,8 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             txtVouDate.requestFocus();
             return false;
         } else {
-            if (cboCash.getSelectedItem() instanceof ChartOfAccount coa) {
-                ph.setAccount(coa.getKey() == null ? null : coa.getKey().getCoaCode());
-            }
+            COAKey coaKey = cOAAutoCompleter.getCOA().getKey();
+            ph.setAccount(coaKey == null ? null : coaKey.getCoaCode());
             Project p = projectAutoCompleter.getProject();
             if (p != null) {
                 ph.setProjectNo(p.getKey() == null ? null : p.getKey().getProjectNo());
@@ -350,16 +349,13 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             ph.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             ph.setTraderCode(t.getKey().getCode());
             ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
-            ph.setAmount(Util1.getFloatOne(txtAmount.getValue()));
+            ph.setAmount(Util1.getDoubleOne(txtAmount.getValue()));
             ph.setDeleted(false);
             ph.setRemark(txtRemark.getText());
             ph.setMacId(Global.macId);
-
+            ph.setCompCode(Global.compCode);
+            ph.setDeptId(Global.deptId);
             if (lblStatus.getText().equals("NEW")) {
-                PaymentHisKey key = new PaymentHisKey();
-                key.setCompCode(Global.compCode);
-                ph.setDeptId(Global.deptId);
-                ph.setKey(key);
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setCreatedDate(LocalDateTime.now());
             } else {
@@ -372,9 +368,8 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     private void clear() {
         traderAutoCompleter.setTrader(null);
         projectAutoCompleter.setProject(null);
-        coaComboModel.setSelectedItem(null);
+        cOAAutoCompleter.setCoa(null);
         progress.setIndeterminate(false);
-        cboCash.repaint();
         txtVouNo.setText(null);
         txtRemark.setText(null);
         txtAmount.setValue(null);
@@ -407,29 +402,30 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void setVoucherDetail(PaymentHis ph) {
         this.ph = ph;
-        String compCode = ph.getKey().getCompCode();
-        String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.findTrader(ph.getTraderCode()).subscribe((t) -> {
+        String compCode = ph.getCompCode();
+        String vouNo = ph.getVouNo();
+        inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
-        accountRepo.findCOA(ph.getAccount()).subscribe((t) -> {
-            coaComboModel.setSelectedItem(t);
-        });
-        userRepo.find(new ProjectKey(ph.getProjectNo(), compCode)).subscribe((t) -> {
+        }).subscribe();
+        accountRepo.findCOA(ph.getAccount()).doOnSuccess((t) -> {
+            cOAAutoCompleter.setCoa(t);
+        }).subscribe();
+        userRepo.find(new ProjectKey(ph.getProjectNo(), compCode)).doOnSuccess((t) -> {
             projectAutoCompleter.setProject(t);
-        });
-        userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+        }).subscribe();
+        userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {
             currencyAutoCompleter.setCurrency(t);
-        });
+        }).subscribe();
         txtVouNo.setText(vouNo);
         txtVouDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtRemark.setText(ph.getRemark());
-        txtAmount.setValue(Util1.getFloat(ph.getAmount()));
+        txtAmount.setValue(Util1.getDouble(ph.getAmount()));
         ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
         if (ph.isDeleted()) {
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
             enableForm(false);
+            observer.selected("delete", true);
         } else if (!ProUtil.isPaymentEdit()) {
             lblStatus.setText("No Permission.");
             lblStatus.setForeground(Color.RED);
@@ -461,16 +457,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void enableForm(boolean status) {
-        txtAmount.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtOutstanding.setEnabled(status);
-        txtProjectNo.setEnabled(status);
-        txtTrader.setEnabled(status);
-        txtVouNo.setEnabled(status);
-        txtVouDate.setEnabled(status);
-        cboCash.setEnabled(status);
-        tblPayment.setEnabled(status);
-        txtCurrency.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -483,12 +470,12 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Payment Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(ph.getVouNo()).doOnSuccess((t) -> {
                         if (t) {
                             calTotalPayment();
                             clear();
                         }
-                    });
+                    }).subscribe();
                 }
             }
             case "DELETED" -> {
@@ -496,13 +483,13 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
                         "Are you sure to restore?", "Payment Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     ph.setDeleted(false);
-                    inventoryRepo.restore(ph.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(ph.getVouNo()).doOnSuccess((t) -> {
                         if (t) {
                             lblStatus.setText("EDIT");
                             lblStatus.setForeground(Color.blue);
                             enableForm(true);
                         }
-                    });
+                    }).subscribe();
                 }
             }
             default ->
@@ -513,10 +500,10 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     private void generateFIFOPayment() {
         List<PaymentHisDetail> list = tableModel.getListDetail();
         list.stream().forEach((p) -> {
-            p.setPayAmt(0.0f);
+            p.setPayAmt(0.0);
             p.setFullPaid(false);
         });
-        double payment = Util1.getFloat(txtAmount.getValue());
+        double payment = Util1.getDouble(txtAmount.getValue());
         double ttlBalance = Util1.getDouble(txtOutstanding.getValue());
         if (payment <= ttlBalance) {
             for (PaymentHisDetail p : list) {
@@ -582,10 +569,10 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel6 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
-        cboCash = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
+        txtAccount = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
@@ -764,8 +751,6 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Account");
 
-        cboCash.setFont(Global.textFont);
-
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Currency");
 
@@ -773,6 +758,8 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
 
         lblStatus.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         lblStatus.setText("NEW");
+
+        txtAccount.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -792,14 +779,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
                     .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblStatus))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtAccount)
+                    .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblStatus)
                 .addContainerGap())
         );
 
@@ -813,8 +797,8 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
                     .addComponent(lblTrader, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtTrader)
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblStatus))
+                    .addComponent(lblStatus)
+                    .addComponent(txtAccount))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -900,7 +884,6 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<ChartOfAccount> cboCash;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -920,6 +903,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JLabel lblTrader;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblPayment;
+    private javax.swing.JTextField txtAccount;
     private javax.swing.JFormattedTextField txtAmount;
     private javax.swing.JFormattedTextField txtCreditAmt;
     private javax.swing.JTextField txtCurrency;

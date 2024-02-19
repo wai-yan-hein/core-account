@@ -8,7 +8,6 @@ package com.inventory.ui.common;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.PaymentHisDetail;
-import com.inventory.model.PaymentHisDetailKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -24,19 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentTableModel extends AbstractTableModel {
 
     private List<PaymentHisDetail> listDetail = new ArrayList<>();
-    private List<PaymentHisDetailKey> listDelete = new ArrayList<>();
     private final String[] columnNames = {"Date", "Vou No", "Remark", "Reference", "Currency", "Vou Total", "Outstanding",
         "Partial Payment", "Single Payment"};
     private JTable table;
     private SelectionObserver observer;
 
-    public List<PaymentHisDetailKey> getListDelete() {
-        return listDelete;
-    }
-
-    public void setListDelete(List<PaymentHisDetailKey> listDelete) {
-        this.listDelete = listDelete;
-    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -168,7 +159,6 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         PaymentHisDetail pd = listDetail.get(row);
-        listDelete.add(pd.getKey());
         listDetail.remove(row);
         fireTableRowsDeleted(row, row);
     }
@@ -217,7 +207,6 @@ public class PaymentTableModel extends AbstractTableModel {
 
     public void clear() {
         listDetail.clear();
-        listDelete.clear();
         fireTableDataChanged();
     }
 
