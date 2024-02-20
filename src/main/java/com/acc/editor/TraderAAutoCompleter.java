@@ -162,7 +162,7 @@ public final class TraderAAutoCompleter implements KeyListener {
             ((JTextField) textComp).setText(trader.getTraderName());
             if (editor == null) {
                 if (observer != null) {
-                    observer.selected("Selected", trader);
+                    observer.selected("TRADER", trader);
                 }
             }
         }
@@ -377,5 +377,10 @@ public final class TraderAAutoCompleter implements KeyListener {
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
+
+    public void clear() {
+        TraderAKey key = new TraderAKey("-", Global.compCode);
+        setTrader(new TraderA(key, "All"));
     }
 }

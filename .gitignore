@@ -43,6 +43,7 @@ config/application.properties
 /data/
 /target/
 /token/
+/temp/
 /update/
 log.txt
 *.class

@@ -379,8 +379,8 @@ public final class COA3AutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                clear(level);
-                accountRepo.searchCOA(str, level).subscribe((t) -> {
+                clearModel();
+                accountRepo.searchCOA(str, level).doOnSuccess((t) -> {
                     if (this.filter) {
                         ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
                         t.add(s);
@@ -389,15 +389,13 @@ public final class COA3AutoCompleter implements KeyListener {
                     if (!t.isEmpty()) {
                         table.setRowSelectionInterval(0, 0);
                     }
-                }, (er) -> {
-                    log.error(er.getMessage());
-                });
+                }).subscribe();
             }
 
         }
     }
 
-    private void clear(int level) {
+    private void clearModel() {
         switch (level) {
             case 0 ->
                 cOATableModel.clear();
@@ -430,5 +428,10 @@ public final class COA3AutoCompleter implements KeyListener {
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
+
+    public void clear() {
+        COAKey key = new COAKey("-", Global.compCode);
+        setCoa(new ChartOfAccount(key, "All"));
     }
 }

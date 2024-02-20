@@ -66,7 +66,6 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         this.observer = observer;
     }
 
-
     public DateAutoCompleter() {
     }
 
@@ -380,6 +379,10 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
 
             }
         }
+    }
+
+    public void clear() {
+        setTodayDate();
     }
 
 }

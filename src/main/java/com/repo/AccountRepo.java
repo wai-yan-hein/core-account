@@ -345,7 +345,11 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(ChartOfAccount.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getUpdateChartOfAccountByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<TraderA>> getUpdateTraderByDate(String updatedDate) {
@@ -355,7 +359,11 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(TraderA.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getUpdateTraderByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<DepartmentA>> getUpdateDepartmentAByDate(String updatedDate) {

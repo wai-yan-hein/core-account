@@ -369,4 +369,9 @@ public final class ProjectAutoCompleter implements KeyListener {
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
+
+    public void clear() {
+        ProjectKey key = new ProjectKey("All", Global.compCode);
+        setProject(new Project(key, "All"));
+    }
 }

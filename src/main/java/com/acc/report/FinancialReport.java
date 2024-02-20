@@ -176,7 +176,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setPlAcc(ProUtil.getProperty(ProUtil.PL));
                     filter.setReAcc(ProUtil.getProperty(ProUtil.RE));
                     filter.setInvGroup(ProUtil.getInvGroup());
-                    filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
                     filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
                     filter.setCashGroup(ProUtil.getProperty("cash.group"));
                     filter.setListCOAGroup(dialog == null ? null : dialog.getSelectCOA());
@@ -209,23 +208,29 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private boolean isValidReport(String url) {
-        if (url.equals("CreditDetail") || url.equals("SharerHolderStatement")) {
-            if (traderAutoCompleter.getTrader().getKey().getCode().equals("-")) {
-                JOptionPane.showMessageDialog(this, "Please select Trader.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
-                txtTrader.requestFocus();
-                return false;
+        switch (url) {
+            case "CreditDetail", "SharerHolderStatement" -> {
+                if (traderAutoCompleter.getTrader().getKey().getCode().equals("-")) {
+                    JOptionPane.showMessageDialog(this, "Please select Trader.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
+                    txtTrader.requestFocus();
+                    return false;
+                }
             }
-        } else if (url.equals("IndividualStatement")) {
-            if (cOA3AutoCompleter.getCOA().getKey().getCoaCode().equals("-")) {
-                JOptionPane.showMessageDialog(this, "Please select COA.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
-                txtCOA.requestFocus();
-                return false;
+            case "IndividualStatement" -> {
+                if (cOA3AutoCompleter.getCOA().getKey().getCoaCode().equals("-")) {
+                    JOptionPane.showMessageDialog(this, "Please select COA.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
+                    txtCOA.requestFocus();
+                    return false;
+                }
             }
-        } else if (url.equals("CashBankSummary")) {
-            if (dialog == null || dialog.getSelectCOA().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Select COA Group.");
-                btnGroup.requestFocus();
-                return false;
+            case "CashBankSummary" -> {
+                if (dialog == null || dialog.getSelectCOA().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Select COA Group.");
+                    btnGroup.requestFocus();
+                    return false;
+                }
+            }
+            default -> {
             }
         }
         return true;
@@ -233,7 +238,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
 
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         if (!reportUrl.equals("CashBankSummary")) {
-            filter.setSecond(true);
+            //filter.setSecond(true);
         }
         filter.setReportName(reportName);
         long start = new GregorianCalendar().getTimeInMillis();
@@ -321,6 +326,20 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
 
     private void clearFilter() {
         lblMessage.setText("");
+        dateAutoCompleter.clear();
+        departmentAutoCompleter.clear();
+        traderAutoCompleter.clear();
+        cOA3AutoCompleter.clear();            
+        projectAutoCompleter.clear();
+    }
+
+    private void setTraderCOA() {
+        TraderA trader = traderAutoCompleter.getTrader();
+        if (trader != null) {
+            accountRepo.findCOA(trader.getAccount()).doOnSuccess((t) -> {
+                cOA3AutoCompleter.setCoa(t);
+            }).subscribe();
+        }
     }
 
     private void observeMain() {
@@ -712,6 +731,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         if (source.equals("SELECT_GROUP")) {
             List<String> list = dialog.getSelectCOA();
             lblMessage.setText("Selected Group : " + list.size());
+        } else if (source.equals("TRADER")) {
+            setTraderCOA();
         }
     }
 
