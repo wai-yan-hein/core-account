@@ -99,7 +99,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         initRowHeader();
         searchJournal();
     }
-    private void initFormat(){
+
+    private void initFormat() {
         txtRecord.setFormatterFactory(Util1.getDecimalFormat());
     }
 
@@ -185,6 +186,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }).doOnTerminate(() -> {
+            Util1.scrollToIndex(tblJournal, selectRow);
             progress.setIndeterminate(false);
         }).subscribe();
     }
@@ -245,9 +247,9 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         tblJournal.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
                 if (e.getClickCount() == 2) {
                     if (tblJournal.getSelectedRow() >= 0) {
-                        selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
                         Gl vGl = tableModel.getGl(selectRow);
                         String tranSource = vGl.getTranSource();
                         String vouNo = vGl.getGlVouNo();

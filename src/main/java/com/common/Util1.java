@@ -68,6 +68,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 
 /**
  * @author WSwe
@@ -1429,6 +1431,18 @@ public class Util1 {
 
     public static String getStar(String vouNo) {
         return "*" + vouNo + "*";
+    }
+
+    public static void scrollToIndex(JTable jTable, int rowIndex) {
+        SwingUtilities.invokeLater(() -> {
+            if (jTable.getRowCount() > rowIndex) {
+                jTable.setRowSelectionInterval(rowIndex, rowIndex);
+                if (rowIndex != -1) {
+                    jTable.scrollRectToVisible(jTable.getCellRect(rowIndex, 0, false));
+                    jTable.requestFocus();
+                }
+            }
+        });
     }
 
 }
