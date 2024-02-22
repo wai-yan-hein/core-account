@@ -52,6 +52,7 @@ import com.inventory.model.LandingHis;
 import com.inventory.model.PurDetailKey;
 import com.inventory.model.WeightHis;
 import com.inventory.ui.common.PurchaseExportTableModel;
+import com.inventory.ui.common.PurchaseOtherTableModel;
 import com.inventory.ui.common.PurchasePaddyTableModel;
 import com.inventory.ui.common.PurchaseRiceBagTableModel;
 import com.inventory.ui.common.PurchaseRiceTableModel;
@@ -102,12 +103,14 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     public static final int EXPORT = 3;
     public static final int PADDY = 4;
     public static final int RICE_BAG = 5;
+    public static final int OTHER = 6;
     private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseWeightTableModel purWeightTableModel = new PurchaseWeightTableModel();
     private final PurchaseRiceTableModel purchaseRiceTableModel = new PurchaseRiceTableModel();
     private final PurchaseExportTableModel purExportTableModel = new PurchaseExportTableModel();
     private final PurchasePaddyTableModel purchasePaddyTableModel = new PurchasePaddyTableModel();
     private final PurchaseRiceBagTableModel purchaseRiceBagTableModel = new PurchaseRiceBagTableModel();
+    private final PurchaseOtherTableModel purchaseOtherTableModel = new PurchaseOtherTableModel();
     private PurchaseHistoryDialog dialog;
     private LandingHistoryDialog landingDialog;
     private InventoryRepo inventoryRepo;
@@ -193,6 +196,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.getObject(row);
             case RICE_BAG ->
                 purchaseRiceBagTableModel.getObject(row);
+            case OTHER ->
+                purchaseOtherTableModel.getObject(row);
             default ->
                 null;
         };
@@ -250,7 +255,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 initPaddyTable();
             case RICE_BAG ->
                 initRiceBag();
-
+            case OTHER ->
+                initOtherTable();
         }
     }
 
@@ -382,6 +388,25 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+    }
+
+    private void initOtherTable() {
+        tblPur.setModel(purchaseOtherTableModel);
+        purchaseOtherTableModel.setEdit(true);
+        purchaseOtherTableModel.setLblRec(lblRec);
+        purchaseOtherTableModel.setInventoryRepo(inventoryRepo);
+        purchaseOtherTableModel.setVouDate(txtPurDate);
+        purchaseOtherTableModel.setParent(tblPur);
+        purchaseOtherTableModel.setPurchase(this);
+        purchaseOtherTableModel.setObserver(this);
+        purchaseOtherTableModel.addNewRow();
+        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
+        tblPur.setCellSelectionEnabled(true);
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
     }
 
     private void initRiceBag() {
@@ -603,6 +628,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchaseRiceBagTableModel.clear();
                 purchaseRiceBagTableModel.clearDelList();
             }
+            case OTHER -> {
+                purchaseOtherTableModel.clear();
+                purchaseOtherTableModel.clearDelList();
+            }
         }
     }
 
@@ -636,6 +665,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.isValidEntry();
             case RICE_BAG ->
                 purchaseRiceBagTableModel.isValidEntry();
+            case OTHER ->
+                purchaseOtherTableModel.isValidEntry();
             default ->
                 false;
         };
@@ -653,6 +684,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.getListDetail();
             case RICE_BAG ->
                 purchaseRiceBagTableModel.getListDetail();
+            case OTHER ->
+                purchaseOtherTableModel.getListDetail();
             default ->
                 null;
         };
@@ -670,6 +703,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.getDelList();
             case RICE_BAG ->
                 purchaseRiceBagTableModel.getDelList();
+            case OTHER ->
+                purchaseOtherTableModel.getDelList();
             default ->
                 null;
         };
@@ -846,6 +881,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.delete(row);
             case RICE_BAG ->
                 purchaseRiceBagTableModel.delete(row);
+            case OTHER ->
+                purchaseOtherTableModel.delete(row);
         }
     }
 
@@ -964,6 +1001,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             case RICE_BAG -> {
                 purchaseRiceBagTableModel.setListDetail(list);
                 purchaseRiceBagTableModel.addNewRow();
+            }
+            case OTHER -> {
+                purchaseOtherTableModel.setListDetail(list);
+                purchaseOtherTableModel.addNewRow();
             }
         }
     }
@@ -1335,6 +1376,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.addNewRow();
             case RICE_BAG ->
                 purchaseRiceBagTableModel.addNewRow();
+            case OTHER ->
+                purchaseOtherTableModel.addNewRow();
         }
     }
 
@@ -1450,7 +1493,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchasePaddyTableModel.addPurchase(p);
             case RICE_BAG ->
                 purchaseRiceBagTableModel.addPurchase(p);
-
+            case OTHER ->
+                purchaseOtherTableModel.addPurchase(p);
         }
     }
 

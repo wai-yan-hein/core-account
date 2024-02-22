@@ -476,7 +476,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchase.initMain();
                 return purchase;
             }
-            case "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy" -> {
+            case "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy", "Purchase Other" -> {
                 int type = getPurType(menuName, version);
                 PurchaseDynamic p = new PurchaseDynamic(type);
                 p.setName(menuName);
@@ -1218,6 +1218,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchaseType = PurchaseDynamic.EXPORT;
             case "Purchase Paddy" ->
                 purchaseType = PurchaseDynamic.PADDY;
+            case "Purchase Other" ->
+                purchaseType = PurchaseDynamic.OTHER;
             default ->
                 purchaseType = 0;
         }
