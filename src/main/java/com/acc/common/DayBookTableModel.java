@@ -11,6 +11,8 @@ import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.common.ComponentUtil;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -330,19 +332,25 @@ public class DayBookTableModel extends AbstractTableModel {
 
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
+            if (DateLockUtil.isLockDate(gl.getGlDate())) {
+                DateLockUtil.showMessage(parent);
+                ComponentUtil.scrollTable(parent, row, 0);
+                return;
+            }
             progress.setIndeterminate(true);
-            accountRepo.save(gl).subscribe((t) -> {
+            accountRepo.save(gl).doOnSuccess((t) -> {
                 if (t != null) {
                     listVGl.set(row, t);
-                    addNewRow();
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(0, 0);
-                    observer.selected("CAL-TOTAL", "-");
                 }
-            }, (e) -> {
-                progress.setIndeterminate(false);
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(parent, e.getMessage());
-            });
+                progress.setIndeterminate(false);
+            }).doOnTerminate(() -> {
+                addNewRow();
+                ComponentUtil.scrollTable(parent, row + 1, 0);
+                progress.setIndeterminate(false);
+                observer.selected("CAL-TOTAL", "-");
+            }).subscribe();
         }
     }
 

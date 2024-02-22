@@ -65,6 +65,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private JournalEntryDialog dialog;
     private CurrencyConversionDialog conversionDialog;
     private int selectRow = 0;
+    private int selectCol =0;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
 
@@ -186,7 +187,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }).doOnTerminate(() -> {
-            Util1.scrollToIndex(tblJournal, selectRow);
+            ComponentUtil.scrollTable(tblJournal, selectRow,selectCol);
             progress.setIndeterminate(false);
         }).subscribe();
     }
@@ -248,6 +249,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             @Override
             public void mouseClicked(MouseEvent e) {
                 selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
+                selectCol = tblJournal.getSelectedColumn();
                 if (e.getClickCount() == 2) {
                     if (tblJournal.getSelectedRow() >= 0) {
                         Gl vGl = tableModel.getGl(selectRow);

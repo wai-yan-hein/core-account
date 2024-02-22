@@ -120,7 +120,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
     private ColumnHeaderListener listener;
-    private int selectRow = -1;
+    private int selectRow = 0;
+    private int selectCol = 0;
     private final JPopupMenu sumPopup = new JPopupMenu();
 
     public void setUserRepo(UserRepo userRepo) {
@@ -310,13 +311,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void requestFoucsTable() {
-        int rc = tblCash.getRowCount();
-        if (rc >= 1) {
-            tblCash.setRowSelectionInterval(rc - 1, rc - 1);
-        }
-        tblCash.setColumnSelectionInterval(0, 0);
-        tblCash.requestFocus();
-
+        ComponentUtil.scrollTable(tblCash, selectRow, selectCol);
     }
 
     private void initTableCB() {
@@ -324,7 +319,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
-        //tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
         tblCash.setCellSelectionEnabled(true);
         tblCash.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCash.getColumnModel().getColumn(0).setPreferredWidth(20);// Date
@@ -581,7 +575,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             taskExecutor.execute(() -> {
                 try {
                     String path = "temp/Ledger" + Global.macId + ".json";
-                    List<Gl> list = allCashTableModel.getListVGl();
+                    List<Gl> list = getListDetail();
                     Util1.writeJsonFile(list, path);
                     Map<String, Object> p = new HashMap();
                     p.put("p_report_name", this.getName());
@@ -795,9 +789,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void checkLock() {
-        int row = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
-        if (row >= 0) {
-            Gl gl = getGl(row);
+        selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
+        selectCol = tblCash.getSelectedColumn();
+        if (selectRow >= 0) {
+            Gl gl = getGl(selectRow);
             setGl(gl);
         }
     }

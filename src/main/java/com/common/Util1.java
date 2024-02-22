@@ -1433,16 +1433,6 @@ public class Util1 {
         return "*" + vouNo + "*";
     }
 
-    public static void scrollToIndex(JTable jTable, int rowIndex) {
-        SwingUtilities.invokeLater(() -> {
-            if (jTable.getRowCount() > rowIndex) {
-                jTable.setRowSelectionInterval(rowIndex, rowIndex);
-                if (rowIndex != -1) {
-                    jTable.scrollRectToVisible(jTable.getCellRect(rowIndex, 0, false));
-                    jTable.requestFocus();
-                }
-            }
-        });
-    }
+   
 
 }

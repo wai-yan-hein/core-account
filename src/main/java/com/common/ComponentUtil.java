@@ -16,8 +16,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -122,4 +124,21 @@ public class ComponentUtil {
         return true;
     }
 
+    public static void scrollTable(JTable table, int row, int column) {
+        SwingUtilities.invokeLater(() -> {
+            if (table.getRowCount() > row) {
+                boolean enable = table.getCellSelectionEnabled();
+                if (enable) {
+                    table.changeSelection(row, column, false, false);
+                } else {
+                    table.setRowSelectionInterval(row, row);
+                    table.setColumnSelectionInterval(column, column);
+                }
+                if (row != -1) {
+                    table.scrollRectToVisible(table.getCellRect(row + 10, 0, false));
+                    table.requestFocus();
+                }
+            }
+        });
+    }
 }

@@ -11,6 +11,7 @@ import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.ProUtil;
@@ -351,7 +352,7 @@ public class AllCashTableModel extends AbstractTableModel {
         if (isValidEntry(gl, row, column)) {
             if (DateLockUtil.isLockDate(gl.getGlDate())) {
                 DateLockUtil.showMessage(parent);
-                setSelection(row, 0);
+                ComponentUtil.scrollTable(parent, row, 0);
                 return;
             }
             progress.setIndeterminate(true);
@@ -364,7 +365,7 @@ public class AllCashTableModel extends AbstractTableModel {
                 progress.setIndeterminate(false);
             }).doOnTerminate(() -> {
                 addNewRow();
-                setSelection(row + 1, 0);
+                ComponentUtil.scrollTable(parent, row + 1, 0);
                 progress.setIndeterminate(false);
                 observer.selected("CAL-TOTAL", "-");
             }).subscribe();

@@ -56,7 +56,8 @@ import net.sf.jasperreports.view.JasperViewer;
 @Slf4j
 public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
-    private int selectRow = -1;
+    private int selectRow = 0;
+    private int selectCol =0;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private DespAutoCompleter despAutoCompleter;
@@ -139,9 +140,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         tblVoucher.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                selectRow = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+                selectCol = tblVoucher.getSelectedColumn();
                 if (e.getClickCount() == 2) {
                     if (tblVoucher.getSelectedRow() >= 0) {
-                        selectRow = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
                         Gl gl = voucherTableModel.getVGl(selectRow);
                         openVoucherDialog(gl.getTranSource(), gl.getGlVouNo());
                     }
@@ -229,6 +231,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     }).doOnTerminate(() -> {
             }).doOnTerminate(() -> {
                 calOpening();
+                ComponentUtil.scrollTable(tblVoucher, selectRow,selectCol);
             }).subscribe();
         }
 
