@@ -287,4 +287,49 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
         }
         return list;
     }
+
+    @Override
+    public List<ChartOfAccount> getCOA(int coaLevel, String compCode) {
+        List<ChartOfAccount> list = new ArrayList<>();
+        String sql = """
+                select a.*,c1.coa_code group_code,c1.coa_code_usr group_usr_code,c1.coa_name_eng group_name,
+                c2.coa_code head_code,c2.coa_code_usr head_usr_code,c2.coa_name_eng head_name
+                from (
+                select coa_code,coa_code_usr,coa_name_eng,coa_parent,comp_code,coa_level
+                from chart_of_account
+                where active = true
+                and deleted = false
+                and coa_level = ?
+                and comp_code =?)a
+                left join chart_of_account c1
+                on a.coa_parent = c1.coa_code
+                and a.comp_code = c1.comp_code
+                left join chart_of_account c2
+                on c1.coa_parent = c2.coa_code
+                and c1.comp_code = c2.comp_code
+                order by coa_code_usr""";
+        ResultSet rs = getResult(sql, coaLevel, compCode);
+        try {
+            while (rs.next()) {
+                ChartOfAccount coa = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCompCode(compCode);
+                key.setCoaCode(rs.getString("coa_code"));
+                coa.setKey(key);
+                coa.setCoaCodeUsr(rs.getString("coa_code_usr"));
+                coa.setCoaNameEng(rs.getString("coa_name_eng"));
+                coa.setGroupCode(rs.getString("group_code"));
+                coa.setGroupUsrCode(rs.getString("group_usr_code"));
+                coa.setGroupName(rs.getString("group_name"));
+                coa.setHeadCode(rs.getString("head_code"));
+                coa.setHeadUsrCode(rs.getString("head_usr_code"));
+                coa.setHeadName(rs.getString("head_name"));
+                coa.setCoaLevel(Util1.getInteger(rs.getInt("coa_level")));
+                list.add(coa);
+            }
+        } catch (SQLException e) {
+            log.error("");
+        }
+        return list;
+    }
 }

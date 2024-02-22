@@ -25,6 +25,7 @@ import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
 import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
+import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -237,9 +238,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
-        if (!reportUrl.equals("CashBankSummary")) {
-            //filter.setSecond(true);
-        }
         filter.setReportName(reportName);
         long start = new GregorianCalendar().getTimeInMillis();
         accountRepo.getReport(filter)
@@ -271,6 +269,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                                     frame.getContentPane().add(viwer);
                                     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                                     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                    frame.setMinimumSize(new Dimension(800, 600)); // Set minimum size here
                                     frame.setVisible(true);
                                 } else {
                                     JOptionPane.showMessageDialog(this, "Sorry, there is no data available.");
@@ -329,7 +328,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         dateAutoCompleter.clear();
         departmentAutoCompleter.clear();
         traderAutoCompleter.clear();
-        cOA3AutoCompleter.clear();            
+        cOA3AutoCompleter.clear();
         projectAutoCompleter.clear();
     }
 

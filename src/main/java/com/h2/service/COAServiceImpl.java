@@ -84,4 +84,9 @@ public class COAServiceImpl implements COAService {
     public List<ChartOfAccount> getCOA(String compCode) {
         return dao.getCOA(compCode);
     }
+
+    @Override
+    public List<ChartOfAccount> getCOA(int coaLevel, String compCode) {
+        return dao.getCOA(coaLevel,compCode);
+    }
 }

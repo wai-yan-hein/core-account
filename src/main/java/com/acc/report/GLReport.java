@@ -610,7 +610,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
+        btnExcel.setBackground(Global.selectionColor);
         btnExcel.setFont(Global.lableFont);
+        btnExcel.setForeground(new java.awt.Color(255, 255, 255));
         btnExcel.setText("Export Excel");
         btnExcel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

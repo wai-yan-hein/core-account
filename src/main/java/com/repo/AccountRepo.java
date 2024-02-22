@@ -140,7 +140,7 @@ public class AccountRepo {
 
     public Mono<List<ChartOfAccount>> getChartOfAccount(Integer coaLevel) {
         if (localDatabase) {
-            return h2Repo.getChartofAccount().collectList();
+            return h2Repo.getCOA(coaLevel).collectList();
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCoa")

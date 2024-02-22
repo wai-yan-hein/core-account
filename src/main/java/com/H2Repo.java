@@ -774,6 +774,10 @@ public class H2Repo {
         return Flux.fromIterable(coaService.getCOA(Global.compCode));
     }
 
+    public Flux<ChartOfAccount> getCOA(int coaLevel) {
+        return Flux.fromIterable(coaService.getCOA(coaLevel, Global.compCode));
+    }
+
     public Mono<ChartOfAccount> find(COAKey key) {
         return Mono.justOrEmpty(coaService.findById(key));
     }

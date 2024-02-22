@@ -38,4 +38,6 @@ public interface COAService {
 
     List<ChartOfAccount> getCOA(String compCode);
 
+    List<ChartOfAccount> getCOA(int coaLevel, String compCode);
+
 }

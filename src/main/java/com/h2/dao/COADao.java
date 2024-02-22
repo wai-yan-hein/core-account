@@ -37,5 +37,6 @@ public interface COADao {
     List<ChartOfAccount> getCOAByHead(String headCode, String compCode);
 
     List<ChartOfAccount> getCOA(String compCode);
+    List<ChartOfAccount> getCOA(int coaLevel, String compCode);
 
 }
