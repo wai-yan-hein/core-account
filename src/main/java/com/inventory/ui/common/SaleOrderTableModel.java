@@ -160,7 +160,6 @@ public class SaleOrderTableModel extends AbstractTableModel {
                     
                 }
                 change = true;
-                assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
@@ -176,19 +175,6 @@ public class SaleOrderTableModel extends AbstractTableModel {
         parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(column, column);
         parent.requestFocus();
-    }
-    
-    private void assignLocation(OrderHisDetail sd) {
-        if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = saleOrderEntry.getLocationAutoCompleter();
-            if (completer != null) {
-                Location l = completer.getLocation();
-                if (l != null) {
-                    sd.setLocCode(l.getKey().getLocCode());
-                    sd.setLocName(l.getLocName());
-                }
-            }
-        }
     }
     
     public void addNewRow() {
