@@ -88,7 +88,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initModel() {
-        if (ProUtil.isUseWeight()) {
+        if (!chkQty.isSelected()) {
             tblBalance.setModel(sbwTableModel);
             initTableWeight();
         } else {
@@ -198,7 +198,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void setListDetail(List<ClosingBalance> list) {
-        if (ProUtil.isUseWeight()) {
+        if (!chkQty.isSelected()) {
             sbwTableModel.setListDetail(list);
         } else {
             stockBSummaryTableModel.setListDetail(list);
@@ -206,7 +206,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     }
 
     private List<ClosingBalance> getListDetail() {
-        if (ProUtil.isUseWeight()) {
+        if (!chkQty.isSelected()) {
             return sbwTableModel.getListDetail();
         } else {
             return stockBSummaryTableModel.getListDetail();
@@ -259,7 +259,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         filter.setCalRI(Util1.getBoolean(ProUtil.isDisableRetIn()));
         filter.setCalRO(Util1.getBoolean(ProUtil.isDisableRetOut()));
         filter.setCalMill(Util1.getBoolean(ProUtil.isDisableMill()));
-        String reportName = ProUtil.isUseWeight() ? "StockInOutSummaryByWeight" : "StockInOutSummary";
+        String reportName = "StockInOutQtySummary"; //  : "StockInOutSummary"
         filter.setReportName(reportName);
         return filter;
     }
@@ -360,6 +360,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         txtSearch = new javax.swing.JTextField();
         txtStock = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
+        chkQty = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblBalance = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -464,6 +465,14 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Stock");
 
+        chkQty.setSelected(true);
+        chkQty.setText("Qty");
+        chkQty.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkQtyActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelFilterLayout = new javax.swing.GroupLayout(panelFilter);
         panelFilter.setLayout(panelFilterLayout);
         panelFilterLayout.setHorizontalGroup(
@@ -496,12 +505,14 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtLoc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(6, 6, 6)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkQty, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelFilterLayout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jLabel10)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
                         .addComponent(btnCalculate)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
@@ -548,7 +559,8 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                             .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkQty))
                         .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -819,9 +831,14 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         // TODO add your handling code here:
     }//GEN-LAST:event_txtStockKeyReleased
 
+    private void chkQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkQtyActionPerformed
+        initModel();        // TODO add your handling code here:
+    }//GEN-LAST:event_chkQtyActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCalculate;
+    private javax.swing.JCheckBox chkQty;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
