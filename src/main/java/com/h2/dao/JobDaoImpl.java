@@ -1,6 +1,6 @@
 package com.h2.dao;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
@@ -25,17 +25,14 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
     }
 
     @Override
-    public List<Job> findAll(FilterObject filterObject) {
-        String compCode = filterObject.getCompCode();
-        Integer deptId = filterObject.getDeptId();
-        String fromDate = filterObject.getFromDate();
-        String toDate = filterObject.getToDate();
-        Boolean finished = filterObject.getFinished();
+    public List<Job> findAll(ReportFilter ReportFilter) {
+        String compCode = ReportFilter.getCompCode();
+        Integer deptId = ReportFilter.getDeptId();
+        String fromDate = ReportFilter.getFromDate();
+        String toDate = ReportFilter.getToDate();
+        Boolean finished = ReportFilter.isFinished();
         List<Job> jList = new ArrayList<>();
         String whereClause = "";
-        if (finished != null) {
-            whereClause += " and finished = " + finished;
-        }
         if (!fromDate.isEmpty() && !toDate.isEmpty()) {
             whereClause += " and start_date >='" + fromDate + "'\n"
                     + "and end_date <='" + toDate + "'";
@@ -45,8 +42,9 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
                 where deleted = false
                 and dept_id = ?
                 and comp_code = ?
+                and finished =?
                 """ + whereClause;
-        ResultSet rs = getResult(sql, deptId, compCode);
+        ResultSet rs = getResult(sql, deptId, compCode, finished);
 
         if (rs != null) {
             try {

@@ -1429,6 +1429,30 @@ public class ExcelExporter {
         });
     }
 
+    public void exportStockValueQty(List<StockValue> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createStockValueQty(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
     private void createStockValue(Workbook workbook, List<StockValue> data, String sheetName,
             CellStyle cellStyle) {
         String[] HEADER = {
@@ -1469,6 +1493,44 @@ public class ExcelExporter {
             row.createCell(12).setCellValue(Util1.getDouble(d.getFifoPrice()));
             row.createCell(13).setCellValue(Util1.getDouble(d.getFifoAmt()));
 
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    private void createStockValueQty(Workbook workbook, List<StockValue> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Stock Code", "Stock Name", "Balance Qty", "Purchase Price (Avg)",
+            "Purchase Amount (Avg)", "Purchase Price (Recent)", "Purchase Amount (Recent)"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (StockValue d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getStockUserCode());
+            row.createCell(1).setCellValue(d.getStockName());
+            row.createCell(2).setCellValue(Util1.getDouble(d.getQty()));
+            row.createCell(3).setCellValue(Util1.getDouble(d.getPurAvgPrice()));
+            row.createCell(4).setCellValue(Util1.getDouble(d.getPurAvgAmount()));
+            row.createCell(5).setCellValue(Util1.getDouble(d.getRecentPrice()));
+            row.createCell(6).setCellValue(Util1.getDouble(d.getRecentAmt()));
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }

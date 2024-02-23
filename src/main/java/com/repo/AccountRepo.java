@@ -703,13 +703,6 @@ public class AccountRepo {
     }
 
     public Mono<ReturnObject> getReport(ReportFilter filter) {
-        if (filter.isSecond()) {
-            return accountApiSecond.post()
-                    .uri("/report/getReport")
-                    .body(Mono.just(filter), ReportFilter.class)
-                    .retrieve()
-                    .bodyToMono(ReturnObject.class);
-        }
         return accountApi.post()
                 .uri("/report/getReport")
                 .body(Mono.just(filter), ReportFilter.class)

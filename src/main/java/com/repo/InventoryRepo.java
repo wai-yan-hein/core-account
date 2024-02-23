@@ -6,7 +6,7 @@ package com.repo;
 
 import com.H2Repo;
 import com.acc.model.VDescription;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.CFont;
 import com.common.Global;
 import com.common.ProUtil;
@@ -143,6 +143,7 @@ import com.inventory.model.WeightLossDetail;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import com.model.WeightColumn;
+import com.ui.management.model.ClosingBalance;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
@@ -1542,13 +1543,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Job>> getJob(FilterObject filterObject) {
+    public Mono<List<Job>> getJob(ReportFilter ReportFilter) {
         if (localDatabase) {
-            return h2Repo.getJob(filterObject);
+            return h2Repo.getJob(ReportFilter);
         }
         return inventoryApi.post()
                 .uri("/setup/getJob")
-                .body(Mono.just(filterObject), FilterObject.class)
+                .body(Mono.just(ReportFilter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Job.class)
                 .collectList()
@@ -2434,11 +2435,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<VReturnIn> getReturnInVoucher(FilterObject filter) {
+    public Flux<VReturnIn> getReturnInVoucher(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/retin/getReturnIn")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VReturnIn.class)
                 .onErrorResume((e) -> {
@@ -2484,13 +2485,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VReturnOut>> getReturnOutVoucher(FilterObject filter) {
+    public Mono<List<VReturnOut>> getReturnOutVoucher(ReportFilter filter) {
         if (filter.isLocal()) {
             return h2Repo.searchReturnOutVoucher(filter);
         }
         return inventoryApi.post()
                 .uri("/retout/getReturnOut")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VReturnOut.class)
                 .collectList()
@@ -3011,14 +3012,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<ProcessHis>> getProcess(FilterObject f) {
+    public Mono<List<ProcessHis>> getProcess(ReportFilter f) {
         if (f.isLocal()) {
             return h2Repo.getProcessHistory(f);
         }
         return inventoryApi
                 .post()
                 .uri("/process/getProcess")
-                .body(Mono.just(f), FilterObject.class)
+                .body(Mono.just(f), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(ProcessHis.class)
                 .collectList()
@@ -3028,10 +3029,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<VPurchase> getPurchaseVoucher(FilterObject filter) {
+    public Flux<VPurchase> getPurchaseVoucher(ReportFilter filter) {
         return inventoryApi.post()
                 .uri("/pur/getPur")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VPurchase.class)
                 .onErrorResume((e) -> {
@@ -3040,13 +3041,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<MillingHis>> getMillingVoucher(FilterObject filter) {
+    public Mono<List<MillingHis>> getMillingVoucher(ReportFilter filter) {
         if (filter.isLocal()) {
 //            return h2Repo.searchPurchaseVoucher(filter);
         }
         return inventoryApi.post()
                 .uri("/milling/getMilling")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(MillingHis.class)
                 .collectList()
@@ -3134,11 +3135,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<GRN>> getGRNHistory(FilterObject filter) {
+    public Mono<List<GRN>> getGRNHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/grn/history")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(GRN.class)
                 .collectList()
@@ -3148,11 +3149,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<WeightHis> getWeightHistory(FilterObject filter) {
+    public Flux<WeightHis> getWeightHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/weight/getWeightHistory")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(WeightHis.class)
                 .onErrorResume((e) -> {
@@ -3189,11 +3190,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<LandingHis>> getLandingHistory(FilterObject filter) {
+    public Mono<List<LandingHis>> getLandingHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/landing/history")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(LandingHis.class)
                 .collectList()
@@ -3203,11 +3204,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<PaymentHis> getPaymentHistory(FilterObject filter) {
+    public Flux<PaymentHis> getPaymentHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/payment/getPaymentHistory")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(PaymentHis.class)
                 .onErrorResume((e) -> {
@@ -3216,20 +3217,20 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<StockPayment> getStockPaymentHistory(FilterObject filter) {
+    public Flux<StockPayment> getStockPaymentHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/stockPayment/getPaymentHistory")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(StockPayment.class);
     }
 
-    public Flux<LabourPaymentDto> getLabourPaymentHistory(FilterObject filter) {
+    public Flux<LabourPaymentDto> getLabourPaymentHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/labourPayment/history")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(LabourPaymentDto.class);
     }
@@ -3496,11 +3497,11 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Flux<VTransfer> getTrasnfer(FilterObject filter) {
+    public Flux<VTransfer> getTrasnfer(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/transfer/getTransfer")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VTransfer.class)
                 .onErrorResume(e -> {
@@ -3685,6 +3686,18 @@ public class InventoryRepo {
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.error(e);
+                });
+    }
+
+    public Flux<ClosingBalance> getStockBalanceQty(ReportFilter filter) {
+        return inventoryApi.post()
+                .uri("/report/getStockBalanceQty")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(ClosingBalance.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Flux.empty();
                 });
     }
 
@@ -3876,13 +3889,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VOrder>> getOrder(FilterObject filter) {
+    public Mono<List<VOrder>> getOrder(ReportFilter filter) {
         if (filter.isLocal()) {
             return h2Repo.getOrderHistory(filter);
         }
         return inventoryApi.post()
                 .uri("/order/getOrder")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VOrder.class)
                 .collectList()
@@ -3908,10 +3921,10 @@ public class InventoryRepo {
 
     }
 
-    public Flux<VSale> getSaleHistory(FilterObject filter) {
+    public Flux<VSale> getSaleHistory(ReportFilter filter) {
         return inventoryApi.post()
                 .uri("/sale/getSale")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)
                 .onErrorResume((e) -> {
@@ -3920,10 +3933,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<OrderNote> getOrderNoteHistory(FilterObject filter) {
+    public Flux<OrderNote> getOrderNoteHistory(ReportFilter filter) {
         return inventoryApi.post()
                 .uri("/orderNote/getOrderNote")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(OrderNote.class)
                 .onErrorResume((e) -> {
@@ -3944,10 +3957,10 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<OPHis>> getOpeningHistory(FilterObject filter) {
+    public Mono<List<OPHis>> getOpeningHistory(ReportFilter filter) {
         return inventoryApi.post()
                 .uri("/setup/getOpening")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(OPHis.class)
                 .collectList();
@@ -4016,11 +4029,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<WeightLossHis>> getWeightLoss(FilterObject filter) {
+    public Mono<List<WeightLossHis>> getWeightLoss(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/weight/getWeightLoss")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(WeightLossHis.class)
                 .collectList();
@@ -4229,11 +4242,11 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Flux<VStockIO> getStockIO(FilterObject filter) {
+    public Flux<VStockIO> getStockIO(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/stockio/getStockIO")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VStockIO.class)
                 .onErrorResume((t) -> Flux.empty());
@@ -4318,11 +4331,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<VConsign> getStockIssRecHistory(FilterObject filter) {
+    public Flux<VConsign> getStockIssRecHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/stockIssRec/getStockIssRecHistory")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VConsign.class)
                 .onErrorResume((e) -> {
@@ -4397,11 +4410,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VPurOrder>> getPurOrderHistory(FilterObject filter) {
+    public Mono<List<VPurOrder>> getPurOrderHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/purOrder/getPurOrderHistory")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VPurOrder.class)
                 .collectList()

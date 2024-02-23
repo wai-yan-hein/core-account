@@ -4,7 +4,7 @@
  */
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.VSale;
@@ -32,7 +32,7 @@ public interface SaleHisService {
 
     void restore(SaleHisKey key);
 
-    List<VSale> getSale(FilterObject filter);
+    List<VSale> getSale(ReportFilter filter);
 
     List<VSale> getSaleReport(String vouNo, String compCode, Integer deptId);
 

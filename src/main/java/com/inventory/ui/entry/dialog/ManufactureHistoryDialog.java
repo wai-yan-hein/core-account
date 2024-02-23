@@ -6,7 +6,7 @@ package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
 import com.common.DecimalFormatRender;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -183,7 +183,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }
 
     public void searchProcess() {
-        FilterObject f = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter f = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         f.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         f.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         f.setProcessNo(txtProNo.getText());

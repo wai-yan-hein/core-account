@@ -5,7 +5,7 @@
  */
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.h2.dao.OrderHisDao;
 import com.h2.dao.OrderHisDetailDao;
@@ -143,7 +143,7 @@ public class OrderHisServiceImpl implements OrderHisService {
     }
 
     @Override
-    public List<VOrder> getOrder(FilterObject filter) {
+    public List<VOrder> getOrder(ReportFilter filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");

@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -86,15 +86,15 @@ public class JobSearchDialog extends javax.swing.JDialog {
         progress.setIndeterminate(true);
         DepartmentUser d = (DepartmentUser) cboDep.getSelectedItem();
         int deptId = d.getKey() == null ? Global.deptId : d.getKey().getDeptId();
-        FilterObject filterObject = new FilterObject(Global.compCode, deptId);
-        filterObject.setFinished(chkFinished.isSelected());
-        filterObject.setFromDate(Util1.toDateStr(fromDate.getDate(), "yyyy-MM-dd"));
-        filterObject.setToDate(Util1.toDateStr(toDate.getDate(), "yyyy-MM-dd"));
+        ReportFilter ReportFilter = new ReportFilter(Global.macId, Global.compCode, deptId);
+        ReportFilter.setFinished(chkFinished.isSelected());
+        ReportFilter.setFromDate(Util1.toDateStr(fromDate.getDate(), "yyyy-MM-dd"));
+        ReportFilter.setToDate(Util1.toDateStr(toDate.getDate(), "yyyy-MM-dd"));
         if (!chkFinished.isSelected()) {
-            filterObject.setFromDate("");
-            filterObject.setToDate("");
+            ReportFilter.setFromDate("");
+            ReportFilter.setToDate("");
         }
-        inventoryRepo.getJob(filterObject).subscribe((t) -> {
+        inventoryRepo.getJob(ReportFilter).subscribe((t) -> {
             tableModel.setListDetail(t);
             lblRecord.setText(String.valueOf(t.size()));
             txtFilter.requestFocus();

@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.setup;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -83,11 +83,11 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
 
     private void searchJob() {
         progress.setIndeterminate(true);
-        FilterObject filterObject = new FilterObject(Global.compCode, Global.deptId);
-        filterObject.setFinished(rdoFinish.isSelected());
-        filterObject.setFromDate("");
-        filterObject.setToDate("");
-        inventoryRepo.getJob(filterObject).doOnSuccess((t) -> {
+        ReportFilter ReportFilter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter.setFinished(rdoFinish.isSelected());
+        ReportFilter.setFromDate("");
+        ReportFilter.setToDate("");
+        inventoryRepo.getJob(ReportFilter).doOnSuccess((t) -> {
             jobTableModel.setListVou(t);
             setSize();
         }).doOnTerminate(() -> {

@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.common.ComponentUtil;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -173,7 +173,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         progress.setIndeterminate(true);
         txtRecord.setValue(0);
         tableModel.clear();
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());

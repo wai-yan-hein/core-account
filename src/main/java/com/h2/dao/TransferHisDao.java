@@ -1,6 +1,6 @@
 package com.h2.dao;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.VTransfer;

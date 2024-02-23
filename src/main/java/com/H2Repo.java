@@ -12,10 +12,8 @@ import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
 import com.acc.model.TraderA;
-import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReportFilter;
-import com.common.ReturnObject;
 import com.common.Util1;
 import com.h2.dao.DateFilterRepo;
 import com.h2.service.AccSettingService;
@@ -83,7 +81,6 @@ import com.inventory.model.TraderKey;
 import com.inventory.model.VRoleMenu;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
-import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.DepartmentUser;
 import com.user.model.ExchangeRate;
@@ -125,7 +122,6 @@ import com.inventory.model.Job;
 import com.inventory.model.JobKey;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.LabourGroupKey;
-import com.inventory.model.Language;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHisDetail;
@@ -834,7 +830,7 @@ public class H2Repo {
         return dateLockService.save(obj);
     }
 
-    public Mono<List<VPurchase>> searchPurchaseVoucher(FilterObject filter) {
+    public Mono<List<VPurchase>> searchPurchaseVoucher(ReportFilter filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
@@ -858,7 +854,7 @@ public class H2Repo {
         return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, depId));
     }
 
-    public Mono<List<VReturnIn>> searchReturnInVoucher(FilterObject filter) {
+    public Mono<List<VReturnIn>> searchReturnInVoucher(ReportFilter filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
@@ -882,7 +878,7 @@ public class H2Repo {
         return Mono.justOrEmpty(retInDetailService.search(vouNo, Global.compCode, depId));
     }
 
-    public Mono<List<VReturnOut>> searchReturnOutVoucher(FilterObject filter) {
+    public Mono<List<VReturnOut>> searchReturnOutVoucher(ReportFilter filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
@@ -906,43 +902,19 @@ public class H2Repo {
         return Mono.justOrEmpty(retOutDetailService.search(vouNo, Global.compCode, depId));
     }
 
-    public Mono<List<Gl>> searchGL(ReportFilter filter) {
-        String fromDate = filter.getFromDate();
-        String toDate = filter.getToDate();
-        String des = Util1.isNull(filter.getDesp(), "-");
-        String srcAcc = Util1.isNull(filter.getSrcAcc(), "-");
-        String acc = Util1.isNull(filter.getAcc(), "-");
-        String curCode = Util1.isNull(filter.getCurCode(), "-");
-        String reference = Util1.isNull(filter.getReference(), "-");
-        String compCode = Util1.isNull(filter.getCompCode(), "-");
-        String tranSource = Util1.isNull(filter.getTranSource(), "-");
-        String traderCode = Util1.isNull(filter.getTraderCode(), "-");
-        String traderType = Util1.isNull(filter.getTraderType(), "-");
-        String coaLv2 = Util1.isNull(filter.getCoaLv2(), "-");
-        String coaLv1 = Util1.isNull(filter.getCoaLv1(), "-");
-        String batchNo = Util1.isNull(filter.getBatchNo(), "-");
-        String projectNo = Util1.isAll("-");
-        Integer macId = filter.getMacId();
-        boolean summary = filter.isSummary();
-        return Mono.justOrEmpty(reportService.getIndividualLedger(fromDate,
-                toDate, des, srcAcc, acc, curCode, reference, compCode,
-                tranSource, traderCode, traderType, coaLv2,
-                coaLv1, batchNo, projectNo, summary, macId));
-    }
-
-    public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
+    public Mono<List<VSale>> getSaleHistory(ReportFilter filter) {
         return Mono.justOrEmpty(saleHisService.getSale(filter));
     }
 
-    public Mono<List<VOrder>> getOrderHistory(FilterObject filter) {
+    public Mono<List<VOrder>> getOrderHistory(ReportFilter filter) {
         return Mono.justOrEmpty(orderHisService.getOrder(filter));
     }
 
-    public Mono<List<VTransfer>> getTransferHistory(FilterObject filter) {
+    public Mono<List<VTransfer>> getTransferHistory(ReportFilter filter) {
         return Mono.justOrEmpty(transferHisService.getTransfer(filter));
     }
 
-    public Mono<List<ProcessHis>> getProcessHistory(FilterObject filter) {
+    public Mono<List<ProcessHis>> getProcessHistory(ReportFilter filter) {
         return Mono.justOrEmpty(processHisService.getProcess(filter));
     }
 
@@ -1056,8 +1028,8 @@ public class H2Repo {
         return stockFormulaService.save(t);
     }
 
-    public Mono<List<Job>> getJob(FilterObject filterObject) {
-        return Mono.justOrEmpty(jobService.findAll(filterObject));
+    public Mono<List<Job>> getJob(ReportFilter ReportFilter) {
+        return Mono.justOrEmpty(jobService.findAll(ReportFilter));
     }
 
     public Mono<Job> find(JobKey key) {
