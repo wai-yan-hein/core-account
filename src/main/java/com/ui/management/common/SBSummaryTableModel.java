@@ -47,7 +47,12 @@ public class SBSummaryTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return String.class;
+        return switch (column) {
+            case 0, 1 ->
+                String.class;
+            default ->
+                Double.class;
+        };
     }
 
     @Override
@@ -65,29 +70,29 @@ public class SBSummaryTableModel extends AbstractTableModel {
                         return his.getStockName();
                     }
                     case 2 -> {
-                        return his.getOpenRel();
+                        return his.getOpenQty();
                     }
                     case 3 -> {
                         //user
-                        return his.getPurRel();
+                        return his.getPurQty();
                     }
                     case 4 -> {
                         //user
-                        return his.getInRel();
+                        return his.getInQty();
                     }
                     case 5 -> {
                         //user
-                        return his.getSaleRel();
+                        return his.getSaleQty();
                     }
 
                     case 6 -> {
                         //user
-                        return his.getOutRel();
+                        return his.getOutQty();
                     }
 
                     case 7 -> {
                         //user
-                        return his.getBalRel();
+                        return his.getBalQty();
                     }
                 }
             }
