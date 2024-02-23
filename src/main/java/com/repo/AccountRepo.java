@@ -373,7 +373,11 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(DepartmentA.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getUpdateDepartmentAByDate : " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Double getTraderBalance(String date, String traderCode, String curCode, String compCode) {
