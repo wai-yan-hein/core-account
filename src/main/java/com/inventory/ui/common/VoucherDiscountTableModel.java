@@ -7,7 +7,6 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.SaleExpense;
 import com.inventory.model.StockUnit;
 import com.inventory.model.VouDiscount;
 import com.inventory.model.VouDiscountKey;

@@ -6,7 +6,6 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.inventory.model.Job;
-import com.inventory.model.LabourGroup;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

@@ -23,7 +23,6 @@ import com.inventory.model.LocationKey;
 import com.inventory.model.MessageType;
 import com.inventory.model.WareHouse;
 import com.inventory.model.WareHouseKey;
-import com.inventory.ui.common.WareHouseComboModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;

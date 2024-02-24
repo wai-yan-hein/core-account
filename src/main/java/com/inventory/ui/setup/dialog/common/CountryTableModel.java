@@ -6,7 +6,6 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.inventory.model.Country;
-import com.inventory.model.Country;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

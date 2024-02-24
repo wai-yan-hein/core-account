@@ -10,7 +10,6 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DateModel;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
-import com.acc.model.Gl;
 import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ReportFilter;

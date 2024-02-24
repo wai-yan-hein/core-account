@@ -4,9 +4,6 @@ import com.inventory.model.MillingOutDetail;
 import com.inventory.ui.common.MillingOutTableModel;
 import javax.swing.*;
 import java.awt.datatransfer.*;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

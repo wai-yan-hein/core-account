@@ -207,6 +207,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             accountRepo.findCOA(sourceAccId).doOnSuccess((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
+                    ComponentUtil.enableForm(this, false);
                     return;
                 }
                 dayBookTableModel.setCredit(coa.isCredit());

@@ -6,7 +6,6 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 

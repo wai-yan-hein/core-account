@@ -5,7 +5,6 @@
 package com.user.common;
 
 import com.repo.UserRepo;
-import com.acc.model.DepartmentA;
 import com.user.model.DepartmentUser;
 import java.util.ArrayList;
 import java.util.List;

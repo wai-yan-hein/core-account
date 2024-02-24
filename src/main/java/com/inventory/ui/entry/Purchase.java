@@ -715,7 +715,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(searchIcon);
-            dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);

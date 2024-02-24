@@ -3,7 +3,6 @@ package com.h2.service;
 import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
-import java.util.Date;
 import java.util.List;
 
 public interface OPHisService {

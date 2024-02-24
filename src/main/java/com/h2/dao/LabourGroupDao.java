@@ -4,7 +4,6 @@ package com.h2.dao;
 import com.inventory.model.LabourGroup;
 import com.inventory.model.LabourGroupKey;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface LabourGroupDao {

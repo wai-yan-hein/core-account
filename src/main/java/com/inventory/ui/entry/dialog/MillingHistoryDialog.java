@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
+import com.common.ComponentUtil;
 import com.user.editor.DepartmentUserAutoCompleter;
 import com.common.ReportFilter;
 import com.common.Global;
@@ -28,6 +29,7 @@ import com.inventory.ui.entry.dialog.common.MillingSearchTableModel;
 import com.repo.InventoryRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
+import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -66,31 +68,32 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private CloudIntegration integration;
     private JobSearchDialog jobSearchDialog;
     private Job job;
-    
+    private int row = 0;
+
     public Job getJob() {
         return job;
     }
-    
+
     public void setJob(Job job) {
         this.job = job;
     }
-    
+
     public void setCloudIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public MillingHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
@@ -98,13 +101,13 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
-    
+
     public void initMain() {
         initCombo();
         initTableVoucher();
         setTodayDate();
     }
-    
+
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
@@ -131,7 +134,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             currAutoCompleter.setCurrency(c);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
-        
+
         if (inventoryRepo.localDatabase) {
             chkLocal.setVisible(true);
             btnUpload.setVisible(true);
@@ -140,7 +143,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             btnUpload.setVisible(false);
         }
     }
-    
+
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
@@ -159,33 +162,33 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-    
+
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
-    
+
     private String getUserCode() {
         return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-    
+
     private String getLocCode() {
         return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-    
+
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
-    
+
     private String getCurCode() {
         return currAutoCompleter.getCurrency() == null ? Global.currency : currAutoCompleter.getCurrency().getCurCode();
     }
-    
+
     public void search() {
         progess.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -205,12 +208,12 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             tableModel.setListDetail(t);
         }).doOnTerminate(() -> {
             calAmount();
+            ComponentUtil.scrollTable(tblVoucher, row, 0);
             progess.setIndeterminate(false);
-            setVisible(true);
         }).subscribe();
-        
+        setVisible(true);
     }
-    
+
     public void jobDialog() {
         if (jobSearchDialog == null) {
             jobSearchDialog = new JobSearchDialog(Global.parentForm);
@@ -223,13 +226,13 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         }
         jobSearchDialog.search();
     }
-    
+
     private void calAmount() {
         List<MillingHis> list = tableModel.getListDetail();
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
-    
+
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -242,10 +245,9 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         currAutoCompleter.setCurrency(null);
     }
-    
+
     private void select() {
         try {
-            int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
             if (row >= 0) {
                 MillingHis v = tableModel.getSelectVou(row);
                 if (ProUtil.isDepartmentLock()) {
@@ -262,7 +264,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             log.error(e.getMessage());
         }
     }
-    
+
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -327,9 +329,8 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         lblTtlAmount = new javax.swing.JLabel();
         txtTotalRecord = new javax.swing.JFormattedTextField();
         txtTotalAmt = new javax.swing.JFormattedTextField();
-        btnSearch = new javax.swing.JButton();
         lblTtlAmount1 = new javax.swing.JLabel();
-        btnSelect = new javax.swing.JButton();
+        btnSearch = new javax.swing.JButton();
 
         setTitle("Purchase Voucher Search");
 
@@ -697,49 +698,27 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtTotalAmt.setFont(Global.amtFont);
 
-        btnSearch.setFont(Global.lableFont);
-        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
-        btnSearch.setText("Search");
-        btnSearch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
-            }
-        });
-
         lblTtlAmount1.setFont(Global.lableFont);
         lblTtlAmount1.setText("Total Paid :");
-
-        btnSelect.setFont(Global.lableFont);
-        btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
-        btnSelect.setText("Select");
-        btnSelect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSelectActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord)
+                .addComponent(txtTotalRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtPaid)
+                .addComponent(txtPaid, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt)
-                .addGap(85, 85, 85)
-                .addComponent(btnSearch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnSelect)
-                .addGap(12, 12, 12))
+                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -751,11 +730,19 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtTotalAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTtlAmount1)
-                    .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSearch)
-                    .addComponent(btnSelect))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(7, Short.MAX_VALUE))
         );
+
+        btnSearch.setBackground(Global.selectionColor);
+        btnSearch.setFont(Global.lableFont);
+        btnSearch.setForeground(new java.awt.Color(255, 255, 255));
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -772,7 +759,9 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter))
+                                .addComponent(txtFilter)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSearch))
                             .addComponent(jScrollPane2)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
@@ -787,7 +776,8 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
+                            .addComponent(jLabel1)
+                            .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -800,6 +790,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() == 2) {
             select();
         }
@@ -885,10 +876,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         // TODO add your handling code here:
     }//GEN-LAST:event_chkDelActionPerformed
 
-    private void btnSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectActionPerformed
-        select();
-    }//GEN-LAST:event_btnSelectActionPerformed
-
     private void txtJobFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtJobFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtJobFocusGained
@@ -908,7 +895,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
-    private javax.swing.JButton btnSelect;
     private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
@@ -958,16 +944,16 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -983,5 +969,5 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             }
         }
     }
-    
+
 }

@@ -5,9 +5,7 @@ import com.inventory.model.WareHouse;
 import com.inventory.model.WareHouseKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j

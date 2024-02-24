@@ -8,7 +8,6 @@ import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
 import com.common.Util1;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 

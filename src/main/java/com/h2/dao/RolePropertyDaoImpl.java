@@ -8,7 +8,6 @@ import com.common.Util1;
 import com.user.model.RoleProperty;
 import com.user.model.RolePropertyKey;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 

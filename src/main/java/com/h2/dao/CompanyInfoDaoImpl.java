@@ -7,7 +7,6 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.CompanyInfo;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 

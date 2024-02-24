@@ -57,4 +57,8 @@ public class ClosingBalance {
     private String traderCode;
     private String traderUserCode;
     private String traderName;
+    private String locName;
+    private String unitName;
+    private double weight;
+    private double totalQty;
 }

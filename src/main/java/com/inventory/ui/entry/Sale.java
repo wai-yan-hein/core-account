@@ -524,6 +524,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.clearDelList();
         saleTableModel.setChange(false);
         saleExpenseFrame.clear();
+        stockBalanceDialog.clear();
         initTextBoxValue();
         assignDefaultValue();
         saleHis = new SaleHis();
@@ -561,7 +562,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 orderDetailDialog.initMain();
                 orderDetailDialog.setLocationRelativeTo(null);
             }
-            //orderDetailDialog.searchOrderDetail(txtOrderNo.getText(), saleHis.getDeptId());
         }
     }
 
@@ -603,7 +603,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
             inventoryRepo.save(saleHis).doOnSuccess((t) -> {
-                progress.setIndeterminate(false);
                 if (print) {
                     printVoucher(t);
                 } else {
@@ -612,6 +611,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }).doOnError((e) -> {
                 observeMain();
                 JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            }).doOnTerminate(() -> {
                 progress.setIndeterminate(false);
             }).subscribe();
         }
@@ -691,7 +692,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleHis.setCreatedBy(Global.loginUser.getUserCode());
                 saleHis.setSession(Global.sessionId);
             } else {
-                saleHis.setUpdatedBy(Global.loginUser.getUserCode());            }
+                saleHis.setUpdatedBy(Global.loginUser.getUserCode());
+            }
         }
         return true;
     }

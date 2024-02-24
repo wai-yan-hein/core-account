@@ -10,14 +10,11 @@ import com.acc.model.BusinessType;
 import com.acc.setup.COATemplateSetup;
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.user.dialog.BusinessTypeSetupDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 
 /**
  *

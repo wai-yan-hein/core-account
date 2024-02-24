@@ -5,7 +5,6 @@
  */
 package com.h2.service;
 
-import com.inventory.model.LocationKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import java.util.List;

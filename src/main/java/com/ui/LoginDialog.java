@@ -17,7 +17,6 @@ import com.common.Util1;
 import com.user.model.MachineInfo;
 import com.user.model.AuthenticationResponse;
 import java.awt.Image;
-import java.awt.event.FocusAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;

@@ -462,7 +462,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIconImage(searchIcon);
-            dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);

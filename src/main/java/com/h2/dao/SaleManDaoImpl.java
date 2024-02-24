@@ -8,7 +8,6 @@ import com.common.Util1;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 

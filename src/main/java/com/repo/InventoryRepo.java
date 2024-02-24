@@ -6,7 +6,6 @@ package com.repo;
 
 import com.H2Repo;
 import com.acc.model.VDescription;
-import com.common.ReportFilter;
 import com.inventory.model.CFont;
 import com.common.Global;
 import com.common.ProUtil;
@@ -127,7 +126,6 @@ import com.inventory.model.VPurOrder;
 import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
-import com.inventory.model.VStockBalance;
 import com.inventory.model.VStockIO;
 import com.inventory.model.VConsign;
 import com.inventory.model.VTransfer;
@@ -3668,7 +3666,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VStockBalance>> getStockBalance(String stockCode, boolean summary) {
+    public Mono<List<ClosingBalance>> getStockBalance(String stockCode, boolean summary) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getStockBalance")
                 .queryParam("stockCode", stockCode)
@@ -3681,7 +3679,7 @@ public class InventoryRepo {
                 .queryParam("macId", Global.macId)
                 .queryParam("summary", summary)
                 .build())
-                .retrieve().bodyToFlux(VStockBalance.class)
+                .retrieve().bodyToFlux(ClosingBalance.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -3701,7 +3699,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VStockBalance>> getStockBalanceByWeight(String stockCode, boolean summary) {
+    public Mono<List<ClosingBalance>> getStockBalanceByWeight(String stockCode, boolean summary) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getStockBalanceByWeight")
                 .queryParam("stockCode", stockCode)
@@ -3715,7 +3713,7 @@ public class InventoryRepo {
                 .queryParam("macId", Global.macId)
                 .queryParam("summary", summary)
                 .build())
-                .retrieve().bodyToFlux(VStockBalance.class)
+                .retrieve().bodyToFlux(ClosingBalance.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
