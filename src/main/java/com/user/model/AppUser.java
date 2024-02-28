@@ -38,6 +38,8 @@ public class AppUser {
     private boolean active;
     @Column(name = "role_code")
     private String roleCode;
+    @Column(name = "phone")
+    private String phoneNo;
     @Column(name = "doctor_id")
     private String doctorId;
     @Column(name = "dept_id")
@@ -48,6 +50,8 @@ public class AppUser {
     private String locCode;
     @Column(name = "dept_code")
     private String deptCode;
+    @Column(name = "image_link")
+    private String imageLink;
 
     public AppUser(String userCode, String userLongName) {
         this.userCode = userCode;
