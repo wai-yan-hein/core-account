@@ -39,8 +39,6 @@ import com.inventory.ui.common.TransferPaddingTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;

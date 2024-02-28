@@ -5,7 +5,7 @@
  */
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.General;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisKey;
@@ -42,6 +42,6 @@ public interface OrderHisService {
 
     OrderHis updateACK(OrderHisKey key);
 
-    public List<VOrder> getOrder(FilterObject filter);
+    public List<VOrder> getOrder(ReportFilter filter);
 
 }

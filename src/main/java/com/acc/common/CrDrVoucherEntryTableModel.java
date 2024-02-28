@@ -12,7 +12,6 @@ import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
 import com.common.Global;
-import com.common.ProUtil;
 import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;

@@ -18,7 +18,6 @@ import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
-import com.inventory.editor.StockAutoCompleter1;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.repo.InventoryRepo;

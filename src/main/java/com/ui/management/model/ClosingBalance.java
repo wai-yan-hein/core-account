@@ -1,9 +1,11 @@
 package com.ui.management.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class ClosingBalance {
 
@@ -55,4 +57,8 @@ public class ClosingBalance {
     private String traderCode;
     private String traderUserCode;
     private String traderName;
+    private String locName;
+    private String unitName;
+    private double weight;
+    private double totalQty;
 }

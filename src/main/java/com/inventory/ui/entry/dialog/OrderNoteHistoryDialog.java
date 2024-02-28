@@ -6,9 +6,8 @@
 package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
-import com.MessageDialog;
 import com.common.ComponentUtil;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -52,6 +51,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     private StartWithRowFilter tblFilter;
     private TaskExecutor taskExecutor;
     private int type;
+    private int row = 0;
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
@@ -133,7 +133,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     public void search() {
         clearModel();
         txtRecord.setValue(0);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -153,10 +153,9 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
                 .doOnTerminate(() -> {
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
-                    setVisible(true);
+                    ComponentUtil.scrollTable(tblVoucher, row, 0);
                 }).subscribe();
-
+        setVisible(true);
     }
 
     private void clearModel() {
@@ -198,24 +197,11 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
     }
 
     private void select() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             OrderNote his = getSale(row);
 //            his.setLocal(chkLocal.isSelected());
             observer.selected("ORDER-NOTE-HISTORY", his);
             setVisible(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select the voucher.",
-                    "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void print() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
-        if (row >= 0) {
-            OrderNote his = getSale(row);
-//            his.setLocal(chkLocal.isSelected());
-            observer.selected("PRINT", his);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
@@ -239,31 +225,6 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         txtOrderName.setText(null);
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
-    }
-
-    private void upload() {
-        int count = integration.uploadSaleCount();
-        if (count > 0) {
-            MessageDialog dialog = new MessageDialog(this, "Uploading to server.");
-            int yn = JOptionPane.showConfirmDialog(this, "Are you to upload sale voucher : " + count);
-            if (yn == JOptionPane.YES_OPTION) {
-                taskExecutor.execute(() -> {
-                    try {
-                        log.info("1");
-                        String message = integration.uploadSale();
-                        JOptionPane.showMessageDialog(this, message);
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        dialog.setVisible(false);
-                    }
-                    dialog.setVisible(false);
-                });
-                dialog.setVisible(true);
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Empty.");
-        }
-
     }
 
     /**
@@ -510,21 +471,21 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(8, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtRecord))
-                .addContainerGap(8, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {lblTtlRecord, txtRecord});
@@ -602,6 +563,7 @@ public class OrderNoteHistoryDialog extends javax.swing.JDialog implements KeyLi
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         // TODO add your handling code here:
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() > 1) {
             select();
         }

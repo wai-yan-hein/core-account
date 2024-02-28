@@ -187,6 +187,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         excelReport.add("SalePriceCalender");
         excelReport.add("PurchasePriceCalender");
         excelReport.add("StockValue");
+        excelReport.add("StockValueQty");
+        excelReport.add("StockInOutQtyDetail");
+        excelReport.add("StockInOutQtySummary");
     }
 
     private void initDate() {
@@ -379,7 +382,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private boolean isValidReport(String url) {
-        if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight")
+        if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight") || url.equals("StockInOutQtyDetail")
                 || url.equals("StockInOutPaddyDetail") || url.equals("StockInOutPaddyDetailWetRice")) {
             if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
                 JOptionPane.showMessageDialog(this, "Please select stock code.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
@@ -460,13 +463,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             String reportUrl = report.getMenuUrl();
             InputStream input = new ByteArrayInputStream(file);
             switch (reportUrl) {
-                case "StockInOutDetail", "StockInOutDetailByWeight" -> {
+                case "StockInOutDetail", "StockInOutDetailByWeight", "StockInOutQtyDetail" -> {
                     String stockName = stockAutoCompleter.getStock().getStockName();
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutDetail(list, stockName);
                     // Use the TypeReference to specify the target type (List<Person>)
                 }
-                case "StockInOutSummary", "StockInOutSummaryByWeight" -> {
+                case "StockInOutSummary", "StockInOutSummaryByWeight", "StockInOutQtySummary" -> {
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutSummary(list, reportUrl);
                 }
@@ -553,6 +556,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 case "StockValue" -> {
                     List<StockValue> list = Util1.readJsonToList(input, StockValue.class);
                     exporter.exportStockValue(list, reportUrl);
+                }
+                case "StockValueQty" -> {
+                    List<StockValue> list = Util1.readJsonToList(input, StockValue.class);
+                    exporter.exportStockValueQty(list, reportUrl);
                 }
                 default -> {
                     btnExcel.setEnabled(true);

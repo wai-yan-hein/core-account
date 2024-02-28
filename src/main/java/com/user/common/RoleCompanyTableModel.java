@@ -4,14 +4,12 @@
  */
 package com.user.common;
 
-import com.common.Global;
 import com.inventory.model.MessageType;
 import com.repo.UserRepo;
 import com.user.model.PrivilegeCompany;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 

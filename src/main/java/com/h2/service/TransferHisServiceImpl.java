@@ -1,6 +1,6 @@
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.h2.dao.SeqDao;
 import com.h2.dao.TransferHisDao;
@@ -110,7 +110,7 @@ public class TransferHisServiceImpl implements TransferHisService {
     }
 
     @Override
-    public List<VTransfer> getTransfer(FilterObject filter) {
+    public List<VTransfer> getTransfer(ReportFilter filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");

@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -34,7 +34,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -155,7 +154,7 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
 
     public void search() {
         progess.setIndeterminate(true);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());

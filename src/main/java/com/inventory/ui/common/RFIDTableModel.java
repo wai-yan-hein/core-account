@@ -10,7 +10,6 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.PriceOption;
 import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;

@@ -6,7 +6,6 @@
 package com.inventory.ui.common;
 
 import com.repo.InventoryRepo;
-import com.common.Global;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.common.Util1;

@@ -7,8 +7,6 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.inventory.model.Location;
-import com.inventory.model.Stock;
-import com.repo.InventoryRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;

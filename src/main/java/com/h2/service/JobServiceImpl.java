@@ -1,6 +1,6 @@
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.h2.dao.JobDao;
 import com.inventory.model.Job;
@@ -31,8 +31,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> findAll(FilterObject filterObject) {
-        return dao.findAll(filterObject);
+    public List<Job> findAll(ReportFilter ReportFilter) {
+        return dao.findAll(ReportFilter);
     }
 
     @Override

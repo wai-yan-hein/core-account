@@ -4,7 +4,7 @@
  */
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.h2.dao.SaleHisDao;
 import com.h2.dao.SaleHisDetailDao;
@@ -120,7 +120,7 @@ public class SaleHisServiceImpl implements SaleHisService {
     }
 
     @Override
-    public List<VSale> getSale(FilterObject filter) {
+    public List<VSale> getSale(ReportFilter filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");

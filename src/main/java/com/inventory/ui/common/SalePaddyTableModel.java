@@ -14,7 +14,6 @@ import com.inventory.model.Location;
 import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
-import com.inventory.ui.entry.PurchaseDynamic;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package com.inventory.ui.entry.dialog;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -12,18 +12,14 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.user.model.AppUser;
-import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurOrder;
-import com.inventory.model.VConsign;
 import com.inventory.ui.entry.dialog.common.PurOrderHisVouSearchTableModel;
 import com.repo.InventoryRepo;
-import com.inventory.ui.entry.dialog.common.StockIssRecVouSearchTableModel;
 import com.user.editor.DepartmentUserAutoCompleter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -136,7 +132,7 @@ public class PurOrderHisDialog extends javax.swing.JDialog implements KeyListene
 
     public void search() {
         progess.setIndeterminate(true);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());

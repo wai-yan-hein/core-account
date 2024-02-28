@@ -98,9 +98,7 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
 
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
-
-        popup.setBorder(BorderFactory.createLineBorder(Color.black));
-        popup.setPopupSize(170, 400);
+        popup.setPopupSize(200, 500);
 
         popup.add(scroll);
 

@@ -6,18 +6,14 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.common.Util1;
 import com.inventory.model.PriceOption;
-import com.inventory.model.Stock;
 import com.repo.InventoryRepo;
-import com.inventory.ui.common.SaleTableModel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
-import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;

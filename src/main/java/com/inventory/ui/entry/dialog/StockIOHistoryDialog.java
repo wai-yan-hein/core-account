@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.common.ComponentUtil;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -60,6 +60,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private TraderAutoCompleter traderAutoCompleter;
     private JobSearchDialog jobSearchDialog;
     private Job job;
+    private int row = 0;
 
     public Job getJob() {
         return job;
@@ -173,7 +174,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         progress.setIndeterminate(true);
         txtRecord.setValue(0);
         tableModel.clear();
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());
@@ -205,7 +206,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                 }).doOnTerminate(() -> {
             progress.setIndeterminate(false);
             btnSearch.setEnabled(true);
-            tblVoucher.requestFocus();
+            ComponentUtil.scrollTable(tblVoucher, row, 0);
         }).subscribe();
         setVisible(true);
     }
@@ -219,7 +220,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void select() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VStockIO his = tableModel.getSelectVou(row);
             observer.selected("IO-HISTORY", his);
@@ -752,6 +752,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() == 2) {
             select();
         }

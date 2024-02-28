@@ -9,7 +9,6 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Transient;
 
 /**
  *

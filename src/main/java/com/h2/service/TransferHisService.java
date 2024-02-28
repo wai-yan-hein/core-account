@@ -1,6 +1,6 @@
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.VTransfer;
@@ -25,5 +25,5 @@ public interface TransferHisService {
 
     TransferHis updateACK(TransferHisKey key);
     
-    public List<VTransfer> getTransfer(FilterObject filter);
+    public List<VTransfer> getTransfer(ReportFilter filter);
 }

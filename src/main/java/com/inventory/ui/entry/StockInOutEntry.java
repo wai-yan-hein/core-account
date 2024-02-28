@@ -8,7 +8,7 @@ package com.inventory.ui.entry;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -198,11 +198,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 labourGroupAutoCompleter.setListObject(t);
             }
         }).subscribe();
-        FilterObject filterObject = new FilterObject(Global.compCode, Global.deptId);
-        filterObject.setFinished(false);
-        filterObject.setFromDate("");
-        filterObject.setToDate("");
-        inventoryRepo.getJob(filterObject).doOnSuccess((t) -> {
+        ReportFilter ReportFilter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter.setFinished(false);
+        ReportFilter.setFromDate("");
+        ReportFilter.setToDate("");
+        inventoryRepo.getJob(ReportFilter).doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new Job());
                 jobAutoCompleter.setListObject(t);

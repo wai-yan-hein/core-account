@@ -188,7 +188,6 @@ public class PurchaseOrderTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            sbTableModel.calStockBalance(s.getKey().getStockCode());
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());

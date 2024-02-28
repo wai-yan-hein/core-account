@@ -6,10 +6,13 @@ package com.inventory.ui.entry.dialog;
 
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.common.StockBalanceWeightTableModel;
 import com.repo.InventoryRepo;
+import com.ui.management.model.ClosingBalance;
 import javax.swing.JFrame;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -39,19 +42,13 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
     private void initMain(boolean weight) {
         if (weight) {
             tblStock.setModel(stockBalanceWeightTableModel);
-            stockBalanceWeightTableModel.setProgress(progress);
-            stockBalanceWeightTableModel.setInventoryRepo(inventoryRepo);
-            stockBalanceWeightTableModel.setChkSummary(chkSummary);
             tblStock.getColumnModel().getColumn(0).setPreferredWidth(200);//Unit
             tblStock.getColumnModel().getColumn(1).setPreferredWidth(80);//qty
             tblStock.getColumnModel().getColumn(2).setPreferredWidth(80);//qty
         } else {
             tblStock.setModel(stockBalanceTableModel);
-            stockBalanceTableModel.setProgress(progress);
-            stockBalanceTableModel.setInventoryRepo(inventoryRepo);
-            stockBalanceTableModel.setChkSummary(chkSummary);
             tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//
-
+            tblStock.getColumnModel().getColumn(1).setPreferredWidth(100); // qty
         }
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
@@ -61,34 +58,49 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
 
     public void calStock(String stockCode, JFrame frame) {
         if (ProUtil.isCalStock()) {
+            progress.setIndeterminate(true);
             boolean weight = ProUtil.isUseWeight();
             initMain(weight);
-            progress.setIndeterminate(true);
-            if (weight) {
-                inventoryRepo.getStockBalanceByWeight(stockCode, chkSummary.isSelected()).doOnSuccess((t) -> {
-                    if (t != null) {
-                        stockBalanceWeightTableModel.setListStockBalance(t);
-                    }
-                }).doOnError((e) -> {
-                    log.error("calStock : " + e.getMessage());
-                    progress.setIndeterminate(false);
-                }).doOnTerminate(() -> {
-                    progress.setIndeterminate(false);
-                    setVisible(true);
-                }).subscribe();
-            } else {
-                inventoryRepo.getStockBalance(stockCode, chkSummary.isSelected()).doOnSuccess((t) -> {
-                    if (t != null) {
-                        stockBalanceTableModel.setListStockBalance(t);
-                    }
-                }).doOnError((e) -> {
-                    log.error("calStock : " + e.getMessage());
-                    progress.setIndeterminate(false);
-                }).doOnTerminate(() -> {
-                    progress.setIndeterminate(false);
-                    setVisible(true);
-                }).subscribe();
-            }
+            ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
+            filter.setStockCode(stockCode);
+            filter.setToDate(Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd"));
+            filter.setSummary(chkSummary.isSelected());
+            clear();
+            inventoryRepo.getStockBalanceQty(filter)
+                    .doOnNext(this::addObject)
+                    .doOnNext(obj -> calTotal())
+                    .doOnError((e) -> {
+                        log.error("getStockBalanceQty : " + e.getMessage());
+                        progress.setIndeterminate(false);
+                    }).doOnTerminate(() -> {
+                progress.setIndeterminate(false);
+                setVisible(true);
+            }).subscribe();
+        }
+    }
+
+    public void clear() {
+        stockBalanceTableModel.clearList();
+        stockBalanceWeightTableModel.clearList();
+
+    }
+
+    private void addObject(ClosingBalance cl) {
+        boolean weight = ProUtil.isUseWeight();
+        if (weight) {
+            stockBalanceWeightTableModel.addObject(cl);
+        } else {
+            stockBalanceTableModel.addObject(cl);
+        }
+
+    }
+
+    private void calTotal() {
+        boolean weight = ProUtil.isUseWeight();
+        if (weight) {
+            txtTotal.setValue(stockBalanceWeightTableModel.getTotal());
+        } else {
+            txtTotal.setValue(stockBalanceTableModel.getTotal());
         }
     }
 
@@ -105,6 +117,8 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
         tblStock = new javax.swing.JTable();
         chkSummary = new javax.swing.JCheckBox();
         progress = new javax.swing.JProgressBar();
+        txtTotal = new javax.swing.JFormattedTextField();
+        jLabel1 = new javax.swing.JLabel();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
@@ -128,6 +142,12 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
 
         chkSummary.setText("Summary");
 
+        txtTotal.setEditable(false);
+        txtTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTotal.setFont(Global.amtFont);
+
+        jLabel1.setText("Total :");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -135,20 +155,30 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
                     .addComponent(chkSummary, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkSummary)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addContainerGap())
         );
 
         pack();
@@ -157,8 +187,10 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkSummary;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblStock;
+    private javax.swing.JFormattedTextField txtTotal;
     // End of variables declaration//GEN-END:variables
 }

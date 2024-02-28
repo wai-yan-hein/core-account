@@ -8,7 +8,7 @@ package com.inventory.ui.entry.dialog;
 import com.CloudIntegration;
 import com.MessageDialog;
 import com.common.ComponentUtil;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -74,6 +74,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private LocationAutoCompleter locationAutoCompleter;
     private TaskExecutor taskExecutor;
     private int type;
+    private int row =0;
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
@@ -232,7 +233,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
     public void search() {
         progress.setIndeterminate(true);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -268,8 +269,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 .doOnTerminate(() -> {
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
-                    // setVisible(true);
+                    ComponentUtil.scrollTable(tblVoucher, row, 0);
                 }).subscribe();
         setVisible(true);
     }
@@ -324,7 +324,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void select() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VSale his = getSale(row);
             his.setLocal(chkLocal.isSelected());
@@ -337,7 +336,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void print() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VSale his = getSale(row);
             his.setLocal(chkLocal.isSelected());
@@ -382,7 +380,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 btnUpload.setEnabled(false);
                 taskExecutor.execute(() -> {
                     try {
-                        log.info("1");
                         String message = integration.uploadSale();
                         JOptionPane.showMessageDialog(this, message);
                     } catch (Exception e) {
@@ -1021,6 +1018,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         // TODO add your handling code here:
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() > 1) {
             select();
         }

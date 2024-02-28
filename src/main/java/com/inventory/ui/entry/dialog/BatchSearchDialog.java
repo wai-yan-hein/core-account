@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -94,7 +94,7 @@ public class BatchSearchDialog extends javax.swing.JDialog {
 
     public void searchBatch() {
         progress.setIndeterminate(true);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         String fromDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
         String toDate = Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
         filter.setFromDate(fromDate);

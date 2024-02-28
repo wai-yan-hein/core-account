@@ -14,7 +14,6 @@ import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -194,7 +193,6 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
 
     public void initMain() {
         initCombo();
-        initStockBalanceTable();
         initModel();
         assignDefaultValue();
         txtOrderDate.setDate(Util1.getTodayDate());
@@ -339,20 +337,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
     }
 
-    private void initStockBalanceTable() {
-        if (ProUtil.isCalStock()) {
-            stockBalanceTableModel.setInventoryRepo(inventoryRepo);
-            tblStockBalance.setModel(stockBalanceTableModel);
-            stockBalanceTableModel.setProgress(sbProgress);
-            tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
-            tblStockBalance.getColumnModel().getColumn(1).setPreferredWidth(140);//Cost Price
-            tblStockBalance.getTableHeader().setFont(Global.tblHeaderFont);
-            tblStockBalance.setDefaultRenderer(Object.class, new TableCellRender());
-            tblStockBalance.setDefaultRenderer(Float.class, new TableCellRender());
-            tblStockBalance.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        }
-        sbPanel.setVisible(ProUtil.isCalStock());
-    }
+    
 
     private void assignDefaultValue() {
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {

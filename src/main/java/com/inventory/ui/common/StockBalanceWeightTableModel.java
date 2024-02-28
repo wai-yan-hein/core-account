@@ -4,14 +4,11 @@
  */
 package com.inventory.ui.common;
 
-import com.repo.InventoryRepo;
-import com.common.ProUtil;
-import com.inventory.model.VStockBalance;
+import com.ui.management.model.ClosingBalance;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JCheckBox;
-import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,27 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockBalanceWeightTableModel extends AbstractTableModel {
 
-    private List<VStockBalance> listStockBalance = new ArrayList();
+    @Getter
+    private double total;
+    private List<ClosingBalance> listStockBalance = new ArrayList();
     private final String[] columnNames = {"Locaiton", "Total Weight", "Total Qty"};
-    private InventoryRepo inventoryRepo;
-    private JProgressBar progress;
-    private JCheckBox chkSummary;
-
-    public void setChkSummary(JCheckBox chkSummary) {
-        this.chkSummary = chkSummary;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -62,20 +42,15 @@ public class StockBalanceWeightTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         if (listStockBalance != null) {
             try {
-                VStockBalance stock = listStockBalance.get(row);
+                ClosingBalance stock = listStockBalance.get(row);
                 switch (column) {
                     case 0 -> {
                         //Location
-                        if (stock.getLocationName() == null) {
-                            return "No Stock";
-                        } else {
-                            return stock.getLocationName();
-                        }
+                        return stock.getLocName();
                     }
                     case 1 -> {
                         //Unit
                         return stock.getWeight();
-
                     }
                     case 2 -> {
                         //Unit
@@ -95,11 +70,11 @@ public class StockBalanceWeightTableModel extends AbstractTableModel {
 
     }
 
-    public List<VStockBalance> getListStockBalance() {
+    public List<ClosingBalance> getListStockBalance() {
         return listStockBalance;
     }
 
-    public void setListStockBalance(List<VStockBalance> listStockBalance) {
+    public void setListStockBalance(List<ClosingBalance> listStockBalance) {
         this.listStockBalance = listStockBalance;
         fireTableDataChanged();
     }
@@ -115,23 +90,19 @@ public class StockBalanceWeightTableModel extends AbstractTableModel {
     }
 
     public void clearList() {
+        total = 0;
         if (listStockBalance != null) {
-            this.listStockBalance.clear();
+            listStockBalance.clear();
             fireTableDataChanged();
         }
     }
 
-    public void calStockBalance(String stockCode) {
-        if (ProUtil.isCalStock()) {
-            progress.setIndeterminate(true);
-            boolean summary = chkSummary == null ? false : chkSummary.isSelected();
-            inventoryRepo.getStockBalance(stockCode, summary).subscribe((t) -> {
-                setListStockBalance(t);
-                progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                log.error("calStockBalance : " + e.getMessage());
-            });
+    public void addObject(ClosingBalance sd) {
+        if (listStockBalance != null) {
+            total += sd.getBalQty();
+            listStockBalance.add(sd);
+            fireTableRowsInserted(listStockBalance.size() - 1, listStockBalance.size() - 1);
         }
     }
+
 }

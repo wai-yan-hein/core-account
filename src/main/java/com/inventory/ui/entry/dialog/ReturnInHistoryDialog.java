@@ -7,7 +7,7 @@ package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
 import com.common.ComponentUtil;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -29,7 +29,6 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -60,11 +59,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
-    private CloudIntegration integration;
-
-    public void setCloudIntegration(CloudIntegration integration) {
-        this.integration = integration;
-    }
+    private int row = 0;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -184,7 +179,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
 
     public void search() {
         progress.setIndeterminate(true);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -214,11 +209,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 .doOnTerminate(() -> {
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
-                    setVisible(true);
+                    ComponentUtil.scrollTable(tblVoucher, row, 0);
                 })
                 .subscribe();
-
+        setVisible(true);
     }
 
     private void calTotal() {
@@ -228,7 +222,6 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void select() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VReturnIn his = tableModel.getSelectVou(row);
             his.setLocal(chkLocal.isSelected());
@@ -683,6 +676,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() == 2) {
             select();
         }

@@ -7,8 +7,6 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.model.Location;
 import com.inventory.model.OrderDetailKey;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.ui.entry.SaleOrderEntry;

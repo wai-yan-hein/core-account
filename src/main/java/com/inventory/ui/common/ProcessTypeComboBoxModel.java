@@ -4,8 +4,6 @@
  */
 package com.inventory.ui.common;
 
-import com.acc.common.*;
-import com.acc.model.ChartOfAccount;
 import com.inventory.model.VouStatus;
 import java.util.List;
 import javax.swing.AbstractListModel;

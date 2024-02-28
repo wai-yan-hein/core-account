@@ -1,6 +1,6 @@
 package com.h2.service;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisKey;
 import java.util.List;
@@ -23,5 +23,5 @@ public interface ProcessHisService {
 
     ProcessHis updateACK(ProcessHisKey key);
 
-    public List<ProcessHis> getProcess(FilterObject filter);
+    public List<ProcessHis> getProcess(ReportFilter filter);
 }

@@ -6,7 +6,6 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.repo.InventoryRepo;
 import java.awt.event.KeyEvent;

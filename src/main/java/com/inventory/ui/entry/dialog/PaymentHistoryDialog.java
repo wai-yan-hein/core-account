@@ -8,7 +8,7 @@ package com.inventory.ui.entry.dialog;
 import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.common.ComponentUtil;
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -58,6 +58,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private COA3AutoCompleter cOA3AutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
     private String tranOption;
+    private int row = 0;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -149,7 +150,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     public void search() {
         tableModel.clear();
         txtRecord.setValue(0);
-        FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -178,7 +179,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                 .doOnTerminate(() -> {
                     progress.setIndeterminate(false);
                     btnSearch.setEnabled(true);
-                    tblVoucher.requestFocus();
+                    ComponentUtil.scrollTable(tblVoucher, row, 0);
                 })
                 .subscribe();
         setVisible(true);
@@ -190,7 +191,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void select() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             PaymentHis his = tableModel.getSelectVou(row);
             observer.selected("PAYMENT_HISTORY", his);
@@ -657,6 +657,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         // TODO add your handling code here:
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() > 1) {
             select();
         }

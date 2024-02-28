@@ -1,6 +1,6 @@
 package com.h2.dao;
 
-import com.common.FilterObject;
+import com.common.ReportFilter;
 import com.inventory.model.Job;
 import com.inventory.model.JobKey;
 import java.util.List;
@@ -9,7 +9,7 @@ public interface JobDao {
 
     Job save(Job Job);
 
-    List<Job> findAll(FilterObject filterObject);
+    List<Job> findAll(ReportFilter ReportFilter);
 
     int delete(JobKey key);
 

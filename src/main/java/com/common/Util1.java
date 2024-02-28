@@ -68,8 +68,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 
 /**
  * @author WSwe

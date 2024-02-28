@@ -16,7 +16,6 @@ import com.inventory.model.MessageType;
 import com.inventory.ui.setup.dialog.common.LabourGroupTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
