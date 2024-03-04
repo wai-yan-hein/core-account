@@ -7,7 +7,7 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.PaymentHisDetail;
+import com.inventory.entity.PaymentHisDetail;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;

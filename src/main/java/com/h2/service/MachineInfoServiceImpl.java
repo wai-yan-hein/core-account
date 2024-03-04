@@ -44,4 +44,9 @@ public class MachineInfoServiceImpl implements MachineInfoService {
         return dao.findAll();
     }
 
+    @Override
+    public MachineInfo find(Integer macId) {
+        return dao.find(macId);
+    }
+
 }

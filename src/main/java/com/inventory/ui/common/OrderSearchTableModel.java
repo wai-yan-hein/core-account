@@ -6,7 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Util1;
-import com.inventory.model.Order;
+import com.inventory.entity.Order;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

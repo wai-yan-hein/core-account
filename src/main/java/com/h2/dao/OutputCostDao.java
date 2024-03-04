@@ -5,8 +5,8 @@
  */
  package com.h2.dao;
 
-import com.inventory.model.OutputCost;
-import com.inventory.model.OutputCostKey;
+import com.inventory.entity.OutputCost;
+import com.inventory.entity.OutputCostKey;
 import java.time.LocalDateTime;
 import java.util.List;
 

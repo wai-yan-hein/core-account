@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Location;
-import com.inventory.model.LocationKey;
+import com.inventory.entity.Location;
+import com.inventory.entity.LocationKey;
 import java.util.List;
 
 /**

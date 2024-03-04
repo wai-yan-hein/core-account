@@ -8,7 +8,7 @@ package com.user.dialog;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import com.user.model.Currency;
 import com.inventory.ui.setup.common.CurrencyTabelModel;
 import com.repo.UserRepo;

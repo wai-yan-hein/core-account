@@ -1,6 +1,6 @@
 package com.h2.service;
 
-import com.inventory.model.OPHisDetail;
+import com.inventory.entity.OPHisDetail;
 import java.util.List;
 
 public interface OPHisDetailService {

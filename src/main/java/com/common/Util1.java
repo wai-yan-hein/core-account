@@ -1431,6 +1431,10 @@ public class Util1 {
         return "*" + vouNo + "*";
     }
 
-   
+    public static String addDay(String sqlFormat, int day) {
+        LocalDate date = LocalDate.parse(sqlFormat);
+        LocalDate minusDays = date.plusDays(day);
+        return minusDays.toString();
+    }
 
 }

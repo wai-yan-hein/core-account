@@ -7,7 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.MillingHis;
+import com.inventory.entity.MillingHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

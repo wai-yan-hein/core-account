@@ -6,10 +6,10 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.General;
-import com.inventory.model.OrderHis;
-import com.inventory.model.OrderHisKey;
-import com.inventory.model.VOrder;
+import com.inventory.entity.General;
+import com.inventory.entity.OrderHis;
+import com.inventory.entity.OrderHisKey;
+import com.inventory.entity.VOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

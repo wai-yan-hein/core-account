@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.Region;
+import com.inventory.entity.Region;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -90,7 +90,6 @@ public class RegionTableModel extends AbstractTableModel {
     public int getColumnCount() {
         return columnNames.length;
     }
-    
 
     public Region getRegion(int row) {
         if (listRegion == null) {
@@ -112,5 +111,17 @@ public class RegionTableModel extends AbstractTableModel {
 
     public void refresh() {
         fireTableDataChanged();
+    }
+
+    public void addObject(Region user) {
+        listRegion.add(user);
+        fireTableRowsInserted(listRegion.size() - 1, listRegion.size() - 1);
+    }
+
+    public void setObject(int row, Region user) {
+        if (!listRegion.isEmpty()) {
+            listRegion.set(row, user);
+            fireTableRowsUpdated(row, row);
+        }
     }
 }

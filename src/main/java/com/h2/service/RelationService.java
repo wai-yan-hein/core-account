@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.RelationKey;
-import com.inventory.model.UnitRelation;
+import com.inventory.entity.RelationKey;
+import com.inventory.entity.UnitRelation;
 import java.util.List;
 
 /**

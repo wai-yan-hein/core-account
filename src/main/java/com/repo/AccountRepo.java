@@ -29,12 +29,13 @@ import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.ReturnObject;
 import com.common.Util1;
-import com.inventory.model.Message;
-import com.inventory.model.MessageType;
-import com.inventory.model.TraderGroup;
-import com.inventory.model.TraderGroupKey;
+import com.inventory.entity.Message;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.TraderGroup;
+import com.inventory.entity.TraderGroupKey;
 import com.model.VoucherInfo;
 import com.user.model.YearEnd;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 /**
  *
@@ -56,8 +58,6 @@ public class AccountRepo {
 
     @Autowired
     private WebClient accountApi;
-    @Autowired
-    private WebClient accountApiSecond;
     @Autowired
     private boolean localDatabase;
     @Autowired
@@ -380,21 +380,16 @@ public class AccountRepo {
                 });
     }
 
-    public Double getTraderBalance(String date, String traderCode, String curCode, String compCode) {
-        try {
-            return accountApi.get()
-                    .uri(builder -> builder.path("/report/getTraderBalance")
-                    .queryParam("date", date)
-                    .queryParam("traderCode", traderCode)
-                    .queryParam("curCode", curCode)
-                    .queryParam("compCode", compCode)
-                    .build())
-                    .retrieve()
-                    .bodyToMono(Double.class).block();
-        } catch (Exception e) {
-            log.error("getTraderBalance : " + e.getMessage());
-        }
-        return 0.0;
+    public Mono<Double> getTraderBalance(String date, String traderCode, String curCode) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/report/getTraderBalance")
+                .queryParam("date", date)
+                .queryParam("traderCode", traderCode)
+                .queryParam("curCode", curCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(Double.class);
     }
 
     public Mono<List<COATemplate>> getCOAChildTemplate(String coaCode, Integer busId) {
@@ -844,7 +839,16 @@ public class AccountRepo {
                 .queryParam("messageId", Global.macId)
                 .build())
                 .retrieve()
-                .bodyToFlux(Message.class);
+                .bodyToFlux(Message.class)
+                .retryWhen(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))
+                .maxBackoff(Duration.ofDays(1))
+                .doAfterRetry(retrySignal -> log.error("Account Retrying...")))
+                .onErrorResume(throwable -> {
+                    // Log the error or handle it as needed
+                    log.error("Error receiving messages: " + throwable.getMessage());
+                    // Return an empty Flux or some default value
+                    return Flux.empty();
+                });
     }
 
     public Mono<String> sendDownloadMessage(String entity, String message) {

@@ -1,8 +1,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.GradeDetail;
-import com.inventory.model.GradeDetailKey;
+import com.inventory.entity.GradeDetail;
+import com.inventory.entity.GradeDetailKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

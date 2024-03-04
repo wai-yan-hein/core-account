@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.StockDao;
-import com.inventory.model.Stock;
-import com.inventory.model.StockKey;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

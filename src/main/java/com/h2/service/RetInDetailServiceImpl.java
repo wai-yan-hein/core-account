@@ -6,8 +6,8 @@
 package com.h2.service;
 
 import com.h2.dao.RetInDetailDao;
-import com.inventory.model.RetInHisDetail;
-import com.inventory.model.RetInKey;
+import com.inventory.entity.RetInHisDetail;
+import com.inventory.entity.RetInKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

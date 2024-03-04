@@ -7,9 +7,9 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.StockUnit;
-import com.inventory.model.VouDiscount;
-import com.inventory.model.VouDiscountKey;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.VouDiscount;
+import com.inventory.entity.VouDiscountKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -90,11 +90,11 @@ public class VoucherDiscountTableModel extends AbstractTableModel {
                 case 1 ->
                     b.getUnit();
                 case 2 ->
-                    b.getQty();
+                    Util1.toNull(b.getQty());
                 case 3 ->
-                    b.getPrice();
+                    Util1.toNull(b.getPrice());
                 case 4 ->
-                    b.getAmount();
+                    Util1.toNull(b.getAmount());
                 default ->
                     null;
             }; //Code

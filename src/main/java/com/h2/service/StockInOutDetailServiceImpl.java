@@ -6,8 +6,8 @@
 package com.h2.service;
 
 import com.h2.dao.StockInOutDetailDao;
-import com.inventory.model.StockInOutDetail;
-import com.inventory.model.StockInOutKey;
+import com.inventory.entity.StockInOutDetail;
+import com.inventory.entity.StockInOutKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

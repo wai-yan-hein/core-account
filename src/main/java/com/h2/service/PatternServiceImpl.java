@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.h2.dao.PatternDao;
-import com.inventory.model.Pattern;
-import com.inventory.model.PatternKey;
+import com.inventory.entity.Pattern;
+import com.inventory.entity.PatternKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

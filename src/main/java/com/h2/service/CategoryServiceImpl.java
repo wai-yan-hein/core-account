@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.CategoryDao;
-import com.inventory.model.Category;
-import com.inventory.model.CategoryKey;
+import com.inventory.entity.Category;
+import com.inventory.entity.CategoryKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

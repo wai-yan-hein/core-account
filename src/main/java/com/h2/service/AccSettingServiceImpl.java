@@ -2,8 +2,8 @@
 package com.h2.service;
 
 import com.h2.dao.AccSettingDao;
-import com.inventory.model.AccSetting;
-import com.inventory.model.AccKey;
+import com.inventory.entity.AccSetting;
+import com.inventory.entity.AccKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

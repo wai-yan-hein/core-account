@@ -6,6 +6,7 @@ package com.common;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+import javax.print.attribute.AttributeSet;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.HashPrintServiceAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
@@ -26,11 +27,10 @@ import net.sf.jasperreports.export.SimplePrintServiceExporterConfiguration;
  */
 public class JasperReportUtil {
 
-    public static void print(JasperPrint jp) {
+    public static void print(JasperPrint jp, String printerName, Integer count, int pageSize) {
         try {
-            String printerName = ProUtil.getProperty("printer.name");
             PrintRequestAttributeSet printRequestAttributeSet = new HashPrintRequestAttributeSet();
-            printRequestAttributeSet.add(MediaSizeName.ISO_A4);
+            printRequestAttributeSet.add(getMediaSizeName(pageSize));
             PrintServiceAttributeSet printServiceAttributeSet = new HashPrintServiceAttributeSet();
             printServiceAttributeSet.add(new PrinterName(printerName, null));
             JRPrintServiceExporter exporter = new JRPrintServiceExporter();
@@ -41,7 +41,6 @@ public class JasperReportUtil {
             config.setDisplayPrintDialog(false);
             exporter.setConfiguration(config);
             exporter.setExporterInput(new SimpleExporterInput(jp));
-            int count = Util1.getIntegerOne(ProUtil.getProperty("printer.pages"));
             for (int i = 0; i < count; i++) {
                 exporter.exportReport();
             }
@@ -49,6 +48,15 @@ public class JasperReportUtil {
         } catch (JRException e) {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Voucher Printer", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private static MediaSizeName getMediaSizeName(int pageSize) {
+        return switch (pageSize) {
+            case 5 ->
+                MediaSizeName.ISO_A5;
+            default ->
+                MediaSizeName.ISO_A4;
+        };
     }
 
     private static boolean isOnline(String printerName) {

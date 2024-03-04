@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.UnitRelation;
+import com.inventory.entity.UnitRelation;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

@@ -13,7 +13,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import com.repo.UserRepo;
 import com.user.common.MenuTreeTrasnferHandler;
 import com.user.model.Menu;

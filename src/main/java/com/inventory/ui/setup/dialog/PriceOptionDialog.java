@@ -7,7 +7,7 @@ package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
 import com.common.TableCellRender;
-import com.inventory.model.PriceOption;
+import com.inventory.entity.PriceOption;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SalePriceTableModel;
 import java.awt.event.ActionEvent;

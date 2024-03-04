@@ -15,8 +15,8 @@ import com.common.QRUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Message;
-import com.inventory.model.MessageType;
+import com.inventory.entity.Message;
+import com.inventory.entity.MessageType;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.user.dialog.DateLockDialog;
@@ -296,6 +296,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private void departmentDialog() {
         DepartmentSetupDialog d = new DepartmentSetupDialog(Global.parentForm);
         d.setUserRepo(userRepo);
+        d.setAccountRepo(accountRepo);
         d.initMain();
         d.setLocationRelativeTo(null);
         d.setVisible(true);
@@ -318,7 +319,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         ShootTriMessageDialog s = new ShootTriMessageDialog(Global.parentForm, true);
         s.setAccountRepo(accountRepo);
         s.initMain();
-        s.setSize(Global.width - 100, Global.height - 100);
+        s.setSize(Global.width - 200, Global.height - 200);
         s.setLocationRelativeTo(null);
         s.setVisible(true);
     }

@@ -6,7 +6,7 @@
 package com.common;
 
 import com.acc.model.DateModel;
-import com.inventory.model.AccSetting;
+import com.inventory.entity.AccSetting;
 import com.user.model.AppUser;
 import java.awt.Color;
 import java.awt.Font;

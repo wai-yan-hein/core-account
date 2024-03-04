@@ -5,7 +5,7 @@
 package com.inventory.ui.common;
 
 import com.repo.UserRepo;
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

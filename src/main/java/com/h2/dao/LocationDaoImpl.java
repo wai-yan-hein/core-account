@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Location;
-import com.inventory.model.LocationKey;
+import com.inventory.entity.Location;
+import com.inventory.entity.LocationKey;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -33,7 +33,7 @@ public class LocationDaoImpl extends AbstractDao<LocationKey, Location> implemen
 
     @Override
     public List<Location> findAll(String compCode) {
-        String hsql = "select o from Location o where o.key.compCode ='" + compCode + "'";
+        String hsql = "select o from Location o where o.key.compCode ='" + compCode + "' order by o.userCode";
         return findHSQL(hsql);
     }
 

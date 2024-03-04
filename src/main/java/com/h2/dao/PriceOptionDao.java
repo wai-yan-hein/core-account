@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.PriceOption;
-import com.inventory.model.PriceOptionKey;
+import com.inventory.entity.PriceOption;
+import com.inventory.entity.PriceOptionKey;
 import java.util.List;
 
 /**

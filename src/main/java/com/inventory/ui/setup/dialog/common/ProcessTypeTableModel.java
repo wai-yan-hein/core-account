@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.ProcessType;
+import com.inventory.entity.ProcessType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

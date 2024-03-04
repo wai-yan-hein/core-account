@@ -14,6 +14,7 @@ import java.util.List;
 public interface MachineInfoService {
 
     MachineInfo save(MachineInfo mInfo);
+    MachineInfo find(Integer macId);
 
     String getMaxDate();
     

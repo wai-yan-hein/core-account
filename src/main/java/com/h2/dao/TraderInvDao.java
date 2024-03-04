@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.Trader;
-import com.inventory.model.TraderKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderKey;
 import java.util.List;
 
 /**
@@ -21,6 +21,8 @@ public interface TraderInvDao {
     String getMaxDate();
 
     List<Trader> findAll(String compCode);
+
+    List<Trader> getTrader(String compCode, String type);
 
     List<Trader> searchTrader(String str, String type, String compCode, Integer deptId);
 

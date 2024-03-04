@@ -7,9 +7,9 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.Expense;
-import com.inventory.model.SaleExpense;
-import com.inventory.model.SaleExpenseKey;
+import com.inventory.entity.Expense;
+import com.inventory.entity.SaleExpense;
+import com.inventory.entity.SaleExpenseKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;

@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.GRN;
+import com.inventory.entity.GRN;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

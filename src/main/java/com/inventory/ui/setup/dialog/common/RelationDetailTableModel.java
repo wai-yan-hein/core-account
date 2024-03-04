@@ -6,9 +6,9 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.common.Util1;
-import com.inventory.model.UnitRelationDetail;
-import com.inventory.model.StockUnit;
-import com.inventory.model.UnitRelation;
+import com.inventory.entity.UnitRelationDetail;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.UnitRelation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -1,8 +1,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Pattern;
-import com.inventory.model.PatternKey;
+import com.inventory.entity.Pattern;
+import com.inventory.entity.PatternKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Language;
-import com.inventory.model.LanguageKey;
+import com.inventory.entity.Language;
+import com.inventory.entity.LanguageKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

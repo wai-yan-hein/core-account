@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.h2.dao.LanguageDao;
-import com.inventory.model.Language;
-import com.inventory.model.LanguageKey;
+import com.inventory.entity.Language;
+import com.inventory.entity.LanguageKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

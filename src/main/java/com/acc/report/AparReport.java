@@ -24,6 +24,9 @@ import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.RegionAutoCompleter;
+import com.inventory.entity.Region;
+import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
@@ -61,7 +64,7 @@ import org.springframework.core.task.TaskExecutor;
 public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
 
-    private int selectRow = -1;
+    private int row = 0;
     /**
      * Creates new form AparReport
      */
@@ -69,6 +72,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private AccountRepo accountRepo;
     @Setter
     private UserRepo userRepo;
+    @Setter
+    private InventoryRepo inventoryRepo;
     private final APARTableModel aPARTableModel = new APARTableModel();
     private DateAutoCompleter dateAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
@@ -76,6 +81,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private TraderAAutoCompleter traderAutoCompleter;
     private COAAutoCompleter cOAAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    private RegionAutoCompleter regionAutoCompleter;
     private TableFilterHeader filterHeader;
     private boolean isApPrCal = false;
     @Setter
@@ -96,9 +102,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void assingDefaultValue() {
-        txtDrAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtCrAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtFOFB.setFormatterFactory(Util1.getDecimalFormat());
+        ComponentUtil.setTextProperty(this);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
     }
@@ -147,7 +151,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     private void initTable() {
         tblAPAR.setModel(aPARTableModel);
-        tblAPAR.getTableHeader().setFont(Global.amtFont);
+        tblAPAR.getTableHeader().setFont(Global.tblHeaderFont);
         tblAPAR.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblAPAR.getColumnModel().getColumn(0).setPreferredWidth(20);
         tblAPAR.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -161,10 +165,10 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         tblAPAR.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                row = tblAPAR.convertRowIndexToModel(tblAPAR.getSelectedRow());
                 if (e.getClickCount() == 2) {
                     if (tblAPAR.getSelectedRow() >= 0) {
-                        selectRow = tblAPAR.convertRowIndexToModel(tblAPAR.getSelectedRow());
-                        VApar apar = aPARTableModel.getAPAR(selectRow);
+                        VApar apar = aPARTableModel.getAPAR(row);
                         String traderCode = apar.getTraderCode();
                         String traderName = apar.getTraderName();
                         String coaCode = apar.getCoaCode();
@@ -243,13 +247,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }).doOnTerminate(() -> {
                 calTotal();
+                filterRegion();
                 removeZero();
                 isApPrCal = false;
                 progress.setIndeterminate(false);
                 long end = new GregorianCalendar().getTimeInMillis();
                 long pt = (end - start) / 1000;
                 lblCalTime.setText(pt + " s");
-                tblAPAR.requestFocus();
+                ComponentUtil.scrollTable(tblAPAR, row, 0);
             }).subscribe();
         }
     }
@@ -263,6 +268,17 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         } else {
             aPARTableModel.setListAPAR(aPARTableModel.getListOrg());
         }
+    }
+
+    private void filterRegion() {
+        Region r = regionAutoCompleter.getRegion();
+        String regCode = r.getKey().getRegCode();
+        if (!regCode.equals("-")) {
+            List<VApar> mutableList = new ArrayList<>(aPARTableModel.getListAPAR());
+            List<VApar> listFilter = mutableList.stream().filter(t -> Util1.isNull(t.getRegCode(), "-").equals(regCode)).toList();
+            aPARTableModel.setListAPAR(listFilter);
+        }
+
     }
 
     private void calTotal() {
@@ -295,7 +311,11 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
         }).subscribe();
-
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
+        regionAutoCompleter.setObserver(this);
+        inventoryRepo.getRegion().doOnSuccess((t) -> {
+            regionAutoCompleter.setListRegion(t);
+        }).subscribe();
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
@@ -374,6 +394,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         txtAccount = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        txtRegion = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblAPAR = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -433,7 +455,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         });
 
         jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Person");
+        jLabel3.setText("Trader");
 
         txtCurrency.setFont(Global.lableFont);
         txtCurrency.setToolTipText("");
@@ -481,6 +503,22 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Region");
+
+        txtRegion.setFont(Global.textFont);
+        txtRegion.setName("txtPerson"); // NOI18N
+        txtRegion.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtRegionFocusGained(evt);
+            }
+        });
+        txtRegion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtRegionActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -502,6 +540,10 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtAccount)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtRegion)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -528,7 +570,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel7)
                     .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9)
+                    .addComponent(txtRegion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -764,6 +808,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         exportExcel();
     }//GEN-LAST:event_btnExcelActionPerformed
 
+    private void txtRegionFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRegionFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRegionFocusGained
+
+    private void txtRegionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRegionActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRegionActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExcel;
@@ -776,6 +828,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -793,6 +846,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField txtFOFB;
     private javax.swing.JTextField txtPerson;
     private javax.swing.JTextField txtProjectNo;
+    private javax.swing.JTextField txtRegion;
     // End of variables declaration//GEN-END:variables
 
     @Override

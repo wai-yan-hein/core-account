@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.h2.dao.WareHouseDao;
-import com.inventory.model.WareHouse;
-import com.inventory.model.WareHouseKey;
+import com.inventory.entity.WareHouse;
+import com.inventory.entity.WareHouseKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -6,7 +6,7 @@ package com.inventory.ui.entry.dialog;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.PurHisDetail;
+import com.inventory.entity.PurHisDetail;
 import com.repo.InventoryRepo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

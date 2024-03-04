@@ -1,7 +1,7 @@
 package com.h2.service;
 
-import com.inventory.model.LabourGroup;
-import com.inventory.model.LabourGroupKey;
+import com.inventory.entity.LabourGroup;
+import com.inventory.entity.LabourGroupKey;
 
 import java.util.List;
 

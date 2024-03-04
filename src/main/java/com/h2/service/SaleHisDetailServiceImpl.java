@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.SaleHisDetailDao;
-import com.inventory.model.SaleDetailKey;
-import com.inventory.model.SaleHisDetail;
+import com.inventory.entity.SaleDetailKey;
+import com.inventory.entity.SaleHisDetail;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

@@ -6,10 +6,10 @@
 package com.inventory.tree;
 
 import com.common.SelectionObserver;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import com.user.model.PrivilegeMenu;
 import com.user.model.PMKey;
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.VRoleMenu;
 import com.repo.UserRepo;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

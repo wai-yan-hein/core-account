@@ -6,7 +6,7 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
-import com.inventory.model.OptionModel;
+import com.inventory.entity.OptionModel;
 import com.inventory.ui.entry.dialog.common.OptionTableModel;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;

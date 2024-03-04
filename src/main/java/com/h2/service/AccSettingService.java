@@ -1,8 +1,8 @@
 
 package com.h2.service;
 
-import com.inventory.model.AccKey;
-import com.inventory.model.AccSetting;
+import com.inventory.entity.AccKey;
+import com.inventory.entity.AccSetting;
 import java.util.List;
 
 /**

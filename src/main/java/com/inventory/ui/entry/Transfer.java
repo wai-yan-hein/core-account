@@ -22,19 +22,19 @@ import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.Trader;
-import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisKey;
-import com.inventory.model.VTransfer;
+import com.inventory.entity.Location;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.TransferHisKey;
+import com.inventory.entity.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.TransferTableModel;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.model.LabourGroup;
-import com.inventory.model.THDetailKey;
-import com.inventory.model.TransferHisDetail;
+import com.inventory.entity.LabourGroup;
+import com.inventory.entity.THDetailKey;
+import com.inventory.entity.TransferHisDetail;
 import com.inventory.ui.common.TransferPaddingTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
@@ -42,6 +42,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -345,15 +347,21 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             inventoryRepo.save(io).doOnSuccess((t) -> {
                 io.getKey().setVouNo(t.getKey().getVouNo());
                 io.setVouDate(t.getVouDate());
-            }).doOnError((e) -> {
-                observer.selected("save", true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-                progress.setIndeterminate(false);
-            }).doOnTerminate(() -> {
                 if (print) {
                     printVoucher(io);
                 } else {
                     clear(true);
+                }
+            }).doOnError((e) -> {
+                progress.setIndeterminate(false);
+                observer.selected("save", true);
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveVoucher(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
                 }
             }).subscribe();
         }
@@ -426,11 +434,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             status = false;
             JOptionPane.showMessageDialog(this, "Can't transfer the same location.");
             txtTo.requestFocus();
-        } else if (!Util1.isDateBetween(txtDate.getDate())) {
-            JOptionPane.showMessageDialog(this, "Invalid Date.",
-                    "Validation.", JOptionPane.ERROR_MESSAGE);
-            txtDate.requestFocus();
-            status = false;
         } else {
             io.setRefNo(txtRefNo.getText());
             io.setRemark(txtRemark.getText());
@@ -457,6 +460,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 io.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
+            }
+            if (!Util1.isDateBetween(txtDate.getDate())) {
+                int yn = JOptionPane.showConfirmDialog(this, "Date is out of range finanical year.",
+                        "Validation.", JOptionPane.WARNING_MESSAGE);
+                return yn == JOptionPane.YES_OPTION;
             }
         }
         return status;

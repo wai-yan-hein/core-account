@@ -5,8 +5,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.PurHis;
-import com.inventory.model.PurHisKey;
+import com.inventory.entity.PurHis;
+import com.inventory.entity.PurHisKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

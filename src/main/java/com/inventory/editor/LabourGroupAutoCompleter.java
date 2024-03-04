@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.LabourGroup;
+import com.inventory.entity.LabourGroup;
 import com.inventory.ui.setup.dialog.common.LabourGroupTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

@@ -45,4 +45,9 @@ public class MachineInfoDaoImpl extends AbstractDao<Integer, MachineInfo> implem
         return findHSQL(sql);
     }
 
+    @Override
+    public MachineInfo find(Integer macId) {
+        return getByKey(macId);
+    }
+
 }

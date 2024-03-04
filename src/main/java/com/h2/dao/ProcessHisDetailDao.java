@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.ProcessHisDetail;
-import com.inventory.model.ProcessHisDetailKey;
+import com.inventory.entity.ProcessHisDetail;
+import com.inventory.entity.ProcessHisDetailKey;
 import java.util.List;
 
 public interface ProcessHisDetailDao {

@@ -18,12 +18,12 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.TraderGroupAutoCompleter;
-import com.inventory.model.General;
-import com.inventory.model.MessageType;
-import com.inventory.model.Region;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderGroup;
-import com.inventory.model.TraderKey;
+import com.inventory.entity.General;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.Region;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderGroup;
+import com.inventory.entity.TraderKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.SupplierTabelModel;
 import com.inventory.ui.setup.dialog.RegionSetup;
@@ -74,6 +74,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
+    private RegionSetup regionSetup;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -364,6 +365,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         observer.selected("history", false);
         observer.selected("delete", true);
         observer.selected("refresh", true);
+    }
+
+    private void regionSetup() {
+        if (regionSetup == null) {
+            regionSetup = new RegionSetup(Global.parentForm);
+            regionSetup.setInventoryRepo(inventoryRepo);
+            regionSetup.initMain();
+            regionSetup.setSize(Global.width / 2, Global.height / 2);
+            regionSetup.setLocationRelativeTo(null);
+        }
+        regionSetup.search();
+        regionAutoCompleter.setListRegion(regionSetup.getListRegion());
     }
 
     /**
@@ -738,15 +751,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        inventoryRepo.getRegion().subscribe((t) -> {
-            RegionSetup regionSetup = new RegionSetup(Global.parentForm);
-            regionSetup.setListRegion(t);
-            regionSetup.setInventoryRepo(inventoryRepo);
-            regionSetup.initMain();
-            regionSetup.setSize(Global.width / 2, Global.height / 2);
-            regionSetup.setLocationRelativeTo(null);
-            regionSetup.setVisible(true);
-        });
+        regionSetup();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased

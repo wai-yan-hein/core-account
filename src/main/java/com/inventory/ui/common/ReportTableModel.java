@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.VRoleMenu;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

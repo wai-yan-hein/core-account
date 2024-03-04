@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OrderStatus;
+import com.inventory.entity.OrderStatus;
 import com.inventory.ui.setup.dialog.common.OrderStatusTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Color;

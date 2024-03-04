@@ -4,86 +4,40 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.Util1;
+import com.inventory.entity.SaleHis;
+import com.repo.AccountRepo;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
-
-    private double vouTotal;
-    private double vouPaid;
-    private double vouBalance;
-    private double vouDiscount;
-    private double vouGrandTotal;
-    private double overPayment;
+    
+    @Getter
+    @Setter
     private boolean confirm;
-
-    public double getOverPayment() {
-        return overPayment;
-    }
-
-    public void setOverPayment(double overPayment) {
-        this.overPayment = overPayment;
-    }
-
-    public double getVouGrandTotal() {
-        return vouGrandTotal;
-    }
-
-    public void setVouGrandTotal(double vouGrandTotal) {
-        this.vouGrandTotal = vouGrandTotal;
-    }
-
-    public double getVouDiscount() {
-        return vouDiscount;
-    }
-
-    public void setVouDiscount(double vouDiscount) {
-        txtVouDis.setValue(Util1.getDouble(vouDiscount));
-        this.vouDiscount = vouDiscount;
-    }
-
-    public double getVouTotal() {
-        return vouTotal;
-    }
-
-    public void setVouTotal(double vouTotal) {
-        txtVouTotal.setValue(Util1.getDouble(vouTotal));
-        this.vouTotal = vouTotal;
-    }
-
-    public double getVouPaid() {
-        return vouPaid;
-    }
-
-    public void setVouPaid(double vouPaid) {
-        txtVouPaid.setValue(Util1.getDouble(vouPaid));
-        this.vouPaid = vouPaid;
-    }
-
-    public double getVouBalance() {
-        return vouBalance;
-    }
-
-    public void setVouBalance(double vouBalance) {
-        txtVouBalance.setValue(Util1.getDouble(vouBalance));
-        this.vouBalance = vouBalance;
-    }
-
-    public boolean isConfirm() {
-        return confirm;
-    }
-
-    public void setConfirm(boolean confirm) {
-        this.confirm = confirm;
-    }
+    @Setter
+    private AccountRepo accountRepo;
+    @Setter
+    private SaleHis sh;
+    @Setter
+    private boolean newState;
 
     /**
      * Creates new form PaymentDialog
@@ -94,52 +48,104 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         super(frame, true);
         initComponents();
         initTextFormat();
-        initKeyListener();
-        txtVouPaid.requestFocus();
+        
     }
-
-    public void calPayment(boolean partial) {
-        setConfirm(false);
-        vouTotal = Util1.getDouble(txtVouTotal.getValue());
-        vouPaid = Util1.getDouble(txtVouPaid.getValue());
-        vouDiscount = Util1.getDouble(txtVouDis.getValue());
-        overPayment = Util1.getDouble(txtOverPayment.getValue());
-        if (!partial) {
-            vouPaid = chkFullPaid.isSelected() ? vouGrandTotal : 0;
-        } else {
-            if (vouPaid > vouGrandTotal) {
-                JOptionPane.showMessageDialog(this, "Invalid Payment.");
-                return;
-            }
-            if (vouTotal == vouPaid) {
-                chkFullPaid.setSelected(true);
-            }
-        }
-        vouGrandTotal = vouTotal - vouDiscount + overPayment;
-        vouBalance = vouGrandTotal - vouPaid;
-        txtGrand.setValue(Util1.getDouble(vouGrandTotal));
-        txtVouPaid.setValue(Util1.getDouble(vouPaid));
-        txtVouBalance.setValue(Util1.getDouble(vouBalance));
-    }
-
+    
     private void initTextFormat() {
-        txtVouTotal.setFormatterFactory(Util1.getDecimalFormat2());
-        txtGrand.setFormatterFactory(Util1.getDecimalFormat2());
-        txtOverPayment.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouDis.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouPaid.setFormatterFactory(Util1.getDecimalFormat2());
-        txtVouBalance.setFormatterFactory(Util1.getDecimalFormat2());
-
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
+        txtPayment.getDocument().addDocumentListener(dl);
     }
-
-    private void initKeyListener() {
-        txtVouTotal.addKeyListener(this);
-        txtGrand.addKeyListener(this);
-        txtOverPayment.addKeyListener(this);
-        txtVouDis.addKeyListener(this);
-        txtVouPaid.addKeyListener(this);
-        txtVouBalance.addKeyListener(this);
+    
+    private void refresh() {
+        setData(sh, newState);
     }
+    
+    public void setData(SaleHis sh, boolean newState) {
+        this.sh = sh;
+        this.newState = newState;
+        clear();
+        if (newState) {
+            progress.setIndeterminate(true);
+            String traderCode = sh.getTraderCode();
+            String curCode = sh.getCurCode();
+            String vouDate = Util1.addDay(Util1.toDateStr(sh.getVouDate(), "yyyy-MM-dd"), 1);
+            accountRepo.getTraderBalance(vouDate, traderCode, curCode).doOnSuccess((opening) -> {
+                sh.setOpening(Util1.getDouble(opening));
+                sh.setTotalBalance(Util1.getDouble(opening) + sh.getVouTotal());
+                sh.setOutstanding(sh.getTotalBalance());
+                initData(sh);
+            }).doOnError((e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "ERROR", JOptionPane.ERROR);
+            }).doOnTerminate(() -> {
+                txtPayment.requestFocus();
+                progress.setIndeterminate(false);
+            }).subscribe();
+        } else {
+            initData(sh);
+        }
+        setVisible(true);
+    }
+    
+    private void initData(SaleHis sh) {
+        txtOpening.setValue(sh.getOpening());
+        txtOpening.setForeground(sh.getOpening() < 0 ? Color.red : Color.green);
+        txtVouTotal.setValue(sh.getVouTotal());
+        txtBalance.setValue(sh.getTotalBalance());
+        txtPayment.setValue(sh.getTotalPayment());
+        txtClosing.setValue(sh.getOutstanding());
+        txtPayment.setEditable(true);
+    }
+    
+    private void calPayment() {
+        SwingUtilities.invokeLater(() -> {
+            log.info("calPayment.");
+            double payment = Util1.getDouble(txtPayment.getText());
+            double balance = Util1.getDouble(txtBalance.getValue());
+            log.info("payment" + payment + "");
+            double outstanding = balance - payment;
+            txtClosing.setValue(outstanding);
+            txtClosing.setForeground(outstanding < 0 ? Color.red : Color.green);
+            //set data
+
+        });
+    }
+    
+    private void confirm() {
+        double payment = Util1.getDouble(txtPayment.getValue());
+        double balance = Util1.getDouble(txtBalance.getValue());
+        double outstanding = Util1.getDouble(txtClosing.getValue());
+        sh.setTotalPayment(payment);
+        sh.setTotalBalance(balance);
+        sh.setOutstanding(outstanding);
+        setConfirm(true);
+        setVisible(false);
+    }
+    
+    private void clear() {
+        txtOpening.setValue(0);
+        txtVouTotal.setValue(0);
+        txtBalance.setValue(0);
+        txtPayment.setValue(0);
+        txtClosing.setValue(0);
+    }
+    private final DocumentListener dl = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            calPayment();
+        }
+        
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            calPayment();
+            
+        }
+        
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            calPayment();
+        }
+    };
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -154,22 +160,21 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         jLabel4 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jButton2 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnConfirm = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         chkFullPaid = new javax.swing.JCheckBox();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        txtOverPayment = new javax.swing.JFormattedTextField();
-        txtVouDis = new javax.swing.JFormattedTextField();
-        txtVouPaid = new javax.swing.JFormattedTextField();
-        txtVouBalance = new javax.swing.JFormattedTextField();
-        txtGrand = new javax.swing.JFormattedTextField();
+        txtPayment = new javax.swing.JFormattedTextField();
+        txtClosing = new javax.swing.JFormattedTextField();
+        txtBalance = new javax.swing.JFormattedTextField();
         txtVouTotal = new javax.swing.JFormattedTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtOpening = new javax.swing.JFormattedTextField();
+        jButton1 = new javax.swing.JButton();
+        progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Payment Dialog");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -177,7 +182,7 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         jLabel4.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabel4.setForeground(Global.selectionColor);
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Voucher Payment");
+        jLabel4.setText(" Payment");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -206,13 +211,13 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
             }
         });
 
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Confirm");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnConfirm.setBackground(Global.selectionColor);
+        btnConfirm.setFont(Global.lableFont);
+        btnConfirm.setForeground(new java.awt.Color(255, 255, 255));
+        btnConfirm.setText("Confirm");
+        btnConfirm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnConfirmActionPerformed(evt);
             }
         });
 
@@ -220,10 +225,7 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         jLabel1.setText("Vou Total");
 
         jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Vou Balance");
-
-        jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Vou Paid");
+        jLabel3.setText("Closing");
 
         chkFullPaid.setFont(Global.lableFont);
         chkFullPaid.setText("Full Paid");
@@ -233,35 +235,47 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
             }
         });
 
-        jLabel5.setFont(Global.lableFont);
-        jLabel5.setText("Vou Discount");
-
         jLabel6.setFont(Global.lableFont);
-        jLabel6.setText("Grand Total");
+        jLabel6.setText("Balance");
 
         jLabel7.setFont(Global.lableFont);
-        jLabel7.setText("Over Payment");
+        jLabel7.setText("Payment");
 
-        txtOverPayment.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtOverPayment.setFont(Global.amtFont);
+        txtPayment.setEditable(false);
+        txtPayment.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPayment.setFont(Global.amtFont);
+        txtPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPaymentActionPerformed(evt);
+            }
+        });
 
-        txtVouDis.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouDis.setFont(Global.amtFont);
+        txtClosing.setEditable(false);
+        txtClosing.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtClosing.setFont(Global.amtFont);
 
-        txtVouPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouPaid.setFont(Global.amtFont);
-
-        txtVouBalance.setEditable(false);
-        txtVouBalance.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouBalance.setFont(Global.amtFont);
-
-        txtGrand.setEditable(false);
-        txtGrand.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtGrand.setFont(Global.amtFont);
+        txtBalance.setEditable(false);
+        txtBalance.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBalance.setFont(Global.amtFont);
 
         txtVouTotal.setEditable(false);
         txtVouTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtVouTotal.setFont(Global.amtFont);
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Opening");
+
+        txtOpening.setEditable(false);
+        txtOpening.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtOpening.setFont(Global.amtFont);
+
+        jButton1.setBackground(Util1.DARK_MODE?new Color(50, 50, 50):Color.white);
+        jButton1.setIcon(IconUtil.getIcon("refresh.svg"));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -270,28 +284,27 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 136, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
+                        .addComponent(btnConfirm))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkFullPaid, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtOverPayment)
-                            .addComponent(txtVouDis)
-                            .addComponent(txtVouPaid)
-                            .addComponent(txtVouBalance, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtGrand)
-                            .addComponent(txtVouTotal))))
+                            .addComponent(txtPayment)
+                            .addComponent(txtClosing, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtBalance)
+                            .addComponent(txtVouTotal)
+                            .addComponent(txtOpening))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -299,34 +312,31 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtOpening, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtGrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtOverPayment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtVouDis, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtVouPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPayment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtClosing, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkFullPaid)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnConfirm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -338,13 +348,16 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -356,54 +369,66 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
 
     private void chkFullPaidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkFullPaidActionPerformed
         // TODO add your handling code here:
-        calPayment(false);
+        if (chkFullPaid.isSelected()) {
+            txtPayment.setValue(Util1.getDouble(txtBalance.getValue()));
+        } else {
+            txtPayment.setValue(0);
+        }
+        calPayment();
     }//GEN-LAST:event_chkFullPaidActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnConfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmActionPerformed
         // TODO add your handling code here:
-        setConfirm(true);
-        this.dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+        confirm();
+    }//GEN-LAST:event_btnConfirmActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        calPayment(false);
-        setConfirm(false);
-        this.dispose();
+        setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void txtPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPaymentActionPerformed
+        // TODO add your handling code here:
+        calPayment();
+        btnConfirm.requestFocus();
+    }//GEN-LAST:event_txtPaymentActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        refresh();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnConfirm;
     private javax.swing.JCheckBox chkFullPaid;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JFormattedTextField txtGrand;
-    private javax.swing.JFormattedTextField txtOverPayment;
-    private javax.swing.JFormattedTextField txtVouBalance;
-    private javax.swing.JFormattedTextField txtVouDis;
-    private javax.swing.JFormattedTextField txtVouPaid;
+    private javax.swing.JProgressBar progress;
+    private javax.swing.JFormattedTextField txtBalance;
+    private javax.swing.JFormattedTextField txtClosing;
+    private javax.swing.JFormattedTextField txtOpening;
+    private javax.swing.JFormattedTextField txtPayment;
     private javax.swing.JFormattedTextField txtVouTotal;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-        calPayment(false);
     }
 }

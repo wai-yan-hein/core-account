@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.VouStatus;
+import com.inventory.entity.VouStatus;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

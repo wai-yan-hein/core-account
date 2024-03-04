@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.Language;
-import com.inventory.model.LanguageKey;
+import com.inventory.entity.Language;
+import com.inventory.entity.LanguageKey;
 import java.time.LocalDateTime;
 import java.util.List;
 

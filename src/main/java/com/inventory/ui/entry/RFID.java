@@ -16,11 +16,11 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisDetail;
-import com.inventory.model.SaleHisKey;
-import com.inventory.model.Trader;
-import com.inventory.model.VSale;
+import com.inventory.entity.SaleHis;
+import com.inventory.entity.SaleHisDetail;
+import com.inventory.entity.SaleHisKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.RFIDTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
@@ -488,7 +488,9 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(t));
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                JasperReportUtil.print(jp);
+                String printerName = ProUtil.getProperty("printer.name");
+                int count = Util1.getIntegerOne(ProUtil.getProperty("printer.pages"));
+                JasperReportUtil.print(jp, printerName, count,4);
             } catch (JRException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }

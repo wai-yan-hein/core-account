@@ -7,7 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.VPurOrder;
+import com.inventory.entity.VPurOrder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

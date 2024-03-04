@@ -2,8 +2,8 @@ package com.h2.service;
 
 
 import com.h2.dao.LabourGroupDao;
-import com.inventory.model.LabourGroup;
-import com.inventory.model.LabourGroupKey;
+import com.inventory.entity.LabourGroup;
+import com.inventory.entity.LabourGroupKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

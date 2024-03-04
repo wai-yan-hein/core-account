@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.Trader;
+import com.inventory.entity.Trader;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

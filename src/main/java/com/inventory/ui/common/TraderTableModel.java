@@ -6,7 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Util1;
-import com.inventory.model.Trader;
+import com.inventory.entity.Trader;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

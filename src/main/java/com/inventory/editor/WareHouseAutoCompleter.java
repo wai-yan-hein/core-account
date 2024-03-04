@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.WareHouse;
+import com.inventory.entity.WareHouse;
 import com.inventory.ui.setup.dialog.common.WareHouseTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

@@ -10,7 +10,7 @@ import com.acc.model.BusinessType;
 import com.acc.model.COATemplate;
 import com.acc.model.COATemplateKey;
 import com.common.Util1;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

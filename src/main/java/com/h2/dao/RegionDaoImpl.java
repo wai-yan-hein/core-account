@@ -1,8 +1,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
+import com.inventory.entity.Region;
+import com.inventory.entity.RegionKey;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

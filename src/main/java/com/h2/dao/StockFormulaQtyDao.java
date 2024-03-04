@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.StockFormulaQty;
-import com.inventory.model.StockFormulaQtyKey;
+import com.inventory.entity.StockFormulaQty;
+import com.inventory.entity.StockFormulaQtyKey;
 import java.util.List;
 
 public interface StockFormulaQtyDao {

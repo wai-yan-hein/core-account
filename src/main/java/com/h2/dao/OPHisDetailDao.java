@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.OPHisDetail;
-import com.inventory.model.OPHisDetailKey;
+import com.inventory.entity.OPHisDetail;
+import com.inventory.entity.OPHisDetailKey;
 import java.util.List;
 
 public interface OPHisDetailDao {

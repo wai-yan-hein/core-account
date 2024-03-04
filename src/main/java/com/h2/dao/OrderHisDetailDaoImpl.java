@@ -5,8 +5,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.OrderDetailKey;
-import com.inventory.model.OrderHisDetail;
+import com.inventory.entity.OrderDetailKey;
+import com.inventory.entity.OrderHisDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

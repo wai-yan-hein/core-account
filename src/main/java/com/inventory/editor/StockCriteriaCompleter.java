@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.StockCriteria;
+import com.inventory.entity.StockCriteria;
 import com.inventory.ui.common.StockCriteriaTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Color;

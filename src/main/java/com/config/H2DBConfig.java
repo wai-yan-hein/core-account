@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  *
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.PropertySource;
 @Slf4j
 @Configuration
 @Conditional(H2DBCondition.class)
+@EnableTransactionManagement
 @PropertySource("classpath:application.properties") // Use the same properties file as your main configuration
 public class H2DBConfig {
 
@@ -41,7 +43,7 @@ public class H2DBConfig {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        em.setPackagesToScan("com.user.model", "com.inventory.model", "com.acc.model");
+        em.setPackagesToScan("com.user.model", "com.inventory.entity", "com.acc.model");
         em.setJpaProperties(additionalJpaProperties());
         return em;
     }

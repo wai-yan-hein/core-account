@@ -4,7 +4,7 @@
  */
 package com.acc.common;
 
-import com.inventory.model.TraderGroup;
+import com.inventory.entity.TraderGroup;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;

@@ -5,7 +5,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
-import com.inventory.model.Stock;
+import com.inventory.entity.Stock;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import java.awt.Color;

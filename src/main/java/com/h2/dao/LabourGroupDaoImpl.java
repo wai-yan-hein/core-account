@@ -2,8 +2,8 @@ package com.h2.dao;
 
 
 import com.common.Util1;
-import com.inventory.model.LabourGroup;
-import com.inventory.model.LabourGroupKey;
+import com.inventory.entity.LabourGroup;
+import com.inventory.entity.LabourGroupKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

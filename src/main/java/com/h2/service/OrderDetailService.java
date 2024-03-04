@@ -5,8 +5,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.OrderDetailKey;
-import com.inventory.model.OrderHisDetail;
+import com.inventory.entity.OrderDetailKey;
+import com.inventory.entity.OrderHisDetail;
 import java.util.List;
 
 /**

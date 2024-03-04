@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.h2.dao.RegionDao;
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
+import com.inventory.entity.Region;
+import com.inventory.entity.RegionKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

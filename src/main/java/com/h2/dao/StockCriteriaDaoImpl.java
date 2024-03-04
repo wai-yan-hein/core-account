@@ -6,8 +6,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.StockCriteria;
-import com.inventory.model.StockCriteriaKey;
+import com.inventory.entity.StockCriteria;
+import com.inventory.entity.StockCriteriaKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

@@ -5,8 +5,8 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.AccKey;
-import com.inventory.model.AccSetting;
+import com.inventory.entity.AccKey;
+import com.inventory.entity.AccSetting;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

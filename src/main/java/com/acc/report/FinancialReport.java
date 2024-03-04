@@ -21,7 +21,7 @@ import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
 import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;

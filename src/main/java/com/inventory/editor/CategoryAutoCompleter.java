@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.Category;
+import com.inventory.entity.Category;
 import com.inventory.ui.setup.dialog.common.CategoryTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

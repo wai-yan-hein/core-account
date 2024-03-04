@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.RelationKey;
-import com.inventory.model.UnitRelation;
+import com.inventory.entity.RelationKey;
+import com.inventory.entity.UnitRelation;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;

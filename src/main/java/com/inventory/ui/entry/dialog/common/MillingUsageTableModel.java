@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.inventory.model.MillingUsage;
+import com.inventory.entity.MillingUsage;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;

@@ -176,32 +176,32 @@ public class WebFlexConfig {
                 .serialNo(serialNo)
                 .password(Util1.getPassword())
                 .build();
-
-        return client.post()
-                .uri("/auth/authenticate")
-                .body(Mono.just(auth), AuthenticationRequest.class)
-                .retrieve()
-                .bodyToMono(AuthenticationResponse.class)
-                .doOnSuccess(response -> {
-                    if (response != null && response.getAccessToken() != null) {
-                        try {
-                            file.write(response); // Assuming this writes the response to a file
-                            log.info("New Token: " + response.getAccessToken());
-                        } catch (Exception e) {
-                            log.error("Error writing response to file: " + e.getMessage());
+        try {
+            return client.post()
+                    .uri("/auth/authenticate")
+                    .body(Mono.just(auth), AuthenticationRequest.class)
+                    .retrieve()
+                    .bodyToMono(AuthenticationResponse.class)
+                    .doOnSuccess(response -> {
+                        if (response != null && response.getAccessToken() != null) {
+                            try {
+                                file.write(response); // Assuming this writes the response to a file
+                                log.info("New Token: " + response.getAccessToken());
+                            } catch (Exception e) {
+                                log.error("Error writing response to file: " + e.getMessage());
+                            }
+                        } else {
+                            log.info("serialNo need register.");
+                            response.setAccessToken("");
                         }
-                    } else {
-                        log.info("serialNo need register.");
-                        response.setAccessToken("");
-                    }
-                })
-                .onErrorResume(e -> {
-                    log.error("Error during authentication: " + e.getMessage());
-                    // Return a fallback access token here
-                    return Mono.just(file.read());
-                })
-                .map(AuthenticationResponse::getAccessToken)
-                .block(Duration.ofSeconds(3)); // Extract and return the access token
+                    })
+                    .map(AuthenticationResponse::getAccessToken)
+                    .block(Duration.ofSeconds(3)); // Extract and return the access token
+        } catch (Exception e) {
+            log.error("Error during authentication: " + e.getMessage());
+            AuthenticationResponse response = file.read();
+            return response == null ? "" : response.getAccessToken();
+        }
     }
 
     @Bean

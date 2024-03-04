@@ -7,9 +7,9 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.MessageType;
-import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaKey;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.StockFormula;
+import com.inventory.entity.StockFormulaKey;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;

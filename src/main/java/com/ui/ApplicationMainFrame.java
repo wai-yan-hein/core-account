@@ -35,10 +35,12 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.common.YNOptionPane;
 import com.dms.CoreDrive;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.extras.FlatSVGIcon.ColorFilter;
 import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.VRoleMenu;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.LabourPaymentEntry;
 import com.repo.InventoryRepo;
@@ -246,6 +248,53 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }
 
+    private void initToolBarIcon() {
+        SwingUtilities.invokeLater(() -> {
+            FlatSVGIcon save = new FlatSVGIcon("svg/save.svg");
+            save.setColorFilter(colorFilter);
+            btnSave.setIcon(save);
+
+            FlatSVGIcon print = new FlatSVGIcon("svg/print.svg");
+            print.setColorFilter(colorFilter);
+            btnPrint.setIcon(print);
+
+            FlatSVGIcon refresh = new FlatSVGIcon("svg/refresh.svg");
+            refresh.setColorFilter(colorFilter);
+            btnRefresh.setIcon(refresh);
+
+            FlatSVGIcon delete = new FlatSVGIcon("svg/delete.svg");
+            delete.setColorFilter(colorFilter);
+            btnDelete.setIcon(delete);
+
+            FlatSVGIcon history = new FlatSVGIcon("svg/history.svg");
+            history.setColorFilter(colorFilter);
+            btnHistory.setIcon(history);
+
+            FlatSVGIcon clear = new FlatSVGIcon("svg/new.svg");
+            clear.setColorFilter(colorFilter);
+            btnNew.setIcon(clear);
+
+            FlatSVGIcon logout = new FlatSVGIcon("svg/logout.svg");
+            logout.setColorFilter(colorFilter);
+            btnLogout.setIcon(logout);
+
+            FlatSVGIcon filter = new FlatSVGIcon("svg/filter.svg");
+            filter.setColorFilter(colorFilter);
+            btnFilter.setIcon(filter);
+
+            FlatSVGIcon exit = new FlatSVGIcon("svg/exit.svg");
+            exit.setColorFilter(colorFilter);
+            btnExit.setIcon(exit);
+        });
+    }
+    private final ColorFilter colorFilter = new ColorFilter(color -> {
+        if (Util1.DARK_MODE) {
+            return Color.WHITE;
+        }
+        return Color.black;
+    });
+
+// Apply the color filter to the icon
     private void initKeyFoucsManager() {
         keyEventDispatcher = (KeyEvent ke) -> {
             if (ke.isAltDown()) {
@@ -441,7 +490,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleOrderEntry.initMain();
                 return saleOrderEntry;
             }
-            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch" -> {
+            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch", "POS" -> {
                 int type = getSaleType(menuName);
                 SaleDynamic s = new SaleDynamic(type);
                 s.setUserRepo(userRepo);
@@ -1006,15 +1055,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return gLReport;
             }
             case "AR / AP" -> {
-                AparReport aparReport = new AparReport();
-                aparReport.setName(menuName);
-                aparReport.setObserver(this);
-                aparReport.setProgress(progress);
-                aparReport.setAccountRepo(accounRepo);
-                aparReport.setUserRepo(userRepo);
-                aparReport.setTaskExecutor(taskExecutor);
-                aparReport.initMain();
-                return aparReport;
+                AparReport apar = new AparReport();
+                apar.setName(menuName);
+                apar.setObserver(this);
+                apar.setProgress(progress);
+                apar.setAccountRepo(accounRepo);
+                apar.setUserRepo(userRepo);
+                apar.setInventoryRepo(inventoryRepo);
+                apar.setTaskExecutor(taskExecutor);
+                apar.initMain();
+                return apar;
             }
             case "Financial Report" -> {
                 FinancialReport financialReport = new FinancialReport();
@@ -1155,6 +1205,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.PADDY;
             case "Sale By Batch" ->
                 SaleDynamic.BATCH;
+            case "POS" ->
+                SaleDynamic.QTY;
             default ->
                 0;
         };
@@ -1311,6 +1363,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     public void initMain() {
+        initToolBarIcon();
         Global.parentForm = this;
         setTitle("Core Account Cloud : " + Global.version);
         initStockBalanceFrame();
@@ -1409,7 +1462,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void createMenu(List<VRoleMenu> list) {
-        if (!list.isEmpty()) {
+        if (list != null && !list.isEmpty()) {
             list.forEach((menu) -> {
                 if (menu.getChild() != null) {
                     if (!menu.getChild().isEmpty()) {
@@ -1741,7 +1794,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.setFocusable(false);
 
         btnSave.setFont(Global.lableFont);
-        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save_18px.png"))); // NOI18N
         btnSave.setText("Save - F5");
         btnSave.setFocusable(false);
         btnSave.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1755,7 +1807,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator1);
 
         btnPrint.setFont(Global.lableFont);
-        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/print_18px.png"))); // NOI18N
         btnPrint.setText("Print - F6");
         btnPrint.setFocusable(false);
         btnPrint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1769,7 +1820,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator6);
 
         btnRefresh.setFont(Global.lableFont);
-        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_18px.png"))); // NOI18N
         btnRefresh.setText("Refresh - F7");
         btnRefresh.setFocusable(false);
         btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1783,7 +1833,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator5);
 
         btnDelete.setFont(Global.lableFont);
-        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/trash_18px.png"))); // NOI18N
         btnDelete.setText("Delete - F8");
         btnDelete.setFocusable(false);
         btnDelete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1797,7 +1846,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator2);
 
         btnHistory.setFont(Global.lableFont);
-        btnHistory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time_machine_18px.png"))); // NOI18N
         btnHistory.setText("History - F9");
         btnHistory.setFocusable(false);
         btnHistory.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1811,7 +1859,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator7);
 
         btnNew.setFont(Global.lableFont);
-        btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/new_copy_18px.png"))); // NOI18N
         btnNew.setText("New - F10");
         btnNew.setFocusable(false);
         btnNew.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1825,7 +1872,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator3);
 
         btnLogout.setFont(Global.lableFont);
-        btnLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_18px.png"))); // NOI18N
         btnLogout.setText("Logout - F11");
         btnLogout.setFocusable(false);
         btnLogout.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1839,7 +1885,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator8);
 
         btnFilter.setFont(Global.lableFont);
-        btnFilter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/slider_18px.png"))); // NOI18N
         btnFilter.setText("Filter-F12");
         btnFilter.setToolTipText("Filter Bar");
         btnFilter.setFocusable(false);
@@ -1854,7 +1899,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator11);
 
         btnExit.setFont(Global.lableFont);
-        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_18px.png"))); // NOI18N
         btnExit.setText("Exit - Alt+F4");
         btnExit.setToolTipText("Filter Bar");
         btnExit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);

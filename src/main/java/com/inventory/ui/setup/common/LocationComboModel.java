@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.setup.common;
 
-import com.inventory.model.Location;
+import com.inventory.entity.Location;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;

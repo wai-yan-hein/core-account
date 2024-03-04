@@ -10,8 +10,7 @@ import com.acc.model.DepartmentA;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.common.Util1;
-import com.inventory.model.OptionModel;
+import com.inventory.entity.OptionModel;
 import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -85,7 +84,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listDepartment.forEach(t -> {
-            if (!Util1.isNullOrEmpty(t.getKey().getCompCode())) {
+            if (t.getKey() != null) {
                 listOption.add(t.getKey().getDeptCode());
             }
         });

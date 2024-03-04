@@ -5,7 +5,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.common.Global;
-import com.inventory.model.MillingUsage;
+import com.inventory.entity.MillingUsage;
 import com.inventory.ui.common.MillingOutTableModel;
 import com.inventory.ui.entry.dialog.common.MillingUsageTableModel;
 import com.repo.InventoryRepo;

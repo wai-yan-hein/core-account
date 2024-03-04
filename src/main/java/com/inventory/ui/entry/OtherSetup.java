@@ -70,11 +70,7 @@ public class OtherSetup extends javax.swing.JPanel {
             regionSetup.setSize(Global.width / 2, Global.height / 2);
             regionSetup.setLocationRelativeTo(null);
         }
-        inventoryRepo.getRegion().doOnSuccess((t) -> {
-            regionSetup.setListRegion(t);
-        }).doOnTerminate(() -> {
-            regionSetup.setVisible(true);
-        }).subscribe();
+        regionSetup.search();
 
     }
 

@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.Expense;
+import com.inventory.entity.Expense;
 import com.inventory.ui.common.ExpenseTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

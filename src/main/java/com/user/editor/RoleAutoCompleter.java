@@ -7,7 +7,7 @@ package com.user.editor;
 
 import com.common.Global;
 import com.common.TableCellRender;
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import com.inventory.ui.common.UserRoleTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;

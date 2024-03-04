@@ -6,8 +6,8 @@ package com.inventory.ui.entry.dialog;
 
 import com.common.Global;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.StockInOut;
-import com.inventory.model.Trader;
+import com.inventory.entity.StockInOut;
+import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import javax.swing.JFrame;
 

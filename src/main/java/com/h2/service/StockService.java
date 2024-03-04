@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Stock;
-import com.inventory.model.StockKey;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockKey;
 import java.util.List;
 
 /**

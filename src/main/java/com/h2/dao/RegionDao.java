@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
+import com.inventory.entity.Region;
+import com.inventory.entity.RegionKey;
 import java.util.List;
 
 public interface RegionDao {

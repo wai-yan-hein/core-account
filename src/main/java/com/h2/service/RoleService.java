@@ -4,7 +4,7 @@
  */
 package com.h2.service;
 
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import java.util.List;
 
 /**

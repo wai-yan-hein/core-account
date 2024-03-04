@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 import com.common.Util1;
-import com.inventory.model.AccKey;
-import com.inventory.model.AccSetting;
+import com.inventory.entity.AccKey;
+import com.inventory.entity.AccSetting;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;

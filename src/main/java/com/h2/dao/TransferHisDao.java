@@ -1,8 +1,8 @@
 package com.h2.dao;
 
-import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisKey;
-import com.inventory.model.VTransfer;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.TransferHisKey;
+import com.inventory.entity.VTransfer;
 import java.util.List;
 
 public interface TransferHisDao {

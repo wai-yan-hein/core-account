@@ -1,6 +1,6 @@
 package com.h2.dao;
 
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.VRoleMenu;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;

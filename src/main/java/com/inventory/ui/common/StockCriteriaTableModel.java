@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.StockCriteria;
+import com.inventory.entity.StockCriteria;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

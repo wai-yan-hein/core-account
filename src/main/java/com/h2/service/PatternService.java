@@ -1,7 +1,7 @@
 package com.h2.service;
 
-import com.inventory.model.Pattern;
-import com.inventory.model.PatternKey;
+import com.inventory.entity.Pattern;
+import com.inventory.entity.PatternKey;
 import java.util.List;
 
 public interface PatternService {

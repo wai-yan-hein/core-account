@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -40,6 +41,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @PersistenceContext
+    @Getter
     private EntityManager entityManager;
 
     @Transactional

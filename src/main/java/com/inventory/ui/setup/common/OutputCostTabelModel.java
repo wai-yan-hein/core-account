@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.setup.common;
 
-import com.inventory.model.OutputCost;
+import com.inventory.entity.OutputCost;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

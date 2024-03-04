@@ -49,25 +49,24 @@ public class ShootTriMessageDialog extends javax.swing.JDialog {
     }
 
     private void refresh() {
-        accountRepo.getShootTriMessage().subscribe((m) -> {
-            if (!m.isEmpty()) {
-                List<String> listStr =convertJsonToPlainStringList(m);
-                StringBuilder htmlContent = new StringBuilder("<html><body>");
-                for (String str : listStr) {
-                    htmlContent.append(str);
-                }
-                htmlContent.append("</body></html>");
-                // Set the formatted HTML in the editor pane
-                editor.setText(htmlContent.toString());
-                editor.setEditable(false);
-            }
-        });
+        progress.setIndeterminate(true);
+        StringBuilder htmlContent = new StringBuilder("<html><body>");
+        accountRepo.getShootTriMessage().doOnNext((str) -> {
+            htmlContent.append(str);
+            editor.setText(str);
+        }).doOnTerminate(() -> {
+            editor.setText(htmlContent.toString());
+            editor.setEditable(false);
+            htmlContent.append("</body></html>");
+            progress.setIndeterminate(false);
+        }).subscribe();
     }
 
     public static List<String> convertJsonToPlainStringList(String jsonString) {
 
         // Use TypeToken to handle generic types
-       return Util1.gson.fromJson(jsonString, new TypeToken<List<String>>() {}.getType());   
+        return Util1.gson.fromJson(jsonString, new TypeToken<List<String>>() {
+        }.getType());
     }
 
     @SuppressWarnings("unchecked")
@@ -77,6 +76,7 @@ public class ShootTriMessageDialog extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         editor = new javax.swing.JEditorPane();
         jButton1 = new javax.swing.JButton();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Trouble Shoot Tri Balance");
@@ -99,18 +99,19 @@ public class ShootTriMessageDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(164, 164, 164)
-                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(164, 164, 164))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -131,5 +132,6 @@ public class ShootTriMessageDialog extends javax.swing.JDialog {
     private javax.swing.JEditorPane editor;
     private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JProgressBar progress;
     // End of variables declaration//GEN-END:variables
 }

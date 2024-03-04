@@ -6,8 +6,8 @@
 package com.h2.service;
 
 import com.h2.dao.OrderHisDetailDao;
-import com.inventory.model.OrderDetailKey;
-import com.inventory.model.OrderHisDetail;
+import com.inventory.entity.OrderDetailKey;
+import com.inventory.entity.OrderHisDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

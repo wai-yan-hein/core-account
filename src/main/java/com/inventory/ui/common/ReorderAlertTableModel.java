@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.ReorderLevel;
+import com.inventory.entity.ReorderLevel;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

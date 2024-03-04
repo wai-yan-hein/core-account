@@ -10,7 +10,7 @@ import com.common.Resolution;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Stock;
+import com.inventory.entity.Stock;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockCompleterTableModel;
 import java.awt.Color;

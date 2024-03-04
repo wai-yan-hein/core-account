@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Stock;
-import com.inventory.model.StockKey;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;

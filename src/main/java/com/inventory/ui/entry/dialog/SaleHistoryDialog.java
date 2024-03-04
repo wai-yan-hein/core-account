@@ -10,11 +10,13 @@ import com.MessageDialog;
 import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.BatchAutoCompeter;
 import com.user.editor.DepartmentUserAutoCompleter;
@@ -23,11 +25,11 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.user.model.AppUser;
-import com.inventory.model.GRN;
-import com.inventory.model.SaleMan;
-import com.inventory.model.Stock;
-import com.inventory.model.Trader;
-import com.inventory.model.VSale;
+import com.inventory.entity.GRN;
+import com.inventory.entity.SaleMan;
+import com.inventory.entity.Stock;
+import com.inventory.entity.Trader;
+import com.inventory.entity.VSale;
 import com.inventory.ui.entry.dialog.common.SalePaddySearchTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
@@ -39,6 +41,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +77,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private LocationAutoCompleter locationAutoCompleter;
     private TaskExecutor taskExecutor;
     private int type;
-    private int row =0;
+    private int row = 0;
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
@@ -104,7 +107,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         initProperty();
     }
 
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, UIManager.get(IconUtil.SEARCH_ICON));
+    }
+
     public void initMain() {
+        initClientProperty();
         initCombo();
         initModel();
         initTable();
@@ -196,7 +206,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
-        tblFilter = new StartWithRowFilter(txtFilter);
+        tblFilter = new StartWithRowFilter(txtSearch);
         tblVoucher.setRowSorter(sorter);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
 
@@ -442,10 +452,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtCurrency = new javax.swing.JTextField();
         chkLocal = new javax.swing.JCheckBox();
         btnUpload = new javax.swing.JButton();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         txtPaid = new javax.swing.JFormattedTextField();
         lblTtlAmount1 = new javax.swing.JLabel();
@@ -791,10 +800,10 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
 
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setFont(Global.textFont);
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -817,9 +826,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
             }
         });
         jScrollPane1.setViewportView(tblVoucher);
-
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Search Bar");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -938,9 +944,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter)
+                                .addComponent(txtSearch)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSearch1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -958,8 +962,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(btnSearch1)
                             .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1007,14 +1010,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
     }//GEN-LAST:event_txtRefFocusGained
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(tblFilter);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         // TODO add your handling code here:
@@ -1084,7 +1087,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
@@ -1115,7 +1117,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
@@ -1125,6 +1126,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtSaleMan;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalAmt;

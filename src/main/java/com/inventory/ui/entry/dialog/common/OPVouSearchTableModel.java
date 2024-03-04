@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Util1;
-import com.inventory.model.OPHis;
+import com.inventory.entity.OPHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

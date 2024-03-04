@@ -2,8 +2,8 @@ package com.h2.dao;
 
 import com.common.ReportFilter;
 import com.common.Util1;
-import com.inventory.model.Job;
-import com.inventory.model.JobKey;
+import com.inventory.entity.Job;
+import com.inventory.entity.JobKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import lombok.extern.slf4j.Slf4j;

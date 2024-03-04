@@ -6,7 +6,7 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.inventory.model.PriceOption;
+import com.inventory.entity.PriceOption;
 import com.repo.InventoryRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

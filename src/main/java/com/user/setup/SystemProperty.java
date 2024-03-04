@@ -16,14 +16,16 @@ import com.user.model.RoleProperty;
 import com.user.model.RolePropertyKey;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.MessageType;
-import com.inventory.model.Stock;
+import com.inventory.entity.Location;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.Stock;
 import com.user.model.SysProperty;
-import com.inventory.model.Trader;
+import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.user.dialog.OtherDialog;
@@ -51,6 +53,9 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,6 +71,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private SelectionObserver observer;
     private JProgressBar progress;
     private TextAutoCompleter printerAutoCompleter;
+    private TextAutoCompleter printerPOSCompleter;
     private TraderAutoCompleter cusCompleter;
     private TraderAutoCompleter supCompleter;
     private StockAutoCompleter stockAutoCompleter;
@@ -140,12 +146,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         if (e.getSource() instanceof JCheckBox chk) {
             String key = chk.getName();
             String value = Util1.getString(chk.isSelected());
-            log.info(key);
-            log.info(value);
             save(key, value);
         } else if (e.getSource() instanceof JTextField txt) {
             String key = txt.getName();
-            log.info("textbox : " + key);
             String value = txt.getText();
             save(key, value);
         }
@@ -160,6 +163,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     }
 
+
     private void initKey() {
         txtDep.setName("default.department");
         chkDepFilter.setName("department.filter");
@@ -167,7 +171,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkPriceOption.setName(ProUtil.SALE_PRICE_OPTION);
         txtStock.setName(ProUtil.DEFAULT_STOCK);
         txtCash.setName(ProUtil.DEFAULT_CASH);
-        txtPages.setName("printer.pages");
+        txtPages.setName(ProUtil.PRINTER_PAGE);
+        txtPrinter.setName(ProUtil.PRINTER_NAME);
+        txtPosPrinter.setName(ProUtil.PRINTER_POS_NAME);
         txtInvGroup.setName("inventory.group");
         txtCashGroup.setName(ProUtil.CASH_GROUP);
         txtBankGroup.setName(ProUtil.BANK_GROUP);
@@ -243,10 +249,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private void initMac() {
         if (properyType.equals("Machine")) {
             panelMac.setVisible(true);
-            userRepo.getMacList().subscribe((t) -> {
+            userRepo.getMacList().doOnSuccess((t) -> {
                 macAutoCompleter = new MacAutoCompleter(txtMac, t, null, false);
                 macAutoCompleter.setObserver(this);
-            });
+            }).subscribe();
 
         } else {
             panelMac.setVisible(false);
@@ -332,9 +338,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     }
 
     private void initCombo() {
-        printerAutoCompleter = new TextAutoCompleter(txtPrinter, getPrinter(), null);
+        List<String> listPrinter = getPrinter();
+        printerAutoCompleter = new TextAutoCompleter(txtPrinter, listPrinter, null);
         printerAutoCompleter.setObserver(this);
-        printerAutoCompleter.setText(hmProperty.get("printer.name"));
+        printerAutoCompleter.setText(hmProperty.get(txtPrinter.getName()));
+        printerPOSCompleter = new TextAutoCompleter(txtPosPrinter, listPrinter, null);
+        printerPOSCompleter.setObserver(this);
+        printerPOSCompleter.setText(hmProperty.get(txtPosPrinter.getName()));
         cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         cusCompleter.setObserver(this);
         inventoryRepo.findTrader(hmProperty.get(txtCustomer.getName())).doOnSuccess((t) -> {
@@ -589,6 +599,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private void reportNameDialog() {
         if (reportNameDialog == null) {
             reportNameDialog = new ReportNameDialog(Global.parentForm);
+            reportNameDialog.setSize(Global.width - 200, Global.height - 200);
             reportNameDialog.setObserver(this);
             reportNameDialog.setLocationRelativeTo(null);
         }
@@ -689,6 +700,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDepLock = new javax.swing.JCheckBox();
         chkNoUnit = new javax.swing.JCheckBox();
         chkTraderBalAcc = new javax.swing.JCheckBox();
+        jLabel5 = new javax.swing.JLabel();
+        txtPosPrinter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -976,6 +989,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             }
         });
 
+        jLabel5.setText("POS Printer");
+
+        txtPosPrinter.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -988,12 +1005,14 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtPrinter)
                             .addComponent(txtLogoName)
-                            .addComponent(txtPages)))
+                            .addComponent(txtPages)
+                            .addComponent(txtPosPrinter)))
                     .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1039,6 +1058,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtPrinter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtPosPrinter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel21)
@@ -1882,6 +1905,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
@@ -1931,6 +1955,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtOtherIncome;
     private javax.swing.JTextField txtPages;
     private javax.swing.JTextField txtPlAcc;
+    private javax.swing.JTextField txtPosPrinter;
     private javax.swing.JTextField txtPrinter;
     private javax.swing.JTextField txtPurchase;
     private javax.swing.JTextField txtREAcc;
@@ -1942,9 +1967,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("TEXT")) {
-            String key = "printer.name";
+            String key = txtPrinter.getName();
             String value = printerAutoCompleter.getText();
             save(key, value);
+            String key1 = txtPosPrinter.getName();
+            String value1 = printerPOSCompleter.getText();
+            save1(key1, value1);
         } else if (source.equals("save")) {
             SysProperty p = (SysProperty) selectObj;
             save1(p.getKey().getPropKey(), p.getPropValue());

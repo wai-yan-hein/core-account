@@ -76,6 +76,8 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private SelectionObserver observer;
     private TableFilterHeader filterHeader;
     private JProgressBar progress;
+    private int row = 0;
+    private int column = 0;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -126,7 +128,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void deleteTran() {
-        int row = tblOpening.convertRowIndexToModel(tblOpening.getSelectedRow());
         if (row >= 0) {
             OpeningBalance b = openingTableModel.getOpening(row);
             OpeningKey key = b.getKey();
@@ -282,12 +283,14 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .doOnNext(obj -> calTotal())
                 .doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                }).doOnTerminate(() -> {
-            calOB();
-            openingTableModel.addNewRow();
-            focusOnTable();
-            progress.setIndeterminate(false);
-        }).subscribe();
+                })
+                .doOnTerminate(() -> {
+                    calOB();
+                    openingTableModel.addNewRow();
+                    focusOnTable();
+                    progress.setIndeterminate(false);
+                    ComponentUtil.scrollTable(tblOpening, row, column);
+                }).subscribe();
     }
 
     private void enableForm(boolean status) {
@@ -575,6 +578,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         tblOpening.setGridColor(new java.awt.Color(204, 204, 204));
         tblOpening.setName("tblOpening"); // NOI18N
+        tblOpening.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblOpeningMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblOpening);
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -699,6 +707,12 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
         observeMain();
     }//GEN-LAST:event_formComponentShown
+
+    private void tblOpeningMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblOpeningMouseClicked
+        // TODO add your handling code here:
+        row = tblOpening.getSelectedRow();
+        column = tblOpening.getSelectedColumn();
+    }//GEN-LAST:event_tblOpeningMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
