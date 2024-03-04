@@ -5,8 +5,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.StockInOutDetail;
-import com.inventory.model.StockInOutKey;
+import com.inventory.entity.StockInOutDetail;
+import com.inventory.entity.StockInOutKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

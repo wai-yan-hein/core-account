@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.h2.dao.ProcessHisDetailDao;
-import com.inventory.model.ProcessHisDetail;
-import com.inventory.model.ProcessHisDetailKey;
+import com.inventory.entity.ProcessHisDetail;
+import com.inventory.entity.ProcessHisDetailKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

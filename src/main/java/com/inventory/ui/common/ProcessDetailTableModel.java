@@ -6,10 +6,10 @@
 package com.inventory.ui.common;
 
 import com.common.Util1;
-import com.inventory.model.Location;
-import com.inventory.model.ProcessDetail;
-import com.inventory.model.Stock;
-import com.inventory.model.StockUnit;
+import com.inventory.entity.Location;
+import com.inventory.entity.ProcessDetail;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

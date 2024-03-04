@@ -4,13 +4,16 @@
  */
 package com;
 
+import com.common.Global;
 import com.common.SelectionObserver;
-import com.inventory.model.MessageType;
+import com.common.Util1;
+import com.inventory.entity.MessageType;
 import com.repo.AccountRepo;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,21 +22,16 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SSEListener {
 
-    @Autowired
-    private InventoryRepo inventoryRepo;
-    @Autowired
-    private AccountRepo accountRepo;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private CloudIntegration integration;
+    private final InventoryRepo inventoryRepo;
+    private final AccountRepo accountRepo;
+    private final UserRepo userRepo;
+    private final CloudIntegration integration;
+    private final PrinterIntegration printer;
+    @Setter
     private SelectionObserver observer;
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public void start() {
         startUser();
@@ -42,61 +40,72 @@ public class SSEListener {
     }
 
     private void startInventory() {
-        inventoryRepo.receiveMessage().subscribe((t) -> {
-            String header = t.getHeader();
-            String entity = t.getEntity();
+        inventoryRepo.receiveMessage().subscribe((message) -> {
+            String header = message.getHeader();
+            String entity = message.getEntity();
+            int macId = Util1.getInteger(message.getMacId());
             log.info(header + "-" + entity);
-            switch (header) {
-                case MessageType.DOWNLOAD -> {
-                    switch (entity) {
-                        case MessageType.STOCK ->
-                            integration.downloadStock();
-                        case MessageType.TRADER_INV ->
-                            integration.downloadInvTrader();
-                        case MessageType.CATEGORY ->
-                            integration.downloadCategory();
-                        case MessageType.BRAND ->
-                            integration.downloadBrand();
-                        case MessageType.GROUP ->
-                            integration.downloadStockType();
-                        case MessageType.UNIT ->
-                            integration.downloadUnit();
-                        case MessageType.RELATION ->
-                            integration.downloadRelation();
-                        case MessageType.LOCATION ->
-                            integration.downloadLocation();
-                        case MessageType.REGION ->
-                            integration.downloadRegion();
-                        case MessageType.SALE_MAN ->
-                            integration.downloadSaleMan();
-                        case MessageType.VOU_STATUS ->
-                            integration.downloadVouStatus();
-                        case MessageType.ORDER_STATUS ->
-                            integration.downloadOrderStatus();
-                        case MessageType.PRICE_OPTION ->
-                            integration.downloadPriceOption();
-                        case MessageType.LABOUR_GROUP ->
-                            integration.downloadLabourGroup();
-                        case MessageType.FORMULA ->
-                            integration.downloadStockFormula();
-                        case MessageType.FORMULA_PRICE ->
-                            integration.downloadStockFormulaPrice();
-                        case MessageType.FORMULA_QTY ->
-                            integration.downloadStockFormulaQty();
-                        case MessageType.GRADE_DETAIL ->
-                            integration.downloadGradeDetail();
-                        case MessageType.CRITERIA ->
-                            integration.downloadStockCriteria();
-                        case MessageType.JOB ->
-                            integration.downloadJob();
-                        case MessageType.PATTERN ->
-                            integration.downloadPattern();
+            if (!Util1.isNullOrEmpty(header)) {
+                switch (header) {
+                    case MessageType.DOWNLOAD -> {
+                        switch (entity) {
+                            case MessageType.STOCK ->
+                                integration.downloadStock();
+                            case MessageType.TRADER_INV ->
+                                integration.downloadInvTrader();
+                            case MessageType.CATEGORY ->
+                                integration.downloadCategory();
+                            case MessageType.BRAND ->
+                                integration.downloadBrand();
+                            case MessageType.GROUP ->
+                                integration.downloadStockType();
+                            case MessageType.UNIT ->
+                                integration.downloadUnit();
+                            case MessageType.RELATION ->
+                                integration.downloadRelation();
+                            case MessageType.LOCATION ->
+                                integration.downloadLocation();
+                            case MessageType.REGION ->
+                                integration.downloadRegion();
+                            case MessageType.SALE_MAN ->
+                                integration.downloadSaleMan();
+                            case MessageType.VOU_STATUS ->
+                                integration.downloadVouStatus();
+                            case MessageType.ORDER_STATUS ->
+                                integration.downloadOrderStatus();
+                            case MessageType.PRICE_OPTION ->
+                                integration.downloadPriceOption();
+                            case MessageType.LABOUR_GROUP ->
+                                integration.downloadLabourGroup();
+                            case MessageType.FORMULA ->
+                                integration.downloadStockFormula();
+                            case MessageType.FORMULA_PRICE ->
+                                integration.downloadStockFormulaPrice();
+                            case MessageType.FORMULA_QTY ->
+                                integration.downloadStockFormulaQty();
+                            case MessageType.GRADE_DETAIL ->
+                                integration.downloadGradeDetail();
+                            case MessageType.CRITERIA ->
+                                integration.downloadStockCriteria();
+                            case MessageType.JOB ->
+                                integration.downloadJob();
+                            case MessageType.PATTERN ->
+                                integration.downloadPattern();
+                        }
+                        showMessage(message.getMessage());
                     }
-                    showMessage(t.getMessage());
+                    case MessageType.PRINTER -> {
+                        log.info("request mac id : " + macId);
+                        if (macId == Global.macId) {
+                            log.info("machine matched.");
+                            switch (entity) {
+                                case MessageType.SALE ->
+                                    printer.printSale(message);
+                            }
+                        }
+                    }
                 }
             }
-        }, (e) -> {
-            log.error("startInventory : " + e.getMessage());
         });
     }
 

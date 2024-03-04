@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.SaleMan;
+import com.inventory.entity.SaleMan;
 import com.inventory.ui.common.SaleManCompleterTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

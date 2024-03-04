@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.Job;
+import com.inventory.entity.Job;
 import java.util.List;
 import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataListener;

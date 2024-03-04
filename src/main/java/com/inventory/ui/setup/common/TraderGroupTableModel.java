@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.common;
 
-import com.inventory.model.TraderGroup;
+import com.inventory.entity.TraderGroup;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;

@@ -105,11 +105,13 @@ public class ComponentUtil {
     public static final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            }
+            SwingUtilities.invokeLater(() -> {
+                if (e.getSource() instanceof JTextField txt) {
+                    txt.selectAll();
+                } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                    txt.selectAll();
+                }
+            });
         }
     };
 

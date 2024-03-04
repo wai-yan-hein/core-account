@@ -6,8 +6,8 @@
 package com.h2.service;
 
 import com.h2.dao.PurHisDetailDao;
-import com.inventory.model.PurDetailKey;
-import com.inventory.model.PurHisDetail;
+import com.inventory.entity.PurDetailKey;
+import com.inventory.entity.PurHisDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

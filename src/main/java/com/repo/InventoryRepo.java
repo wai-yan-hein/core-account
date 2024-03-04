@@ -6,142 +6,144 @@ package com.repo;
 
 import com.H2Repo;
 import com.acc.model.VDescription;
-import com.inventory.model.CFont;
+import com.inventory.entity.CFont;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.ReturnObject;
 import com.common.Util1;
-import com.inventory.model.AccSetting;
-import com.inventory.model.Category;
-import com.inventory.model.CategoryKey;
-import com.inventory.model.Expense;
-import com.inventory.model.GRN;
-import com.inventory.model.GRNDetail;
-import com.inventory.model.GRNKey;
-import com.inventory.model.General;
-import com.inventory.model.GradeDetail;
-import com.inventory.model.GradeDetailKey;
-import com.inventory.model.Job;
-import com.inventory.model.JobKey;
-import com.inventory.model.LabourGroup;
-import com.inventory.model.LabourGroupKey;
-import com.inventory.model.LabourPaymentDetail;
-import com.inventory.model.LabourPaymentDto;
-import com.inventory.model.LandingHisPrice;
-import com.inventory.model.LandingHis;
-import com.inventory.model.LandingHisGrade;
-import com.inventory.model.LandingHisKey;
-import com.inventory.model.LandingHisQty;
-import com.inventory.model.Location;
-import com.inventory.model.LocationKey;
-import com.inventory.model.Message;
-import com.inventory.model.MessageType;
-import com.inventory.model.MillingExpense;
-import com.inventory.model.MillingHis;
-import com.inventory.model.MillingHisKey;
-import com.inventory.model.MillingOutDetail;
-import com.inventory.model.MillingRawDetail;
-import com.inventory.model.MillingUsage;
-import com.inventory.model.OPHis;
-import com.inventory.model.OPHisDetail;
-import com.inventory.model.OPHisKey;
-import com.inventory.model.OrderHis;
-import com.inventory.model.OrderHisDetail;
-import com.inventory.model.OrderHisKey;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.OrderStatusKey;
-import com.inventory.model.OutputCost;
-import com.inventory.model.OutputCostKey;
-import com.inventory.model.Pattern;
-import com.inventory.model.PaymentHis;
-import com.inventory.model.PaymentHisDetail;
-import com.inventory.model.PriceOption;
-import com.inventory.model.ProcessHis;
-import com.inventory.model.ProcessHisDetail;
-import com.inventory.model.ProcessHisDetailKey;
-import com.inventory.model.ProcessHisKey;
-import com.inventory.model.PurExpense;
-import com.inventory.model.PurHis;
-import com.inventory.model.PurHisDetail;
-import com.inventory.model.PurHisKey;
-import com.inventory.model.PurOrderHis;
-import com.inventory.model.PurOrderHisDetail;
-import com.inventory.model.PurOrderHisKey;
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
-import com.inventory.model.RelationKey;
-import com.inventory.model.ReorderLevel;
-import com.inventory.model.RetInHis;
-import com.inventory.model.RetInHisDetail;
-import com.inventory.model.RetInHisKey;
-import com.inventory.model.RetOutHis;
-import com.inventory.model.RetOutHisDetail;
-import com.inventory.model.RetOutHisKey;
-import com.inventory.model.SaleExpense;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisDetail;
-import com.inventory.model.SaleHisKey;
-import com.inventory.model.SaleMan;
-import com.inventory.model.SaleManKey;
-import com.inventory.model.SaleOrderJoin;
-import com.inventory.model.Stock;
-import com.inventory.model.StockBrand;
-import com.inventory.model.StockBrandKey;
-import com.inventory.model.StockColor;
-import com.inventory.model.StockCriteria;
-import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaPrice;
-import com.inventory.model.StockFormulaPriceKey;
-import com.inventory.model.StockFormulaKey;
-import com.inventory.model.StockFormulaQty;
-import com.inventory.model.StockIOKey;
-import com.inventory.model.StockInOut;
-import com.inventory.model.StockInOutDetail;
-import com.inventory.model.ConsignHisDetail;
-import com.inventory.model.ConsignHis;
-import com.inventory.model.ConsignHisKey;
-import com.inventory.model.OrderFileJoin;
-import com.inventory.model.OrderNote;
-import com.inventory.model.StockKey;
-import com.inventory.model.StockPayment;
-import com.inventory.model.StockPaymentDetail;
-import com.inventory.model.StockType;
-import com.inventory.model.StockTypeKey;
-import com.inventory.model.StockUnit;
-import com.inventory.model.StockUnitKey;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderGroup;
-import com.inventory.model.TraderGroupKey;
-import com.inventory.model.TraderKey;
-import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisDetail;
-import com.inventory.model.TransferHisKey;
-import com.inventory.model.UnitRelation;
-import com.inventory.model.UnitRelationDetail;
-import com.inventory.model.VLanding;
-import com.inventory.model.VPurchase;
-import com.inventory.model.VOrder;
-import com.inventory.model.VPurOrder;
-import com.inventory.model.VReturnIn;
-import com.inventory.model.VReturnOut;
-import com.inventory.model.VSale;
-import com.inventory.model.VStockIO;
-import com.inventory.model.VConsign;
-import com.inventory.model.VTransfer;
-import com.inventory.model.VouDiscount;
-import com.inventory.model.VouStatus;
-import com.inventory.model.VouStatusKey;
-import com.inventory.model.WareHouse;
-import com.inventory.model.WareHouseKey;
-import com.inventory.model.WeightHis;
-import com.inventory.model.WeightHisDetail;
-import com.inventory.model.WeightHisKey;
-import com.inventory.model.WeightLossDetail;
-import com.inventory.model.WeightLossHis;
-import com.inventory.model.WeightLossHisKey;
+import com.inventory.dto.SaleNote;
+import com.inventory.entity.AccSetting;
+import com.inventory.entity.Category;
+import com.inventory.entity.CategoryKey;
+import com.inventory.entity.Expense;
+import com.inventory.entity.GRN;
+import com.inventory.entity.GRNDetail;
+import com.inventory.entity.GRNKey;
+import com.inventory.entity.General;
+import com.inventory.entity.GradeDetail;
+import com.inventory.entity.GradeDetailKey;
+import com.inventory.entity.Job;
+import com.inventory.entity.JobKey;
+import com.inventory.entity.LabourGroup;
+import com.inventory.entity.LabourGroupKey;
+import com.inventory.entity.LabourPaymentDetail;
+import com.inventory.entity.LabourPaymentDto;
+import com.inventory.entity.LandingHisPrice;
+import com.inventory.entity.LandingHis;
+import com.inventory.entity.LandingHisGrade;
+import com.inventory.entity.LandingHisKey;
+import com.inventory.entity.LandingHisQty;
+import com.inventory.entity.Location;
+import com.inventory.entity.LocationKey;
+import com.inventory.entity.Message;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.MillingExpense;
+import com.inventory.entity.MillingHis;
+import com.inventory.entity.MillingHisKey;
+import com.inventory.entity.MillingOutDetail;
+import com.inventory.entity.MillingRawDetail;
+import com.inventory.entity.MillingUsage;
+import com.inventory.entity.OPHis;
+import com.inventory.entity.OPHisDetail;
+import com.inventory.entity.OPHisKey;
+import com.inventory.entity.OrderHis;
+import com.inventory.entity.OrderHisDetail;
+import com.inventory.entity.OrderHisKey;
+import com.inventory.entity.OrderStatus;
+import com.inventory.entity.OrderStatusKey;
+import com.inventory.entity.OutputCost;
+import com.inventory.entity.OutputCostKey;
+import com.inventory.entity.Pattern;
+import com.inventory.entity.PaymentHis;
+import com.inventory.entity.PaymentHisDetail;
+import com.inventory.entity.PriceOption;
+import com.inventory.entity.ProcessHis;
+import com.inventory.entity.ProcessHisDetail;
+import com.inventory.entity.ProcessHisDetailKey;
+import com.inventory.entity.ProcessHisKey;
+import com.inventory.entity.PurExpense;
+import com.inventory.entity.PurHis;
+import com.inventory.entity.PurHisDetail;
+import com.inventory.entity.PurHisKey;
+import com.inventory.entity.PurOrderHis;
+import com.inventory.entity.PurOrderHisDetail;
+import com.inventory.entity.PurOrderHisKey;
+import com.inventory.entity.Region;
+import com.inventory.entity.RegionKey;
+import com.inventory.entity.RelationKey;
+import com.inventory.entity.ReorderLevel;
+import com.inventory.entity.RetInHis;
+import com.inventory.entity.RetInHisDetail;
+import com.inventory.entity.RetInHisKey;
+import com.inventory.entity.RetOutHis;
+import com.inventory.entity.RetOutHisDetail;
+import com.inventory.entity.RetOutHisKey;
+import com.inventory.entity.SaleExpense;
+import com.inventory.entity.SaleHis;
+import com.inventory.entity.SaleHisDetail;
+import com.inventory.entity.SaleHisKey;
+import com.inventory.entity.SaleMan;
+import com.inventory.entity.SaleManKey;
+import com.inventory.entity.SaleOrderJoin;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockBrand;
+import com.inventory.entity.StockBrandKey;
+import com.inventory.entity.StockColor;
+import com.inventory.entity.StockCriteria;
+import com.inventory.entity.StockFormula;
+import com.inventory.entity.StockFormulaPrice;
+import com.inventory.entity.StockFormulaPriceKey;
+import com.inventory.entity.StockFormulaKey;
+import com.inventory.entity.StockFormulaQty;
+import com.inventory.entity.StockIOKey;
+import com.inventory.entity.StockInOut;
+import com.inventory.entity.StockInOutDetail;
+import com.inventory.entity.ConsignHisDetail;
+import com.inventory.entity.ConsignHis;
+import com.inventory.entity.ConsignHisKey;
+import com.inventory.entity.OrderFileJoin;
+import com.inventory.entity.OrderNote;
+import com.inventory.entity.StockKey;
+import com.inventory.entity.StockPayment;
+import com.inventory.entity.StockPaymentDetail;
+import com.inventory.entity.StockType;
+import com.inventory.entity.StockTypeKey;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.StockUnitKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderGroup;
+import com.inventory.entity.TraderGroupKey;
+import com.inventory.entity.TraderKey;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.TransferHisDetail;
+import com.inventory.entity.TransferHisKey;
+import com.inventory.entity.UnitRelation;
+import com.inventory.entity.UnitRelationDetail;
+import com.inventory.entity.VLanding;
+import com.inventory.entity.VPurchase;
+import com.inventory.entity.VOrder;
+import com.inventory.entity.VPurOrder;
+import com.inventory.entity.VReturnIn;
+import com.inventory.entity.VReturnOut;
+import com.inventory.entity.VSale;
+import com.inventory.entity.VStockIO;
+import com.inventory.entity.VConsign;
+import com.inventory.entity.VTransfer;
+import com.inventory.entity.VouDiscount;
+import com.inventory.entity.VouStatus;
+import com.inventory.entity.VouStatusKey;
+import com.inventory.entity.WareHouse;
+import com.inventory.entity.WareHouseKey;
+import com.inventory.entity.WeightHis;
+import com.inventory.entity.WeightHisDetail;
+import com.inventory.entity.WeightHisKey;
+import com.inventory.entity.WeightLossDetail;
+import com.inventory.entity.WeightLossHis;
+import com.inventory.entity.WeightLossHisKey;
 import com.model.WeightColumn;
 import com.ui.management.model.ClosingBalance;
+import java.time.Duration;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
@@ -151,6 +153,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 /**
  *
@@ -669,11 +672,12 @@ public class InventoryRepo {
     }
 
     public Mono<Region> findRegion(String code) {
+        log.info("region code : " + code);
         if (Util1.isNullOrEmpty(code)) {
             return Mono.empty();
         }
         RegionKey key = new RegionKey();
-        key.setRegCode(Util1.isNull(code, "-"));
+        key.setRegCode(code);
         key.setCompCode(Global.compCode);
         if (localDatabase) {
             return h2Repo.find(key);
@@ -704,6 +708,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<Trader>> getCustomer() {
+        if (localDatabase) {
+            return h2Repo.getCustomer();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getCustomer")
                 .queryParam("compCode", Global.compCode)
@@ -748,6 +755,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<Trader>> getSupplier() {
+        if (localDatabase) {
+            return h2Repo.getSupplier();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getSupplier")
                 .queryParam("compCode", Global.compCode)
@@ -3346,20 +3356,8 @@ public class InventoryRepo {
                 .uri("/retin/saveReturnIn")
                 .body(Mono.just(rh), RetInHis.class)
                 .retrieve()
-                .bodyToMono(RetInHis.class)
-                .onErrorResume((e) -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(rh);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(RetInHis.class);
+
     }
 
     public Mono<RetInHis> uploadRetIn(RetInHis rh) {
@@ -3410,20 +3408,8 @@ public class InventoryRepo {
                 .uri("/sale/saveSale")
                 .body(Mono.just(sh), SaleHis.class)
                 .retrieve()
-                .bodyToMono(SaleHis.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.ERROR_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(sh);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(SaleHis.class);
+
     }
 
     public Mono<OrderNote> save(OrderNote sh) {
@@ -3464,20 +3450,7 @@ public class InventoryRepo {
                 .uri("/transfer/saveTransfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
-                .bodyToMono(TransferHis.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(th);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(TransferHis.class);
     }
 
     public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, Integer deptId, boolean local) {
@@ -3524,20 +3497,7 @@ public class InventoryRepo {
                 .uri("/stockio/saveStockIO")
                 .body(Mono.just(sio), StockInOut.class)
                 .retrieve()
-                .bodyToMono(StockInOut.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(sio);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(StockInOut.class);
     }
 
     public Mono<StockInOut> uploadStockInOut(StockInOut sio) {
@@ -4111,6 +4071,17 @@ public class InventoryRepo {
                 .collectList();
     }
 
+    public Mono<List<SaleNote>> getSaleNote(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/sale/getSaleNote")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(SaleNote.class)
+                .collectList();
+    }
+
     public Mono<List<VouDiscount>> searchDiscountDescription(String str) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/searchDiscountDescription")
@@ -4255,7 +4226,17 @@ public class InventoryRepo {
                 .queryParam("messageId", Global.macId)
                 .build())
                 .retrieve()
-                .bodyToFlux(Message.class);
+                .bodyToFlux(Message.class)
+                .retryWhen(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))
+                        .maxBackoff(Duration.ofDays(1))
+                        .doAfterRetry(retrySignal -> log.error("Inventory Retrying..."))
+                )
+                .onErrorResume(throwable -> {
+                    // Log the error or handle it as needed
+                    log.error("Error receiving messages: " + throwable.getMessage());
+                    // Return an empty Flux or some default value
+                    return Flux.empty();
+                });
     }
 
     public Mono<ReturnObject> getReport(ReportFilter filter) {

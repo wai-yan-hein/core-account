@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.GradeDetail;
-import com.inventory.model.GradeDetailKey;
+import com.inventory.entity.GradeDetail;
+import com.inventory.entity.GradeDetailKey;
 import java.util.List;
 
 public interface GradeDetailDao {

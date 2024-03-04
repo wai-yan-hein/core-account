@@ -11,7 +11,7 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.CFont;
+import com.inventory.entity.CFont;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.FileInputStream;

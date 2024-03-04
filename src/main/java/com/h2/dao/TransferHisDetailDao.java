@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.THDetailKey;
-import com.inventory.model.TransferHisDetail;
+import com.inventory.entity.THDetailKey;
+import com.inventory.entity.TransferHisDetail;
 import java.util.List;
 
 public interface TransferHisDetailDao {

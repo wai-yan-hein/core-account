@@ -7,10 +7,10 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.LandingHisQty;
-import com.inventory.model.LandingHisQtyKey;
-import com.inventory.model.StockCriteria;
-import com.inventory.model.StockUnit;
+import com.inventory.entity.LandingHisQty;
+import com.inventory.entity.LandingHisQtyKey;
+import com.inventory.entity.StockCriteria;
+import com.inventory.entity.StockUnit;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;

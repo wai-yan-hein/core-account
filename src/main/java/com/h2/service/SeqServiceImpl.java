@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.SeqDao;
-import com.inventory.model.SeqKey;
-import com.inventory.model.SeqTable;
+import com.inventory.entity.SeqKey;
+import com.inventory.entity.SeqTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;

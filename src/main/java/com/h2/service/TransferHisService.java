@@ -1,9 +1,9 @@
 package com.h2.service;
 
 import com.common.ReportFilter;
-import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisKey;
-import com.inventory.model.VTransfer;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.TransferHisKey;
+import com.inventory.entity.VTransfer;
 import java.util.List;
 
 public interface TransferHisService {

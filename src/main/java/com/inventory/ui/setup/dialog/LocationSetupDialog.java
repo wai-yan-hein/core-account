@@ -6,23 +6,20 @@
 package com.inventory.ui.setup.dialog;
 
 import com.repo.AccountRepo;
-import com.acc.common.COAComboBoxModel;
-import com.acc.common.DepartmentAccComboBoxModel;
-import com.acc.model.COAKey;
+import com.acc.editor.COAAutoCompleter;
+import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
-import com.acc.model.DepartmentAKey;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.WareHouseAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.LocationKey;
-import com.inventory.model.MessageType;
-import com.inventory.model.WareHouse;
-import com.inventory.model.WareHouseKey;
+import com.inventory.entity.Location;
+import com.inventory.entity.LocationKey;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.WareHouse;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
@@ -38,6 +35,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -50,21 +48,15 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     private int selectRow = - 1;
     private Location location = new Location();
     private final LocationTableModel locationTableModel = new LocationTableModel();
-    private final DepartmentAccComboBoxModel departmentComboBoxModel = new DepartmentAccComboBoxModel();
-    private final COAComboBoxModel cOAComboBoxModel = new COAComboBoxModel();
     private WareHouseAutoCompleter wareHouseAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
+    private COAAutoCompleter coaAutoCompleter;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private AccountRepo accountRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -94,19 +86,19 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void initModel() {
-        cboDepartment.setModel(departmentComboBoxModel);
-        cboCash.setModel(cOAComboBoxModel);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            t.add(new DepartmentA());
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         wareHouseAutoCompleter = new WareHouseAutoCompleter(txtWH, null, false);
         inventoryRepo.getWareHouse().doOnSuccess((t) -> {
             wareHouseAutoCompleter.setListObject(t);
         }).subscribe();
-        accountRepo.getDepartment().doOnSuccess((t) -> {
-            t.add(new DepartmentA());
-            departmentComboBoxModel.setData(t);
-        }).subscribe();
+        coaAutoCompleter = new COAAutoCompleter(txtCoa, null, false);
         accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP)).doOnSuccess((t) -> {
             t.add(new ChartOfAccount());
-            cOAComboBoxModel.setData(t);
+            coaAutoCompleter.setListCOA(t);
         }).subscribe();
 
     }
@@ -165,27 +157,15 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void setCash(String cashAcc) {
-        if (!Util1.isNullOrEmpty(cashAcc)) {
-            accountRepo.findCOA(cashAcc).doOnSuccess((t) -> {
-                cOAComboBoxModel.setSelectedItem(t);
-                cboCash.repaint();
-            }).subscribe();
-        } else {
-            cOAComboBoxModel.setSelectedItem(null);
-            cboCash.repaint();
-        }
+        accountRepo.findCOA(cashAcc).doOnSuccess((t) -> {
+            coaAutoCompleter.setCoa(t);
+        }).subscribe();
     }
 
     private void setDepartment(String deptCode) {
-        if (!Util1.isNullOrEmpty(deptCode)) {
-            accountRepo.findDepartment(deptCode).doOnSuccess((t) -> {
-                departmentComboBoxModel.setSelectedItem(t);
-                cboDepartment.repaint();
-            }).subscribe();
-        } else {
-            departmentComboBoxModel.setSelectedItem(null);
-            cboDepartment.repaint();
-        }
+        accountRepo.findDepartment(deptCode).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
     }
 
     private void save() {
@@ -215,10 +195,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         txtFilter.setText(null);
         txtName.setText(null);
         chkActive.setSelected(true);
-        departmentComboBoxModel.setSelectedItem(null);
-        cboDepartment.repaint();
-        cOAComboBoxModel.setSelectedItem(null);
-        cboCash.repaint();
+        departmentAutoCompleter.setDepartment(null);
+        coaAutoCompleter.setCoa(null);
         wareHouseAutoCompleter.setObject(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
@@ -234,21 +212,21 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
         } else {
-            if (cboDepartment.getSelectedItem() instanceof DepartmentA d) {
-                DepartmentAKey key = d.getKey();
-                location.setDeptCode(key == null ? null : key.getDeptCode());
+            DepartmentA d = departmentAutoCompleter.getDepartment();
+            if (d != null) {
+                location.setDeptCode(d.getKey() == null ? null : d.getKey().getDeptCode());
             }
-            if (cboCash.getSelectedItem() instanceof ChartOfAccount coa) {
-                COAKey key = coa.getKey();
-                location.setCashAcc(key == null ? null : key.getCoaCode());
+            ChartOfAccount coa = coaAutoCompleter.getCOA();
+            if (coa != null) {
+                location.setCashAcc(coa.getKey() == null ? null : coa.getKey().getCoaCode());
             }
+
             WareHouse w = wareHouseAutoCompleter.getObject();
             if (w != null) {
-                WareHouseKey key = w.getKey();
-                location.setWareHouseCode(key == null ? null : key.getCode());
+                location.setWareHouseCode(w.getKey() == null ? null : w.getKey().getCode());
                 location.setWareHouseName(w.getDescription());
-
             }
+
             location.setUserCode(txtUserCode.getText());
             location.setLocName(txtName.getText());
             location.setDeptId(Global.deptId);
@@ -293,14 +271,14 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        cboDepartment = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
-        cboCash = new javax.swing.JComboBox<>();
         jSeparator1 = new javax.swing.JSeparator();
         btnSave1 = new javax.swing.JButton();
         chkActive = new javax.swing.JCheckBox();
         jLabel6 = new javax.swing.JLabel();
         txtWH = new javax.swing.JTextField();
+        txtDep = new javax.swing.JTextField();
+        txtCoa = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Location Setup");
@@ -389,12 +367,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Department");
 
-        cboDepartment.setFont(Global.textFont);
-
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Cash");
-
-        cboCash.setFont(Global.textFont);
 
         btnSave1.setBackground(Global.selectionColor);
         btnSave1.setFont(Global.lableFont);
@@ -427,6 +401,32 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtName"); // NOI18N
+        txtDep.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDepFocusGained(evt);
+            }
+        });
+        txtDep.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtDepActionPerformed(evt);
+            }
+        });
+
+        txtCoa.setFont(Global.textFont);
+        txtCoa.setName("txtName"); // NOI18N
+        txtCoa.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtCoaFocusGained(evt);
+            }
+        });
+        txtCoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCoaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -454,10 +454,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnClear))
                             .addComponent(txtUserCode)
-                            .addComponent(cboDepartment, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cboCash, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtWH))))
+                            .addComponent(txtWH)
+                            .addComponent(txtDep)
+                            .addComponent(txtCoa))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -478,14 +478,14 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(cboDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(6, 6, 6)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(txtCoa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(chkActive)
@@ -495,7 +495,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(btnSave)
                             .addComponent(btnSave1)))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(202, Short.MAX_VALUE))
+                .addContainerGap(199, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -581,6 +581,22 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         // TODO add your handling code here:
     }//GEN-LAST:event_txtWHActionPerformed
 
+    private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepFocusGained
+
+    private void txtDepActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDepActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepActionPerformed
+
+    private void txtCoaFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCoaFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCoaFocusGained
+
+    private void txtCoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCoaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCoaActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -589,8 +605,6 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSave1;
-    private javax.swing.JComboBox<ChartOfAccount> cboCash;
-    private javax.swing.JComboBox<DepartmentA> cboDepartment;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -602,6 +616,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblLocation;
+    private javax.swing.JTextField txtCoa;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtUserCode;

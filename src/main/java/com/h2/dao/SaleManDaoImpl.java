@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.SaleMan;
-import com.inventory.model.SaleManKey;
+import com.inventory.entity.SaleMan;
+import com.inventory.entity.SaleManKey;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;

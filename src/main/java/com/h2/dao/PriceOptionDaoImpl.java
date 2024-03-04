@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.PriceOption;
-import com.inventory.model.PriceOptionKey;
+import com.inventory.entity.PriceOption;
+import com.inventory.entity.PriceOptionKey;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;

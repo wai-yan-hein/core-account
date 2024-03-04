@@ -5,29 +5,34 @@
  */
 package com.user.dialog;
 
+import com.acc.editor.COAAutoCompleter;
+import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
+import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
+import com.repo.AccountRepo;
 import com.user.common.DepartmentTableModel;
 import com.repo.UserRepo;
 import com.user.model.DepartmentKey;
 import com.user.model.DepartmentUser;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -40,15 +45,12 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
     private int selectRow = -1;
     private DepartmentUser department = new DepartmentUser();
     private final DepartmentTableModel departmentTableModel = new DepartmentTableModel();
+    private DepartmentAutoCompleter departmentAutoCompleter;
+    private COAAutoCompleter coaAutoCompleter;
+    @Setter
     private UserRepo userRepo;
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    @Setter
+    private AccountRepo accountRepo;
 
     /**
      * Creates new form CurrencySetup
@@ -64,40 +66,40 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
 
     public void initMain() {
         initTable();
+        initCompleter();
         searchDepartment();
     }
 
-    private void initFocusAdapter() {
-        txtCode.addFocusListener(fa);
-        txtName.addFocusListener(fa);
-        txtPhone.addFocusListener(fa);
-        txtAddress.addFocusListener(fa);
-        txtEmail.addFocusListener(fa);
+    private void initCompleter() {
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            t.add(new DepartmentA());
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        coaAutoCompleter = new COAAutoCompleter(txtCoa, null, false);
+        accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP)).doOnSuccess((t) -> {
+            t.add(new ChartOfAccount());
+            coaAutoCompleter.setListCOA(t);
+        }).subscribe();
     }
-    private FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            Object obj = e.getSource();
-            if (obj instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (obj instanceof JFormattedTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
+
+    private void initFocusAdapter() {
+        ComponentUtil.addFocusListener(this);
+    }
 
     private void searchDepartment() {
-        userRepo.getDeparment(false).subscribe((t) -> {
+        progress.setIndeterminate(true);
+        userRepo.getDeparment(false).doOnSuccess((t) -> {
             departmentTableModel.setListDepartment(t);
+        }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
             txtCode.requestFocus();
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
     }
 
     private void initTable() {
         tblDep.setModel(departmentTableModel);
-        tblDep.getTableHeader().setFont(Global.textFont);
+        tblDep.getTableHeader().setFont(Global.tblHeaderFont);
         tblDep.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblDep.getColumnModel().getColumn(0).setPreferredWidth(20);// Code
         tblDep.getColumnModel().getColumn(1).setPreferredWidth(100);// Name
@@ -121,19 +123,20 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            userRepo.saveDepartment(department).subscribe((t) -> {
+            userRepo.saveDepartment(department).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("NEW")) {
                     departmentTableModel.addDepartment(t);
                 } else {
                     departmentTableModel.setDepartment(selectRow, t);
                 }
-                clear();
-                sendMessage(t.getDeptName());
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).doOnTerminate(() -> {
+                sendMessage(department.getDeptName());
+                clear();
+            }).subscribe();
         }
     }
 
@@ -146,6 +149,8 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
 
     private void setDepartment(DepartmentUser d) {
         this.department = d;
+        setDepartment(d.getDeptCode());
+        setCash(d.getCashAcc());
         txtCode.setText(d.getUserCode());
         txtName.setText(d.getDeptName());
         txtPhone.setText(d.getPhoneNo());
@@ -162,6 +167,8 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         txtPhone.setText(null);
         txtEmail.setText(null);
         txtAddress.setText(null);
+        departmentAutoCompleter.setDepartment(null);
+        coaAutoCompleter.setCoa(null);
         chkActive.setSelected(Boolean.TRUE);
         lblStatus.setText("NEW");
         progress.setIndeterminate(false);
@@ -195,6 +202,14 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                 key.setCompCode(Global.compCode);
                 department.setKey(key);
             }
+            DepartmentA d = departmentAutoCompleter.getDepartment();
+            if (d != null) {
+                department.setDeptCode(d.getKey() == null ? null : d.getKey().getDeptCode());
+            }
+            ChartOfAccount coa = coaAutoCompleter.getCOA();
+            if (coa != null) {
+                department.setCashAcc(coa.getKey() == null ? null : coa.getKey().getCoaCode());
+            }
             department.setUserCode(code);
             department.setDeptName(name);
             department.setActive(chkActive.isSelected());
@@ -204,6 +219,18 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
             department.setUpdatedDate(LocalDateTime.now());
         }
         return true;
+    }
+
+    private void setCash(String cashAcc) {
+        accountRepo.findCOA(cashAcc).doOnSuccess((t) -> {
+            coaAutoCompleter.setCoa(t);
+        }).subscribe();
+    }
+
+    private void setDepartment(String deptCode) {
+        accountRepo.findDepartment(deptCode).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
     }
 
     private void export() {
@@ -238,6 +265,10 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         jLabel6 = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
         btnSave1 = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtCoa = new javax.swing.JTextField();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -331,6 +362,18 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Dep");
+
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtCurrSymbol"); // NOI18N
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Cash");
+
+        txtCoa.setFont(Global.textFont);
+        txtCoa.setName("txtCurrSymbol"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -353,14 +396,18 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtAddress)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(chkActive)
-                                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtCoa, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -399,6 +446,14 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtCoa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(chkActive))
                 .addGap(8, 8, 8)
@@ -408,7 +463,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(btnSave1))
-                .addContainerGap(176, Short.MAX_VALUE))
+                .addContainerGap(120, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -420,7 +475,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 363, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -469,6 +524,8 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
@@ -476,7 +533,9 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblDep;
     private javax.swing.JTextField txtAddress;
+    private javax.swing.JTextField txtCoa;
     private javax.swing.JTextField txtCode;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtPhone;

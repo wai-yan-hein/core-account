@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.VouStatus;
-import com.inventory.model.VouStatusKey;
+import com.inventory.entity.VouStatus;
+import com.inventory.entity.VouStatusKey;
 import java.util.List;
 
 /**

@@ -5,8 +5,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.RetOutHis;
-import com.inventory.model.RetOutHisKey;
+import com.inventory.entity.RetOutHis;
+import com.inventory.entity.RetOutHisKey;
 import java.util.List;
 
 /**

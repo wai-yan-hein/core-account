@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.SeqKey;
-import com.inventory.model.SeqTable;
+import com.inventory.entity.SeqKey;
+import com.inventory.entity.SeqTable;
 
 /**
  *

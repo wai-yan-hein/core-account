@@ -7,8 +7,8 @@ package com.h2.service;
 
 import com.common.Util1;
 import com.h2.dao.OutputCostDao;
-import com.inventory.model.OutputCost;
-import com.inventory.model.OutputCostKey;
+import com.inventory.entity.OutputCost;
+import com.inventory.entity.OutputCostKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.WeightLossDetail;
-import com.inventory.model.WeightLossDetailKey;
+import com.inventory.entity.WeightLossDetail;
+import com.inventory.entity.WeightLossDetailKey;
 import java.util.List;
 
 public interface WeightLossHisDetailDao {

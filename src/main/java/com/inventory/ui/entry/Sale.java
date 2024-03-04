@@ -32,19 +32,19 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.GRN;
-import com.inventory.model.Location;
-import com.inventory.model.OrderHis;
-import com.inventory.model.SaleExpense;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisDetail;
-import com.inventory.model.SaleHisKey;
-import com.inventory.model.SaleMan;
-import com.inventory.model.Trader;
-import com.inventory.model.TransferHis;
-import com.inventory.model.VOrder;
-import com.inventory.model.VSale;
-import com.inventory.model.VTransfer;
+import com.inventory.entity.GRN;
+import com.inventory.entity.Location;
+import com.inventory.entity.OrderHis;
+import com.inventory.entity.SaleExpense;
+import com.inventory.entity.SaleHis;
+import com.inventory.entity.SaleHisDetail;
+import com.inventory.entity.SaleHisKey;
+import com.inventory.entity.SaleMan;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.VOrder;
+import com.inventory.entity.VSale;
+import com.inventory.entity.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockInfoPanel;
@@ -99,6 +99,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -591,17 +592,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setListOrder(getOrderList());
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            if (print) {
-                observer.selected("print", false);
-                if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                    String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
-                    String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                    balance = accountRepo.getTraderBalance(date, traderCode, saleHis.getCurCode(), Global.compCode);
-                    if (balance != 0) {
-                        prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                    }
-                }
-            }
             inventoryRepo.save(saleHis).doOnSuccess((t) -> {
                 if (print) {
                     printVoucher(t);
@@ -609,11 +599,16 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     clear(true);
                 }
             }).doOnError((e) -> {
+                progress.setIndeterminate(false);
                 observeMain();
-                JOptionPane.showMessageDialog(this, e.getMessage());
-                progress.setIndeterminate(false);
-            }).doOnTerminate(() -> {
-                progress.setIndeterminate(false);
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveSale(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).subscribe();
         }
     }
@@ -993,7 +988,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 Map<String, Object> hm = getDefaultParam(sh);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, hm, ds);
                 if (chkVou.isSelected()) {
-                    JasperReportUtil.print(jp);
+                    String printerName = ProUtil.getProperty("printer.name");
+                    int count = Util1.getIntegerOne(ProUtil.getProperty("printer.pages"));
+                    JasperReportUtil.print(jp, printerName, count, 4);
                 } else {
                     JasperViewer.viewReport(jp, false);
                 }

@@ -1,6 +1,6 @@
 package com.common;
 
-import com.inventory.model.MillingOutDetail;
+import com.inventory.entity.MillingOutDetail;
 import com.inventory.ui.common.MillingOutTableModel;
 import javax.swing.*;
 import java.awt.datatransfer.*;

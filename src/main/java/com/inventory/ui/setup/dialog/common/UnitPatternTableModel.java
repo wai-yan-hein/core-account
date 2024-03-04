@@ -7,7 +7,7 @@ package com.inventory.ui.setup.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.UnitPattern;
+import com.inventory.entity.UnitPattern;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

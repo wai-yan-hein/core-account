@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.VouStatusDao;
-import com.inventory.model.VouStatus;
-import com.inventory.model.VouStatusKey;
+import com.inventory.entity.VouStatus;
+import com.inventory.entity.VouStatusKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

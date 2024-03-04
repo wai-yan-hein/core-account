@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.OrderStatusKey;
+import com.inventory.entity.OrderStatus;
+import com.inventory.entity.OrderStatusKey;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

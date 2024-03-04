@@ -19,7 +19,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
-import com.inventory.model.StockUnit;
+import com.inventory.entity.StockUnit;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;

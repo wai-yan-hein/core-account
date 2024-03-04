@@ -1,6 +1,6 @@
 package com.h2.dao;
 
-import com.inventory.model.PurExpense;
+import com.inventory.entity.PurExpense;
 import java.util.List;
 
 public interface PurExpenseDao {

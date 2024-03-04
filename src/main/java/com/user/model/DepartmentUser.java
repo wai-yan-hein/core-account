@@ -44,6 +44,10 @@ public class DepartmentUser {
     private boolean active;
     @Column(name = "deleted")
     private boolean deleted;
+    @Column(name = "dept_code")
+    private String deptCode;
+    @Column(name = "cash_acc")
+    private String cashAcc;
 
     @Override
     public String toString() {

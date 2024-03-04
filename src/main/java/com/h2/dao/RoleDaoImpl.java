@@ -5,7 +5,7 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;

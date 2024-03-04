@@ -9,7 +9,7 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.LabourPaymentDetail;
+import com.inventory.entity.LabourPaymentDetail;
 import com.repo.AccountRepo;
 import java.util.ArrayList;
 import java.util.HashMap;

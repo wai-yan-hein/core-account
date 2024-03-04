@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.OrderStatusDao;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.OrderStatusKey;
+import com.inventory.entity.OrderStatus;
+import com.inventory.entity.OrderStatusKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

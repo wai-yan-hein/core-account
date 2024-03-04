@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Util1;
-import com.inventory.model.VSale;
+import com.inventory.entity.VSale;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -85,9 +85,6 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
                         }
                     }
                     case 2 -> {
-                        if (!Util1.isNullOrEmpty(his.getTraderCode())) {
-                            return String.format("%s - %s", his.getTraderCode(), his.getTraderName());
-                        }
                         //customer
                         return his.getTraderName();
                     }

@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import com.user.common.CurrencyComboBoxModel;
 import com.repo.UserRepo;
 import com.user.model.Currency;

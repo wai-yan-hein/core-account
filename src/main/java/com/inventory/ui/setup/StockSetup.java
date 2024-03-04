@@ -22,15 +22,15 @@ import com.inventory.editor.StockFormulaCompleter;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.UnitAutoCompleter;
 import com.inventory.editor.UnitRelationAutoCompleter;
-import com.inventory.model.Category;
-import com.inventory.model.MessageType;
-import com.inventory.model.Stock;
-import com.inventory.model.StockBrand;
-import com.inventory.model.StockFormula;
-import com.inventory.model.StockKey;
-import com.inventory.model.StockType;
-import com.inventory.model.StockUnit;
-import com.inventory.model.UnitRelation;
+import com.inventory.entity.Category;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockBrand;
+import com.inventory.entity.StockFormula;
+import com.inventory.entity.StockKey;
+import com.inventory.entity.StockType;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.UnitRelation;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.StockTableModel;
 import com.inventory.ui.setup.dialog.CategorySetupDialog;
@@ -150,6 +150,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initComponents();
         initKeyListener();
         panelUnit.setVisible(!noUnit);
+    }
+    private void initClientProperty(){
+        //txtFilter.putClientProperty(ui, ui);
     }
 
     public void initMain() {

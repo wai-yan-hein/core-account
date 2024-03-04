@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.h2.dao.WeightLossHisDetailDao;
-import com.inventory.model.WeightLossDetail;
-import com.inventory.model.WeightLossDetailKey;
+import com.inventory.entity.WeightLossDetail;
+import com.inventory.entity.WeightLossDetailKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

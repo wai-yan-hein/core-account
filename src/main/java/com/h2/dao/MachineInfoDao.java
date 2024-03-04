@@ -15,9 +15,11 @@ public interface MachineInfoDao {
 
     MachineInfo save(MachineInfo mInfo);
 
+    MachineInfo find(Integer macId);
+
     String getMaxDate();
-    
+
     MachineInfo getMachineInfo(String machineName);
-    
+
     List<MachineInfo> findAll();
 }

@@ -5,8 +5,9 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderKey;
+import jakarta.persistence.Query;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -49,7 +50,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
 
     @Override
     public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
-       str = Util1.cleanStr(str);
+        str = Util1.cleanStr(str);
         str = str + "%";
         String filter = """
                 where active = true
@@ -64,9 +65,9 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
         String sql = """
                      select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days,account
                      from trader
-                     """ + filter + "\n" +
-                "order by user_code,trader_name\n" +
-                "limit 100\n";
+                     """ + filter + "\n"
+                + "order by user_code,trader_name\n"
+                + "limit 100\n";
         ResultSet rs = getResult(sql, compCode, deptId, deptId, str, str);
         List<Trader> list = new ArrayList<>();
         try {
@@ -93,6 +94,21 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
             log.error(e.getMessage());
         }
         return list;
+    }
+
+    @Override
+    public List<Trader> getTrader(String compCode, String type) {
+        String hsql = """
+                    select o
+                    from Trader o
+                    where o.key.compCode =:compCode
+                    and o.type =:type
+                    order by o.userCode
+                    """;
+        Query query = getEntityManager().createQuery(hsql);
+        query.setParameter("compCode", compCode);
+        query.setParameter("type", type);
+        return query.getResultList();
     }
 
 }

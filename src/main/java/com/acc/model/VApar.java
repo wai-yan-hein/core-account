@@ -25,4 +25,5 @@ public class VApar {
     private String traderName;
     private double drAmt;
     private double crAmt;
+    private String regCode;
 }

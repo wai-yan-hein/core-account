@@ -5,8 +5,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.PurDetailKey;
-import com.inventory.model.PurHisDetail;
+import com.inventory.entity.PurDetailKey;
+import com.inventory.entity.PurHisDetail;
 import java.util.List;
 
 /**

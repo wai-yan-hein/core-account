@@ -4,7 +4,7 @@
  */
 package com.user.common;
 
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import com.repo.UserRepo;
 import com.user.model.PrivilegeCompany;
 import java.util.ArrayList;

@@ -51,7 +51,7 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
                 and (LOWER(REPLACE(user_code, ' ', '')) LIKE ? OR LOWER(REPLACE(trader_name, ' ', '')) LIKE ?)
                 """;
         String sql = """
-                     SELECT code AS trader_code, user_code, trader_name, account_code, discriminator
+                     SELECT code AS trader_code, user_code, trader_name, account_code, discriminator,address
                      FROM trader_acc
                      """
                 + filter + "\n"
@@ -71,6 +71,7 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
                     t.setTraderName(rs.getString("trader_name"));
                     t.setAccount(rs.getString("account_code"));
                     t.setTraderType(rs.getString("discriminator"));
+                    t.setAddress(rs.getString("address"));
                     list.add(t);
                 }
             }

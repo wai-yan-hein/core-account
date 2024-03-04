@@ -1,7 +1,10 @@
 package com;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.ui.LoginDialog;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
@@ -188,30 +191,48 @@ public class CoreAccountApplication {
     }
 
     private static void applayTheme() {
-        try {
-            log.info("theme start.");
-            System.setProperty("flatlaf.useWindowDecorations", "true");
-            System.setProperty("flatlaf.menuBarEmbedded", "true");
-            System.setProperty("flatlaf.animation", "true");
-            System.setProperty("flatlaf.uiScale.enabled", "true");
-            Util1.DARK_MODE = isDarkModeEnabled();
-            UIManager.setLookAndFeel(Util1.DARK_MODE ? new FlatMacDarkLaf() : new FlatMacLightLaf());
-            Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
-            UIManager.put("TableHeader.background", Global.selectionColor);
-            UIManager.put("Table.selectionBackground", Global.selectionColor);
-            UIManager.put("Button.arc", 20);
-            UIManager.put("Table.arc", 20);
-            UIManager.put("Component.arc", 20);
-            UIManager.put("ProgressBar.arc", 20);
-            UIManager.put("CheckBox.arc", 20);
-            UIManager.put("TextComponent.arc", 20);
-            UIManager.put("TabbedPane.showTabSeparators", true);
-            UIManager.put("TableHeader.foreground", Color.WHITE);
-            UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
-            log.info("theme end.");
-        } catch (UnsupportedLookAndFeelException ex) {
-            log.error("Failed to initialize LaF");
+        log.info("theme start.");
+        System.setProperty("flatlaf.useWindowDecorations", "true");
+        System.setProperty("flatlaf.menuBarEmbedded", "true");
+        System.setProperty("flatlaf.animation", "true");
+        System.setProperty("flatlaf.uiScale.enabled", "true");
+        FlatLaf.registerCustomDefaultsSource("com.theme");
+        Util1.DARK_MODE = isDarkModeEnabled();
+        if (Util1.DARK_MODE) {
+            FlatMacDarkLaf.setup();
+        } else {
+            FlatMacLightLaf.setup();
         }
+        initUIManager();
+        initIcon();
+        initDateChooser();
+        log.info("theme end.");
+    }
+
+    public static void initUIManager() {
+        Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
+        UIManager.put("TableHeader.background", Global.selectionColor);
+        UIManager.put("Table.selectionBackground", Global.selectionColor);
+        UIManager.put("Button.arc", 20);
+        UIManager.put("Table.arc", 20);
+        UIManager.put("Component.arc", 20);
+        UIManager.put("ProgressBar.arc", 20);
+        UIManager.put("CheckBox.arc", 20);
+        UIManager.put("TextComponent.arc", 20);
+        UIManager.put("TabbedPane.showTabSeparators", true);
+        UIManager.put("TableHeader.foreground", Color.WHITE);
+        UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
+    }
+
+    private static void initIcon() {
+        FlatSVGIcon i = new FlatSVGIcon("svg/search.svg");
+
+        UIManager.put(IconUtil.SEARCH_ICON, i);
+    }
+
+    private static void initDateChooser() {
+        UIManager.put("JDateChooser.foreground", Color.RED);
+
     }
 
     private static boolean isDarkModeEnabled() {

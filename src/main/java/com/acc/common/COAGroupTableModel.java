@@ -10,7 +10,7 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.MessageType;
+import com.inventory.entity.MessageType;
 import java.awt.HeadlessException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -6,7 +6,7 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.inventory.model.VouDiscount;
+import com.inventory.entity.VouDiscount;
 import com.repo.InventoryRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

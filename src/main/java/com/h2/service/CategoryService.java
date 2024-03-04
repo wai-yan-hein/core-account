@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Category;
-import com.inventory.model.CategoryKey;
+import com.inventory.entity.Category;
+import com.inventory.entity.CategoryKey;
 import java.util.List;
 
 /**

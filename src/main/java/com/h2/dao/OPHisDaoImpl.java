@@ -1,8 +1,8 @@
 package com.h2.dao;
 
-import com.inventory.model.LocationKey;
-import com.inventory.model.OPHis;
-import com.inventory.model.OPHisKey;
+import com.inventory.entity.LocationKey;
+import com.inventory.entity.OPHis;
+import com.inventory.entity.OPHisKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

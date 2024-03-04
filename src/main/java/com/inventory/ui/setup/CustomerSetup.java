@@ -18,13 +18,13 @@ import com.common.Util1;
 import com.inventory.editor.CountryAutoCompleter;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.TraderGroupAutoCompleter;
-import com.inventory.model.Country;
-import com.inventory.model.General;
-import com.inventory.model.MessageType;
-import com.inventory.model.Region;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderGroup;
-import com.inventory.model.TraderKey;
+import com.inventory.entity.Country;
+import com.inventory.entity.General;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.Region;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderGroup;
+import com.inventory.entity.TraderKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.CustomerTabelModel;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
@@ -79,6 +79,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+    private RegionSetup regionSetup;
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
@@ -95,7 +96,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
 
     enum Header {
         UserCode,
@@ -161,21 +161,21 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void initCombo() {
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, false);
-        inventoryRepo.getRegion().subscribe((t) -> {
+        inventoryRepo.getRegion().doOnSuccess((t) -> {
             regionAutoCompleter.setListRegion(t);
-        });
+        }).subscribe();
         countryAutoCompleter = new CountryAutoCompleter(txtCountry, null, false);
-        userRepo.getCountry().subscribe((t) -> {
+        userRepo.getCountry().doOnSuccess((t) -> {
             countryAutoCompleter.setListCountry(t);
-        });
-        inventoryRepo.getTraderGroup().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getTraderGroup().doOnSuccess((t) -> {
             traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, t, null, false);
             traderGroupAutoCompleter.setGroup(null);
-        });
+        }).subscribe();
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
-        accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).subscribe((t) -> {
+        accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).doOnSuccess((t) -> {
             cOAAutoCompleter.setListCOA(t);
-        });
+        }).subscribe();
         assignDefault();
     }
 
@@ -187,7 +187,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void initTable() {
         tblCustomer.setModel(customerTabelModel);
-        tblCustomer.getTableHeader().setFont(Global.textFont);
+        tblCustomer.getTableHeader().setFont(Global.tblHeaderFont);
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(60);// Code
         tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(300);// Name
@@ -229,21 +229,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtPrice.setText(customer.getPriceType());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        inventoryRepo.findRegion(customer.getRegCode()).subscribe((t) -> {
+        inventoryRepo.findRegion(customer.getRegCode()).doOnSuccess((t) -> {
             regionAutoCompleter.setRegion(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
-        userRepo.findCountry(customer.getCountryCode()).subscribe((t) -> {
+        }).subscribe();
+        userRepo.findCountry(customer.getCountryCode()).doOnSuccess((t) -> {
             countryAutoCompleter.setCountry(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
-        inventoryRepo.findTraderGroup(customer.getGroupCode(), Global.deptId).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findTraderGroup(customer.getGroupCode(), Global.deptId).doOnSuccess((t) -> {
             traderGroupAutoCompleter.setGroup(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
         accountRepo.findCOA(customer.getAccount()).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
         }).subscribe();
@@ -401,6 +395,18 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         observer.selected("history", false);
         observer.selected("delete", true);
         observer.selected("refresh", true);
+    }
+
+    private void regionSetup() {
+        if (regionSetup == null) {
+            regionSetup = new RegionSetup(Global.parentForm);
+            regionSetup.setInventoryRepo(inventoryRepo);
+            regionSetup.initMain();
+            regionSetup.setSize(Global.width / 2, Global.height / 2);
+            regionSetup.setLocationRelativeTo(null);
+        }
+        regionSetup.search();
+        regionAutoCompleter.setListRegion(regionSetup.getListRegion());
     }
 
     /**
@@ -961,15 +967,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        inventoryRepo.getRegion().subscribe((t) -> {
-            RegionSetup regionSetup = new RegionSetup(Global.parentForm);
-            regionSetup.setListRegion(t);
-            regionSetup.setInventoryRepo(inventoryRepo);
-            regionSetup.initMain();
-            regionSetup.setSize(Global.width / 2, Global.height / 2);
-            regionSetup.setLocationRelativeTo(null);
-            regionSetup.setVisible(true);
-        });
+        regionSetup();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtCusAddressKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCusAddressKeyReleased

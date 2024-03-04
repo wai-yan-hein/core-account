@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.common.ReportFilter;
-import com.inventory.model.ProcessHis;
-import com.inventory.model.ProcessHisKey;
+import com.inventory.entity.ProcessHis;
+import com.inventory.entity.ProcessHisKey;
 import java.util.List;
 
 public interface ProcessHisService {

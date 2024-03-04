@@ -1,8 +1,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaKey;
+import com.inventory.entity.StockFormula;
+import com.inventory.entity.StockFormulaKey;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;

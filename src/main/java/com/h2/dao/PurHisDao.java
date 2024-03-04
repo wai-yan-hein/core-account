@@ -4,8 +4,8 @@
  * and open the template in the editor.
  */
 package com.h2.dao;
-import com.inventory.model.PurHis;
-import com.inventory.model.PurHisKey;
+import com.inventory.entity.PurHis;
+import com.inventory.entity.PurHisKey;
 import java.util.List;
 
 /**

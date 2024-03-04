@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.PriceOptionDao;
-import com.inventory.model.PriceOption;
-import com.inventory.model.PriceOptionKey;
+import com.inventory.entity.PriceOption;
+import com.inventory.entity.PriceOptionKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

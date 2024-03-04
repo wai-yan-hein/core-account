@@ -1,9 +1,9 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisKey;
-import com.inventory.model.VTransfer;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.TransferHisKey;
+import com.inventory.entity.VTransfer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

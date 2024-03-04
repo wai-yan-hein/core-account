@@ -11,15 +11,15 @@ import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.RoleProperty;
-import com.inventory.model.AppRole;
-import com.inventory.model.Country;
-import com.inventory.model.Language;
+import com.inventory.entity.AppRole;
+import com.inventory.entity.Country;
+import com.inventory.entity.Language;
 import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
 import com.user.model.MachineInfo;
-import com.inventory.model.Message;
-import com.inventory.model.MessageType;
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.Message;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.VRoleMenu;
 import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
 import com.user.model.Currency;
@@ -37,6 +37,7 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.CompanyInfo;
 import com.user.model.YearEnd;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 /**
  *
@@ -272,6 +274,24 @@ public class UserRepo {
                 .bodyToMono(Currency.class)
                 .onErrorResume((e) -> {
                     log.error("findCurrency :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+     public Mono<MachineInfo> findMachine(Integer macId) {
+        if (Util1.isNullOrEmpty(macId)) {
+            return Mono.empty();
+        }
+        if (localdatabase) {
+            return h2Repo.findMachine(macId);
+        }
+        return userApi.get()
+                .uri(builder -> builder.path("/user/findMachine")
+                .queryParam("macId", macId)
+                .build())
+                .retrieve()
+                .bodyToMono(MachineInfo.class)
+                .onErrorResume((e) -> {
+                    log.error("findMachine :" + e.getMessage());
                     return Mono.empty();
                 });
     }
@@ -1136,7 +1156,16 @@ public class UserRepo {
                 .queryParam("messageId", Global.macId)
                 .build())
                 .retrieve()
-                .bodyToFlux(Message.class);
+                .bodyToFlux(Message.class)
+                .retryWhen(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))
+                        .maxBackoff(Duration.ofDays(1))
+                        .doAfterRetry(retrySignal -> log.error("User Retrying...")))
+                .onErrorResume(throwable -> {
+                    // Log the error or handle it as needed
+                    log.error("Error receiving messages: " + throwable.getMessage());
+                    // Return an empty Flux or some default value
+                    return Flux.empty();
+                });
     }
 
     public Mono<List<Currency>> getCurrency(String homeCur, String exCur) {

@@ -6,7 +6,7 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.common.Util1;
-import com.inventory.model.SaleMan;
+import com.inventory.entity.SaleMan;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

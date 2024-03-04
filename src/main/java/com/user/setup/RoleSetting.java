@@ -11,7 +11,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.UserRoleTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;

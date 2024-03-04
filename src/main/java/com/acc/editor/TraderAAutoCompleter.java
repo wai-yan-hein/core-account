@@ -90,7 +90,7 @@ public final class TraderAAutoCompleter implements KeyListener {
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
-
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);//Name
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -103,7 +103,7 @@ public final class TraderAAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(500, 200);
+        popup.setPopupSize(600, 300);
 
         popup.add(scroll);
 
@@ -220,11 +220,11 @@ public final class TraderAAutoCompleter implements KeyListener {
 
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
+                 // Calculate the preferred x and y positions for the popup
                     if (x == 0) {
                         x = textComp.getWidth();
-                        y = textComp.getHeight();
+                        y = -200;
                     }
-
                     popup.show(textComp, x, y);
                     popupOpen = false;
 

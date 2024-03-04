@@ -5,8 +5,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.StockCriteria;
-import com.inventory.model.StockCriteriaKey;
+import com.inventory.entity.StockCriteria;
+import com.inventory.entity.StockCriteriaKey;
 import java.util.List;
 
 /**

@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.Stock;
+import com.inventory.entity.Stock;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;

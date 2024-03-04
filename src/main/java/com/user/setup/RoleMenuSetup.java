@@ -7,7 +7,7 @@ package com.user.setup;
 
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.inventory.model.VRoleMenu;
+import com.inventory.entity.VRoleMenu;
 import com.inventory.tree.MyAbstractTreeTableModel;
 import com.inventory.tree.MyDataModel;
 import com.inventory.tree.MyTreeTable;

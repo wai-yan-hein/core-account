@@ -7,8 +7,8 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.StockPaymentDetail;
-import com.inventory.model.StockPaymentDetailKey;
+import com.inventory.entity.StockPaymentDetail;
+import com.inventory.entity.StockPaymentDetailKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;

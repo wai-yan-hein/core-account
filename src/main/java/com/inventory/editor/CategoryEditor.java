@@ -6,7 +6,7 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.inventory.model.Category;
+import com.inventory.entity.Category;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;

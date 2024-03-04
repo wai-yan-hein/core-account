@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.TraderGroup;
+import com.inventory.entity.TraderGroup;
 import com.inventory.ui.setup.common.TraderGroupTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

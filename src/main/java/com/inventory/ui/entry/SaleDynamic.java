@@ -30,17 +30,17 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.SaleDetailKey;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisDetail;
-import com.inventory.model.SaleHisKey;
-import com.inventory.model.SaleMan;
-import com.inventory.model.StockUnit;
-import com.inventory.model.Trader;
-import com.inventory.model.TransferHis;
-import com.inventory.model.VSale;
-import com.inventory.model.VTransfer;
+import com.inventory.entity.Location;
+import com.inventory.entity.SaleDetailKey;
+import com.inventory.entity.SaleHis;
+import com.inventory.entity.SaleHisDetail;
+import com.inventory.entity.SaleHisKey;
+import com.inventory.entity.SaleMan;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.VSale;
+import com.inventory.entity.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByWeightTableModel;
 import com.inventory.ui.common.SaleExportTableModel;
@@ -49,11 +49,14 @@ import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.model.WeightHis;
+import com.inventory.entity.WeightHis;
 import com.inventory.ui.common.SaleByBatchTableModel;
 import com.inventory.ui.common.SalePaddyTableModel;
+import com.inventory.ui.common.SaleQtyTableModel;
 import com.inventory.ui.common.SaleRiceTableModel;
 import com.inventory.ui.entry.dialog.AccountOptionDialog;
+import com.inventory.ui.entry.dialog.PaymentDialog;
+import com.inventory.ui.entry.dialog.SaleNoteDialog;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.inventory.ui.entry.dialog.VouDiscountDialog;
 import com.inventory.ui.entry.dialog.WeightHistoryDialog;
@@ -93,6 +96,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -107,11 +111,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     public static final int RICE = 3;
     public static final int PADDY = 4;
     public static final int BATCH = 5;
-    private final SaleByWeightTableModel saleTableModel = new SaleByWeightTableModel();
+    public static final int QTY = 6;
+    private final SaleByWeightTableModel saleWeightTableModel = new SaleByWeightTableModel();
     private final SaleExportTableModel saleExportTableModel = new SaleExportTableModel();
     private final SaleRiceTableModel saleRiceTableModel = new SaleRiceTableModel();
     private final SalePaddyTableModel salePaddyTableModel = new SalePaddyTableModel();
     private final SaleByBatchTableModel saleByBatchTableModel = new SaleByBatchTableModel();
+    private final SaleQtyTableModel saleQtyTableModel = new SaleQtyTableModel();
     private SaleHistoryDialog dialog;
     @Setter
     private InventoryRepo inventoryRepo;
@@ -126,7 +132,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private LocationAutoCompleter locationAutoCompleter;
     @Setter
     private SelectionObserver observer;
-    private SaleHis saleHis = new SaleHis();
+    private SaleHis sh = new SaleHis();
     @Setter
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
@@ -138,9 +144,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     @Setter
     private StockBalanceFrame stockBalanceDialog;
     private VouDiscountDialog vouDiscountDialog;
+    private SaleNoteDialog saleNoteDialog;
     private AccountOptionDialog optionDialog;
     private WeightHistoryDialog weightHistoryDialog;
     private ContractDialog contractDialog;
+    private PaymentDialog paymentDialog;
 
     /**
      * Creates new form SaleEntry1
@@ -192,8 +200,24 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         initModel();
         initRowHeader();
         assignDefaultValue();
+        initExternal();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
+    }
+
+    private void initExternal() {
+        btnDiscount.setVisible(false);
+        btnNote.setVisible(false);
+        btnWeight.setVisible(false);
+        btnTransfer.setVisible(true);
+        switch (type) {
+            case PADDY -> {
+                btnWeight.setVisible(true);
+            }
+            case QTY -> {
+                btnNote.setVisible(true);
+            }
+        }
     }
 
     private void initRowHeader() {
@@ -218,7 +242,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private SaleHisDetail getSaleHisDetail(int row) {
         switch (type) {
             case WEIGHT -> {
-                return saleTableModel.getSale(row);
+                return saleWeightTableModel.getSale(row);
             }
             case EXPORT -> {
                 return saleExportTableModel.getSale(row);
@@ -231,6 +255,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case BATCH -> {
                 return saleByBatchTableModel.getObject(row);
+            }
+            case QTY -> {
+                return saleQtyTableModel.getObject(row);
             }
         }
         return null;
@@ -253,19 +280,22 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case BATCH -> {
                 initBatchTable();
             }
+            case QTY -> {
+                initQtyTable();
+            }
         }
     }
 
     private void initWeight() {
-        tblSale.setModel(saleTableModel);
-        saleTableModel.setLblRecord(lblRec);
-        saleTableModel.setParent(tblSale);
-        saleTableModel.setSale(this);
-        saleTableModel.addNewRow();
-        saleTableModel.setObserver(this);
-        saleTableModel.setVouDate(txtSaleDate);
-        saleTableModel.setInventoryRepo(inventoryRepo);
-        saleTableModel.setDialog(stockBalanceDialog);
+        tblSale.setModel(saleWeightTableModel);
+        saleWeightTableModel.setLblRecord(lblRec);
+        saleWeightTableModel.setParent(tblSale);
+        saleWeightTableModel.setSale(this);
+        saleWeightTableModel.addNewRow();
+        saleWeightTableModel.setObserver(this);
+        saleWeightTableModel.setVouDate(txtSaleDate);
+        saleWeightTableModel.setInventoryRepo(inventoryRepo);
+        saleWeightTableModel.setDialog(stockBalanceDialog);
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
@@ -403,6 +433,32 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
     }
 
+    private void initQtyTable() {
+        tblSale.setModel(saleQtyTableModel);
+        saleQtyTableModel.setLblRecord(lblRec);
+        saleQtyTableModel.setParent(tblSale);
+        saleQtyTableModel.setSale(this);
+        saleQtyTableModel.addNewRow();
+        saleQtyTableModel.setObserver(this);
+        saleQtyTableModel.setVouDate(txtSaleDate);
+        saleQtyTableModel.setInventoryRepo(inventoryRepo);
+        tblSale.getTableHeader().setFont(Global.tblHeaderFont);
+        tblSale.setCellSelectionEnabled(true);
+        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//code
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(300);//name
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(50);//qty
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(20);//unit
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(100);//price
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(120);//amount
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));//
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//qty
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            tblSale.getColumnModel().getColumn(3).setCellEditor(new StockUnitEditor(t));
+        }).subscribe();
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//
+    }
+
     private void initTable() {
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
@@ -467,12 +523,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtVouTaxP.setValue(0);
         txtVouDiscP.setValue(0);
         txtGrandTotal.setValue(0);
-        txtOut.setValue(0);
     }
 
     private void initTextBoxFormat() {
         ComponentUtil.setTextProperty(this);
-        txtOut.setForeground(Color.green);
     }
 
     private void assignDefaultValue() {
@@ -511,8 +565,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private void clearList() {
         switch (type) {
             case WEIGHT -> {
-                saleTableModel.removeListDetail();
-                saleTableModel.clearDelList();
+                saleWeightTableModel.removeListDetail();
+                saleWeightTableModel.clearDelList();
             }
             case EXPORT -> {
                 saleExportTableModel.removeListDetail();
@@ -530,13 +584,17 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleByBatchTableModel.removeListDetail();
                 saleByBatchTableModel.clearDelList();
             }
+            case QTY -> {
+                saleQtyTableModel.removeListDetail();;
+                saleQtyTableModel.clearDelList();
+            }
         }
     }
 
     private void addNewRow() {
         switch (type) {
             case WEIGHT -> {
-                saleTableModel.addNewRow();
+                saleWeightTableModel.addNewRow();
             }
             case EXPORT -> {
                 saleExportTableModel.addNewRow();
@@ -550,6 +608,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case BATCH -> {
                 saleByBatchTableModel.addNewRow();
             }
+            case QTY -> {
+                saleQtyTableModel.addNewRow();
+            }
         }
     }
 
@@ -558,9 +619,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         clearList();
         addNewRow();
         clearDiscount();
+        clearNote();
         initTextBoxValue();
         assignDefaultValue();
-        saleHis = new SaleHis();
+        sh = new SaleHis();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
@@ -580,10 +642,16 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
+    private void clearNote() {
+        if (saleNoteDialog != null) {
+            saleNoteDialog.clear();
+        }
+    }
+
     private boolean isValidDetail() {
         switch (type) {
             case WEIGHT -> {
-                return saleTableModel.isValidEntry();
+                return saleWeightTableModel.isValidEntry();
             }
             case EXPORT -> {
                 return saleExportTableModel.isValidEntry();
@@ -596,6 +664,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case BATCH -> {
                 return saleByBatchTableModel.isValidEntry();
+            }
+            case QTY -> {
+                return saleQtyTableModel.isValidEntry();
             }
         }
         return false;
@@ -610,9 +681,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            saleHis.setListSH(getListDetail());
-            saleHis.setListDel(getListDel());
-            inventoryRepo.save(saleHis).doOnSuccess((t) -> {
+            sh.setListSH(getListDetail());
+            sh.setListDel(getListDel());
+            inventoryRepo.save(sh).doOnSuccess((t) -> {
                 if (print) {
                     if (!Util1.isNullOrEmpty(t.getWeightVouNo())) {
                         printWeightVoucher(t);
@@ -623,9 +694,16 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     clear(true);
                 }
             }).doOnError((e) -> {
-                observer.selected("save", true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveSale(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).subscribe();
         }
     }
@@ -685,6 +763,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
         param.put("p_paid_text", NumberConverter.convertToWords((int) p.getPaid()));
         param.put("p_payment_type", getPaymentType(p));
+        param.put("p_opening", sh.getOpening());
+        param.put("p_total_balance", sh.getTotalBalance());
+        param.put("p_total_payment", sh.getTotalPayment());
+        param.put("p_closing", sh.getOutstanding());
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(p.getReference(), t.getTraderName()));
@@ -737,50 +819,52 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             status = false;
             txtSaleDate.requestFocus();
         } else {
-            saleHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
+            sh.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();
             if (sm != null) {
-                saleHis.setSaleManCode(sm.getKey().getSaleManCode());
+                sh.setSaleManCode(sm.getKey().getSaleManCode());
             }
             String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-            saleHis.setRemark(txtRemark.getText());
-            saleHis.setReference(txtReference.getText());
-            saleHis.setDiscP(Util1.getDouble(txtVouDiscP.getValue()));
-            saleHis.setDiscount(Util1.getDouble(txtVouDiscount.getValue()));
-            saleHis.setTaxPercent(Util1.getDouble(txtVouTaxP.getValue()));
-            saleHis.setTaxAmt(Util1.getDouble(txtTax.getValue()));
-            saleHis.setPaid(Util1.getDouble(txtVouPaid.getValue()));
-            saleHis.setBalance(Util1.getDouble(txtVouBalance.getValue()));
-            saleHis.setOutstanding(Util1.getDouble(txtOut.getValue()));
-            saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
-            saleHis.setDeleted(saleHis.isDeleted());
-            saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            saleHis.setTraderCode(traderCode);
-            saleHis.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
-            saleHis.setGrandTotal(Util1.getDouble(txtGrandTotal.getValue()));
-            saleHis.setStatus(lblStatus.getText());
-            saleHis.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
-            saleHis.setMacId(Global.macId);
-            saleHis.setCarNo(txtCarNo.getText());
-            saleHis.setSPay(rdoPay.isSelected());
-            saleHis.setTranSource(type);
+            sh.setRemark(txtRemark.getText());
+            sh.setReference(txtReference.getText());
+            sh.setDiscP(Util1.getDouble(txtVouDiscP.getValue()));
+            sh.setDiscount(Util1.getDouble(txtVouDiscount.getValue()));
+            sh.setTaxPercent(Util1.getDouble(txtVouTaxP.getValue()));
+            sh.setTaxAmt(Util1.getDouble(txtTax.getValue()));
+            sh.setPaid(Util1.getDouble(txtVouPaid.getValue()));
+            sh.setBalance(Util1.getDouble(txtVouBalance.getValue()));
+            sh.setCurCode(currAutoCompleter.getCurrency().getCurCode());
+            sh.setDeleted(sh.isDeleted());
+            sh.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+            sh.setTraderCode(traderCode);
+            sh.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
+            sh.setGrandTotal(Util1.getDouble(txtGrandTotal.getValue()));
+            sh.setStatus(lblStatus.getText());
+            sh.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
+            sh.setMacId(Global.macId);
+            sh.setCarNo(txtCarNo.getText());
+            sh.setSPay(rdoPay.isSelected());
+            sh.setTranSource(type);
             Project p = projectAutoCompleter.getProject();
-            saleHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
+            sh.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             if (vouDiscountDialog != null) {
-                saleHis.setListVouDiscount(vouDiscountDialog.getListDetail());
-                saleHis.setListDelVouDiscount(vouDiscountDialog.getListDel());
+                sh.setListVouDiscount(vouDiscountDialog.getListDetail());
+                sh.setListDelVouDiscount(vouDiscountDialog.getListDel());
+            }
+            if (saleNoteDialog != null) {
+                sh.setListSaleNote(saleNoteDialog.getListDetail());
             }
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
                 key.setVouNo(null);
-                saleHis.setKey(key);
-                saleHis.setDeptId(Global.deptId);
-                saleHis.setCreatedDate(LocalDateTime.now());
-                saleHis.setCreatedBy(Global.loginUser.getUserCode());
-                saleHis.setSession(Global.sessionId);
+                sh.setKey(key);
+                sh.setDeptId(Global.deptId);
+                sh.setCreatedDate(LocalDateTime.now());
+                sh.setCreatedBy(Global.loginUser.getUserCode());
+                sh.setSession(Global.sessionId);
             } else {
-                saleHis.setUpdatedBy(Global.loginUser.getUserCode());
+                sh.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;
@@ -793,7 +877,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis).doOnSuccess((t) -> {
+                    inventoryRepo.delete(sh).doOnSuccess((t) -> {
                         clear(true);
                     }).subscribe();
                 }
@@ -802,8 +886,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
-                    saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis).doOnSuccess((t) -> {
+                    sh.setDeleted(false);
+                    inventoryRepo.restore(sh).doOnSuccess((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
@@ -834,7 +918,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private void deleteDetail(int row) {
         switch (type) {
             case WEIGHT ->
-                saleTableModel.delete(row);
+                saleWeightTableModel.delete(row);
             case EXPORT ->
                 saleExportTableModel.delete(row);
             case RICE ->
@@ -843,13 +927,15 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 salePaddyTableModel.delete(row);
             case BATCH ->
                 saleByBatchTableModel.delete(row);
+            case QTY ->
+                saleQtyTableModel.delete(row);
         }
     }
 
     private void addSale(SaleHisDetail sd) {
         switch (type) {
             case WEIGHT ->
-                saleTableModel.addSale(sd);
+                saleWeightTableModel.addSale(sd);
             case EXPORT ->
                 saleExportTableModel.addSale(sd);
             case RICE ->
@@ -858,13 +944,15 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 salePaddyTableModel.addSale(sd);
             case BATCH ->
                 saleByBatchTableModel.addSale(sd);
+            case QTY ->
+                saleQtyTableModel.addSale(sd);
         }
     }
 
     private List<SaleHisDetail> getListDetail() {
         switch (type) {
             case WEIGHT -> {
-                return saleTableModel.getListDetail();
+                return saleWeightTableModel.getListDetail();
             }
             case EXPORT -> {
                 return saleExportTableModel.getListDetail();
@@ -878,6 +966,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case BATCH -> {
                 return saleByBatchTableModel.getListDetail();
             }
+            case QTY -> {
+                return saleQtyTableModel.getListDetail();
+            }
             default ->
                 throw new AssertionError();
         }
@@ -886,7 +977,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private List<SaleDetailKey> getListDel() {
         switch (type) {
             case WEIGHT -> {
-                return saleTableModel.getDelList();
+                return saleWeightTableModel.getDelList();
             }
             case EXPORT -> {
                 return saleExportTableModel.getDelList();
@@ -899,6 +990,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case BATCH -> {
                 saleByBatchTableModel.getDelList();
+            }
+            case QTY -> {
+                saleQtyTableModel.getDelList();
             }
         }
         return null;
@@ -968,7 +1062,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
-            saleHis = sh;
+            this.sh = sh;
             setHeader(sh);
             setDetail(sh);
         }
@@ -976,7 +1070,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     private void setDetail(SaleHis sh) {
         String vouNo = sh.getKey().getVouNo();
-        inventoryRepo.getSaleDetail(vouNo, saleHis.getDeptId(), saleHis.isLocal()).doOnSuccess((t) -> {
+        inventoryRepo.getSaleDetail(vouNo, sh.getDeptId(), sh.isLocal()).doOnSuccess((t) -> {
             setListDetail(t);
         }).doOnError((e) -> {
             progress.setIndeterminate(false);
@@ -988,6 +1082,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void setHeader(SaleHis sh) {
+        sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
         if (sh.isVouLock()) {
             lblStatus.setText("Voucher is locked.");
             lblStatus.setForeground(Color.RED);
@@ -1007,7 +1102,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             lblStatus.setForeground(Color.RED);
             disableForm(false);
             observer.selected("delete", true);
-        } else if (DateLockUtil.isLockDate(saleHis.getVouDate())) {
+        } else if (DateLockUtil.isLockDate(sh.getVouDate())) {
             lblStatus.setText(DateLockUtil.MESSAGE);
             lblStatus.setForeground(Color.RED);
             disableForm(false);
@@ -1016,46 +1111,44 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             lblStatus.setForeground(Color.blue);
             disableForm(true);
         }
-        txtVouNo.setText(saleHis.getKey().getVouNo());
-        txtDueDate.setDate(Util1.convertToDate(saleHis.getCreditTerm()));
-        txtRemark.setText(saleHis.getRemark());
-        txtReference.setText(saleHis.getReference());
-        txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));
-        txtVouTotal.setValue(Util1.getDouble(saleHis.getVouTotal()));
-        txtVouDiscP.setValue(Util1.getDouble(saleHis.getDiscP()));
-        txtVouDiscount.setValue(Util1.getDouble(saleHis.getDiscount()));
-        txtVouTaxP.setValue(Util1.getDouble(saleHis.getTaxPercent()));
-        txtTax.setValue(Util1.getDouble(saleHis.getTaxAmt()));
-        txtVouPaid.setValue(Util1.getDouble(saleHis.getPaid()));
-        txtVouBalance.setValue(Util1.getDouble(saleHis.getBalance()));
-        txtGrandTotal.setValue(Util1.getDouble(saleHis.getGrandTotal()));
-        txtOut.setValue(Util1.getDouble(saleHis.getOutstanding()));
-        txtCarNo.setText(saleHis.getCarNo());
-        chkPaid.setSelected(saleHis.getPaid() > 0);
-        rdoPay.setSelected(saleHis.isSPay());
-        inventoryRepo.findLocation(saleHis.getLocCode()).doOnSuccess((t) -> {
+        txtVouNo.setText(sh.getKey().getVouNo());
+        txtDueDate.setDate(Util1.convertToDate(sh.getCreditTerm()));
+        txtRemark.setText(sh.getRemark());
+        txtReference.setText(sh.getReference());
+        txtSaleDate.setDate(Util1.convertToDate(sh.getVouDate()));
+        txtVouTotal.setValue(Util1.getDouble(sh.getVouTotal()));
+        txtVouDiscP.setValue(Util1.getDouble(sh.getDiscP()));
+        txtVouDiscount.setValue(Util1.getDouble(sh.getDiscount()));
+        txtVouTaxP.setValue(Util1.getDouble(sh.getTaxPercent()));
+        txtTax.setValue(Util1.getDouble(sh.getTaxAmt()));
+        txtVouPaid.setValue(Util1.getDouble(sh.getPaid()));
+        txtVouBalance.setValue(Util1.getDouble(sh.getBalance()));
+        txtGrandTotal.setValue(Util1.getDouble(sh.getGrandTotal()));
+        txtCarNo.setText(sh.getCarNo());
+        chkPaid.setSelected(sh.getPaid() > 0);
+        rdoPay.setSelected(sh.isSPay());
+        inventoryRepo.findLocation(sh.getLocCode()).doOnSuccess((t) -> {
             locationAutoCompleter.setLocation(t);
         }).subscribe();
-        inventoryRepo.findTrader(saleHis.getTraderCode()).doOnSuccess((t) -> {
+        inventoryRepo.findTrader(sh.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
-        userRepo.findCurrency(saleHis.getCurCode()).doOnSuccess((t) -> {
+        userRepo.findCurrency(sh.getCurCode()).doOnSuccess((t) -> {
             currAutoCompleter.setCurrency(t);
         }).subscribe();
-        inventoryRepo.findSaleMan(saleHis.getSaleManCode()).doOnSuccess((t) -> {
+        inventoryRepo.findSaleMan(sh.getSaleManCode()).doOnSuccess((t) -> {
             saleManCompleter.setSaleMan(t);
         }).subscribe();
         userRepo.find(new ProjectKey(sh.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
             projectAutoCompleter.setProject(t);
         }).subscribe();
-        sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
     }
 
     private void setListDetail(List<SaleHisDetail> list) {
         switch (type) {
             case WEIGHT -> {
-                saleTableModel.setListDetail(list);
-                saleTableModel.addNewRow();
+                saleWeightTableModel.setListDetail(list);
+                saleWeightTableModel.addNewRow();
             }
             case EXPORT -> {
                 saleExportTableModel.setListDetail(list);
@@ -1072,6 +1165,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case BATCH -> {
                 saleByBatchTableModel.setListDetail(list);
                 saleByBatchTableModel.addNewRow();
+            }
+            case QTY -> {
+                saleQtyTableModel.setListDetail(list);
+                saleQtyTableModel.addNewRow();
             }
         }
     }
@@ -1127,7 +1224,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
                 if (print) {
-                    JasperReportUtil.print(jp);
+                    String printerName = ProUtil.getProperty(ProUtil.PRINTER_NAME);
+                    int count = Util1.getIntegerOne(ProUtil.getProperty(ProUtil.PRINTER_PAGE));
+                    JasperReportUtil.print(jp, printerName, count, 4);
                 } else {
                     JasperViewer.viewReport(jp, false);
                 }
@@ -1233,6 +1332,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private void discountDialog() {
         if (vouDiscountDialog == null) {
             vouDiscountDialog = new VouDiscountDialog(Global.parentForm);
+            vouDiscountDialog.setSize(Global.width / 3, Global.height / 3);
             vouDiscountDialog.setLocationRelativeTo(null);
             vouDiscountDialog.setObserver(this);
             vouDiscountDialog.setInventoryRepo(inventoryRepo);
@@ -1240,6 +1340,25 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }
         String vouNo = txtVouNo.getText();
         vouDiscountDialog.search(vouNo);
+    }
+
+    private void saleNoteDialog() {
+        if (saleNoteDialog == null) {
+            saleNoteDialog = new SaleNoteDialog(Global.parentForm);
+            saleNoteDialog.setSize(Global.width - 300, Global.height - 300);
+            saleNoteDialog.setLocationRelativeTo(null);
+            saleNoteDialog.setInventoryRepo(inventoryRepo);
+            saleNoteDialog.initMain();
+        }
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            sh.setVouDateStr(Util1.toDateStr(txtSaleDate.getDate(), Global.dateFormat));
+            sh.setTrader(t);
+            sh.setListSH(getListDetail());
+            saleNoteDialog.search(sh);
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Customer.");
+        }
     }
 
     private void optionDialog() {
@@ -1251,10 +1370,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 optionDialog.setAccountRepo(accountRepo);
                 optionDialog.initMain();
             }
-            optionDialog.setObject(saleHis, trader);
+            optionDialog.setObject(sh, trader);
             optionDialog.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Select Trader.");
+            txtCus.requestFocus();
         }
     }
 
@@ -1274,7 +1394,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     private void setWeightVoucher(WeightHis s) {
         clearList();
-        saleHis.setWeightVouNo(s.getKey().getVouNo());
+        sh.setWeightVouNo(s.getKey().getVouNo());
         inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
@@ -1304,16 +1424,15 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         contractDialog.search();
     }
 
-    private void calTraderBalance() {
-        Trader trader = traderAutoCompleter.getTrader();
-        if (trader != null) {
-            if (ProUtil.isTraderBalAcc()) {
-                //future
-            } else {
-                inventoryRepo.getTraderBalanceSummary(trader.getKey().getCode(), "C").doOnSuccess((t) -> {
-                    txtOut.setValue(t == null ? 0 : t.getAmount());
-                }).subscribe();
+    private void paymentDialog() {
+        if (isValidEntry()) {
+            if (paymentDialog == null) {
+                paymentDialog = new PaymentDialog(Global.parentForm);
+                paymentDialog.setSize(Global.width / 3, Global.height / 2);
+                paymentDialog.setLocationRelativeTo(null);
+                paymentDialog.setAccountRepo(accountRepo);
             }
+            paymentDialog.setData(sh, lblStatus.getText().equals("NEW"));
         }
     }
 
@@ -1359,9 +1478,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         chkVou = new javax.swing.JCheckBox();
         chkA4 = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
-        btnBatch1 = new javax.swing.JButton();
-        btnBatch2 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnTransfer = new javax.swing.JButton();
+        btnWeight = new javax.swing.JButton();
+        btnDiscount = new javax.swing.JButton();
+        btnNote = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
@@ -1383,11 +1503,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtGrandTotal = new javax.swing.JFormattedTextField();
         jSeparator2 = new javax.swing.JSeparator();
         chkPaid = new javax.swing.JCheckBox();
-        jLabel10 = new javax.swing.JLabel();
-        txtOut = new javax.swing.JFormattedTextField();
         deskPane = new javax.swing.JDesktopPane();
         scroll = new javax.swing.JScrollPane();
         tblSale = new javax.swing.JTable();
+        btnPayment = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1588,7 +1707,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCus)
-                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
+                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
                     .addComponent(txtVouNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -1597,10 +1716,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
+                    .addComponent(txtRemark)
                     .addComponent(txtSaleman)
                     .addGroup(panelSaleLayout.createSequentialGroup()
-                        .addComponent(txtLocation)
+                        .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(rdoPay, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1610,7 +1729,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
                     .addComponent(txtCurrency)
                     .addComponent(txtReference))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1618,11 +1737,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(carNoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtCarNo, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE))
+                        .addComponent(txtCarNo))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(carNoLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtProjectNo)
+                        .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton2))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelSaleLayout.createSequentialGroup()
@@ -1734,33 +1853,43 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         lblRec.setFont(Global.lableFont);
         lblRec.setText("Records");
 
-        btnBatch1.setBackground(Global.selectionColor);
-        btnBatch1.setFont(Global.lableFont);
-        btnBatch1.setForeground(new java.awt.Color(255, 255, 255));
-        btnBatch1.setText("Transfer");
-        btnBatch1.addActionListener(new java.awt.event.ActionListener() {
+        btnTransfer.setBackground(Global.selectionColor);
+        btnTransfer.setFont(Global.lableFont);
+        btnTransfer.setForeground(new java.awt.Color(255, 255, 255));
+        btnTransfer.setText("Transfer");
+        btnTransfer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBatch1ActionPerformed(evt);
+                btnTransferActionPerformed(evt);
             }
         });
 
-        btnBatch2.setBackground(Global.selectionColor);
-        btnBatch2.setFont(Global.lableFont);
-        btnBatch2.setForeground(new java.awt.Color(255, 255, 255));
-        btnBatch2.setText("Weight");
-        btnBatch2.addActionListener(new java.awt.event.ActionListener() {
+        btnWeight.setBackground(Global.selectionColor);
+        btnWeight.setFont(Global.lableFont);
+        btnWeight.setForeground(new java.awt.Color(255, 255, 255));
+        btnWeight.setText("Weight");
+        btnWeight.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBatch2ActionPerformed(evt);
+                btnWeightActionPerformed(evt);
             }
         });
 
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Discount");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnDiscount.setBackground(Global.selectionColor);
+        btnDiscount.setFont(Global.lableFont);
+        btnDiscount.setForeground(new java.awt.Color(255, 255, 255));
+        btnDiscount.setText("Discount");
+        btnDiscount.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnDiscountActionPerformed(evt);
+            }
+        });
+
+        btnNote.setBackground(Global.selectionColor);
+        btnNote.setFont(Global.lableFont);
+        btnNote.setForeground(new java.awt.Color(255, 255, 255));
+        btnNote.setText("Note");
+        btnNote.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNoteActionPerformed(evt);
             }
         });
 
@@ -1778,9 +1907,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                             .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(10, 10, 10)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnBatch2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnBatch1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                            .addComponent(btnDiscount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnWeight, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnTransfer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnNote, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1789,11 +1919,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(btnBatch1)
+                        .addComponent(btnTransfer)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnBatch2)
+                        .addComponent(btnWeight)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(btnDiscount)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnNote)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblRec)
                 .addGap(18, 18, 18)
@@ -1934,20 +2066,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
         });
 
-        jLabel10.setFont(Global.lableFont);
-        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel10.setText("Outstanding :");
-
-        txtOut.setEditable(false);
-        txtOut.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtOut.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtOut.setFont(Global.amtFont);
-        txtOut.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtOutActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -1955,30 +2073,16 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1)
-                            .addComponent(jSeparator2)))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(8, 8, 8)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addGap(8, 8, 8)
-                                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                            .addComponent(jLabel20))
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                .addGap(18, 18, 18))
+                                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel20))
+                                .addGap(18, 18, Short.MAX_VALUE))
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2000,13 +2104,20 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                                     .addComponent(txtVouDiscount)
                                     .addComponent(txtTax)))
                             .addComponent(txtGrandTotal)
-                            .addComponent(txtVouPaid, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtVouBalance)
-                            .addComponent(txtOut))))
+                            .addComponent(txtVouPaid, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1)
+                            .addComponent(jSeparator2)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtVouBalance)))))
                 .addContainerGap())
         );
 
-        jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel13, jLabel14, jLabel16, jLabel8});
+        jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel13, jLabel14, jLabel16});
 
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2039,16 +2150,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(chkPaid, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel19, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10)
-                    .addComponent(txtOut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jScrollPane2.setViewportView(jPanel3);
@@ -2091,6 +2198,16 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         });
         scroll.setViewportView(tblSale);
 
+        btnPayment.setBackground(Global.selectionColor);
+        btnPayment.setFont(Global.lableFont);
+        btnPayment.setForeground(new java.awt.Color(255, 255, 255));
+        btnPayment.setText("Payment");
+        btnPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPaymentActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -2104,6 +2221,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deskPane)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnPayment)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelSale, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -2116,10 +2235,12 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(deskPane))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(deskPane))
+                    .addComponent(btnPayment))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -2254,15 +2375,15 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
-    private void btnBatch1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatch1ActionPerformed
+    private void btnTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTransferActionPerformed
         // TODO add your handling code here:
         trasnferDialog();
-    }//GEN-LAST:event_btnBatch1ActionPerformed
+    }//GEN-LAST:event_btnTransferActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnDiscountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDiscountActionPerformed
         // TODO add your handling code here:
         discountDialog();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnDiscountActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
@@ -2270,10 +2391,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void btnBatch2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatch2ActionPerformed
+    private void btnWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWeightActionPerformed
         // TODO add your handling code here:
         weightDialog();
-    }//GEN-LAST:event_btnBatch2ActionPerformed
+    }//GEN-LAST:event_btnWeightActionPerformed
 
     private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
         // TODO add your handling code here:
@@ -2292,9 +2413,15 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         // TODO add your handling code here:
     }//GEN-LAST:event_rdoPayActionPerformed
 
-    private void txtOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOutActionPerformed
+    private void btnNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNoteActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtOutActionPerformed
+        saleNoteDialog();
+    }//GEN-LAST:event_btnNoteActionPerformed
+
+    private void btnPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentActionPerformed
+        // TODO add your handling code here:
+        paymentDialog();
+    }//GEN-LAST:event_btnPaymentActionPerformed
 
     @Override
     public void keyEvent(KeyEvent e) {
@@ -2315,7 +2442,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 }
             }
             case "TRADER" -> {
-                calTraderBalance();
             }
             case "SALE-TOTAL" ->
                 calculateTotalAmount(false);
@@ -2468,8 +2594,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBatch1;
-    private javax.swing.JButton btnBatch2;
+    private javax.swing.JButton btnDiscount;
+    private javax.swing.JButton btnNote;
+    private javax.swing.JButton btnPayment;
+    private javax.swing.JButton btnTransfer;
+    private javax.swing.JButton btnWeight;
     private javax.swing.JLabel carNoLabel;
     private javax.swing.JLabel carNoLabel1;
     private javax.swing.JCheckBox chkA4;
@@ -2477,10 +2606,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JDesktopPane deskPane;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -2516,7 +2643,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private com.toedter.calendar.JDateChooser txtDueDate;
     private javax.swing.JFormattedTextField txtGrandTotal;
     private javax.swing.JTextField txtLocation;
-    private javax.swing.JFormattedTextField txtOut;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
@@ -2549,7 +2675,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void newForm() {
-        clear(true);
+        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
+        if (yes) {
+            clear(true);
+        }
     }
 
     @Override

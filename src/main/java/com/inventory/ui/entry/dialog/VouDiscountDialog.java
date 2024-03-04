@@ -9,8 +9,8 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.DiscountDescriptionEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.model.VouDiscount;
-import com.inventory.model.VouDiscountKey;
+import com.inventory.entity.VouDiscount;
+import com.inventory.entity.VouDiscountKey;
 import com.inventory.ui.common.VoucherDiscountTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.InventoryRepo;
@@ -203,6 +203,7 @@ public class VouDiscountDialog extends javax.swing.JDialog implements SelectionO
         txtDiscount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtDiscount.setFont(Global.amtFont);
 
+        jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Discount Total :");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

@@ -7,8 +7,8 @@ package com.h2.service;
 
 import com.common.Util1;
 import com.h2.dao.StockCriteriaDao;
-import com.inventory.model.StockCriteria;
-import com.inventory.model.StockCriteriaKey;
+import com.inventory.entity.StockCriteria;
+import com.inventory.entity.StockCriteriaKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -17,7 +17,7 @@ import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.OPHis;
+import com.inventory.entity.OPHis;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;

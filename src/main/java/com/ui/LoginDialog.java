@@ -14,20 +14,26 @@ import com.common.SelectionObserver;
 import com.common.TokenFile;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.user.model.MachineInfo;
 import com.user.model.AuthenticationResponse;
 import java.awt.Image;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -41,7 +47,6 @@ import reactor.core.publisher.Mono;
 public class LoginDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
 
     private int loginAttempt = 0;
-    private int enableCount = 0;
     private String APP_NAME = "Core Account";
     private Image appIcon;
     private final TokenFile<AuthenticationResponse> file = new TokenFile<>(AuthenticationResponse.class);
@@ -59,8 +64,6 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     @Autowired
     private UserRepo userRepo;
     @Autowired
-    private TaskExecutor taskExecutor;
-    @Autowired
     private ApplicationMainFrame mainFrame;
 
     /**
@@ -71,13 +74,22 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         initComponents();
         initKeyListener();
         initFocusListener();
+        initClientProperty();
+    }
+
+    private void initClientProperty() {
+        txtUserName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Username");
+        txtUserName.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtPassword.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
+        txtPassword.putClientProperty(FlatClientProperties.STYLE, "showRevealButton:true;" + "showCapsLock:true");
     }
 
     public void focus() {
-        txtLoginName.requestFocus();
+        txtUserName.requestFocus();
     }
 
     public void checkMachineRegister() {
+        chkDark.setSelected(Util1.DARK_MODE);
         String serialNo = Util1.getBaseboardSerialNumber();
         log.info("serialNo : " + serialNo);
         if (serialNo == null) {
@@ -87,7 +99,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         Global.dialog = this;
         Global.machineName = Util1.getComputerName();
         MessageDialog d = new MessageDialog(this, "Connecting to Server.");
-        taskExecutor.execute(() -> {
+        SwingUtilities.invokeLater(() -> {
             d.setLocationRelativeTo(null);
             d.setVisible(true);
         });
@@ -126,7 +138,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 checkAndDeleteData(t);
                 saveMachine(t);
                 enableForm(false);
-                taskExecutor.execute(() -> {
+                SwingUtilities.invokeLater(() -> {
                     setLocationRelativeTo(null);
                     focus();
                     setVisible(true);
@@ -160,7 +172,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     }
 
     private void enableForm(boolean status) {
-        txtLoginName.setEnabled(status);
+        txtUserName.setEnabled(status);
         txtPassword.setEnabled(status);
         btnLogin.setEnabled(status);
         progress.setIndeterminate(!status);
@@ -239,7 +251,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                     case KeyEvent.VK_DOWN ->
                         btnLogin.requestFocus();
                     case KeyEvent.VK_UP ->
-                        txtLoginName.requestFocus();
+                        txtUserName.requestFocus();
                 }
             }
             case "butLogin" -> {
@@ -255,7 +267,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                     case KeyEvent.VK_ENTER ->
                         clear();
                     case KeyEvent.VK_DOWN ->
-                        txtLoginName.requestFocus();
+                        txtUserName.requestFocus();
                     case KeyEvent.VK_UP ->
                         btnLogin.requestFocus();
                 }
@@ -264,7 +276,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     }
 
     private void login() {
-        String userName = txtLoginName.getText();
+        String userName = txtUserName.getText();
         String password = String.valueOf(txtPassword.getPassword());
         if (userName.isEmpty() || password.length() == 0) {
             JOptionPane.showMessageDialog(this, "Invalid user name or password.",
@@ -275,7 +287,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 if (t != null) {
                     Global.loginUser = t;
                     Global.roleCode = t.getRoleCode();
-                    taskExecutor.execute(() -> {
+                    SwingUtilities.invokeLater(() -> {
                         mainFrame.setName(APP_NAME);
                         mainFrame.setIconImage(appIcon);
                         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -287,6 +299,9 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                     JOptionPane.showMessageDialog(this, "Invalid user name or password.",
                             "Authentication error.", JOptionPane.ERROR_MESSAGE);
                     loginAttempt++;
+                    lblStatus.setText(String.format("Incorrect : %d of 3", loginAttempt));
+                    txtUserName.putClientProperty("JComponent.outline", "warning");
+                    txtPassword.putClientProperty("JComponent.outline", "warning");
                 }
                 if (loginAttempt >= 3) {
                     this.dispose();
@@ -296,19 +311,38 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     }
 
     public void clear() {
-        txtLoginName.setText(null);
+        txtUserName.setText(null);
         txtPassword.setText(null);
-        txtLoginName.requestFocus();
+        txtUserName.requestFocus();
     }
 
     private void initKeyListener() {
-        txtLoginName.addKeyListener(this);
+        txtUserName.addKeyListener(this);
         txtPassword.addKeyListener(this);
         btnLogin.addKeyListener(this);
     }
 
     private void initFocusListener() {
         ComponentUtil.addFocusListener(this);
+    }
+
+    private void enableDarkMode(boolean isDark) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                if (isDark) {
+                    UIManager.setLookAndFeel(new FlatMacDarkLaf());
+                } else {
+                    UIManager.setLookAndFeel(new FlatMacLightLaf());
+                }
+                CoreAccountApplication.initUIManager();
+                Util1.DARK_MODE = isDark;
+                for (Window w : Window.getWindows()) {
+                    SwingUtilities.updateComponentTreeUI(w);
+                }
+            } catch (UnsupportedLookAndFeelException e) {
+                log.error("enableDarkMode : " + e.getMessage());
+            }
+        });
     }
 
     /**
@@ -322,12 +356,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtLoginName = new javax.swing.JTextField();
+        txtUserName = new javax.swing.JTextField();
         txtPassword = new javax.swing.JPasswordField();
         jLabel2 = new javax.swing.JLabel();
         btnLogin = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
+        chkDark = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Login Core Account Cloud");
@@ -350,17 +385,15 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("LOGIN");
 
-        txtLoginName.setFont(new java.awt.Font("Arial", 0, 15)); // NOI18N
-        txtLoginName.setText("Username");
-        txtLoginName.setName("txtLoginName"); // NOI18N
-        txtLoginName.addActionListener(new java.awt.event.ActionListener() {
+        txtUserName.setFont(new java.awt.Font("Arial", 0, 15)); // NOI18N
+        txtUserName.setName("txtUserName"); // NOI18N
+        txtUserName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtLoginNameActionPerformed(evt);
+                txtUserNameActionPerformed(evt);
             }
         });
 
         txtPassword.setFont(new java.awt.Font("Arial", 0, 15)); // NOI18N
-        txtPassword.setText("Password");
         txtPassword.setName("txtPassword"); // NOI18N
         txtPassword.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -385,21 +418,33 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
 
         lblStatus.setBackground(new java.awt.Color(255, 255, 255));
         lblStatus.setFont(Global.lableFont);
+        lblStatus.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+
+        chkDark.setFont(Global.lableFont);
+        chkDark.setText("Dark Mode");
+        chkDark.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkDarkActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
-                    .addComponent(txtLoginName, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
-                    .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
-                    .addComponent(btnLogin, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progress, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
+                    .addComponent(txtUserName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
+                    .addComponent(btnLogin, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkDark)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -410,13 +455,15 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtLoginName, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addComponent(chkDark)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -455,30 +502,35 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         login();
     }//GEN-LAST:event_btnLoginActionPerformed
 
-    private void txtLoginNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLoginNameActionPerformed
+    private void txtUserNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUserNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtLoginNameActionPerformed
+    }//GEN-LAST:event_txtUserNameActionPerformed
 
     private void txtPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPasswordActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPasswordActionPerformed
 
+    private void chkDarkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkDarkActionPerformed
+        // TODO add your handling code here:
+        enableDarkMode(chkDark.isSelected());
+    }//GEN-LAST:event_chkDarkActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLogin;
+    private javax.swing.JRadioButton chkDark;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
-    private javax.swing.JTextField txtLoginName;
     private javax.swing.JPasswordField txtPassword;
+    private javax.swing.JTextField txtUserName;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void selected(Object source, Object selectObj) {
         String type = source.toString();
         if (type.equals("download")) {
-            enableCount += 1;
             lblStatus.setText(selectObj.toString());
             enableForm(true);
         } else if (type.equals("enable")) {

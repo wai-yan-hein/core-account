@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Trader;
-import com.inventory.model.TraderKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderKey;
 import java.util.List;
 
 /**
@@ -20,8 +20,10 @@ public interface TraderInvService {
 
     List<Trader> findAll(String compCode);
 
+    List<Trader> getTrader(String compCode, String type);
+
     String getMaxDate();
-    
+
     List<Trader> searchTrader(String str, String type, String compCode, Integer deptId);
 
 }

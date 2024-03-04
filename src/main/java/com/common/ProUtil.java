@@ -101,13 +101,17 @@ public class ProUtil {
     public static final String DECIMAL_PLACE = "decimal.palace";
     public static final String STOCK_IR_EDIT = "stockir.voucher";
     public static final String SALE_VOU = "report.sale.voucher";
-    public static final String SALE_VOU_A5 = "report.sale.voucher";
+    public static final String SALE_VOU_A5 = "report.sale.A5";
     public static final String SALE_VOU_A4 = "report.sale.A4";
+    public static final String SALE_VOU_NOTE = "report.sale.note";
     public static final String STOCK_USE_WEIHGT = "stock.use.weight";
     public static final String DEFAULT_STOCK_REC = "default.stock.receivable";
     public static final String DEFAULT_STOCK_PAY = "default.stock.payable";
     public static final String TRADER_BAL_ACC = "trader.balance.account";
-
+    public static final String PRINTER_NAME = "printer.name";
+    public static final String PRINTER_POS_NAME = "printer.pos.name";
+    public static final String PRINTER_PAGE = "printer.pages";
+    public static final String DARK_MODE = "dark.mode";
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
     }

@@ -9,7 +9,7 @@ import com.google.gson.stream.JsonReader;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.ReorderLevel;
+import com.inventory.entity.ReorderLevel;
 import com.inventory.ui.common.ReorderTableModel;
 import java.io.File;
 import java.io.FileOutputStream;

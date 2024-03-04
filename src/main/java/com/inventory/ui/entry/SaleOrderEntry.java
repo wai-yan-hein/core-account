@@ -16,12 +16,12 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.Order;
-import com.inventory.model.OrderHis;
-import com.inventory.model.OrderHisKey;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.Trader;
-import com.inventory.model.VOrder;
+import com.inventory.entity.Order;
+import com.inventory.entity.OrderHis;
+import com.inventory.entity.OrderHisKey;
+import com.inventory.entity.OrderStatus;
+import com.inventory.entity.Trader;
+import com.inventory.entity.VOrder;
 import com.inventory.ui.common.OrderStatusComboBoxModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockBalanceTableModel;
@@ -224,8 +224,6 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
     private void initTextBoxFormat() {
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
     }
-
-   
 
     private void assignDefaultValue() {
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
@@ -481,12 +479,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
                 ByteArrayInputStream stream = new ByteArrayInputStream(t);
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                log.info(ProUtil.getFontPath());
-                if (print) {
-                    JasperReportUtil.print(jp);
-                } else {
-                    JasperViewer.viewReport(jp, false);
-                }
+                JasperViewer.viewReport(jp, false);
             } catch (JRException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }

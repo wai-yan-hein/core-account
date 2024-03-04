@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.WeightLossDetail;
-import com.inventory.model.WeightLossDetailKey;
+import com.inventory.entity.WeightLossDetail;
+import com.inventory.entity.WeightLossDetailKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

@@ -6,7 +6,6 @@
 package com.acc.common;
 
 import com.acc.model.DepartmentA;
-import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -60,7 +59,7 @@ public class DepartmentTableModel extends AbstractTableModel {
             DepartmentA dep = listDep.get(row);
             return switch (column) {
                 case 0 ->
-                    Util1.isNull(dep.getUserCode(), dep.getKey().getDeptCode());
+                    dep.getUserCode();
                 case 1 ->
                     dep.getDeptName();
                 default ->

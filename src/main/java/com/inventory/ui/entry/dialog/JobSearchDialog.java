@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Job;
+import com.inventory.entity.Job;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.JobSearchTableModel;
 import com.repo.UserRepo;

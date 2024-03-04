@@ -9,9 +9,9 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.MessageType;
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
+import com.inventory.entity.MessageType;
+import com.inventory.entity.Region;
+import com.inventory.entity.RegionKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
@@ -27,6 +27,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,22 +40,8 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     private int selectRow = - 1;
     private Region region = new Region();
     private RegionTableModel regionTableModel = new RegionTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
-    private List<Region> listRegion;
-
-    public List<Region> getListRegion() {
-        return listRegion;
-    }
-
-    public void setListRegion(List<Region> listRegion) {
-        regionTableModel.setListRegion(listRegion);
-        this.listRegion = listRegion;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
 
@@ -88,14 +75,14 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         tblLocation.setModel(regionTableModel);
         sorter = new TableRowSorter<>(tblLocation.getModel());
         tblLocation.setRowSorter(sorter);
-        tblLocation.getTableHeader().setFont(Global.lableFont);
+        tblLocation.getTableHeader().setFont(Global.tblHeaderFont);
         tblLocation.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblLocation.setDefaultRenderer(Object.class, new TableCellRender());
         tblLocation.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
                 if (tblLocation.getSelectedRow() >= 0) {
                     selectRow = tblLocation.convertRowIndexToModel(tblLocation.getSelectedRow());
-                    setCategory(regionTableModel.getRegion(selectRow));
+                    setRegion(regionTableModel.getRegion(selectRow));
                 }
             }
         });
@@ -103,7 +90,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
 
     }
 
-    private void setCategory(Region cat) {
+    private void setRegion(Region cat) {
         region = cat;
         txtName.setText(region.getRegionName());
         txtUserCode.setText(region.getUserCode());
@@ -116,19 +103,20 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            inventoryRepo.saveRegion(region).subscribe((t) -> {
+            inventoryRepo.saveRegion(region).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    listRegion.set(selectRow, t);
+                    regionTableModel.setObject(selectRow, t);
                 } else {
-                    listRegion.add(t);
+                    regionTableModel.addObject(t);
                 }
-                clear();
-                sendMessage(t.getRegionName());
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).doOnTerminate(() -> {
+                sendMessage(region.getRegionName());
+                clear();
+            }).subscribe();
 
         }
     }
@@ -137,6 +125,10 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         inventoryRepo.sendDownloadMessage(MessageType.REGION, mes).doOnSuccess((t) -> {
             log.info(t);
         }).subscribe();
+    }
+
+    public List<Region> getListRegion() {
+        return regionTableModel.getListRegion();
     }
 
     private void clear() {
@@ -177,6 +169,16 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         return status;
     }
 
+    public void search() {
+        progress.setIndeterminate(true);
+        inventoryRepo.getRegion().doOnSuccess((t) -> {
+            regionTableModel.setListRegion(t);
+        }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+        }).subscribe();
+        setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -199,9 +201,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         txtUserCode = new javax.swing.JTextField();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Region Setup");
-        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
 
         tblLocation.setFont(Global.textFont);
         tblLocation.setModel(new javax.swing.table.DefaultTableModel(

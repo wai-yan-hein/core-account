@@ -53,33 +53,33 @@ import com.h2.service.UserService;
 import com.h2.service.VRoleCompanyService;
 import com.h2.service.VRoleMenuService;
 import com.h2.service.VouStatusService;
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import com.user.model.AppUser;
-import com.inventory.model.Category;
-import com.inventory.model.CategoryKey;
-import com.inventory.model.Location;
-import com.inventory.model.LocationKey;
+import com.inventory.entity.Category;
+import com.inventory.entity.CategoryKey;
+import com.inventory.entity.Location;
+import com.inventory.entity.LocationKey;
 import com.user.model.MachineInfo;
-import com.inventory.model.OrderHis;
-import com.inventory.model.PurHis;
-import com.inventory.model.RetInHis;
-import com.inventory.model.RetOutHis;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleMan;
-import com.inventory.model.SaleManKey;
-import com.inventory.model.Stock;
-import com.inventory.model.StockBrand;
-import com.inventory.model.StockBrandKey;
-import com.inventory.model.StockKey;
-import com.inventory.model.StockType;
-import com.inventory.model.StockTypeKey;
-import com.inventory.model.StockUnit;
-import com.inventory.model.StockUnitKey;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderKey;
-import com.inventory.model.VRoleMenu;
-import com.inventory.model.VouStatus;
-import com.inventory.model.VouStatusKey;
+import com.inventory.entity.OrderHis;
+import com.inventory.entity.PurHis;
+import com.inventory.entity.RetInHis;
+import com.inventory.entity.RetOutHis;
+import com.inventory.entity.SaleHis;
+import com.inventory.entity.SaleMan;
+import com.inventory.entity.SaleManKey;
+import com.inventory.entity.Stock;
+import com.inventory.entity.StockBrand;
+import com.inventory.entity.StockBrandKey;
+import com.inventory.entity.StockKey;
+import com.inventory.entity.StockType;
+import com.inventory.entity.StockTypeKey;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.StockUnitKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderKey;
+import com.inventory.entity.VRoleMenu;
+import com.inventory.entity.VouStatus;
+import com.inventory.entity.VouStatusKey;
 import com.user.model.Currency;
 import com.user.model.DepartmentUser;
 import com.user.model.ExchangeRate;
@@ -113,59 +113,59 @@ import com.h2.service.TransferHisDetailService;
 import com.h2.service.TransferHisService;
 import com.h2.service.WareHouseService;
 import com.h2.service.WeightLossService;
-import com.inventory.model.AccSetting;
-import com.inventory.model.General;
-import com.inventory.model.GradeDetail;
-import com.inventory.model.GradeDetailKey;
-import com.inventory.model.Job;
-import com.inventory.model.JobKey;
-import com.inventory.model.LabourGroup;
-import com.inventory.model.LabourGroupKey;
-import com.inventory.model.OPHis;
-import com.inventory.model.OPHisKey;
-import com.inventory.model.OrderHisDetail;
-import com.inventory.model.OrderHisKey;
-import com.inventory.model.OrderStatus;
-import com.inventory.model.OrderStatusKey;
-import com.inventory.model.OutputCost;
-import com.inventory.model.OutputCostKey;
-import com.inventory.model.Pattern;
-import com.inventory.model.ProcessHis;
-import com.inventory.model.ProcessHisDetail;
-import com.inventory.model.ProcessHisKey;
-import com.inventory.model.SaleHisDetail;
-import com.inventory.model.SaleHisKey;
-import com.inventory.model.PurHisDetail;
-import com.inventory.model.PurHisKey;
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
-import com.inventory.model.RelationKey;
-import com.inventory.model.RetInHisDetail;
-import com.inventory.model.RetInHisKey;
-import com.inventory.model.RetOutHisDetail;
-import com.inventory.model.RetOutHisKey;
-import com.inventory.model.StockCriteria;
-import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaKey;
-import com.inventory.model.StockFormulaPrice;
-import com.inventory.model.StockFormulaPriceKey;
-import com.inventory.model.StockFormulaQty;
-import com.inventory.model.StockIOKey;
-import com.inventory.model.StockInOut;
-import com.inventory.model.StockInOutDetail;
-import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisDetail;
-import com.inventory.model.TransferHisKey;
-import com.inventory.model.UnitRelation;
-import com.inventory.model.VOrder;
-import com.inventory.model.VSale;
-import com.inventory.model.VPurchase;
-import com.inventory.model.VReturnIn;
-import com.inventory.model.VReturnOut;
-import com.inventory.model.VTransfer;
-import com.inventory.model.WareHouse;
-import com.inventory.model.WareHouseKey;
-import com.inventory.model.WeightLossHis;
+import com.inventory.entity.AccSetting;
+import com.inventory.entity.General;
+import com.inventory.entity.GradeDetail;
+import com.inventory.entity.GradeDetailKey;
+import com.inventory.entity.Job;
+import com.inventory.entity.JobKey;
+import com.inventory.entity.LabourGroup;
+import com.inventory.entity.LabourGroupKey;
+import com.inventory.entity.OPHis;
+import com.inventory.entity.OPHisKey;
+import com.inventory.entity.OrderHisDetail;
+import com.inventory.entity.OrderHisKey;
+import com.inventory.entity.OrderStatus;
+import com.inventory.entity.OrderStatusKey;
+import com.inventory.entity.OutputCost;
+import com.inventory.entity.OutputCostKey;
+import com.inventory.entity.Pattern;
+import com.inventory.entity.ProcessHis;
+import com.inventory.entity.ProcessHisDetail;
+import com.inventory.entity.ProcessHisKey;
+import com.inventory.entity.SaleHisDetail;
+import com.inventory.entity.SaleHisKey;
+import com.inventory.entity.PurHisDetail;
+import com.inventory.entity.PurHisKey;
+import com.inventory.entity.Region;
+import com.inventory.entity.RegionKey;
+import com.inventory.entity.RelationKey;
+import com.inventory.entity.RetInHisDetail;
+import com.inventory.entity.RetInHisKey;
+import com.inventory.entity.RetOutHisDetail;
+import com.inventory.entity.RetOutHisKey;
+import com.inventory.entity.StockCriteria;
+import com.inventory.entity.StockFormula;
+import com.inventory.entity.StockFormulaKey;
+import com.inventory.entity.StockFormulaPrice;
+import com.inventory.entity.StockFormulaPriceKey;
+import com.inventory.entity.StockFormulaQty;
+import com.inventory.entity.StockIOKey;
+import com.inventory.entity.StockInOut;
+import com.inventory.entity.StockInOutDetail;
+import com.inventory.entity.TransferHis;
+import com.inventory.entity.TransferHisDetail;
+import com.inventory.entity.TransferHisKey;
+import com.inventory.entity.UnitRelation;
+import com.inventory.entity.VOrder;
+import com.inventory.entity.VSale;
+import com.inventory.entity.VPurchase;
+import com.inventory.entity.VReturnIn;
+import com.inventory.entity.VReturnOut;
+import com.inventory.entity.VTransfer;
+import com.inventory.entity.WareHouse;
+import com.inventory.entity.WareHouseKey;
+import com.inventory.entity.WeightLossHis;
 import com.user.model.DateLock;
 import com.user.model.DepartmentKey;
 import com.user.model.PrivilegeMenu;
@@ -696,6 +696,9 @@ public class H2Repo {
     public Mono<Currency> findCurrency(String curCode) {
         return Mono.justOrEmpty(currencyService.findById(curCode));
     }
+    public Mono<MachineInfo> findMachine(Integer macId) {
+        return Mono.justOrEmpty(machineInfoService.find(macId));
+    }
 
     public Mono<List<ExchangeRate>> search(String startDate, String endDate, String targetCur, String compCode) {
         return Mono.justOrEmpty(exchangeRateService.searchExchange(startDate, endDate, targetCur, compCode));
@@ -763,6 +766,14 @@ public class H2Repo {
 
     public Mono<List<TraderA>> getTrader(String str) {
         return Mono.justOrEmpty(traderAccService.getTrader(str, Global.compCode));
+    }
+
+    public Mono<List<Trader>> getCustomer() {
+        return Mono.justOrEmpty(traderInvService.getTrader(Global.compCode, "CUS"));
+    }
+
+    public Mono<List<Trader>> getSupplier() {
+        return Mono.justOrEmpty(traderInvService.getTrader(Global.compCode, "SUP"));
     }
 
     public Flux<ChartOfAccount> getChartofAccount() {

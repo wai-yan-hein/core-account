@@ -5,10 +5,10 @@
 package com.h2.service;
 
 import com.acc.model.Gl;
-import com.inventory.model.General;
-import com.inventory.model.VPurchase;
-import com.inventory.model.VReturnIn;
-import com.inventory.model.VReturnOut;
+import com.inventory.entity.General;
+import com.inventory.entity.VPurchase;
+import com.inventory.entity.VReturnIn;
+import com.inventory.entity.VReturnOut;
 import java.util.List;
 
 /**

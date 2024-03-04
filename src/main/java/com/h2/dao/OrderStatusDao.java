@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.OrderStatus;
-import com.inventory.model.OrderStatusKey;
+import com.inventory.entity.OrderStatus;
+import com.inventory.entity.OrderStatusKey;
 import java.util.List;
 
 /**

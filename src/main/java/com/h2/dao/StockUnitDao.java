@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.StockUnit;
-import com.inventory.model.StockUnitKey;
+import com.inventory.entity.StockUnit;
+import com.inventory.entity.StockUnitKey;
 import java.util.List;
 
 /**

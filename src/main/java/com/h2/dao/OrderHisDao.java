@@ -5,10 +5,10 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.General;
-import com.inventory.model.OrderHis;
-import com.inventory.model.OrderHisKey;
-import com.inventory.model.VOrder;
+import com.inventory.entity.General;
+import com.inventory.entity.OrderHis;
+import com.inventory.entity.OrderHisKey;
+import com.inventory.entity.VOrder;
 import java.util.List;
 
 /**

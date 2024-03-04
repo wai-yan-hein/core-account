@@ -5,7 +5,7 @@
 package com.h2.service;
 
 import com.h2.dao.RoleDao;
-import com.inventory.model.AppRole;
+import com.inventory.entity.AppRole;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

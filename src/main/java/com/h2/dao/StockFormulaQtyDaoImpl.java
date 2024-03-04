@@ -1,8 +1,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.StockFormulaQty;
-import com.inventory.model.StockFormulaQtyKey;
+import com.inventory.entity.StockFormulaQty;
+import com.inventory.entity.StockFormulaQtyKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;

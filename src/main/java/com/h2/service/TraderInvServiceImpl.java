@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.TraderInvDao;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.TraderKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -48,6 +48,11 @@ public class TraderInvServiceImpl implements TraderInvService {
     @Override
     public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
         return dao.searchTrader(str, type, compCode, deptId);
+    }
+
+    @Override
+    public List<Trader> getTrader(String compCode, String type) {
+        return dao.getTrader(compCode, type);
     }
 
 }

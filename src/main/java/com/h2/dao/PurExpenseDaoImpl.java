@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.PurExpense;
-import com.inventory.model.PurExpenseKey;
+import com.inventory.entity.PurExpense;
+import com.inventory.entity.PurExpenseKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

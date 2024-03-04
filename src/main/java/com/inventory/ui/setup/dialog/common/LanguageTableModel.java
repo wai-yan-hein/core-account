@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.model.Language;
+import com.inventory.entity.Language;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

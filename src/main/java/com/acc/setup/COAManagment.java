@@ -23,8 +23,8 @@ import com.common.ComponentUtil;
 import com.common.Util1;
 import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
-import com.inventory.model.CFont;
-import com.inventory.model.MessageType;
+import com.inventory.entity.CFont;
+import com.inventory.entity.MessageType;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.model.MenuKey;
@@ -143,6 +143,7 @@ public class COAManagment extends javax.swing.JPanel implements
         initTree();
         initCombo();
     }
+
     private void batchLock(boolean lock) {
         ComponentUtil.enableForm(this, lock);
         observer.selected("save", lock);
@@ -227,21 +228,21 @@ public class COAManagment extends javax.swing.JPanel implements
                 progress.setIndeterminate(true);
                 observer.selected("save", false);
                 accountRepo.saveCOA(coa).doOnSuccess((t) -> {
-                    if (t != null) {
-                        if (lblStatus.getText().equals("EDIT")) {
-                            selectedNode.setUserObject(t);
-                            TreePath path = treeCOA.getSelectionPath();
-                            DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
-                            model.nodeChanged(selectedNode);
-                            treeCOA.setSelectionPath(path);
-                            setEnabledControl(false);
-                            clear();
-                            sendMessage(t.getCoaNameEng());
-                        }
-                    }
+                    selectedNode.setUserObject(t);
                 }).doOnError((e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     progress.setIndeterminate(false);
                     observer.selected("save", true);
+                }).doOnTerminate(() -> {
+                    sendMessage(coa.getCoaNameEng());
+                    clear();
+                    setEnabledControl(false);
+                    SwingUtilities.invokeLater(() -> {
+                        TreePath path = treeCOA.getSelectionPath();
+                        DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
+                        model.nodeChanged(selectedNode);
+                        treeCOA.setSelectionPath(path);
+                    });
                 }).subscribe();
 
             } catch (HeadlessException ex) {

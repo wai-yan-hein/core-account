@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.Location;
+import com.inventory.entity.Location;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

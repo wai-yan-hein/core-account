@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.inventory.model.OptionModel;
+import com.inventory.entity.OptionModel;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

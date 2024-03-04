@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.WareHouse;
-import com.inventory.model.WareHouseKey;
+import com.inventory.entity.WareHouse;
+import com.inventory.entity.WareHouseKey;
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -8,6 +8,8 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.*;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 @Slf4j
 public class TokenFile<T> {
@@ -44,6 +46,8 @@ public class TokenFile<T> {
             }
             return gson.fromJson(jsonBuilder.toString(), persistentClass);
         } catch (IOException | JsonSyntaxException | JsonIOException e) {
+            JOptionPane.showMessageDialog(new JFrame(), "Token not found. Check Internert Connection.","Access Denied",JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
             log.error("Failed to read: " + e.getMessage());
         }
         return null;

@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.StockBrand;
-import com.inventory.model.StockBrandKey;
+import com.inventory.entity.StockBrand;
+import com.inventory.entity.StockBrandKey;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;

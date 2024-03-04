@@ -70,12 +70,12 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
             }
         }
 
-        List<RoleProperty> roleProperty = rpService.getRoleProperty(roleCode,compCode);
+        List<RoleProperty> roleProperty = rpService.getRoleProperty(roleCode, compCode);
         if (!roleProperty.isEmpty()) {
             for (RoleProperty rp : roleProperty) {
                 String value = rp.getPropValue();
-                if (!Util1.isNullOrEmpty(value) || !value.equals("-")) {
-                    hm.put(rp.getKey().getPropKey(),value);
+                if (!Util1.isNull(value, "-").equals("-")) {
+                    hm.put(rp.getKey().getPropKey(), value);
                 }
             }
         }
@@ -83,8 +83,8 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
         if (!machineProperties.isEmpty()) {
             for (MachineProperty p : machineProperties) {
                 String value = p.getPropValue();
-                if (!Util1.isNullOrEmpty(value) || !value.equals("-")) {
-                    hm.put(p.getKey().getPropKey(),value);
+                if (!Util1.isNull(value, "-").equals("-")) {
+                    hm.put(p.getKey().getPropKey(), value);
                 }
             }
         }

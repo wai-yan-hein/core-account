@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.RelationDao;
-import com.inventory.model.RelationKey;
-import com.inventory.model.UnitRelation;
+import com.inventory.entity.RelationKey;
+import com.inventory.entity.UnitRelation;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

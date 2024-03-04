@@ -24,14 +24,14 @@ import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.OPHis;
-import com.inventory.model.OPHisDetail;
-import com.inventory.model.StockIOKey;
-import com.inventory.model.StockInOut;
-import com.inventory.model.StockInOutDetail;
-import com.inventory.model.StockInOutKey;
-import com.inventory.model.VStockIO;
+import com.inventory.entity.Location;
+import com.inventory.entity.OPHis;
+import com.inventory.entity.OPHisDetail;
+import com.inventory.entity.StockIOKey;
+import com.inventory.entity.StockInOut;
+import com.inventory.entity.StockInOutDetail;
+import com.inventory.entity.StockInOutKey;
+import com.inventory.entity.VStockIO;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockInOutTableModel;
 import com.inventory.ui.common.StockInOutWeightTableModel;
@@ -39,8 +39,8 @@ import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.entry.dialog.StockIOHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
-import com.inventory.model.Job;
-import com.inventory.model.LabourGroup;
+import com.inventory.entity.Job;
+import com.inventory.entity.LabourGroup;
 import com.inventory.ui.common.StockInOutPaddyTableModel;
 import com.inventory.ui.entry.dialog.StockIOMoreDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -65,6 +65,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -198,7 +199,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 labourGroupAutoCompleter.setListObject(t);
             }
         }).subscribe();
-        ReportFilter ReportFilter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter ReportFilter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         ReportFilter.setFinished(false);
         ReportFilter.setFromDate("");
         ReportFilter.setToDate("");
@@ -410,9 +411,16 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     printVoucher(t.getKey().getVouNo(), customReport, title);
                 }
             }).doOnError((e) -> {
-                observer.selected("save", true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveVoucher(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).subscribe();
         }
     }
@@ -584,11 +592,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         } else if (lblStatus.getText().equals("DELETED")) {
             clear();
             status = false;
-        } else if (!Util1.isDateBetween(txtDate.getDate())) {
-            JOptionPane.showMessageDialog(this, "Invalid Date.",
-                    "Validation.", JOptionPane.ERROR_MESSAGE);
-            status = false;
-            txtDate.requestFocus();
         } else {
             LabourGroup lg = labourGroupAutoCompleter.getObject();
             Job job = jobAutoCompleter.getObject();
@@ -610,6 +613,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 io.setDeleted(Boolean.FALSE);
             } else {
                 io.setUpdatedBy(Global.loginUser.getUserCode());
+            }
+            if (!Util1.isDateBetween(txtDate.getDate())) {
+                int yn = JOptionPane.showConfirmDialog(this, "Date is out of range finanical year.",
+                        "Validation.", JOptionPane.WARNING_MESSAGE);
+                return yn == JOptionPane.YES_OPTION;
+
             }
         }
         return status;

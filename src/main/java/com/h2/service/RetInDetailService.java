@@ -5,8 +5,8 @@
  */
 package com.h2.service;
 
-import com.inventory.model.RetInHisDetail;
-import com.inventory.model.RetInKey;
+import com.inventory.entity.RetInHisDetail;
+import com.inventory.entity.RetInKey;
 import java.util.List;
 
 /**

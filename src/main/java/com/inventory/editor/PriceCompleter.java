@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.PriceOption;
+import com.inventory.entity.PriceOption;
 import com.inventory.ui.common.SalePriceTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

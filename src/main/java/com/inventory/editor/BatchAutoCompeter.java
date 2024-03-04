@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.GRN;
+import com.inventory.entity.GRN;
 import com.inventory.ui.common.BatchTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Color;

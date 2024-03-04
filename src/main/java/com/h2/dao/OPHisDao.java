@@ -1,8 +1,8 @@
 package com.h2.dao;
 
-import com.inventory.model.LocationKey;
-import com.inventory.model.OPHis;
-import com.inventory.model.OPHisKey;
+import com.inventory.entity.LocationKey;
+import com.inventory.entity.OPHis;
+import com.inventory.entity.OPHisKey;
 import java.util.List;
 
 public interface OPHisDao {

@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TraderATableModel extends AbstractTableModel {
 
     private List<TraderA> listTrader = new ArrayList<>();
-    private final String[] columnNames = {"No.", "Code", "Name"};
+    private final String[] columnNames = {"Code", "Name", "Address"};
 
     public TraderATableModel(List<TraderA> listTrader) {
         this.listTrader = listTrader;
@@ -36,12 +36,12 @@ public class TraderATableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == 3;
+        return false;
     }
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 3 ? Boolean.class : String.class;
+        return String.class;
     }
 
     public List<TraderA> getListTrader() {
@@ -64,11 +64,11 @@ public class TraderATableModel extends AbstractTableModel {
                 TraderA trader = listTrader.get(row);
                 return switch (column) {
                     case 0 ->
-                        String.valueOf(row + 1 + ". ");
+                        trader.getUserCode();
                     case 1 ->
-                        Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
-                    case 2 ->
                         trader.getTraderName();
+                    case 2 ->
+                        trader.getAddress();
                     default ->
                         null;
                 }; //Code

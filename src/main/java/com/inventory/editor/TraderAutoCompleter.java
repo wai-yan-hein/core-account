@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Trader;
+import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.TraderTableModel;
 import java.awt.Color;

@@ -1,7 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.model.ProcessHisDetail;
-import com.inventory.model.ProcessHisDetailKey;
+import com.inventory.entity.ProcessHisDetail;
+import com.inventory.entity.ProcessHisDetailKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 

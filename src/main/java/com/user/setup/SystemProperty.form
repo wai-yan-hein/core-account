@@ -431,12 +431,14 @@
                               <Component id="jLabel8" max="32767" attributes="0"/>
                               <Component id="jLabel1" max="32767" attributes="0"/>
                               <Component id="jLabel21" max="32767" attributes="0"/>
+                              <Component id="jLabel5" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtPrinter" max="32767" attributes="0"/>
                               <Component id="txtLogoName" max="32767" attributes="0"/>
                               <Component id="txtPages" max="32767" attributes="0"/>
+                              <Component id="txtPosPrinter" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
@@ -496,6 +498,11 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtPrinter" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtPosPrinter" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -596,6 +603,18 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkTraderBalAccActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel5">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="POS Printer"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtPosPrinter">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

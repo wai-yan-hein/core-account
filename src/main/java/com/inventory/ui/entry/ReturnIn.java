@@ -23,13 +23,13 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.Location;
-import com.inventory.model.Order;
-import com.inventory.model.RetInHis;
-import com.inventory.model.RetInHisDetail;
-import com.inventory.model.RetInHisKey;
-import com.inventory.model.Trader;
-import com.inventory.model.VReturnIn;
+import com.inventory.entity.Location;
+import com.inventory.entity.Order;
+import com.inventory.entity.RetInHis;
+import com.inventory.entity.RetInHisDetail;
+import com.inventory.entity.RetInHisKey;
+import com.inventory.entity.Trader;
+import com.inventory.entity.VReturnIn;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReturnInTableModel;
 import com.inventory.ui.entry.dialog.ReturnInHistoryDialog;
@@ -67,6 +67,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -321,16 +322,21 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             ri.setListRD(retInTableModel.getListDetail());
             ri.setListDel(retInTableModel.getDelList());
             inventoryRepo.save(ri).doOnSuccess((t) -> {
-                progress.setIndeterminate(false);
-            }).doOnError((e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-                progress.setIndeterminate(false);
-                observer.selected("save", false);
-            }).doOnTerminate(() -> {
                 if (print) {
                     printVoucher(ri);
                 }
                 clear(false);
+            }).doOnError((e) -> {
+                progress.setIndeterminate(false);
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveRetIn(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).subscribe();
 
         }

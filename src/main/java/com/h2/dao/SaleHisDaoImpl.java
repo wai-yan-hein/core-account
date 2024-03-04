@@ -5,9 +5,9 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisKey;
-import com.inventory.model.VSale;
+import com.inventory.entity.SaleHis;
+import com.inventory.entity.SaleHisKey;
+import com.inventory.entity.VSale;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
