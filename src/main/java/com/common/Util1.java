@@ -526,6 +526,11 @@ public class Util1 {
         String str = number.toString().trim().replace(",", "");
         try {
             str = convertMyanmarToArabic(str);
+            if (str.startsWith("(") && str.endsWith(")")) {
+                // Remove the parentheses and negate the value
+                str = "-" + str.substring(1, str.length() - 1);
+                return Double.valueOf(str);
+            }
             return Double.valueOf(str); // Convert string to double
         } catch (NumberFormatException e) {
             log.error("getDouble : " + e.getMessage());

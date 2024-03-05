@@ -72,10 +72,17 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
             String curCode = sh.getCurCode();
             String vouDate = Util1.addDay(Util1.toDateStr(sh.getVouDate(), "yyyy-MM-dd"), 1);
             accountRepo.getTraderBalance(vouDate, traderCode, curCode).doOnSuccess((opening) -> {
-                sh.setOpening(Util1.getDouble(opening));
-                sh.setTotalBalance(Util1.getDouble(opening) + sh.getVouTotal());
-                sh.setOutstanding(sh.getTotalBalance());
-                initData(sh);
+                SwingUtilities.invokeLater(() -> {
+                    double vouTotal = sh.getVouTotal();
+                    double balance = opening + vouTotal;
+                    log.info("balance" + balance);
+                    txtOpening.setForeground(opening < 0 ? Color.red : Color.green);
+                    txtOpening.setValue(opening);
+                    txtVouTotal.setValue(vouTotal);
+                    txtBalance.setValue(balance);
+                    txtPayment.setEditable(true);
+                    txtOpening.setEditable(true);
+                });
             }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "ERROR", JOptionPane.ERROR);
             }).doOnTerminate(() -> {
@@ -113,9 +120,11 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     private void confirm() {
+        double opening = Util1.getDouble(txtOpening.getValue());
         double payment = Util1.getDouble(txtPayment.getValue());
         double balance = Util1.getDouble(txtBalance.getValue());
         double outstanding = Util1.getDouble(txtClosing.getValue());
+        sh.setOpening(opening);
         sh.setTotalPayment(payment);
         sh.setTotalBalance(balance);
         sh.setOutstanding(outstanding);
