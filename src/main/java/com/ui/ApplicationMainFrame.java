@@ -28,6 +28,7 @@ import com.acc.setup.TraderSetup;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -35,7 +36,6 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.common.YNOptionPane;
 import com.dms.CoreDrive;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGIcon.ColorFilter;
 import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
@@ -250,49 +250,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void initToolBarIcon() {
         SwingUtilities.invokeLater(() -> {
-            FlatSVGIcon save = new FlatSVGIcon("svg/save.svg");
-            save.setColorFilter(colorFilter);
-            btnSave.setIcon(save);
-
-            FlatSVGIcon print = new FlatSVGIcon("svg/print.svg");
-            print.setColorFilter(colorFilter);
-            btnPrint.setIcon(print);
-
-            FlatSVGIcon refresh = new FlatSVGIcon("svg/refresh.svg");
-            refresh.setColorFilter(colorFilter);
-            btnRefresh.setIcon(refresh);
-
-            FlatSVGIcon delete = new FlatSVGIcon("svg/delete.svg");
-            delete.setColorFilter(colorFilter);
-            btnDelete.setIcon(delete);
-
-            FlatSVGIcon history = new FlatSVGIcon("svg/history.svg");
-            history.setColorFilter(colorFilter);
-            btnHistory.setIcon(history);
-
-            FlatSVGIcon clear = new FlatSVGIcon("svg/new.svg");
-            clear.setColorFilter(colorFilter);
-            btnNew.setIcon(clear);
-
-            FlatSVGIcon logout = new FlatSVGIcon("svg/logout.svg");
-            logout.setColorFilter(colorFilter);
-            btnLogout.setIcon(logout);
-
-            FlatSVGIcon filter = new FlatSVGIcon("svg/filter.svg");
-            filter.setColorFilter(colorFilter);
-            btnFilter.setIcon(filter);
-
-            FlatSVGIcon exit = new FlatSVGIcon("svg/exit.svg");
-            exit.setColorFilter(colorFilter);
-            btnExit.setIcon(exit);
+            btnSave.setIcon(IconUtil.getIcon("save.svg"));
+            btnPrint.setIcon(IconUtil.getIcon("print.svg"));
+            btnRefresh.setIcon(IconUtil.getIcon("refresh.svg"));
+            btnDelete.setIcon(IconUtil.getIcon("delete.svg"));
+            btnHistory.setIcon(IconUtil.getIcon("history.svg"));
+            btnNew.setIcon(IconUtil.getIcon("new.svg"));
+            btnLogout.setIcon(IconUtil.getIcon("logout.svg"));
+            btnFilter.setIcon(IconUtil.getIcon("filter.svg"));
+            btnExit.setIcon(IconUtil.getIcon("exit.svg"));
         });
     }
-    private final ColorFilter colorFilter = new ColorFilter(color -> {
-        if (Util1.DARK_MODE) {
-            return Color.WHITE;
-        }
-        return Color.black;
-    });
 
 // Apply the color filter to the icon
     private void initKeyFoucsManager() {

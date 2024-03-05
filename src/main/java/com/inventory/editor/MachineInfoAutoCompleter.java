@@ -6,8 +6,10 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.user.model.MachineInfo;
 import com.inventory.ui.common.MachineInfoCompleterTableModel;
 import java.awt.Color;
@@ -69,6 +71,7 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
 
@@ -80,7 +83,7 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.getTableHeader().setFont(Global.tblHeaderFont);
-               table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);

@@ -6,8 +6,10 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.GRN;
 import com.inventory.ui.common.BatchTableModel;
 import com.repo.InventoryRepo;
@@ -94,6 +96,7 @@ public class BatchAutoCompeter implements KeyListener, SelectionObserver {
             setBatch(new GRN("All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);

@@ -6,8 +6,10 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.StockUnit;
 import com.inventory.ui.setup.dialog.common.StockUnitTableModel;
 import java.awt.Color;
@@ -74,7 +76,6 @@ public final class UnitAutoCompleter implements KeyListener {
     public List<StockUnit> getListUnit() {
         return listUnit;
     }
-    
 
     public UnitAutoCompleter() {
     }
@@ -84,6 +85,7 @@ public final class UnitAutoCompleter implements KeyListener {
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);

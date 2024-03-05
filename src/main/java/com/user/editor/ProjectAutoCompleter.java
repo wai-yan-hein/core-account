@@ -6,8 +6,10 @@
 package com.user.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.user.common.ProjectTableModel;
 import com.repo.UserRepo;
 import com.user.model.Project;
@@ -81,6 +83,7 @@ public final class ProjectAutoCompleter implements KeyListener {
             setProject(new Project(new ProjectKey("All", Global.compCode), "All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         table.setModel(projectTableModel);
         table.getTableHeader().setFont(Global.lableFont);

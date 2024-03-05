@@ -103,6 +103,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
                     from Trader o
                     where o.key.compCode =:compCode
                     and o.type =:type
+                    and deleted = false
                     order by o.userCode
                     """;
         Query query = getEntityManager().createQuery(hsql);

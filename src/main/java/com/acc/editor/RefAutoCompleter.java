@@ -9,8 +9,10 @@ import com.repo.AccountRepo;
 import com.acc.common.RefTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -80,10 +82,11 @@ public final class RefAutoCompleter implements KeyListener {
             setAutoText(new VDescription("All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         table.setModel(refModel);
         table.setSize(25, 25);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());

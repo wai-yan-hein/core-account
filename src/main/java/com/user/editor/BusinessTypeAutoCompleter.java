@@ -7,7 +7,9 @@ package com.user.editor;
 
 import com.acc.model.BusinessType;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.user.common.BusinessTypeTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -57,6 +59,7 @@ public final class BusinessTypeAutoCompleter implements KeyListener {
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         tableModel = new BusinessTypeTableModel(false);

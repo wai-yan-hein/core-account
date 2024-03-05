@@ -566,7 +566,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap())
         );
 
-        tblOpening.setAutoCreateRowSorter(true);
         tblOpening.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 

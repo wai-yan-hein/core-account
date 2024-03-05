@@ -6,10 +6,12 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.Resolution;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.Stock;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockCompleterTableModel;
@@ -95,6 +97,7 @@ public final class StockAutoCompleter implements KeyListener {
         }
         initOption();
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         table.setModel(stockTableModel);

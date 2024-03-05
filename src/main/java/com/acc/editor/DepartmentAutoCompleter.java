@@ -8,8 +8,10 @@ package com.acc.editor;
 import com.acc.common.DepartmentTableModel;
 import com.acc.model.DepartmentA;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.OptionModel;
 import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Color;
@@ -117,13 +119,13 @@ public final class DepartmentAutoCompleter implements KeyListener {
         this.custom = custom;
         this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         depTableModel.setTable(table);
         table.setModel(depTableModel);
-        table.getTableHeader().setFont(Global.textFont);
-        table.setFont(Global.lableFont); // NOI18N
+        table.getTableHeader().setFont(Global.tblHeaderFont);
+        table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());

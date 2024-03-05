@@ -8,6 +8,7 @@ package com.inventory.ui.setup;
 import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -31,6 +32,7 @@ import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import com.repo.UserRepo;
+import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileWriter;
@@ -65,7 +67,7 @@ import org.springframework.core.task.TaskExecutor;
 @Slf4j
 public class CustomerSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
-    private int selectRow = -1;
+    private int row = 0;
     private Trader customer = new Trader();
     private final CustomerTabelModel customerTabelModel = new CustomerTabelModel();
     private TaskExecutor taskExecutor;
@@ -204,7 +206,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .doOnSuccess((t) -> {
                     customerTabelModel.setListCustomer(t);
                     lblRecord.setText(String.valueOf(t.size()));
+                })
+                .doOnTerminate(() -> {
                     progress.setIndeterminate(false);
+                    ComponentUtil.scrollTable(tblCustomer, row, 0);
                 }).subscribe();
 
     }
@@ -310,7 +315,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             observer.selected("save", false);
             inventoryRepo.saveTrader(customer).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    customerTabelModel.setCustomer(selectRow, customer);
+                    customerTabelModel.setCustomer(row, customer);
                 } else {
                     customerTabelModel.addCustomer(customer);
                 }
@@ -382,9 +387,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     };
 
     private void setCustomer() {
-        if (tblCustomer.getSelectedRow() >= 0) {
-            selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
-            setCustomer(customerTabelModel.getCustomer(selectRow));
+        row = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
+        if (row >= 0) {
+            setCustomer(customerTabelModel.getCustomer(row));
         }
     }
 
@@ -1287,8 +1292,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 break;
             case "tblCustomer":
                 if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
-                    setCustomer(customerTabelModel.getCustomer(selectRow));
+                    row = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
+                    setCustomer(customerTabelModel.getCustomer(row));
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1319,11 +1324,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     @Override
     public void delete() {
-        if (selectRow >= 0) {
-            Trader t = customerTabelModel.getCustomer(selectRow);
+        if (row >= 0) {
+            Trader t = customerTabelModel.getCustomer(row);
             inventoryRepo.deleteTrader(t.getKey()).subscribe((list) -> {
                 if (list.isEmpty()) {
-                    customerTabelModel.deleteCustomer(selectRow);
+                    customerTabelModel.deleteCustomer(row);
                     clear();
                     JOptionPane.showMessageDialog(this, "Deleted.");
                 } else {

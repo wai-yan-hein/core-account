@@ -36,7 +36,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="210" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" pref="204" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -63,6 +63,10 @@
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="lblCount" min="-2" pref="158" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
+                  <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="txtTotal" min="-2" pref="180" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -73,6 +77,8 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblCount" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtTotal" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -94,6 +100,16 @@
               <Connection code="Global.lableFont" type="code"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Records :"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JFormattedTextField" name="txtTotal">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel4">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Total :"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -118,6 +134,9 @@
               <Connection code="Global.tblRowHeight" type="code"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tblJournalMouseClicked"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

@@ -13,8 +13,10 @@ import com.acc.common.COATableModel;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -100,9 +102,9 @@ public final class COA3AutoCompleter implements KeyListener {
             }
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         table.getTableHeader().setFont(Global.tblHeaderFont);
-        table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
@@ -192,7 +194,6 @@ public final class COA3AutoCompleter implements KeyListener {
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
                 if (observer != null) {
-                    observer.selected("COA", coa.getKey().getCoaCode());
                     observer.selected("COA_TF", (JTextField) textComp);
                 }
             }

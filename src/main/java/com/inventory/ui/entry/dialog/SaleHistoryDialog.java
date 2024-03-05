@@ -110,7 +110,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private void initClientProperty() {
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, UIManager.get(IconUtil.SEARCH_ICON));
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     public void initMain() {

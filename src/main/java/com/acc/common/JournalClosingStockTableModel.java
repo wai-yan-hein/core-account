@@ -32,26 +32,26 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JournalClosingStockTableModel extends AbstractTableModel {
-    
+
     private List<StockOP> listGV = new ArrayList();
-    private final String[] columnNames = {"Stock Closing Date", "Dep :", "Code", "COA Name", "Project No", "Currency", "Closing Amount"};
+    private final String[] columnNames = {"Date", "Dep :", "Code", "COA Name", "Project No", "Currency", "Closing Amount"};
     private JTable parent;
     private AccountRepo accountRepo;
     private DepartmentA department;
     private JProgressBar progress;
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public void setDepartment(DepartmentA department) {
         this.department = department;
     }
-    
+
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
+
     @Override
     public int getRowCount() {
         if (listGV == null) {
@@ -59,17 +59,17 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return listGV.size();
     }
-    
+
     @Override
     public int getColumnCount() {
         return columnNames.length;
     }
-    
+
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
     }
-    
+
     @Override
     public Object getValueAt(int row, int column) {
         try {
@@ -99,7 +99,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return null;
     }
-    
+
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
@@ -142,7 +142,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                     }
                     case 6 ->
                         op.setClAmt(Util1.getDouble(value));
-                    
+
                 }
                 save(op, row, column);
                 fireTableRowsUpdated(row, row);
@@ -152,16 +152,16 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
-    
+
     private void foucsTable(int row, int colum) {
         parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(colum, colum);
     }
-    
+
     public StockOP getGl(int row) {
         return listGV.get(row);
     }
-    
+
     @Override
     public Class getColumnClass(int column) {
         if (column == 6) {
@@ -169,54 +169,54 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return String.class;
     }
-    
+
     public List<StockOP> getListGV() {
         return listGV;
     }
-    
+
     public void setListGV(List<StockOP> listGV) {
         this.listGV = listGV;
         fireTableDataChanged();
     }
-    
+
     @Override
     public boolean isCellEditable(int row, int column) {
         StockOP op = listGV.get(row);
         return !op.isTranLock();
-        
+
     }
-    
+
     public void addGV(StockOP op) {
         listGV.add(op);
         fireTableRowsInserted(listGV.size() - 1, listGV.size() - 1);
     }
-    
+
     public void setGVGroup(int row, StockOP op) {
         if (!listGV.isEmpty()) {
             listGV.set(row, op);
             fireTableRowsUpdated(row, row);
         }
     }
-    
+
     public JTable getParent() {
         return parent;
     }
-    
+
     public void setParent(JTable parent) {
         this.parent = parent;
     }
-    
+
     public int getListSize() {
         return listGV.size();
     }
-    
+
     public void delete(int row) {
         if (!listGV.isEmpty()) {
             listGV.remove(row);
             fireTableRowsDeleted(row, row);
         }
     }
-    
+
     private void save(StockOP op, int row, int column) {
         op.setUpdatedDate(LocalDateTime.now());
         if (isValidEntry(op, column)) {
@@ -238,10 +238,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 addNewRow();
                 progress.setIndeterminate(false);
             }).subscribe();
-            
+
         }
     }
-    
+
     private boolean isValidEntry(StockOP op, int column) {
         if (op.getTranDate() == null && column > 0) {
             JOptionPane.showMessageDialog(parent, "Invalid Closing Date.");
@@ -260,7 +260,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
         }
         return true;
     }
-    
+
     public boolean hasEmptyRow() {
         boolean status = true;
         if (listGV.isEmpty() || listGV == null) {
@@ -271,10 +271,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 status = false;
             }
         }
-        
+
         return status;
     }
-    
+
     public void addNewRow() {
         if (hasEmptyRow()) {
             StockOP op = new StockOP();
@@ -290,9 +290,9 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             }
             listGV.add(op);
             fireTableRowsInserted(listGV.size() - 1, listGV.size() - 1);
-            
+
         }
         progress.setIndeterminate(false);
     }
-    
+
 }

@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
-    
+
     @Getter
     @Setter
     private boolean confirm;
@@ -48,19 +48,20 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         super(frame, true);
         initComponents();
         initTextFormat();
-        
+
     }
-    
+
     private void initTextFormat() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
         txtPayment.getDocument().addDocumentListener(dl);
+        txtOpening.getDocument().addDocumentListener(dl);
     }
-    
+
     private void refresh() {
         setData(sh, newState);
     }
-    
+
     public void setData(SaleHis sh, boolean newState) {
         this.sh = sh;
         this.newState = newState;
@@ -86,7 +87,7 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         }
         setVisible(true);
     }
-    
+
     private void initData(SaleHis sh) {
         txtOpening.setValue(sh.getOpening());
         txtOpening.setForeground(sh.getOpening() < 0 ? Color.red : Color.green);
@@ -95,22 +96,22 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         txtPayment.setValue(sh.getTotalPayment());
         txtClosing.setValue(sh.getOutstanding());
         txtPayment.setEditable(true);
+        txtOpening.setEditable(true);
     }
-    
+
     private void calPayment() {
         SwingUtilities.invokeLater(() -> {
-            log.info("calPayment.");
+            double opening = Util1.getDouble(txtOpening.getText());
+            double vouTotal = Util1.getDouble(txtVouTotal.getText());
+            double balance = opening + vouTotal;
             double payment = Util1.getDouble(txtPayment.getText());
-            double balance = Util1.getDouble(txtBalance.getValue());
-            log.info("payment" + payment + "");
             double outstanding = balance - payment;
+            txtBalance.setValue(balance);
             txtClosing.setValue(outstanding);
             txtClosing.setForeground(outstanding < 0 ? Color.red : Color.green);
-            //set data
-
         });
     }
-    
+
     private void confirm() {
         double payment = Util1.getDouble(txtPayment.getValue());
         double balance = Util1.getDouble(txtBalance.getValue());
@@ -121,7 +122,7 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         setConfirm(true);
         setVisible(false);
     }
-    
+
     private void clear() {
         txtOpening.setValue(0);
         txtVouTotal.setValue(0);
@@ -134,13 +135,13 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         public void insertUpdate(DocumentEvent e) {
             calPayment();
         }
-        
+
         @Override
         public void removeUpdate(DocumentEvent e) {
             calPayment();
-            
+
         }
-        
+
         @Override
         public void changedUpdate(DocumentEvent e) {
             calPayment();
@@ -268,6 +269,11 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         txtOpening.setEditable(false);
         txtOpening.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtOpening.setFont(Global.amtFont);
+        txtOpening.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtOpeningActionPerformed(evt);
+            }
+        });
 
         jButton1.setBackground(Util1.DARK_MODE?new Color(50, 50, 50):Color.white);
         jButton1.setIcon(IconUtil.getIcon("refresh.svg"));
@@ -398,6 +404,13 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
         refresh();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void txtOpeningActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOpeningActionPerformed
+        // TODO add your handling code here:
+        SwingUtilities.invokeLater(() -> {
+            txtPayment.requestFocus();
+        });
+    }//GEN-LAST:event_txtOpeningActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConfirm;
@@ -423,11 +436,11 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
     }

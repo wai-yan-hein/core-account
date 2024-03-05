@@ -554,7 +554,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtVouNo.setText(null);
         chkPaid.setSelected(ProUtil.isSalePaid());
         chkVou.setSelected(true);
-        rdoPay.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.DEFAULT_STOCK_REC)));
+        rdoPay.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.DEFAULT_STOCK_PAY)));
         chkA4.setSelected(Util1.getBoolean(ProUtil.getProperty("check.sale.A4")));
         chkA5.setSelected(Util1.getBoolean(ProUtil.getProperty("check.sale.A5")));
         if (!lblStatus.getText().equals("NEW")) {
