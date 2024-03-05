@@ -10,8 +10,10 @@ import com.acc.common.TraderATableModel;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -78,6 +80,7 @@ public final class TraderAAutoCompleter implements KeyListener {
             setTrader(new TraderA(new TraderAKey("-", Global.compCode), "All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         traderTableModel = new TraderATableModel();
         table.setModel(traderTableModel);
@@ -220,7 +223,7 @@ public final class TraderAAutoCompleter implements KeyListener {
 
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
-                 // Calculate the preferred x and y positions for the popup
+                    // Calculate the preferred x and y positions for the popup
                     if (x == 0) {
                         x = textComp.getWidth();
                         y = -200;

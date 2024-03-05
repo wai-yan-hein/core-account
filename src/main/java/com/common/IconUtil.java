@@ -14,13 +14,18 @@ import javax.swing.Icon;
  */
 public class IconUtil {
 
-    public static final String SEARCH_ICON = "icon.search";
-
+    public static final String SEARCH_ICON = "search.svg";
+    public static final String FILTER_ICON_ALT = "filter_alt.svg";
+    public static final String CALENDER = "calender.svg";
     public static final Icon getIcon(String name) {
         FlatSVGIcon icon = new FlatSVGIcon("svg/" + name);
-        FlatSVGIcon.ColorFilter f = new FlatSVGIcon.ColorFilter();
-        f.add(Color.white, Color.black);
-        icon.setColorFilter(f);
+        icon.setColorFilter(colorFilter);
         return icon;
     }
+    private static final FlatSVGIcon.ColorFilter colorFilter = new FlatSVGIcon.ColorFilter(color -> {
+        if (Util1.DARK_MODE) {
+            return Color.WHITE;
+        }
+        return Color.black;
+    });
 }

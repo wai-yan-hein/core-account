@@ -745,6 +745,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         double drAmt = Util1.getDouble(txtDr.getValue());
         double crAmt = Util1.getDouble(txtCr.getValue());
         double closing = opening + drAmt - crAmt;
+        closing = closing == -0 ? 0 : closing;
         txtOpening.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
         txtClosing.setForeground(closing >= 0 ? Color.GREEN : Color.RED);
         txtClosing.setValue(closing);
@@ -862,7 +863,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        tblCash.setAutoCreateRowSorter(true);
         tblCash.setFont(Global.textFont);
         tblCash.setToolTipText("");
         tblCash.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -1337,7 +1337,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         .addGap(5, 5, 5)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(panelOption, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                            .addComponent(panelOption, javax.swing.GroupLayout.PREFERRED_SIZE, 118, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(scroll)

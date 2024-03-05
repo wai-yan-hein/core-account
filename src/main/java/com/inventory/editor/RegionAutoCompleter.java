@@ -6,8 +6,10 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.Region;
 import com.inventory.entity.RegionKey;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
@@ -86,6 +88,7 @@ public final class RegionAutoCompleter implements KeyListener {
             setRegion(sm);
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         table.setModel(regionTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);

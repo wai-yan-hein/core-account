@@ -55,6 +55,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private UserRepo userRepo;
     private Mono<List<Currency>> monoCur;
     private Mono<List<DepartmentA>> monoDep;
+    private int row = 0;
+    private int column = 0;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -96,6 +98,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
     private void initListener() {
         ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
         tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
     }
 
@@ -155,14 +158,20 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         filter.setDeptCode(getDeptCode());
         filter.setCurCode(getCurCode());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
-        accountRepo.searchOP(filter).subscribe((t) -> {
+        accountRepo.searchOP(filter).doOnSuccess((t) -> {
             checkDateLock(t);
             tableModel.setListGV(t);
+        }).doOnTerminate(() -> {
             tableModel.addNewRow();
             lblCount.setText(tableModel.getListSize() + "");
             progress.setIndeterminate(false);
-            focusOnTable();
-        });
+            calTotal();
+            ComponentUtil.scrollTable(tblJournal, row, column);
+        }).subscribe();
+    }
+    private void calTotal(){
+        double ttlAmt =tableModel.getListGV().stream().mapToDouble((value) -> value.getClAmt()).sum();
+        txtTotal.setValue(ttlAmt);
     }
 
     private void checkDateLock(List<StockOP> list) {
@@ -219,15 +228,15 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblJournal.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        monoDep.subscribe((t) -> {
+        monoDep.doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
-        });
+        }).subscribe();
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(4).setCellEditor(new ProjectCellEditor(userRepo));
-        monoCur.subscribe((t) -> {
+        monoCur.doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(5).setCellEditor(new CurrencyEditor(t));
-        });
+        }).subscribe();
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
 
     }
@@ -251,7 +260,6 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -264,6 +272,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         jPanel2 = new javax.swing.JPanel();
         lblCount = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        txtTotal = new javax.swing.JFormattedTextField();
+        jLabel4 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblJournal = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
@@ -290,6 +300,10 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Records :");
 
+        txtTotal.setEditable(false);
+
+        jLabel4.setText("Total :");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -299,7 +313,11 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 .addComponent(jLabel5)
                 .addGap(18, 18, 18)
                 .addComponent(lblCount, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -307,7 +325,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(lblCount))
+                    .addComponent(lblCount)
+                    .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
                 .addContainerGap())
         );
 
@@ -325,6 +345,11 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         ));
         tblJournal.setName("tblJournal"); // NOI18N
         tblJournal.setRowHeight(Global.tblRowHeight);
+        tblJournal.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblJournalMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblJournal);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -410,7 +435,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -422,11 +447,19 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         observeMain();
     }//GEN-LAST:event_formComponentShown
 
+    private void tblJournalMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblJournalMouseClicked
+        // TODO add your handling code here:
+        row = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
+        column = tblJournal.convertColumnIndexToModel(tblJournal.getSelectedColumn());
+
+    }//GEN-LAST:event_tblJournalMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
@@ -438,6 +471,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtProjectNo;
+    private javax.swing.JFormattedTextField txtTotal;
     // End of variables declaration//GEN-END:variables
 
     @Override

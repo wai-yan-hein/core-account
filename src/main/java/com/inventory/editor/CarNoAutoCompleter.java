@@ -7,8 +7,10 @@ package com.inventory.editor;
 import com.acc.common.DespTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -41,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Athu Sint
  */
 @Slf4j
-public class CarNoAutoCompleter implements KeyListener {
+public final class CarNoAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
@@ -81,9 +83,10 @@ public class CarNoAutoCompleter implements KeyListener {
             setAutoText(new VDescription("All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         table.setModel(despModel);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.getTableHeader().setFont(Global.lableFont);
