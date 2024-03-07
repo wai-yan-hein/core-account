@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui.setup.common;
+package com.user.common;
 
 import com.user.model.Currency;
 import java.util.ArrayList;

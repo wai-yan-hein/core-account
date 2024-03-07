@@ -899,6 +899,7 @@ public class Util1 {
 
     }
 
+
     public static String toFormatDate(String obj, int length) {
         String[] arr = obj.split("(?<=\\G.{2})");
         if (length == 8) {

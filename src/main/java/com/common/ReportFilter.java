@@ -60,6 +60,7 @@ public class ReportFilter {
     private String labourGroupCode;
     private String warehouseCode;
     private int reportType;
+    private String mode;
     private boolean summary;
     private String remark;
     private String userCode;

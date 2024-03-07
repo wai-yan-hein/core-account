@@ -6,7 +6,6 @@
 package com.acc.dialog;
 
 import com.common.Global;
-import com.common.SelectionObserver;
 import com.common.Util1;
 import com.toedter.calendar.JDateChooser;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -16,22 +15,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class DatePickerDialog extends javax.swing.JDialog implements KeyListener {
-
-    private static final Logger log = LoggerFactory.getLogger(DatePickerDialog.class);
-
-    private SelectionObserver observer;
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public JDateChooser getTxtFromDate() {
         return txtFromDate;
@@ -275,10 +266,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
                     case KeyEvent.VK_ENTER -> {
                         if (sourceObj != null) {
                             String date = ((JTextFieldDateEditor) sourceObj).getText();
-                            if (date.length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(date, date.length());
-                                txtFromDate.setDate(Util1.parseDate(toFormatDate, "dd/MM/yyyy"));
-                            }
+                            txtFromDate.setDate(Util1.formatDate(date));
                         }
                         txtToDate.requestFocusInWindow();
                     }
@@ -294,10 +282,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
                     case KeyEvent.VK_ENTER -> {
                         if (sourceObj != null) {
                             String date = ((JTextFieldDateEditor) sourceObj).getText();
-                            if (date.length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(date, date.length());
-                                txtToDate.setDate(Util1.parseDate(toFormatDate, "dd/MM/yyyy"));
-                            }
+                            txtToDate.setDate(Util1.formatDate(date));
                         }
                         btnOK.requestFocus();
                     }

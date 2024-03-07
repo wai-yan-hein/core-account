@@ -5,6 +5,7 @@
 package com.repo;
 
 import com.model.VoucherInfo;
+import com.user.model.SyncModel;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,5 +139,14 @@ public class HMSRepo {
                     .bodyToMono(String.class);
         }
         return Mono.empty();
+    }
+
+    public Mono<Boolean> syncVoucher(List<SyncModel> list) {
+        return hmsApi.post()
+                .uri("/syncVoucher")
+                .body(Mono.just(list), List.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+
     }
 }

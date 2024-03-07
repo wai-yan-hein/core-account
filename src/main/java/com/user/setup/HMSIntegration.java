@@ -4,6 +4,7 @@
  */
 package com.user.setup;
 
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -13,6 +14,7 @@ import com.model.VoucherInfoEnum;
 import com.repo.AccountRepo;
 import com.repo.HMSRepo;
 import com.user.common.HMSIntegrationTableModel;
+import com.user.dialog.SyncHMSDialog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +36,7 @@ public class HMSIntegration extends javax.swing.JPanel {
     private final HMSIntegrationTableModel tableModel = new HMSIntegrationTableModel();
     private JProgressBar progress;
     private SelectionObserver observer;
+    private SyncHMSDialog hMSDialog;
 
     public void setHmsRepo(HMSRepo hmsRepo) {
         this.hmsRepo = hmsRepo;
@@ -65,12 +68,7 @@ public class HMSIntegration extends javax.swing.JPanel {
     }
 
     private void initFormat() {
-        txtHMSTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtAccTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtDiffAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtHMSTotal.setFont(Global.amtFont);
-        txtAccTotal.setFont(Global.amtFont);
-        txtDiffAmt.setFont(Global.amtFont);
+        ComponentUtil.setTextProperty(this);
     }
 
     private void initDate() {
@@ -220,6 +218,17 @@ public class HMSIntegration extends javax.swing.JPanel {
         btnCheck.setEnabled(status);
     }
 
+    private void hmsDailog() {
+        if (hMSDialog == null) {
+            hMSDialog = new SyncHMSDialog(Global.parentForm);
+            hMSDialog.setLocationRelativeTo(null);
+            hMSDialog.setSize(Global.width / 2, Global.height / 2);
+            hMSDialog.setHmsRepo(hmsRepo);
+            hMSDialog.initMain();
+        }
+        hMSDialog.setVisible(true);
+    }
+
     private void observerMain() {
         observer.selected("enableToolBar", false);
     }
@@ -255,6 +264,7 @@ public class HMSIntegration extends javax.swing.JPanel {
         txtAccTotal = new javax.swing.JFormattedTextField();
         jLabel7 = new javax.swing.JLabel();
         txtDiffAmt = new javax.swing.JFormattedTextField();
+        jButton1 = new javax.swing.JButton();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -409,6 +419,14 @@ public class HMSIntegration extends javax.swing.JPanel {
 
         txtDiffAmt.setEditable(false);
 
+        jButton1.setFont(Global.lableFont);
+        jButton1.setText("Sync Voucher");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -426,7 +444,9 @@ public class HMSIntegration extends javax.swing.JPanel {
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtDiffAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -438,7 +458,8 @@ public class HMSIntegration extends javax.swing.JPanel {
                     .addComponent(jLabel6)
                     .addComponent(txtAccTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel7)
-                    .addComponent(txtDiffAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtDiffAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
                 .addContainerGap())
         );
 
@@ -463,7 +484,7 @@ public class HMSIntegration extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -485,11 +506,17 @@ public class HMSIntegration extends javax.swing.JPanel {
         observerMain();
     }//GEN-LAST:event_tblAuditComponentShown
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        hmsDailog();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCheck;
     private javax.swing.JButton btnSync;
     private javax.swing.JComboBox<VoucherInfoEnum> cboType;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

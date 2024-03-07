@@ -46,10 +46,6 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-
-import net.coderazzi.filters.gui.AutoChoices;
-
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -74,7 +70,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private TraderAAutoCompleter tradeAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
-    private TableFilterHeader filterHeader;
     private JProgressBar progress;
     private int row = 0;
     private int column = 0;
@@ -229,10 +224,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
-        filterHeader = new TableFilterHeader(tblOpening, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
     }
 
     // allo cell editable for table
@@ -404,7 +395,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
-        filterHeader.setVisible(!filterHeader.isVisible());
     }
 
     @Override
