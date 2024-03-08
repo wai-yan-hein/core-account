@@ -6,6 +6,7 @@ package com.acc.setup;
 
 import com.repo.AccountRepo;
 import com.acc.common.OpeningBalanceTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ChartOfAccount;
@@ -23,6 +24,7 @@ import com.common.PanelControl;
 import com.common.Global;
 import com.common.Util1;
 import com.common.DecimalFormatRender;
+import com.common.IconUtil;
 import com.common.ReportFilter;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
@@ -37,8 +39,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-//import com.cv.accountswing.util.Util1;
-
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -73,6 +73,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private JProgressBar progress;
     private int row = 0;
     private int column = 0;
+    private FindDialog findDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -148,7 +149,12 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         txtDate.setDate(Util1.parseDate(Global.startDate, "dd/MM/yyyy"));
         initComboBox();
         initTable();
+        initFindDialog();
         searchOpening();
+    }
+
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblOpening);
     }
 
     private void initComboBox() {
@@ -395,6 +401,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     @Override

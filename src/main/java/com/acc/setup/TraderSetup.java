@@ -12,16 +12,18 @@ import com.acc.dialog.TraderImportDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
+import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.PanelControl;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.TraderGroup;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -36,7 +38,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -49,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class TraderSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
+
     private AccountRepo accountRepo;
     private int selectRow = -1;
     private TraderA trader = new TraderA();
@@ -58,12 +60,12 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+    private StartWithRowFilter swrf;
     private TraderAGroupDialog dialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
 
     public JProgressBar getProgress() {
         return progress;
@@ -87,15 +89,19 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     public TraderSetup() {
         initComponents();
         initKeyListener();
+        initFcous();
+        initClientProperty();
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
+
+    private void initFcous() {
+        ComponentUtil.addFocusListener(this);
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON, 0.9f));
+    }
 
     private void batchLock(boolean lock) {
         txtSysCode.setEnabled(lock);
@@ -135,7 +141,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
 
     private void initTable() {
         tblCustomer.setModel(traderATableModel);
-        tblCustomer.getTableHeader().setFont(Global.textFont);
+        tblCustomer.getTableHeader().setFont(Global.tblHeaderFont);
         tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(1);// Code
         tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(10);// Code
         tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(400);// Name
@@ -152,6 +158,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         });
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
+        swrf = new StartWithRowFilter(txtSearch);
     }
 
     private void searchTrader() {
@@ -268,16 +275,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         comboModel.setSelectedItem(null);
         cboGroup.repaint();
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(2).toUpperCase().replace(" ", "");
-            String text = txtFilter.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text);
-        }
-    };
 
     private void observeMain() {
         observer.selected("control", this);
@@ -336,7 +333,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         cboGroup = new javax.swing.JComboBox<>();
         scroll = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
@@ -583,15 +580,15 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         });
         scroll.setViewportView(tblCustomer);
 
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtSearch.setFont(Global.textFont);
+        txtSearch.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtFilterFocusGained(evt);
+                txtSearchFocusGained(evt);
             }
         });
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -632,7 +629,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-                    .addComponent(txtFilter)
+                    .addComponent(txtSearch)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -645,7 +642,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(scroll)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -685,20 +682,20 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSysCodeKeyReleased
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        String filter = txtFilter.getText();
+        String filter = txtSearch.getText();
         if (filter.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(startsWithFilter);
+            sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
-    private void txtFilterFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtFilterFocusGained
+    private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchFocusGained
         // TODO add your handling code here:
-        txtFilter.selectAll();
-    }//GEN-LAST:event_txtFilterFocusGained
+        txtSearch.selectAll();
+    }//GEN-LAST:event_txtSearchFocusGained
 
     private void txtRemarkKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtRemarkKeyReleased
         // TODO add your handling code here:
@@ -738,9 +735,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private javax.swing.JTextField txtCusEmail;
     private javax.swing.JTextField txtCusName;
     private javax.swing.JTextField txtCusPhone;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtNRC;
     private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtSysCode;
     // End of variables declaration//GEN-END:variables
 
@@ -752,13 +749,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusEmail.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
-        txtCusCode.addFocusListener(fa);
-        txtCusName.addFocusListener(fa);
-        txtCusPhone.addFocusListener(fa);
-        txtCusAddress.addFocusListener(fa);
-        txtCusEmail.addFocusListener(fa);
-        chkActive.addFocusListener(fa);
-        tblCustomer.addFocusListener(fa);
 
     }
 

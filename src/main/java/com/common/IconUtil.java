@@ -26,6 +26,13 @@ public class IconUtil {
         icon.setColorFilter(colorFilter);
         return icon;
     }
+
+    public static final Icon getIcon(String name, float size) {
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, size);
+        icon.setColorFilter(colorFilter);
+        return icon;
+    }
+
     public static final Image getImage(String name) {
         FlatSVGIcon icon = new FlatSVGIcon("svg/" + name);
         icon.setColorFilter(colorFilter);

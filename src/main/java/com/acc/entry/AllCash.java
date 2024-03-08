@@ -22,6 +22,7 @@ import com.acc.common.ColumnHeaderListener;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.DayBookTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.dialog.ReportModeDialog;
 import com.acc.editor.BatchCellEditor;
 import com.acc.editor.BatchNoAutoCompeter;
@@ -119,6 +120,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private int selectCol = 0;
     private final JPopupMenu sumPopup = new JPopupMenu();
     private ReportModeDialog reportModeDialog;
+    private FindDialog findDialog;
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -301,6 +303,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         initFilter();
         initTableModel();
+        initFindDialog();
         initTableCB();
         initRowHeader();
         createDateFilter();
@@ -312,7 +315,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableCB() {
-        tblCash.setAutoCreateRowSorter(true);
         tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
@@ -832,6 +834,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         reportModeDialog.setVisible(true);
         btnMode.setText(reportModeDialog.getSelectName());
         searchCash();
+    }
+
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblCash);
     }
 
     private void observeMain() {
@@ -1633,7 +1639,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
-
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     @Override
