@@ -202,8 +202,10 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     public final void setLocation(Location location) {
         this.location = location;
         if (this.location != null) {
+            listOption.add(location.getKey().getLocCode());
             this.textComp.setText(location.getLocName());
         } else {
+            initOption();
             this.textComp.setText(null);
         }
     }

@@ -103,6 +103,14 @@ public class SyncHMSDialog extends javax.swing.JDialog {
         initModel();
     }
 
+    private void selectAll() {
+        List<SyncModel> list = hmsVoucherTableModel.getListSync();
+        list.forEach((t) -> {
+            t.setSync(chkSelect.isSelected());
+        });
+        hmsVoucherTableModel.setListSync(list);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -121,6 +129,7 @@ public class SyncHMSDialog extends javax.swing.JDialog {
         btnSave = new javax.swing.JButton();
         txtStartDate = new com.toedter.calendar.JDateChooser();
         txtEndDate = new com.toedter.calendar.JDateChooser();
+        chkSelect = new javax.swing.JCheckBox();
         progress = new javax.swing.JProgressBar();
 
         setTitle("Sync HMS Dialog");
@@ -176,6 +185,14 @@ public class SyncHMSDialog extends javax.swing.JDialog {
         txtEndDate.setDateFormatString("dd/MM/yyyy");
         txtEndDate.setFont(Global.textFont);
 
+        chkSelect.setFont(Global.lableFont);
+        chkSelect.setText("Select All");
+        chkSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSelectActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -195,7 +212,10 @@ public class SyncHMSDialog extends javax.swing.JDialog {
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnClear)))
+                        .addComponent(btnClear))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -213,7 +233,9 @@ public class SyncHMSDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
                     .addComponent(btnSave))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(chkSelect)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -255,6 +277,11 @@ public class SyncHMSDialog extends javax.swing.JDialog {
         syncVoucher();
     }//GEN-LAST:event_btnSaveActionPerformed
 
+    private void chkSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSelectActionPerformed
+        // TODO add your handling code here:
+        selectAll();
+    }//GEN-LAST:event_chkSelectActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -262,6 +289,7 @@ public class SyncHMSDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JCheckBox chkSelect;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
