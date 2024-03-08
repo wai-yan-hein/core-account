@@ -174,7 +174,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                 }
                 case 6 -> {
                     //qty
-                    return record.getQty();
+                    return Util1.toNull(record.getQty());
                 }
                 case 7 -> {
                     //unit
@@ -183,11 +183,11 @@ public class ReturnInTableModel extends AbstractTableModel {
 
                 case 8 -> {
                     //price
-                    return record.getPrice();
+                    return Util1.toNull(record.getPrice());
                 }
                 case 9 -> {
                     //amount
-                    return record.getAmount();
+                    return Util1.toNull(record.getAmount());
                 }
                 default -> {
                     return new Object();

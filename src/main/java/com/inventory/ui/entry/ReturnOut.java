@@ -482,15 +482,27 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtVouTotal.setValue(totalAmount);
 
         //cal discAmt
-        float discp = Util1.getFloat(txtVouDiscP.getValue());
-        float discountAmt = (totalAmount * (discp / 100));
-        txtVouDiscount.setValue(Util1.getFloat(discountAmt));
-
+        double discp = Util1.getDouble(txtVouDiscP.getValue());
+        double disAmt = Util1.getDouble(txtVouDiscount.getValue());
+        if (discp > 0) {
+            double discountAmt = (totalAmount * (discp / 100));
+            txtVouDiscount.setValue(Util1.getDouble(discountAmt));
+        } else if (disAmt > 0) {
+            double disP = (disAmt / totalAmount) * 100;
+            txtVouDiscP.setValue(Util1.getDouble(disP));
+        }
         //calculate taxAmt
-        float taxp = Util1.getFloat(txtVouTaxP.getValue());
-        float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-        float totalTax = (afterDiscountAmt * taxp) / 100;
-        txtTax.setValue(Util1.getFloat(totalTax));
+        double taxp = Util1.getDouble(txtVouTaxP.getValue());
+        double taxAmt = Util1.getDouble(txtTax.getValue());
+        if (taxp > 0) {
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            double totalTax = (afterDiscountAmt * taxp) / 100;
+            txtTax.setValue(Util1.getDouble(totalTax));
+        } else if (taxAmt > 0) {
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            taxp = (taxAmt / afterDiscountAmt) * 100;
+            txtVouTaxP.setValue(Util1.getDouble(taxp));
+        }
         //
         txtGrandTotal.setValue(totalAmount
                 + Util1.getFloat(txtTax.getValue())
@@ -926,7 +938,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
-        txtVouTaxP.setEditable(false);
         txtVouTaxP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         txtVouTaxP.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtVouTaxP.setFont(Global.amtFont);
@@ -936,7 +947,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
-        txtTax.setEditable(false);
         txtTax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         txtTax.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtTax.setFont(Global.amtFont);

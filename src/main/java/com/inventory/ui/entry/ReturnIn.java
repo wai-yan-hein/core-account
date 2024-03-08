@@ -446,14 +446,26 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
         //cal discAmt
         double discp = Util1.getDouble(txtVouDiscP.getValue());
-        double discountAmt = (totalAmount * (discp / 100));
-        txtVouDiscount.setValue(Util1.getDouble(discountAmt));
-
+        double disAmt = Util1.getDouble(txtVouDiscount.getValue());
+        if (discp > 0) {
+            double discountAmt = (totalAmount * (discp / 100));
+            txtVouDiscount.setValue(Util1.getDouble(discountAmt));
+        } else if (disAmt > 0) {
+            double disP = (disAmt / totalAmount) * 100;
+            txtVouDiscP.setValue(Util1.getDouble(disP));
+        }
         //calculate taxAmt
         double taxp = Util1.getDouble(txtVouTaxP.getValue());
-        double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
-        double totalTax = (afterDiscountAmt * taxp) / 100;
-        txtTax.setValue(Util1.getDouble(totalTax));
+        double taxAmt = Util1.getDouble(txtTax.getValue());
+        if (taxp > 0) {
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            double totalTax = (afterDiscountAmt * taxp) / 100;
+            txtTax.setValue(Util1.getDouble(totalTax));
+        } else if (taxAmt > 0) {
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            taxp = (taxAmt / afterDiscountAmt) * 100;
+            txtVouTaxP.setValue(Util1.getDouble(taxp));
+        }
         //
         txtGrandTotal.setValue(totalAmount
                 + Util1.getDouble(txtTax.getValue())
@@ -907,7 +919,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         });
 
-        txtVouTaxP.setEditable(false);
         txtVouTaxP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         txtVouTaxP.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtVouTaxP.setFont(Global.amtFont);
@@ -917,7 +928,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         });
 
-        txtTax.setEditable(false);
         txtTax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         txtTax.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtTax.setFont(Global.amtFont);
@@ -1143,6 +1153,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     private void txtVouDiscPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDiscPActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtVouDiscP.getValue()) <= 0) {
+            txtVouDiscount.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtVouDiscPActionPerformed
 
@@ -1153,6 +1166,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     private void txtVouDiscountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDiscountActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtVouDiscount.getValue()) >= 0) {
+            txtVouDiscP.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtVouDiscountActionPerformed
 

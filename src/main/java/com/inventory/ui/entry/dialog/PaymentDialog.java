@@ -406,9 +406,7 @@ public class PaymentDialog extends javax.swing.JDialog implements KeyListener {
 
     private void txtOpeningActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOpeningActionPerformed
         // TODO add your handling code here:
-        SwingUtilities.invokeLater(() -> {
-            txtPayment.requestFocus();
-        });
+       
     }//GEN-LAST:event_txtOpeningActionPerformed
 
 
