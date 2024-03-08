@@ -22,6 +22,8 @@ import com.acc.common.ColumnHeaderListener;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.DayBookTableModel;
+import com.acc.dialog.FindDialog;
+import com.acc.dialog.ReportModeDialog;
 import com.acc.editor.BatchCellEditor;
 import com.acc.editor.BatchNoAutoCompeter;
 import com.acc.editor.COA3AutoCompleter;
@@ -35,6 +37,7 @@ import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
@@ -63,7 +66,6 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -72,12 +74,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableColumn;
 import lombok.extern.slf4j.Slf4j;
-import net.coderazzi.filters.gui.AutoChoices;
-import net.coderazzi.filters.gui.IFilterEditor;
-import net.coderazzi.filters.gui.IFilterHeaderObserver;
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -109,7 +106,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private String sourceAccId;
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
-    private TableFilterHeader filterHeader;
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
@@ -123,6 +119,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private int selectRow = 0;
     private int selectCol = 0;
     private final JPopupMenu sumPopup = new JPopupMenu();
+    private ReportModeDialog reportModeDialog;
+    private FindDialog findDialog;
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -305,6 +303,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         initFilter();
         initTableModel();
+        initFindDialog();
         initTableCB();
         initRowHeader();
         createDateFilter();
@@ -316,7 +315,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableCB() {
-        tblCash.setAutoCreateRowSorter(false);
         tblCash.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblCash.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
@@ -354,42 +352,46 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        filterHeader = new TableFilterHeader(tblCash, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
-        filterHeader.addHeaderObserver(new IFilterHeaderObserver() {
-            @Override
-            public void tableFilterEditorCreated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
-                log.info("1");
-            }
-
-            @Override
-            public void tableFilterEditorExcluded(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
-                log.info("2");
-            }
-
-            @Override
-            public void tableFilterUpdated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
-                double drAmt = sumColumn(tblCash, 10);
-                double crAmt = sumColumn(tblCash, 11);
-                JPopupMenu popupMenu = new JPopupMenu();
-                popupMenu.setFocusable(false);
-                popupMenu.setLightWeightPopupEnabled(true);
-                JFormattedTextField drAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
-                drAmtItem.setFont(Global.amtFont);
-                drAmtItem.setValue(drAmt);
-                JFormattedTextField crAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
-                crAmtItem.setFont(Global.amtFont);
-                crAmtItem.setValue(crAmt);
-                popupMenu.add(drAmtItem);
-                popupMenu.addSeparator();
-                popupMenu.add(crAmtItem);
-                int centerX = tblCash.getWidth() / 2;
-                int centerY = tblCash.getHeight() / 2;
-                popupMenu.show(tblCash, centerX, centerY);
-            }
-        });
+//        filterHeader = new TableFilterHeader(tblCash,AutoChoices.DISABLED);
+////        filterHeader.setHidePopupsOnTableUpdates(true);
+////        filterHeader.setInstantFiltering(true);
+////        filterHeader.setAutoCompletion(true);
+////        filterHeader.setAdaptiveChoices(true);
+//        filterHeader.setPosition(TableFilterHeader.Position.TOP);
+//        filterHeader.setFont(Global.textFont);
+//        filterHeader.setVisible(false);
+//        filterHeader.addHeaderObserver(new IFilterHeaderObserver() {
+//            @Override
+//            public void tableFilterEditorCreated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
+//                log.info("1");
+//            }
+//
+//            @Override
+//            public void tableFilterEditorExcluded(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
+//                log.info("2");
+//            }
+//
+//            @Override
+//            public void tableFilterUpdated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
+//                double drAmt = sumColumn(tblCash, 10);
+//                double crAmt = sumColumn(tblCash, 11);
+//                JPopupMenu popupMenu = new JPopupMenu();
+//                popupMenu.setFocusable(false);
+//                popupMenu.setLightWeightPopupEnabled(true);
+//                JFormattedTextField drAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
+//                drAmtItem.setFont(Global.amtFont);
+//                drAmtItem.setValue(drAmt);
+//                JFormattedTextField crAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
+//                crAmtItem.setFont(Global.amtFont);
+//                crAmtItem.setValue(crAmt);
+//                popupMenu.add(drAmtItem);
+//                popupMenu.addSeparator();
+//                popupMenu.add(crAmtItem);
+//                int centerX = tblCash.getWidth() / 2;
+//                int centerY = tblCash.getHeight() / 2;
+//                popupMenu.show(tblCash, centerX, centerY);
+//            }
+//        });
     }
 
     private void setGl(Gl gl) {
@@ -551,19 +553,22 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
-                    accountRepo.delete(obj).subscribe((t) -> {
-                        if (t) {
-                            if (single) {
-                                dayBookTableModel.deleteVGl(row);
-                            } else {
-                                allCashTableModel.deleteVGl(row);
-                            }
-                        }
+                    accountRepo.delete(obj).doOnSuccess((t) -> {
+                        deleteTable(row);
+                    }).doOnTerminate(() -> {
                         calculateClosing();
-                    });
+                    }).subscribe();
 
                 }
             }
+        }
+    }
+
+    private void deleteTable(int row) {
+        if (single) {
+            dayBookTableModel.deleteVGl(row);
+        } else {
+            allCashTableModel.deleteVGl(row);
         }
     }
 
@@ -593,8 +598,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     double closing = Util1.getDouble(txtClosing.getValue());
                     p.put("p_opening", op);
                     p.put("p_closing", closing);
-                    String rpName = chkSummary.isSelected() ? "IndividualLedgerSummary.jasper" : "IndividualLedger.jasper";
-                    String filePath = String.format(Global.accountRP + rpName);
+                    String filePath = String.format(Global.accountRP + getReportName());
                     InputStream input = new FileInputStream(path);
                     JsonDataSource ds = new JsonDataSource(input);
                     JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
@@ -611,7 +615,20 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         } else {
             JOptionPane.showMessageDialog(this, "Select Currency.");
         }
+    }
 
+    private String getReportName() {
+        String reportName = "IndividualLedgerSummary.jasper";
+        if (reportModeDialog != null) {
+            String name = reportModeDialog.getSelectName();
+            switch (name) {
+                case "Detail" ->
+                    reportName = "IndividualLedgerDetail.jasper";
+                case "Summary" ->
+                    reportName = "IndividualLedgerSummary.jasper";
+            }
+        }
+        return reportName;
     }
 
     private String getCurCode() {
@@ -723,10 +740,18 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setCoaLv1(coaLv1);
         filter.setCoaLv2(coaLv2);
         filter.setAcc(accCode);
-        filter.setSummary(chkSummary.isSelected());
+        filter.setMode(getMode());
         log.info("start date : " + filter.getFromDate());
         log.info("end date : " + filter.getToDate());
         return filter;
+    }
+
+    private String getMode() {
+        String mode = "Detail";
+        if (reportModeDialog != null) {
+            return reportModeDialog.getSelectName();
+        }
+        return mode;
     }
 
     private ReportFilter getOPFilter() {
@@ -782,6 +807,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void addObject(Gl gl) {
         if (DateLockUtil.isLockDate(gl.getGlDate())) {
             gl.setTranLock(true);
+        } else if (!Util1.isNull(gl.getTranSource(), "CB").equals("CB")) {
+            gl.setTranLock(true);
         }
         if (single) {
             dayBookTableModel.addObject(gl);
@@ -797,6 +824,20 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             Gl gl = getGl(selectRow);
             setGl(gl);
         }
+    }
+
+    private void reportModeDialog() {
+        if (reportModeDialog == null) {
+            reportModeDialog = new ReportModeDialog(Global.parentForm);
+            reportModeDialog.setLocationRelativeTo(null);
+        }
+        reportModeDialog.setVisible(true);
+        btnMode.setText(reportModeDialog.getSelectName());
+        searchCash();
+    }
+
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblCash);
     }
 
     private void observeMain() {
@@ -839,11 +880,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelDate = new javax.swing.JPanel();
         panelOption = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
-        chkSummary = new javax.swing.JCheckBox();
         lblRecord = new javax.swing.JFormattedTextField();
         chkAdjust = new javax.swing.JCheckBox();
-        chkLocal = new javax.swing.JCheckBox();
         lblInfo = new javax.swing.JLabel();
+        btnMode = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         txtCr = new javax.swing.JFormattedTextField();
@@ -1080,42 +1120,42 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtDepartment, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE))
+                    .addComponent(txtDepartment, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtPerson, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                    .addComponent(txtPerson, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtAccount)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE))
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                    .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtBatchNo, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                    .addComponent(txtBatchNo, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                     .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                    .addComponent(txtOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1172,13 +1212,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
         jLabel9.setText("Records : ");
 
-        chkSummary.setText("Summary Mode");
-        chkSummary.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkSummaryActionPerformed(evt);
-            }
-        });
-
         lblRecord.setEditable(false);
         lblRecord.setBorder(null);
         lblRecord.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
@@ -1191,16 +1224,21 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        chkLocal.setText("Local");
-        chkLocal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkLocalActionPerformed(evt);
-            }
-        });
-
         lblInfo.setFont(Global.lableFont);
         lblInfo.setForeground(Color.RED);
         lblInfo.setText("-");
+
+        btnMode.setBackground(Global.selectionColor);
+        btnMode.setFont(Global.lableFont);
+        btnMode.setForeground(new java.awt.Color(255, 255, 255));
+        btnMode.setIcon(IconUtil.getIcon(IconUtil.LIST_ICON)
+        );
+        btnMode.setText("Mode");
+        btnMode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModeActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelOptionLayout = new javax.swing.GroupLayout(panelOption);
         panelOption.setLayout(panelOptionLayout);
@@ -1208,17 +1246,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelOptionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chkSummary)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnMode)
+                .addGap(38, 38, 38)
                 .addComponent(chkAdjust)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkLocal)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(114, 114, 114)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 18, Short.MAX_VALUE)
                 .addContainerGap())
         );
         panelOptionLayout.setVerticalGroup(
@@ -1226,12 +1262,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(panelOptionLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chkSummary)
                     .addComponent(jLabel9)
                     .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(chkAdjust)
-                    .addComponent(chkLocal)
-                    .addComponent(lblInfo))
+                    .addComponent(lblInfo)
+                    .addComponent(btnMode))
                 .addContainerGap())
         );
 
@@ -1337,7 +1372,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         .addGap(5, 5, 5)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(panelOption, javax.swing.GroupLayout.PREFERRED_SIZE, 118, Short.MAX_VALUE))
+                            .addComponent(panelOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(scroll)
@@ -1350,7 +1385,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -1453,12 +1488,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtOptionActionPerformed
 
-    private void chkSummaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSummaryActionPerformed
-        // TODO add your handling code here:
-        chkSummary.setText(chkSummary.isSelected() ? "Summary Mode " : "Detail Mode");
-        searchCash();
-    }//GEN-LAST:event_chkSummaryActionPerformed
-
     private void txtBatchNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBatchNoFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtBatchNoFocusGained
@@ -1488,10 +1517,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tableListener(chkAdjust.isSelected());
     }//GEN-LAST:event_chkAdjustActionPerformed
 
-    private void chkLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_chkLocalActionPerformed
-
     private void tblCashMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCashMouseClicked
         // TODO add your handling code here:
         checkLock();
@@ -1509,11 +1534,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDateActionPerformed
 
+    private void btnModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModeActionPerformed
+        // TODO add your handling code here:
+        reportModeDialog();
+    }//GEN-LAST:event_btnModeActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnMode;
     private javax.swing.JCheckBox chkAdjust;
-    private javax.swing.JCheckBox chkLocal;
-    private javax.swing.JCheckBox chkSummary;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1605,14 +1634,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void refresh() {
-        chkSummary.setSelected(false);
-        chkSummary.setText("Detail Mode");
         searchCash();
     }
 
     @Override
     public void filter() {
-        filterHeader.setVisible(!filterHeader.isVisible());
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     @Override

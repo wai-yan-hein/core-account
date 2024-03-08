@@ -40,8 +40,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import net.coderazzi.filters.gui.AutoChoices;
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -76,8 +74,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
-    private TableFilterHeader filterDr;
-    private TableFilterHeader filterCr;
+    
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
@@ -131,20 +128,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         initComponents();
         initFormat();
         initKeyListener();
-        initTableFilter();
 
     }
 
-    private void initTableFilter() {
-        filterDr = new TableFilterHeader(tblDr, AutoChoices.ENABLED);
-        filterDr.setPosition(TableFilterHeader.Position.TOP);
-        filterDr.setFont(Global.textFont);
-        filterDr.setVisible(false);
-        filterCr = new TableFilterHeader(tblCr, AutoChoices.ENABLED);
-        filterCr.setPosition(TableFilterHeader.Position.TOP);
-        filterCr.setFont(Global.textFont);
-        filterCr.setVisible(false);
-    }
+    
 
     private void initKeyListener() {
         ComponentUtil.addFocusListener(this);
@@ -363,10 +350,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     }
 
-    private void enableFilter() {
-        filterDr.setVisible(!filterDr.isVisible());
-        filterCr.setVisible(!filterCr.isVisible());
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -843,7 +826,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        enableFilter();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**

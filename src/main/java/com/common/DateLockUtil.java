@@ -56,13 +56,15 @@ public class DateLockUtil {
 
     public static boolean isLockDate(LocalDateTime date) {
         if (listLock != null) {
-            LocalDate userDate = date.toLocalDate();
-            for (DateLock dateLock : listLock) {
-                LocalDate startDate = dateLock.getStartDate();
-                LocalDate endDate = dateLock.getEndDate();
-                if ((userDate.isEqual(startDate) || userDate.isEqual(endDate))
-                        || (userDate.isAfter(startDate) && userDate.isBefore(endDate))) {
-                    return true;
+            if (date != null) {
+                LocalDate userDate = date.toLocalDate();
+                for (DateLock dateLock : listLock) {
+                    LocalDate startDate = dateLock.getStartDate();
+                    LocalDate endDate = dateLock.getEndDate();
+                    if ((userDate.isEqual(startDate) || userDate.isEqual(endDate))
+                            || (userDate.isAfter(startDate) && userDate.isBefore(endDate))) {
+                        return true;
+                    }
                 }
             }
         }

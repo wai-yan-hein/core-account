@@ -9,11 +9,13 @@ import com.CloudIntegration;
 import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
@@ -100,8 +102,19 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         super(frame, true);
         initComponents();
         initKeyListener();
-        txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtPaid.setFormatterFactory(Util1.getDecimalFormat());
+        initClientProperty();
+        initProperty();
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
+    }
+
+    private void initProperty() {
+        ComponentUtil.addFocusListener(this);
+        ComponentUtil.setTextProperty(this);
     }
 
     public void initMain() {
@@ -159,7 +172,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter<>(tblVoucher.getModel());
-        tblFilter = new StartWithRowFilter(txtFilter);
+        tblFilter = new StartWithRowFilter(txtSearch);
         tblVoucher.setRowSorter(sorter);
     }
 
@@ -302,8 +315,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         chkLocal = new javax.swing.JCheckBox();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
+        txtSearch = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblTtlAmount1 = new javax.swing.JLabel();
         lblTtlRecord = new javax.swing.JLabel();
@@ -584,15 +596,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         });
         jScrollPane2.setViewportView(tblVoucher);
 
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setFont(Global.textFont);
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
-
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Search Bar");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -676,9 +685,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter)
+                                .addComponent(txtSearch)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSearch))
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -693,8 +700,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
@@ -709,21 +715,17 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
 
     private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
         // TODO add your handling code here:
-        txtCus.selectAll();
     }//GEN-LAST:event_txtCusFocusGained
 
     private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
-        // TODO add your handling code here:
-        txtVouNo.selectAll();
     }//GEN-LAST:event_txtVouNoFocusGained
 
     private void txtUserFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserFocusGained
         // TODO add your handling code here:
-        txtUser.selectAll();
     }//GEN-LAST:event_txtUserFocusGained
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
-        row =tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+        row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (evt.getClickCount() == 2) {
             select();
         }
@@ -747,14 +749,14 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         clearFilter();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(tblFilter);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
         // TODO add your handling code here:
@@ -765,11 +767,9 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }//GEN-LAST:event_txtDepFocusGained
 
     private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
-        txtProjectNo.selectAll();        // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoFocusGained
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
-        txtCurrency.selectAll();        // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
 
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
@@ -792,7 +792,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel15;
@@ -816,12 +815,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalAmt;

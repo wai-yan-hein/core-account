@@ -10,12 +10,14 @@ import com.common.ComponentUtil;
 import com.user.editor.DepartmentUserAutoCompleter;
 import com.common.ReportFilter;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -29,7 +31,6 @@ import com.inventory.ui.entry.dialog.common.MillingSearchTableModel;
 import com.repo.InventoryRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
-import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -98,6 +99,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         super(frame, true);
         initComponents();
         initKeyListener();
+        initClientProperty();
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
@@ -106,6 +108,12 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         initCombo();
         initTableVoucher();
         setTodayDate();
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initCombo() {
@@ -159,7 +167,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
-        tblFilter = new StartWithRowFilter(txtFilter);
+        tblFilter = new StartWithRowFilter(txtSearch);
         tblVoucher.setRowSorter(sorter);
     }
 
@@ -321,8 +329,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
-        txtFilter = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
+        txtSearch = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblTtlRecord = new javax.swing.JLabel();
         txtPaid = new javax.swing.JFormattedTextField();
@@ -666,15 +673,12 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         });
         jScrollPane2.setViewportView(tblVoucher);
 
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setFont(Global.textFont);
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
-
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Search Bar");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -757,9 +761,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter)
+                                .addComponent(txtSearch)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSearch))
                             .addComponent(jScrollPane2)
@@ -775,8 +777,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -800,14 +801,14 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         search();
     }//GEN-LAST:event_btnSearchActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(tblFilter);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
         // TODO add your handling code here:
@@ -899,7 +900,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
@@ -925,7 +925,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLocation;
@@ -933,6 +932,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalAmt;

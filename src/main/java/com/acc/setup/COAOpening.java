@@ -6,6 +6,7 @@ package com.acc.setup;
 
 import com.repo.AccountRepo;
 import com.acc.common.OpeningBalanceTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ChartOfAccount;
@@ -23,6 +24,7 @@ import com.common.PanelControl;
 import com.common.Global;
 import com.common.Util1;
 import com.common.DecimalFormatRender;
+import com.common.IconUtil;
 import com.common.ReportFilter;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
@@ -37,8 +39,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-//import com.cv.accountswing.util.Util1;
-
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -46,10 +46,6 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-
-import net.coderazzi.filters.gui.AutoChoices;
-
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -74,10 +70,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private TraderAAutoCompleter tradeAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
-    private TableFilterHeader filterHeader;
     private JProgressBar progress;
     private int row = 0;
     private int column = 0;
+    private FindDialog findDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -153,7 +149,12 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         txtDate.setDate(Util1.parseDate(Global.startDate, "dd/MM/yyyy"));
         initComboBox();
         initTable();
+        initFindDialog();
         searchOpening();
+    }
+
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblOpening);
     }
 
     private void initComboBox() {
@@ -229,10 +230,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
-        filterHeader = new TableFilterHeader(tblOpening, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
     }
 
     // allo cell editable for table
@@ -404,7 +401,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
-        filterHeader.setVisible(!filterHeader.isVisible());
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     @Override

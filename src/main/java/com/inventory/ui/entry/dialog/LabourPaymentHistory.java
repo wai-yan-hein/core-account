@@ -8,11 +8,13 @@ package com.inventory.ui.entry.dialog;
 import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LabourGroupAutoCompleter;
 import com.inventory.entity.LabourGroup;
@@ -70,7 +72,7 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
         initComponents();
         initKeyListener();
         initFocus();
-        setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        initClientProperty();
     }
 
     public void initMain() {
@@ -81,6 +83,11 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
 
     private void initFocus() {
         ComponentUtil.addFocusListener(this);
+    }
+     private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initCombo() {
@@ -114,7 +121,7 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
         tblVoucher.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
-        tblFilter = new StartWithRowFilter(txtFilter);
+        tblFilter = new StartWithRowFilter(txtSearch);
         tblVoucher.setRowSorter(sorter);
     }
 
@@ -222,10 +229,9 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
         txtCurrency = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtLabour = new javax.swing.JTextField();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         lblTtlRecord = new javax.swing.JLabel();
         txtTotalRecord = new javax.swing.JFormattedTextField();
@@ -398,10 +404,10 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
 
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setFont(Global.textFont);
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -424,9 +430,6 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
             }
         });
         jScrollPane1.setViewportView(tblVoucher);
-
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Search Bar");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -497,9 +500,7 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFilter)
+                                .addComponent(txtSearch)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSearch))
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -514,9 +515,8 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnSearch)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -553,14 +553,14 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
         clearFilter();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(tblFilter);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         // TODO add your handling code here:
@@ -586,7 +586,6 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton btnSearch;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -602,11 +601,11 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtCurrency;
-    private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLabour;
     private javax.swing.JFormattedTextField txtPayment;
     private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtSearch;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;

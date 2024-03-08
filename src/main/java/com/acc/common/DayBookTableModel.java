@@ -497,7 +497,7 @@ public class DayBookTableModel extends AbstractTableModel {
         }
     }
 
-    public void addObject(Gl gl) {
+    public  void addObject(Gl gl) {
         listVGl.add(gl);
         drAmt += gl.getDrAmt();
         crAmt += gl.getCrAmt();
@@ -509,4 +509,5 @@ public class DayBookTableModel extends AbstractTableModel {
             fireTableRowsInserted(0, 0);
         }
     }
+
 }

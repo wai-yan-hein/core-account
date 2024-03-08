@@ -6,11 +6,13 @@ package com.common;
 
 import javax.swing.RowFilter;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author WSwe
  */
+@Slf4j
 public class StartWithRowFilter extends RowFilter<Object, Object> {
 
     private final JTextComponent jtf;
@@ -22,9 +24,9 @@ public class StartWithRowFilter extends RowFilter<Object, Object> {
     @Override
     public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
         for (int i = 0; i < entry.getValueCount(); i++) {
-            if (entry.getStringValue(i) != null) {
-                if (entry.getStringValue(i).toUpperCase().startsWith(
-                        jtf.getText().toUpperCase())) {
+            String value =entry.getStringValue(i);
+            if (!Util1.isNullOrEmpty(value)) {
+                if (value.toUpperCase().startsWith(jtf.getText().toUpperCase())) {
                     return true;
                 }
             }

@@ -47,8 +47,6 @@ import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.coderazzi.filters.gui.AutoChoices;
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -82,7 +80,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private COAAutoCompleter cOAAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private RegionAutoCompleter regionAutoCompleter;
-    private TableFilterHeader filterHeader;
     private boolean isApPrCal = false;
     @Setter
     private SelectionObserver observer;
@@ -178,10 +175,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             }
 
         });
-        filterHeader = new TableFilterHeader(tblAPAR, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
     }
 
     private void openTBDDialog(String coaCode, String traderCode, String traderName) {
@@ -905,7 +898,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
-        filterHeader.setVisible(!filterHeader.isVisible());
     }
 
     @Override

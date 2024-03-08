@@ -172,17 +172,17 @@ public class COAGroupChildTableModel extends AbstractTableModel {
         if (isValidCOA(coa)) {
             coa.setCoaNameEng(Util1.convertToUniCode(coa.getCoaNameEng()));
             progress.setIndeterminate(true);
-            accountRepo.saveCOA(coa).subscribe((t) -> {
-                if (t.getKey().getCoaCode() != null) {
+            accountRepo.saveCOA(coa).doOnSuccess((t) -> {
+                if (t != null) {
                     listCOA.set(row, t);
                     addEmptyRow();
                     parent.setRowSelectionInterval(row + 1, row + 1);
                     parent.setColumnSelectionInterval(1, 1);
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(parent, e.getMessage());
-            });
+                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR);
+            }).subscribe();
 
         }
     }
@@ -257,12 +257,12 @@ public class COAGroupChildTableModel extends AbstractTableModel {
         } else if (Util1.isNull(coa.getCoaLevel())) {
             status = false;
         } else {
+            coa.setCoaOption("USR");
             if (Util1.isNullOrEmpty(coa.getKey().getCoaCode())) {
                 coa.setActive(true);
                 coa.setCreatedBy(Global.loginUser.getUserCode());
                 coa.setCreatedDate(LocalDateTime.now());
                 coa.setMacId(Global.macId);
-                coa.setCoaOption("USR");
             } else {
                 coa.setModifiedBy(Global.loginUser.getUserCode());
             }

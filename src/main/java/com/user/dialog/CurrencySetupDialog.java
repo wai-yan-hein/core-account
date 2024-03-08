@@ -10,7 +10,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.MessageType;
 import com.user.model.Currency;
-import com.inventory.ui.setup.common.CurrencyTabelModel;
+import com.user.common.CurrencyTabelModel;
 import com.repo.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

@@ -69,8 +69,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import net.coderazzi.filters.gui.AutoChoices;
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -103,7 +101,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private SelectionObserver observer;
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
-    private TableFilterHeader filterHeader;
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
@@ -323,10 +320,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        filterHeader = new TableFilterHeader(tblCash, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
     }
 
     private void actionMapping() {
@@ -498,7 +491,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         filter.setCoaLv1(coaLv1);
         filter.setCoaLv2(coaLv2);
         filter.setAcc(accCode);
-        filter.setSummary(chkSummary.isSelected());
         return filter;
     }
 
@@ -1227,7 +1219,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
     @Override
     public void filter() {
-        filterHeader.setVisible(!filterHeader.isVisible());
     }
 
     @Override

@@ -46,8 +46,6 @@ import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.coderazzi.filters.gui.AutoChoices;
-import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -86,7 +84,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private SelectionObserver observer;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
-    private TableFilterHeader filterHeader;
     private boolean isGLCal = false;
     private JProgressBar progress;
 
@@ -196,10 +193,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 }
             }
         });
-        filterHeader = new TableFilterHeader(tblGL, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
     }
 
     private String getCurCode() {
@@ -921,7 +914,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
-        filterHeader.setVisible(!filterHeader.isVisible());
     }
 
     @Override

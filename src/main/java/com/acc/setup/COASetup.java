@@ -27,8 +27,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import net.coderazzi.filters.gui.AutoChoices;
-import net.coderazzi.filters.gui.TableFilterHeader;
 
 /**
  *
@@ -40,7 +38,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private final COAHeadTableModel coaHeadTableModel = new COAHeadTableModel();
     private final COAGroupTableModel coaGroupTableModel = new COAGroupTableModel();
     private final COAGroupChildTableModel cOAGroupChildTableModel = new COAGroupChildTableModel();
-    private TableFilterHeader filterHeader;
     private AccountRepo accountRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
@@ -106,10 +103,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaHead.setDefaultRenderer(Object.class, new TableCellRender());
         tblCoaHead.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        filterHeader = new TableFilterHeader(tblCoaHead, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
         searchHead();
     }
 
@@ -152,10 +145,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 }
             }
         });
-        filterHeader = new TableFilterHeader(tblCoaGroup, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
 
     }
 
@@ -177,10 +166,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAGroupChild.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        filterHeader = new TableFilterHeader(tblCOAGroupChild, AutoChoices.ENABLED);
-        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-        filterHeader.setFont(Global.textFont);
-        filterHeader.setVisible(false);
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);

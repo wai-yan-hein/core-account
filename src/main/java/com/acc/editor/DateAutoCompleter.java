@@ -15,7 +15,6 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatClientProperties;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -28,8 +27,6 @@ import java.time.format.DateTimeFormatter;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -42,6 +39,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -61,21 +59,18 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
     private int x = 0;
     private boolean popupOpen = true;
     private final DatePickerDialog dialog = new DatePickerDialog();
+    @Setter
     private SelectionObserver observer;
-    private final Image image = new ImageIcon(this.getClass().getResource("/images/date.png")).getImage();
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public DateAutoCompleter() {
     }
 
     public DateAutoCompleter(JTextComponent comp) {
         this.textComp = comp;
+        initDateDialog();
         setTodayDate();
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.CALENDER));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.CALENDER_ICON));
         textComp.setFont(Global.textFont);
         dateTableModel = new DateTableModel(Global.listDate);
         table.setModel(dateTableModel);
@@ -176,10 +171,14 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         }
     }
 
+    private void initDateDialog() {
+        dialog.setIconImage(IconUtil.getImage(IconUtil.CALENDER_ICON));
+        dialog.setLocationRelativeTo(null);
+    }
+
     private void generateDate(DateModel date) {
         if (date.getDescription().equals("Custom")) {
-            dialog.setIconImage(image);
-            dialog.setLocationRelativeTo(null);
+            closePopup();
             dialog.setVisible(true);
             String startDate = dialog.getStartDate();
             String endDate = dialog.getEndDate();
