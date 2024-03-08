@@ -4,6 +4,7 @@
  */
 package com.ui.management;
 
+import com.acc.dialog.FindDialog;
 import com.common.ColumnColorCellRenderer;
 import com.common.ComponentUtil;
 import com.common.DecimalFormatRender;
@@ -12,7 +13,6 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
-import com.common.StartWithRowFilter;
 import com.common.Util1;
 import com.google.gson.reflect.TypeToken;
 import com.inventory.editor.BrandAutoCompleter;
@@ -31,8 +31,6 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -50,9 +48,8 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     private JProgressBar progress;
     private SelectionObserver observer;
     private SBWeightDetailDialog dialog;
-    private TableRowSorter<TableModel> sorter;
-    private StartWithRowFilter swrf;
     private StockAutoCompleter stockAutoCompleter;
+    private FindDialog findDialog;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -78,8 +75,13 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         setTodayDate();
         initCompeter();
         initModel();
+        initFindDialog();
         initTable();
 
+    }
+
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblBalance);
     }
 
     private void setTodayDate() {
@@ -143,9 +145,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         tblBalance.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
         tblBalance.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
         tblBalance.setShowGrid(true);
-        sorter = new TableRowSorter<>(tblBalance.getModel());
-        tblBalance.setRowSorter(sorter);
-        swrf = new StartWithRowFilter(txtSearch);
     }
 
     private void initCompeter() {
@@ -323,14 +322,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         }
     }
 
-    private void searchTable() {
-        if (txtSearch.getText().isEmpty()) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(swrf);
-        }
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -356,8 +347,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         btnCalculate = new javax.swing.JButton();
         lblRecord = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        txtSearch = new javax.swing.JTextField();
         txtStock = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         chkQty = new javax.swing.JCheckBox();
@@ -445,16 +434,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Records :");
 
-        jLabel8.setFont(Global.lableFont);
-        jLabel8.setText("Search");
-
-        txtSearch.setFont(Global.textFont);
-        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtSearchKeyReleased(evt);
-            }
-        });
-
         txtStock.setFont(Global.textFont);
         txtStock.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -511,19 +490,12 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkQty, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelFilterLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(btnCalculate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelFilterLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12)
+                .addComponent(btnCalculate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
+                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -554,9 +526,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
                         .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -822,11 +791,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         }
     }//GEN-LAST:event_tblBalanceMouseClicked
 
-    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
-        // TODO add your handling code here:
-        searchTable();
-    }//GEN-LAST:event_txtSearchKeyReleased
-
     private void txtStockKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtStockKeyReleased
         // TODO add your handling code here:
     }//GEN-LAST:event_txtStockKeyReleased
@@ -858,7 +822,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -882,7 +845,6 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
     private javax.swing.JFormattedTextField txtPurWt;
     private javax.swing.JFormattedTextField txtSaleQty;
     private javax.swing.JFormattedTextField txtSaleWt;
-    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
     // End of variables declaration//GEN-END:variables
@@ -918,6 +880,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
 
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     @Override

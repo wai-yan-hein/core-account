@@ -256,7 +256,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             btnHistory.setIcon(IconUtil.getIcon("history.svg"));
             btnNew.setIcon(IconUtil.getIcon("new.svg"));
             btnLogout.setIcon(IconUtil.getIcon("logout.svg"));
-            btnFilter.setIcon(IconUtil.getIcon("filter.svg"));
+            btnFilter.setIcon(IconUtil.getIcon("search.svg"));
             btnExit.setIcon(IconUtil.getIcon("exit.svg"));
         });
     }
@@ -1852,7 +1852,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(jSeparator8);
 
         btnFilter.setFont(Global.lableFont);
-        btnFilter.setText("Filter-F12");
+        btnFilter.setText("Search-F12");
         btnFilter.setToolTipText("Filter Bar");
         btnFilter.setFocusable(false);
         btnFilter.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1937,11 +1937,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
+                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
+                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE))
+                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
