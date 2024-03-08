@@ -29,21 +29,21 @@ public class RetInHisDetail {
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty", nullable = false)
-    private Double qty;
+    private double qty;
     @Column(name = "unit")
     private String unitCode;
     @Column(name = "price", nullable = false)
-    private Double price;
+    private double price;
     @Column(name = "amt", nullable = false)
-    private Double amount;
+    private double amount;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "weight")
-    private Double weight;
+    private double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")
-    private Double totalWeight;
+    private double totalWeight;
     @Transient
     private String userCode;
     @Transient

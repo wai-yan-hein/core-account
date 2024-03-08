@@ -1006,9 +1006,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         txtVouTotal.setValue(totalAmount);
         //cal discAmt
         double discp = Util1.getDouble(txtVouDiscP.getValue());
+        double disAmt = Util1.getDouble(txtVouDiscount.getValue());
         if (discp > 0) {
             double discountAmt = (totalAmount * (discp / 100));
             txtVouDiscount.setValue(Util1.getDouble(discountAmt));
+        } else if (disAmt > 0) {
+            double disP = (disAmt / totalAmount) * 100;
+            txtVouDiscP.setValue(Util1.getDouble(disP));
         }
         //calculate taxAmt
         double taxp = Util1.getDouble(txtVouTaxP.getValue());

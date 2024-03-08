@@ -218,6 +218,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             appUser.setActive(chkAtive.isSelected());
             appUser.setRoleCode(roleAutoCompleter.getAppRole().getRoleCode());
             appUser.setUpdatedDate(LocalDateTime.now());
+            appUser.setPhoneNo("");
+            appUser.setDoctorId("");
+            appUser.setImageLink("");
             return true;
         }
     }
