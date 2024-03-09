@@ -8,6 +8,7 @@ import com.repo.AccountRepo;
 import com.acc.common.ColumnHeaderListener;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.JournalClosingStockTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.editor.COA3CellEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -43,7 +44,7 @@ import reactor.core.publisher.Mono;
  * @author DELL
  */
 public class JournalClosingStock extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     private final JournalClosingStockTableModel tableModel = new JournalClosingStockTableModel();
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -57,19 +58,20 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private Mono<List<DepartmentA>> monoDep;
     private int row = 0;
     private int column = 0;
-
+    private FindDialog findDialog;
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -82,26 +84,31 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         initListener();
         actionMapping();
     }
-
+    
     private void batchLock(boolean lock) {
         tblJournal.setEnabled(lock);
         observer.selected("save", lock);
         observer.selected("delete", lock);
     }
-
+    
     public void initMain() {
         batchLock(!Global.batchLock);
         initCompleter();
         initTable();
+        initFindDialog();
         searchJournal();
     }
-
+    
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblJournal);
+    }
+    
     private void initListener() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
         tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -114,7 +121,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             deleteVoucher();
         }
     };
-
+    
     private void deleteVoucher() {
         int selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
         if (selectRow >= 0) {
@@ -136,20 +143,20 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 }
             }
         }
-
+        
     }
-
+    
     private String getCurCode() {
         if (currencyAAutoCompleter == null || currencyAAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currencyAAutoCompleter.getCurrency().getCurCode();
     }
-
+    
     private String getDeptCode() {
         return departmentAutoCompleter.getDepartment() == null ? "-" : departmentAutoCompleter.getDepartment().getKey().getDeptCode();
     }
-
+    
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
@@ -169,11 +176,12 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             ComponentUtil.scrollTable(tblJournal, row, column);
         }).subscribe();
     }
-    private void calTotal(){
-        double ttlAmt =tableModel.getListGV().stream().mapToDouble((value) -> value.getClAmt()).sum();
+    
+    private void calTotal() {
+        double ttlAmt = tableModel.getListGV().stream().mapToDouble((value) -> value.getClAmt()).sum();
         txtTotal.setValue(ttlAmt);
     }
-
+    
     private void checkDateLock(List<StockOP> list) {
         list.forEach((t) -> {
             if (DateLockUtil.isLockDate(t.getTranDate())) {
@@ -181,7 +189,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             }
         });
     }
-
+    
     private void initCompleter() {
         monoDep = accountRepo.getDepartment();
         monoCur = userRepo.getCurrency();
@@ -202,9 +210,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
         }).subscribe();
-
+        
     }
-
+    
     private void initTable() {
         accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
             tableModel.setDepartment(t);
@@ -238,9 +246,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             tblJournal.getColumnModel().getColumn(5).setCellEditor(new CurrencyEditor(t));
         }).subscribe();
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
-
+        
     }
-
+    
     private void focusOnTable() {
         int rc = tblJournal.getRowCount();
         if (rc > 1) {
@@ -251,7 +259,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             txtDate.requestFocusInWindow();
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -260,6 +268,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -480,37 +489,38 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             searchJournal();
         }
     }
-
+    
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchJournal();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

@@ -8,6 +8,7 @@ import com.repo.AccountRepo;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
 import com.acc.dialog.CurrencyConversionDialog;
+import com.acc.dialog.FindDialog;
 import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -53,7 +54,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class Journal extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     private final JournalTableModel tableModel = new JournalTableModel();
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -65,22 +66,23 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private JournalEntryDialog dialog;
     private CurrencyConversionDialog conversionDialog;
     private int selectRow = 0;
-    private int selectCol =0;
+    private int selectCol = 0;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
-
+    private FindDialog findDialog;
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -93,24 +95,29 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         initListener();
         initFormat();
     }
-
+    
     public void initMain() {
         initCompleter();
         initTable();
         initRowHeader();
+        initFindDialog();
         searchJournal();
     }
-
+    
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblJournal);
+    }
+    
     private void initFormat() {
         txtRecord.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblJournal, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void deleteVoucher() {
         selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
         if (selectRow >= 0) {
@@ -138,7 +145,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             }
         }
     }
-
+    
     private void focusOnTable() {
         int rc = tblJournal.getRowCount();
         if (rc > 1) {
@@ -149,7 +156,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             txtDate.requestFocusInWindow();
         }
     }
-
+    
     private void initListener() {
         ComponentUtil.addFocusListener(this);
         txtRefrence.addActionListener(action);
@@ -158,15 +165,15 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private final ActionListener action = (ActionEvent e) -> {
         searchJournal();
     };
-
+    
     private List<String> getListDep() {
         return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
-
+    
     private String getProjectNo() {
         return projectAutoCompleter == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
     }
-
+    
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
@@ -187,21 +194,21 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .doOnError((e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }).doOnTerminate(() -> {
-            ComponentUtil.scrollTable(tblJournal, selectRow,selectCol);
+            ComponentUtil.scrollTable(tblJournal, selectRow, selectCol);
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void calTotal() {
         txtRecord.setValue(tableModel.getSize());
     }
-
+    
     private void checkDateLock(Gl t) {
         if (DateLockUtil.isLockDate(t.getGlDate())) {
             t.setTranLock(true);
         }
     }
-
+    
     public void openJournalEntryDialog(String glVou, String status) {
         if (dialog == null) {
             dialog = new JournalEntryDialog(Global.parentForm);
@@ -216,7 +223,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         dialog.setStatus(status);
         dialog.searchJournalByVouId(glVou);
     }
-
+    
     private void initCompleter() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
@@ -232,7 +239,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
     }
-
+    
     private void initTable() {
         tblJournal.setModel(tableModel);
         tblJournal.getTableHeader().setFont(Global.tblHeaderFont);
@@ -265,9 +272,9 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 }
             }
         });
-
+        
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -276,7 +283,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void conversionDialog(String vouNo) {
         if (conversionDialog == null) {
             conversionDialog = new CurrencyConversionDialog(Global.parentForm);
@@ -288,7 +295,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         conversionDialog.search(vouNo);
         conversionDialog.setVisible(true);
     }
-
+    
     private void printVoucher(Gl gl) {
         progress.setIndeterminate(true);
         String glVouNo = gl.getGlVouNo();
@@ -321,7 +328,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         }).subscribe();
-
+        
     }
 
     /**
@@ -694,25 +701,25 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             }
         }
     }
-
+    
     @Override
     public void save() {
-
+        
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
         int row = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
@@ -720,16 +727,17 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             printVoucher(tableModel.getGl(row));
         }
     }
-
+    
     @Override
     public void refresh() {
         searchJournal();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

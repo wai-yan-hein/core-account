@@ -7,6 +7,7 @@ package com.acc.entry;
 import com.repo.AccountRepo;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.VoucherTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.dialog.VoucherEntryDailog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.Gl;
@@ -57,7 +58,7 @@ import net.sf.jasperreports.view.JasperViewer;
 public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
     private int selectRow = 0;
-    private int selectCol =0;
+    private int selectCol = 0;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private DespAutoCompleter despAutoCompleter;
@@ -69,6 +70,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private AccountRepo accountRepo;
     private UserRepo userRepo;
     private VoucherEntryDailog dialog;
+    private FindDialog findDialog;
 
     public JProgressBar getProgress() {
         return progress;
@@ -183,7 +185,12 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         initCombo();
         initTable();
         initRowHeader();
+        initFindDialog();
         search();
+    }
+    
+    private void initFindDialog() {
+        findDialog = new FindDialog(Global.parentForm, tblVoucher);
     }
 
     private void initRowHeader() {
@@ -231,7 +238,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     }).doOnTerminate(() -> {
             }).doOnTerminate(() -> {
                 calOpening();
-                ComponentUtil.scrollTable(tblVoucher, selectRow,selectCol);
+                ComponentUtil.scrollTable(tblVoucher, selectRow, selectCol);
             }).subscribe();
         }
 
@@ -902,5 +909,6 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
 }
