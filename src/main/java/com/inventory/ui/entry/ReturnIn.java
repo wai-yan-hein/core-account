@@ -1161,6 +1161,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     private void txtVouTaxPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouTaxPActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtVouTaxP.getValue()) >= 0) {
+            txtTax.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtVouTaxPActionPerformed
 
@@ -1174,6 +1177,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     private void txtTaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTaxActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtTax.getValue()) >= 0) {
+            txtVouTaxP.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtTaxActionPerformed
 

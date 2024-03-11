@@ -1171,21 +1171,33 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     private void txtVouDiscPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDiscPActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtVouDiscP.getValue()) <= 0) {
+            txtVouDiscount.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtVouDiscPActionPerformed
 
     private void txtVouTaxPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouTaxPActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:        
+        if (Util1.getDouble(txtVouTaxP.getValue()) >= 0) {
+            txtTax.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtVouTaxPActionPerformed
 
     private void txtVouDiscountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDiscountActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtVouDiscount.getValue()) >= 0) {
+            txtVouDiscP.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtVouDiscountActionPerformed
 
     private void txtTaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTaxActionPerformed
         // TODO add your handling code here:
+        if (Util1.getDouble(txtTax.getValue()) >= 0) {
+            txtVouTaxP.setValue(0);
+        }
         calculateTotalAmount();
     }//GEN-LAST:event_txtTaxActionPerformed
 
