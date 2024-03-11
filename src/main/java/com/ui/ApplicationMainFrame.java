@@ -261,7 +261,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         });
     }
 
-// Apply the color filter to the icon
     private void initKeyFoucsManager() {
         keyEventDispatcher = (KeyEvent ke) -> {
             if (ke.isAltDown()) {

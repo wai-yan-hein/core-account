@@ -9,4 +9,5 @@ public class SyncModel {
     private String fromDate;
     private String toDate;
     private boolean sync;
+    private boolean ack;
 }
