@@ -118,7 +118,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private ColumnHeaderListener listener;
     private int selectRow = 0;
     private int selectCol = 0;
-    private final JPopupMenu sumPopup = new JPopupMenu();
     private ReportModeDialog reportModeDialog;
     private FindDialog findDialog;
 
@@ -222,6 +221,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             accountRepo.findCOA(sourceAccId).doOnSuccess((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
+                    ComponentUtil.enableForm(this, false);
                     return;
                 }
                 allCashTableModel.setParent(tblCash);
@@ -332,9 +332,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(9).setPreferredWidth(1);// Curr      
         tblCash.getColumnModel().getColumn(10).setPreferredWidth(60);// Dr-Amt   
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        monoDep.subscribe((t) -> {
+        monoDep.doOnSuccess((t) -> {
             tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
-        });
+        }).subscribe();
         tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
@@ -342,9 +342,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(6).setCellEditor(new ProjectCellEditor(userRepo));
         tblCash.getColumnModel().getColumn(7).setCellEditor(new TraderCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        monoCur.subscribe((t) -> {
+        monoCur.doOnSuccess((t) -> {
             tblCash.getColumnModel().getColumn(9).setCellEditor(new CurrencyEditor(t));
-        });
+        }).subscribe();
         tblCash.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
         if (!single) {
             tblCash.getColumnModel().getColumn(11).setPreferredWidth(60);// Cr-Amt  
@@ -352,46 +352,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-//        filterHeader = new TableFilterHeader(tblCash,AutoChoices.DISABLED);
-////        filterHeader.setHidePopupsOnTableUpdates(true);
-////        filterHeader.setInstantFiltering(true);
-////        filterHeader.setAutoCompletion(true);
-////        filterHeader.setAdaptiveChoices(true);
-//        filterHeader.setPosition(TableFilterHeader.Position.TOP);
-//        filterHeader.setFont(Global.textFont);
-//        filterHeader.setVisible(false);
-//        filterHeader.addHeaderObserver(new IFilterHeaderObserver() {
-//            @Override
-//            public void tableFilterEditorCreated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
-//                log.info("1");
-//            }
-//
-//            @Override
-//            public void tableFilterEditorExcluded(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
-//                log.info("2");
-//            }
-//
-//            @Override
-//            public void tableFilterUpdated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
-//                double drAmt = sumColumn(tblCash, 10);
-//                double crAmt = sumColumn(tblCash, 11);
-//                JPopupMenu popupMenu = new JPopupMenu();
-//                popupMenu.setFocusable(false);
-//                popupMenu.setLightWeightPopupEnabled(true);
-//                JFormattedTextField drAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
-//                drAmtItem.setFont(Global.amtFont);
-//                drAmtItem.setValue(drAmt);
-//                JFormattedTextField crAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
-//                crAmtItem.setFont(Global.amtFont);
-//                crAmtItem.setValue(crAmt);
-//                popupMenu.add(drAmtItem);
-//                popupMenu.addSeparator();
-//                popupMenu.add(crAmtItem);
-//                int centerX = tblCash.getWidth() / 2;
-//                int centerY = tblCash.getHeight() / 2;
-//                popupMenu.show(tblCash, centerX, centerY);
-//            }
-//        });
     }
 
     private void setGl(Gl gl) {
@@ -400,16 +360,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         } else {
             lblInfo.setText("");
         }
-    }
-
-    private double sumColumn(JTable table, int columnIndex) {
-        int rowCount = table.getRowCount();
-        double sum = 0.0;
-        for (int i = 0; i < rowCount; i++) {
-            double cellValue = Util1.getDouble(table.getValueAt(i, columnIndex));
-            sum += cellValue;
-        }
-        return sum;
     }
 
     private void actionMapping() {
