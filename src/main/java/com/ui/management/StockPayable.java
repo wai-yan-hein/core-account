@@ -4,6 +4,7 @@
  */
 package com.ui.management;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -38,7 +39,7 @@ import javax.swing.table.TableRowSorter;
  * @author Lenovo
  */
 public class StockPayable extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     public static final int SPCUS = 1;
     public static final int SPCON = 2;
     private StockTypeAutoCompleter stockTypeAutoCompleter;
@@ -56,15 +57,16 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private int type;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -78,21 +80,25 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         this.type = type;
         initComponents();
     }
-
+    
     public void initMain() {
         ComponentUtil.addFocusListener(panelFilter);
         setTodayDate();
         initCompeter();
         initModel();
         initTable();
-
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblBalance);
+    }
+    
     private void setTodayDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initModel() {
         switch (type) {
             case 1 -> {
@@ -103,11 +109,11 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
                 tblBalance.setModel(consignorSummaryTableModel);
                 initTableWeight();
             }
-
+            
         }
-
+        
     }
-
+    
     private void initTableWeight() {
         tblBalance.getColumnModel().getColumn(0).setPreferredWidth(70);
         tblBalance.getColumnModel().getColumn(1).setPreferredWidth(30);
@@ -121,7 +127,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         tblBalance.getColumnModel().getColumn(9).setPreferredWidth(20);
         tblBalance.getColumnModel().getColumn(10).setPreferredWidth(40);//cl
     }
-
+    
     private void initTable() {
         tblBalance.getTableHeader().setFont(Global.tblHeaderFont);
         tblBalance.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -134,7 +140,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         tblBalance.setRowSorter(sorter);
         swrf = new StartWithRowFilter(txtSearch);
     }
-
+    
     private void initCompeter() {
         stockTypeAutoCompleter = new StockTypeAutoCompleter(txtGroup, null, true);
         stockTypeAutoCompleter.setObserver(this);
@@ -164,7 +170,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
             locationAutoCompleter.setListLocation(t);
         }).subscribe();
     }
-
+    
     private void calculate() {
         btnCalculate.setEnabled(false);
         progress.setIndeterminate(true);
@@ -185,17 +191,17 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void setListDetail(List<ClosingBalance> list) {
         switch (type) {
             case 1 ->
                 customerSummaryTableModel.setListDetail(list);
             case 2 ->
                 consignorSummaryTableModel.setListDetail(list);
-
+            
         }
     }
-
+    
     private List<ClosingBalance> getListDetail() {
         switch (type) {
             case SPCUS -> {
@@ -207,7 +213,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         }
         return null;
     }
-
+    
     private void calTotal() {
         List<ClosingBalance> list = getListDetail();
         double opQty = list.stream().mapToDouble((t) -> t.getOpenQty()).sum();
@@ -223,9 +229,9 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         txtClQty.setValue(clQty);
         txtClWt.setValue(clWt);
         lblRecord.setText(String.valueOf(list.size()));
-
+        
     }
-
+    
     private ReportFilter getFilter() {
         String startDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
         String endDate = Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
@@ -247,7 +253,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         filter.setReportName(getReportName());
         return filter;
     }
-
+    
     private String getReportName() {
         switch (type) {
             case SPCUS -> {
@@ -259,7 +265,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         }
         return null;
     }
-
+    
     private String getDetailReportName() {
         switch (type) {
             case SPCUS -> {
@@ -271,7 +277,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         }
         return null;
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -280,7 +286,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         observer.selected("delete", false);
         observer.selected("refresh", true);
     }
-
+    
     private ClosingBalance getObject(int row) {
         switch (type) {
             case 1 -> {
@@ -292,7 +298,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         }
         return null;
     }
-
+    
     private void detailDialog() {
         if (dialog == null) {
             dialog = new SPWeightDetailDialog(Global.parentForm, type);
@@ -336,7 +342,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
             JOptionPane.showMessageDialog(this, "Select Row.");
         }
     }
-
+    
     private void searchTable() {
         if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
@@ -776,36 +782,37 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
     @Override
     public void selected(Object source, Object selectObj) {
     }
-
+    
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         calculate();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

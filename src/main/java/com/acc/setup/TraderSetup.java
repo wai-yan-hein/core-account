@@ -8,6 +8,7 @@ package com.acc.setup;
 import com.repo.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.common.TraderGroupComboModel;
+import com.acc.dialog.FindDialog;
 import com.acc.dialog.TraderImportDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.TraderA;
@@ -50,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class TraderSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private AccountRepo accountRepo;
     private int selectRow = -1;
     private TraderA trader = new TraderA();
@@ -62,23 +63,24 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private TraderAGroupDialog dialog;
-
+    private FindDialog findDialog;
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -92,17 +94,17 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         initFcous();
         initClientProperty();
     }
-
+    
     private void initFcous() {
         ComponentUtil.addFocusListener(this);
     }
-
+    
     private void initClientProperty() {
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON, 0.9f));
     }
-
+    
     private void batchLock(boolean lock) {
         txtSysCode.setEnabled(lock);
         txtCusCode.setEnabled(lock);
@@ -115,21 +117,26 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         observer.selected("save", lock);
         observer.selected("delete", lock);
     }
-
+    
     public void initMain() {
         batchLock(!Global.batchLock);
         initCombo();
         initTable();
         initRowHeader();
+        initFind();
         searchTrader();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblCustomer);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblCustomer, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initCombo() {
         cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
         cOAAutoCompleter.setCoa(null);
@@ -138,7 +145,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             cboGroup.setModel(comboModel);
         });
     }
-
+    
     private void initTable() {
         tblCustomer.setModel(traderATableModel);
         tblCustomer.getTableHeader().setFont(Global.tblHeaderFont);
@@ -160,7 +167,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         tblCustomer.setRowSorter(sorter);
         swrf = new StartWithRowFilter(txtSearch);
     }
-
+    
     private void searchTrader() {
         progress.setIndeterminate(true);
         traderATableModel.clear();
@@ -172,9 +179,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         });
-
+        
     }
-
+    
     private void setTrader(TraderA cus) {
         trader = cus;
         txtSysCode.setText(trader.getKey().getCode());
@@ -196,7 +203,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             cboGroup.repaint();
         }).subscribe();
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtCusName.getText().isEmpty()) {
@@ -235,7 +242,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         }
         return status;
     }
-
+    
     private void saveTrader() {
         if (isValidEntry()) {
             accountRepo.saveTrader(trader).subscribe((t) -> {
@@ -251,14 +258,14 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             });
         }
     }
-
+    
     private void sendMessage(String mes) {
         accountRepo.sendDownloadMessage(MessageType.TRADER_ACC, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-
+    
     public void clear() {
         trader = new TraderA();
         txtSysCode.setText(null);
@@ -275,7 +282,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         comboModel.setSelectedItem(null);
         cboGroup.repaint();
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -284,7 +291,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void traderGroupDialog() {
         if (dialog == null) {
             dialog = new TraderAGroupDialog(Global.parentForm);
@@ -749,25 +756,25 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusEmail.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
-
+        
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JComboBox) {
             ctrlName = ((JComboBox) sourceObj).getName();
         } else if (sourceObj instanceof JFormattedTextField) {
@@ -799,7 +806,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusName.requestFocus();
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -820,7 +827,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboAccount":
                 switch (e.getKeyCode()) {
@@ -837,7 +844,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnSave":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -846,7 +853,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     chkActive.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnClear":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -855,14 +862,14 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
                 tabToTable(e);
-
+                
                 break;
             case "tblCustomer":
                 if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setTrader(traderATableModel.getTrader(selectRow));
                 }
-
+                
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtCusName.requestFocus();
                 }
@@ -874,7 +881,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 break;
         }
     }
-
+    
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblCustomer.requestFocus();
@@ -883,12 +890,12 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveTrader();
     }
-
+    
     @Override
     public void delete() {
         if (selectRow >= 0) {
@@ -903,32 +910,33 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             }
         }
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchTrader();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
 }

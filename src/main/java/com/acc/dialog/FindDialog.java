@@ -77,7 +77,6 @@ public class FindDialog extends javax.swing.JDialog {
 //    }
     private void find() {
         SwingUtilities.invokeLater(() -> {
-            log.info("search.");
             if (txtSearch.getText().isEmpty()) {
                 for (JTable table : tables) {
                     sorter = (TableRowSorter<TableModel>) table.getRowSorter();
@@ -87,23 +86,10 @@ public class FindDialog extends javax.swing.JDialog {
                 for (JTable table : tables) {
                     sorter = (TableRowSorter<TableModel>) table.getRowSorter();
                     sorter.setRowFilter(swrf);
-//                    parseTableData(table);
                 }
             }
         });
     }
-//
-//    private void parseTableData(JTable table) {
-//        TableModel model = table.getModel();
-//        int rowCount = model.getRowCount();
-//        int colCount = model.getColumnCount();
-//
-//        for (int row = 0; row < rowCount; row++) {
-//            for (int col = 0; col < colCount; col++) {
-//                Object cellData = model.getValueAt(row, col);
-//            }
-//        }
-//    }
 
     /**
      * This method is called from within the constructor to initialize the form.

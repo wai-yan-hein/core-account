@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
@@ -59,7 +60,7 @@ import net.sf.jasperreports.view.JasperViewer;
  * @author Lenovo
  */
 public class LandingEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
-
+    
     private LandingPriceTableModel landingPriceTableModel = new LandingPriceTableModel();
     private LandingQtyTableModel landingQtyTableModel = new LandingQtyTableModel();
     private LandingGradeTableModel landingGradeTableModel = new LandingGradeTableModel();
@@ -73,23 +74,24 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private SelectionObserver observer;
     private LandingHis landing = new LandingHis();
     private LandingHistoryDialog dialog;
-
+    private FindDialog findDialog;
+    
     public StockAutoCompleter1 getStockAutoCompleter() {
         return stockAutoCompleter;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
@@ -103,18 +105,18 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         initFoucsAdapter();
         actionMapping();
     }
-
+    
     private void initFoucsAdapter() {
         ComponentUtil.addFocusListener(this);
-
+        
     }
-
+    
     private void initKeyListener() {
         txtTrader.addKeyListener(this);
         txtStock.addKeyListener(this);
         txtLocation.addKeyListener(this);
     }
-
+    
     public void initMain() {
         assignDefaultValue();
         initTextBox();
@@ -123,22 +125,26 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         initTableQty();
         initTableGrade();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblGrade, tblPrice, tblQty);
+    }
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPrice.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
         tblPrice.getActionMap().put(solve, new DeleteAction("Criteria"));
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         private String table;
-
+        
         public DeleteAction(String table) {
             this.table = table;
         }
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             if (table != null) {
@@ -151,7 +157,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-
+    
     private void deleteTranCriteria() {
         int row = tblPrice.convertRowIndexToModel(tblPrice.getSelectedRow());
         if (row >= 0) {
@@ -166,7 +172,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-
+    
     private void initTablePrice() {
         landingPriceTableModel.setLblRec(lblRC);
         landingPriceTableModel.setObserver(this);
@@ -193,7 +199,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         tblPrice.getColumnModel().getColumn(4).setPreferredWidth(100);
         tblPrice.getColumnModel().getColumn(5).setPreferredWidth(150);
     }
-
+    
     private void initTableQty() {
         landingQtyTableModel.setLblRec(lblRC);
         landingQtyTableModel.setObserver(this);
@@ -222,7 +228,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         tblQty.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
         tblQty.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
     }
-
+    
     private void initTableGrade() {
         landingGradeTableModel.setObserver(this);
         landingGradeTableModel.setInventoryRepo(inventoryRepo);
@@ -243,12 +249,12 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         tblGrade.getColumnModel().getColumn(2).setPreferredWidth(10);
         tblGrade.getColumnModel().getColumn(3).setPreferredWidth(20);
     }
-
+    
     private void assignDefaultValue() {
         txtVouDate.setDate(Util1.getTodayDate());
         txtVouDate.setDateFormatString(Global.dateFormat);
     }
-
+    
     private void initTextBox() {
         txtPurPrice.setFormatterFactory(Util1.getDecimalFormat2());
         txtPrice.setFormatterFactory(Util1.getDecimalFormat2());
@@ -261,7 +267,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         txtPurAmt.setFont(Global.amtFont);
         txtPurPrice.setFont(Global.amtFont);
     }
-
+    
     private void initCompleter() {
         stockAutoCompleter = new StockAutoCompleter1(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
@@ -284,7 +290,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             currencyAutoCompleter.setListCurrency(t);
         }).subscribe();
     }
-
+    
     private void checkGrade() {
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
@@ -292,7 +298,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             landingGradeTableModel.checkGrade(formulaCode, landingPriceTableModel.getListDetail());
         }
     }
-
+    
     private void setLandingPrice(String formulaCode) {
         List<LandingHisPrice> data = landingPriceTableModel.getListDetail();
         if (!data.isEmpty()) {
@@ -320,7 +326,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-
+    
     private void calPurchase() {
         List<LandingHisGrade> list = landingGradeTableModel.getListGrade();
         if (list != null) {
@@ -345,7 +351,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             });
         }
     }
-
+    
     private void setLandingQty(String formulaCode) {
         if (formulaCode != null) {
             inventoryRepo.getStockFormulaQty(formulaCode).doOnSuccess((list) -> {
@@ -367,7 +373,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-
+    
     private boolean isValidEntry() {
         if (locationAutoCompleter.getLocation() == null) {
             JOptionPane.showMessageDialog(this, "Invalid Location", "Location", JOptionPane.WARNING_MESSAGE);
@@ -415,7 +421,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         }
         return true;
     }
-
+    
     private void saveLanding(boolean print) {
         if (isValidEntry()
                 && landingPriceTableModel.isValidEntry()) {
@@ -444,7 +450,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-
+    
     private void printReport(String vouNo) {
         String reportName = "LandingVoucherA5";
         if (!Util1.isNullOrEmpty(reportName)) {
@@ -491,7 +497,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-
+    
     private void clear() {
         landingPriceTableModel.clear();
         landingPriceTableModel.clearDelList();
@@ -514,7 +520,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         landing = new LandingHis();
         observeMain();
     }
-
+    
     private void setStock() {
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
@@ -522,7 +528,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             setLandingQty(s.getFormulaCode());
         }
     }
-
+    
     private void focusTable() {
         int rc = tblPrice.getRowCount();
         if (rc >= 1) {
@@ -533,7 +539,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             txtTrader.requestFocus();
         }
     }
-
+    
     private void historyLanding() {
         if (dialog == null) {
             dialog = new LandingHistoryDialog(Global.parentForm);
@@ -546,7 +552,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         }
         dialog.search();
     }
-
+    
     private void setVoucher(LandingHis his) {
         String vouNo = his.getKey().getVouNo();
         setLandingHis(vouNo);
@@ -554,7 +560,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         setLandingHisQty(vouNo);
         setLandingHisGrade(vouNo);
     }
-
+    
     private void setLandingHis(String vouNo) {
         inventoryRepo.findLanding(vouNo).doOnSuccess((l) -> {
             if (l != null) {
@@ -594,7 +600,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             tblPrice.requestFocus();
         }).subscribe();
     }
-
+    
     private void setLandingHisPrice(String vouNo) {
         inventoryRepo.getLandingHisPrice(vouNo).doOnSuccess((t) -> {
             if (t != null) {
@@ -602,7 +608,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         }).subscribe();
     }
-
+    
     private void setLandingHisQty(String vouNo) {
         inventoryRepo.getLandingHisQty(vouNo).doOnSuccess((t) -> {
             if (t != null) {
@@ -610,7 +616,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         }).subscribe();
     }
-
+    
     private void setLandingHisGrade(String vouNo) {
         inventoryRepo.getLandingHisGrade(vouNo).doOnSuccess((t) -> {
             if (t != null) {
@@ -618,7 +624,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             }
         }).subscribe();
     }
-
+    
     private void enableForm(boolean t) {
         txtTrader.setEnabled(t);
         txtVouDate.setEnabled(t);
@@ -627,7 +633,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
         txtCargo.setEnabled(t);
         txtStock.setEnabled(t);
         tblPrice.setEnabled(t);
-
+        
     }
 
     /* private void paymentDialog() {
@@ -686,7 +692,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1275,53 +1281,54 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
                 setVoucher((LandingHis) selectObj);
         }
     }
-
+    
     @Override
     public void save() {
         saveLanding(false);
     }
-
+    
     @Override
     public void delete() {
         deleteLanding();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyLanding();
     }
-
+    
     @Override
     public void print() {
         saveLanding(true);
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1335,7 +1342,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
             case "txtTrader" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtLocation.requestFocus();
-
+                    
                 }
             }
             case "txtLocation" -> {
