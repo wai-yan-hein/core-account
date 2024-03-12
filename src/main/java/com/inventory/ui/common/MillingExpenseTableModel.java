@@ -281,6 +281,7 @@ public class MillingExpenseTableModel extends AbstractTableModel {
     }
     public void clear(){
         listDetail.clear();
+        addNewRow();
         fireTableDataChanged();
     }
 
