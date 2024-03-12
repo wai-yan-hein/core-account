@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
@@ -42,7 +43,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +65,7 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
  * @author Lenovo
  */
 public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
-
+    
     public static final int TRAN = 1;
     public static final int TRAN_PADDY = 2;
     private final TransferTableModel tranTableModel = new TransferTableModel();
@@ -81,23 +81,24 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private SelectionObserver observer;
     private JProgressBar progress;
     private int type;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
@@ -111,28 +112,33 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         initDateListner();
         actionMapping();
     }
-
+    
     public void initMain() {
         initTable();
         initModel();
         initRowHeader();
         initCombo();
         initButttonGroup();
+        initFind();
         clear(true);
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblTransfer);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblTransfer, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initButttonGroup() {
         chkGroupReport.add(rdoA4);
         chkGroupReport.add(rdoA5);
         rdoA5.setSelected(true);
     }
-
+    
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -143,23 +149,23 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtTo.addKeyListener(this);
         ComponentUtil.addFocusListener(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblTransfer.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initCombo() {
         fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, null, false, false);
         toLocaitonCompleter = new LocationAutoCompleter(txtTo, null, false, false);
@@ -175,7 +181,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
     }
-
+    
     private void initTable() {
         tblTransfer.getTableHeader().setFont(Global.tblHeaderFont);
         tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -186,7 +192,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.changeSelection(0, 0, false, false);
         tblTransfer.requestFocus();
     }
-
+    
     private void initModel() {
         switch (type) {
             case TRAN -> {
@@ -197,7 +203,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private void initTransfer() {
         tranTableModel.setVouDate(txtDate);
         tranTableModel.setLblRec(lblRec);
@@ -222,7 +228,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             tblTransfer.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
     }
-
+    
     private void initTransferPaddy() {
         tranPaddingTableModel.setVouDate(txtDate);
         tranPaddingTableModel.setLblRec(lblRec);
@@ -249,7 +255,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
     }
-
+    
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -272,14 +278,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-
+                    
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblTransfer.convertRowIndexToModel(tblTransfer.getSelectedRow());
         if (row >= 0) {
@@ -293,7 +299,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private boolean isValidDetail() {
         switch (type) {
             case TRAN -> {
@@ -304,11 +310,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
             default -> {
                 return false;
-
+                
             }
         }
     }
-
+    
     private List<TransferHisDetail> getListDetail() {
         switch (type) {
             case TRAN -> {
@@ -320,7 +326,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return null;
     }
-
+    
     private List<THDetailKey> getDeleteList() {
         switch (type) {
             case TRAN -> {
@@ -332,7 +338,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return null;
     }
-
+    
     public void saveVoucher(boolean print) {
         if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtDate.getDate())) {
@@ -366,13 +372,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }).subscribe();
         }
     }
-
+    
     private void assingnDefault() {
         inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             fromLocaitonCompleter.setLocation(tt);
         }).subscribe();
     }
-
+    
     private void clearModel() {
         switch (type) {
             case TRAN -> {
@@ -385,7 +391,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private void clear(boolean focus) {
         assingnDefault();
         clearModel();
@@ -403,7 +409,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         labourGroupAutoCompleter.setObject(null);
         disableForm(true);
     }
-
+    
     private void focusOnTable() {
         int rc = tblTransfer.getRowCount();
         if (rc > 1) {
@@ -414,7 +420,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             txtDate.requestFocus();
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         Location fromLoc = fromLocaitonCompleter.getLocation();
@@ -469,7 +475,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return status;
     }
-
+    
     private void setVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
         io = s;
@@ -522,9 +528,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             progress.setIndeterminate(false);
             focusOnTable();
         }).subscribe();
-
+        
     }
-
+    
     private void setListDetail(List<TransferHisDetail> list) {
         switch (type) {
             case TRAN -> {
@@ -537,14 +543,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -553,7 +559,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void printVoucher(TransferHis his) {
         String vouNo = his.getKey().getVouNo();
         inventoryRepo.getTransferReport(vouNo).doOnSuccess((t) -> {
@@ -891,17 +897,17 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public void save() {
         saveVoucher(false);
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         clear(true);
     }
-
+    
     @Override
     public void history() {
         if (dialog == null) {
@@ -916,21 +922,22 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         dialog.search();
     }
-
+    
     @Override
     public void print() {
         saveVoucher(true);
     }
-
+    
     @Override
     public void refresh() {
         initCombo();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("TR-HISTORY")) {
@@ -940,22 +947,22 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 });
             }
         }
-
+        
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();

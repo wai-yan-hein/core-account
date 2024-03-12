@@ -27,7 +27,7 @@ public class FindDialog extends javax.swing.JDialog {
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private JTable table;
+    private JTable[] tables;
 
     /**
      * Creates new form FindDialog
@@ -35,24 +35,28 @@ public class FindDialog extends javax.swing.JDialog {
      * @param frame
      * @param table
      */
-    public FindDialog(JFrame frame, JTable table) {
+    public FindDialog(JFrame frame, JTable... tables) {
         super(frame, Dialog.ModalityType.MODELESS);
         super.setIconImage(IconUtil.getImage(IconUtil.SEARCH_ICON));
-        this.table = table;
+        this.tables = tables;
         setLocationRelativeTo(null);
         initComponents();
         initFoucs();
         initRowFilter();
         initClientProperty();
     }
+
     private void initFoucs() {
         ComponentUtil.addFocusListener(this);
     }
 
     private void initRowFilter() {
-        sorter = new TableRowSorter<>(table.getModel());
-        table.setRowSorter(sorter);
-        swrf = new StartWithRowFilter(txtSearch);
+        for (JTable table : tables) {
+            sorter = new TableRowSorter<>(table.getModel());
+            table.setRowSorter(sorter);
+            swrf = new StartWithRowFilter(txtSearch);
+        }
+
     }
 
     private void initClientProperty() {
@@ -60,17 +64,46 @@ public class FindDialog extends javax.swing.JDialog {
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON, 0.9f));
     }
 
+//    private void find() {
+//
+//        SwingUtilities.invokeLater(() -> {
+//            log.info("search.");
+//            if (txtSearch.getText().isEmpty()) {
+//                sorter.setRowFilter(null);
+//            } else {
+//                sorter.setRowFilter(swrf);
+//            }
+//        });
+//    }
     private void find() {
-
         SwingUtilities.invokeLater(() -> {
             log.info("search.");
             if (txtSearch.getText().isEmpty()) {
-                sorter.setRowFilter(null);
+                for (JTable table : tables) {
+                    sorter = (TableRowSorter<TableModel>) table.getRowSorter();
+                    sorter.setRowFilter(null);
+                }
             } else {
-                sorter.setRowFilter(swrf);
+                for (JTable table : tables) {
+                    sorter = (TableRowSorter<TableModel>) table.getRowSorter();
+                    sorter.setRowFilter(swrf);
+//                    parseTableData(table);
+                }
             }
         });
     }
+//
+//    private void parseTableData(JTable table) {
+//        TableModel model = table.getModel();
+//        int rowCount = model.getRowCount();
+//        int colCount = model.getColumnCount();
+//
+//        for (int row = 0; row < rowCount; row++) {
+//            for (int col = 0; col < colCount; col++) {
+//                Object cellData = model.getValueAt(row, col);
+//            }
+//        }
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.

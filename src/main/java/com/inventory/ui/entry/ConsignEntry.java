@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
@@ -59,7 +60,7 @@ import net.sf.jasperreports.view.JasperViewer;
  * @author Lenovo
  */
 public class ConsignEntry extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
-
+    
     private final StockIssueRecTableModel tableModel = new StockIssueRecTableModel();
     private ConsignHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
@@ -71,27 +72,28 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
     private JProgressBar progress;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private String tranSource;
-
+    private FindDialog findDialog;
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locaitonCompleter;
     }
@@ -107,20 +109,25 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         initDateListner();
         actionMapping();
     }
-
+    
     public void initMain() {
         initTable();
         initRowHeader();
         initCombo();
+        initFind();
         clear();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblStockIR);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblStockIR, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -131,23 +138,23 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblStockIR.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblStockIR.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initCombo() {
         locaitonCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locaitonCompleter.setObserver(this);
@@ -163,7 +170,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
     }
-
+    
     private void initTable() {
         tableModel.setVouDate(txtDate);
         tableModel.setInventoryRepo(inventoryRepo);
@@ -194,7 +201,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         tblStockIR.changeSelection(0, 0, false, false);
         tblStockIR.requestFocus();
     }
-
+    
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -225,7 +232,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblStockIR.convertRowIndexToModel(tblStockIR.getSelectedRow());
         if (row >= 0) {
@@ -239,7 +246,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             }
         }
     }
-
+    
     public boolean saveVoucher(boolean print) {
         boolean status = false;
         if (isValidEntry() && tableModel.isValidEntry()) {
@@ -268,7 +275,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         }
         return status;
     }
-
+    
     private void assingnDefault() {
         inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             locaitonCompleter.setLocation(tt);
@@ -277,7 +284,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         txtBag.setValue(0);
         txtDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void clear() {
         assingnDefault();
         io = new ConsignHis();
@@ -290,8 +297,9 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         progress.setIndeterminate(false);
         traderAutoCompleter.setTrader(null);
         labourGroupAutoCompleter.setObject(null);
-        disableForm(true);    }
-
+        disableForm(true);
+    }
+    
     private void focusOnTable() {
         int rc = tblStockIR.getRowCount();
         if (rc > 1) {
@@ -302,7 +310,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             txtDate.requestFocusInWindow();
         }
     }
-
+    
     private boolean isValidEntry() {
         LabourGroup lg = labourGroupAutoCompleter.getObject();
         Trader t = traderAutoCompleter.getTrader();
@@ -347,7 +355,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         }
         return true;
     }
-
+    
     private void setVoucher(ConsignHis s) {
         progress.setIndeterminate(true);
         this.io = s;
@@ -395,21 +403,21 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void calTotal() {
         double bag = tableModel.getListDetail().stream().mapToDouble((t) -> t.getBag()).sum();
         double weight = tableModel.getListDetail().stream().mapToDouble((t) -> t.getTotalWeight()).sum();
         txtBag.setValue(bag);
         txtWt.setValue(weight);
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -418,7 +426,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void enableToolBar(boolean status) {
         progress.setIndeterminate(!status);
         observer.selected("refresh", status);
@@ -426,7 +434,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         observer.selected("save", false);
         observer.selected("history", true);
     }
-
+    
     private void printVoucher(ConsignHis spd) {
         try {
             enableToolBar(false);
@@ -444,7 +452,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
+    
     private Map<String, Object> getDefaultParam(ConsignHis p) {
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -734,17 +742,17 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
     public void save() {
         saveVoucher(false);
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         if (dialog == null) {
@@ -760,21 +768,22 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         }
         dialog.search();
     }
-
+    
     @Override
     public void print() {
         saveVoucher(true);
     }
-
+    
     @Override
     public void refresh() {
         initCombo();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("ISSREC-HISTORY")) {
@@ -785,20 +794,20 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             }
         }
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -836,7 +845,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
                     tblStockIR.requestFocus();
                 }
             }
-
+            
         }
     }
 }

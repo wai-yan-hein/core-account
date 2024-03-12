@@ -5,6 +5,7 @@
 package com.inventory.ui.entry;
 
 import com.CloudIntegration;
+import com.acc.dialog.FindDialog;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -55,7 +56,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class Manufacture extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
-
+    
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -70,19 +71,19 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private ProcessHis ph = new ProcessHis();
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
-    
 
     /**
      * Creates new form Manufacture
@@ -93,33 +94,33 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         initGroupRadio();
         actionMapping();
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     private void initGroupRadio() {
         ButtonGroup g = new ButtonGroup();
         g.add(rdoRecent);
         g.add(rdoAvg);
         g.add(rdoProRecent);
     }
-
+    
     private void initDate() {
         txtStartDate.setDate(Util1.getTodayDate());
         txtEndDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initFomatFactory() {
         txtQty.setFormatterFactory(Util1.getDecimalFormat());
         txtPrice.setFormatterFactory(Util1.getDecimalFormat());
         txtAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void initCompleter() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
@@ -138,9 +139,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListData(t);
         }).subscribe();
-
+        
     }
-
+    
     private void focusOnTable() {
         int rc = tblProcessDetail.getRowCount();
         if (rc > 0) {
@@ -151,17 +152,17 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             txtQty.requestFocus();
         }
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblProcessDetail.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblProcessDetail.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             int row = tblProcessDetail.convertRowIndexToModel(tblProcessDetail.getSelectedRow());
@@ -173,12 +174,12 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                         processHisDetailTableModel.deleteObject(row);
                         processHisDetailTableModel.calPrice();
                     });
-
+                    
                 }
             }
         }
     }
-
+    
     private void initTblProcessDetail() {
         tblProcessDetail.setModel(processHisDetailTableModel);
         processHisDetailTableModel.setTxtVouNo(txtVouNo);
@@ -225,14 +226,19 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         tblProcessDetail.setFont(Global.textFont);
         tblProcessDetail.setRowHeight(Global.tblRowHeight);
     }
-
+    
     public void initMain() {
         initFomatFactory();
         initDate();
         initCompleter();
         initTblProcessDetail();
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblProcessDetail);
+    }
+    
     private void initKeyListener() {
         txtStartDate.getDateEditor().getUiComponent().setName("txtStartDate");
         txtStartDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -247,7 +253,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtUnit.addKeyListener(this);
         txtPrice.addKeyListener(this);
     }
-
+    
     private void setProcess(ProcessHis p, boolean local) {
         ph = p;
         txtVouNo.setText(ph.getKey().getVouNo());
@@ -295,9 +301,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                     lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
                     focusOnTable();
                 });
-
+        
     }
-
+    
     private void enableProcess(boolean status) {
         txtStartDate.setEnabled(status);
         txtEndDate.setEnabled(status);
@@ -311,7 +317,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtLocation.setEnabled(status);
         observer.selected("save", status);
     }
-
+    
     private void vouStatusSetup() {
         inventoryRepo.getVoucherStatus().subscribe((t) -> {
             VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
@@ -323,9 +329,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             vsDialog.setLocationRelativeTo(null);
             vsDialog.setVisible(true);
         });
-
+        
     }
-
+    
     private void saveProcess() {
         if (isValidProcess() && processHisDetailTableModel.validEntry()) {
             if (DateLockUtil.isLockDate(txtStartDate.getDate())) {
@@ -347,10 +353,10 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 progress.setIndeterminate(false);
                 observer.selected("save", false);
             });
-
+            
         }
     }
-
+    
     private void clear() {
         inventoryRepo.getDefaultLocation().subscribe((tt) -> {
             locationAutoCompleter.setLocation(tt);
@@ -370,7 +376,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         enableProcess(true);
         txtStartDate.requestFocusInWindow();
     }
-
+    
     private boolean isValidProcess() {
         if (vouStatusAutoCompleter.getVouStatus() == null) {
             JOptionPane.showMessageDialog(this, "Choose Process Type.");
@@ -437,7 +443,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         }
         return true;
     }
-
+    
     private void deleteProcess() {
         String name = lblStatus.getText();
         if (name.equals("Delete")) {
@@ -457,11 +463,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                     lblStatus.setForeground(Color.blue);
                     enableProcess(true);
                 });
-
+                
             }
         }
     }
-
+    
     private void historyDialog() {
         if (dialog == null) {
             dialog = new ManufactureHistoryDialog(Global.parentForm);
@@ -476,7 +482,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         }
         dialog.searchProcess();
     }
-
+    
     private void getPattern() {
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
@@ -486,7 +492,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 if (status == JOptionPane.OK_OPTION) {
                     processHisDetailTableModel.clear();
                     generatePattern(stockCode);
-
+                    
                 }
             } else {
                 generatePattern(stockCode);
@@ -496,7 +502,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             txtStock.requestFocus();
         }
     }
-
+    
     private void generatePattern(String code) {
         LocalDateTime vouDate = Util1.convertToLocalDateTime(txtStartDate.getDate());
         inventoryRepo.getPattern(code, Util1.toDateStr(vouDate, "yyyy-MM-dd")).subscribe((t) -> {
@@ -526,7 +532,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 } else {
                     JOptionPane.showMessageDialog(this, "Invalid Qty");
                 }
-
+                
             } else {
                 JOptionPane.showMessageDialog(this, "No pattern.");
             }
@@ -537,7 +543,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             processHisDetailTableModel.calPrice();
             focusOnTable();
         });
-
+        
     }
 
     /**
@@ -951,39 +957,40 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     public void save() {
         saveProcess();
     }
-
+    
     @Override
     public void delete() {
         deleteProcess();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyDialog();
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         String str = source.toString();
@@ -1003,15 +1010,15 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1077,5 +1084,5 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             }
         }
     }
-
+    
 }

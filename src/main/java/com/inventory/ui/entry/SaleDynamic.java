@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.repo.AccountRepo;
@@ -149,6 +150,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private WeightHistoryDialog weightHistoryDialog;
     private ContractDialog contractDialog;
     private PaymentDialog paymentDialog;
+    private FindDialog findDialog;
 
     /**
      * Creates new form SaleEntry1
@@ -201,8 +203,13 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         initRowHeader();
         assignDefaultValue();
         initExternal();
+        initFind();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
+    }
+
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblSale);
     }
 
     private void initExternal() {
@@ -2696,6 +2703,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     @Override

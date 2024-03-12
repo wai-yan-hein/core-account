@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.Global;
@@ -69,7 +70,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
-
+    
     public static final int ORDERNOTE = 1;
     private DefaultMutableTreeNode treeRoot;
     @Setter
@@ -94,6 +95,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private StockAutoCompleter stockAutoCompleter;
     private OrderNoteHistoryDialog dialog;
     private final int type;
+    private FindDialog findDialog;
 
     /**
      * Creates new form CoreDrive
@@ -104,7 +106,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         initKeyListener();
         initDateListner();
     }
-
+    
     public void initMain() {
         initCombo();
         initNewPopup();
@@ -113,50 +115,55 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         initTree();
         initTable();
         initRowHeader();
+        initFind();
         assignDefaultValue();
         getHeadFolder();
         getStorageInfo();
         txtOrderDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
+    private void initFind() {
+        findDialog.setVisible(!findDialog.isVisible());
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblChild, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initDateListner() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         ComponentUtil.addFocusListener(this);
     }
-
+    
     private void initKeyListener() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtOrderDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtCus.addKeyListener(this);
         txtStock.addKeyListener(this);
     }
-
+    
     private void assignDefaultValue() {
         progress.setIndeterminate(false);
         if (!lblStatus.getText().equals("NEW")) {
             txtOrderDate.setDate(Util1.getTodayDate());
         }
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
-
+        
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
     }
-
+    
     private void initNewPopup() {
         newPopup = new JPopupMenu("Edit");
         newPopup.setFont(Global.textFont);
@@ -171,7 +178,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         newPopup.add(file);
         newPopup.add(fu);
     }
-
+    
     private void initMorePopup() {
         morePopup = new JPopupMenu("More");
         morePopup.setFont(Global.textFont);
@@ -195,7 +202,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         morePopup.addSeparator();
         morePopup.add(trash);
     }
-
+    
     private void initTrashPopup() {
         trashPopup = new JPopupMenu("Edit");
         trashPopup.setFont(Global.textFont);
@@ -236,7 +243,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     };
-
+    
     private void viewFile() {
         progress.setIndeterminate(true);
         taskExecutor.execute(() -> {
@@ -264,9 +271,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         });
     }
-
-   
-
+    
     private void showImage(ImagePlus imagePlus) {
         // Display the ImagePlus instance
         ImageWindow window = new ImageWindow(imagePlus);
@@ -274,7 +279,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         window.setIconImage(Global.parentForm.getIconImage());
         window.setLocationRelativeTo(null);
     }
-
+    
     private void downloadFile() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -282,7 +287,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             openWebBrowser(url);
         }
     }
-
+    
     private CVFile getSelectFile() {
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
         if (row >= 0) {
@@ -290,7 +295,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         }
         return null;
     }
-
+    
     private void copyLink() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -298,7 +303,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             Util1.copyToClipboard(url);
         }
     }
-
+    
     private void renameFile() {
         if (fileRenameDialog == null) {
             fileRenameDialog = new FileRenameDialog(Global.parentForm);
@@ -320,7 +325,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void moveToTrash() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -330,7 +335,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void restore() {
         progress.setIndeterminate(true);
         CVFile file = getSelectFile();
@@ -343,7 +348,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void deleteForever() {
         progress.setIndeterminate(true);
         CVFile file = getSelectFile();
@@ -356,7 +361,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void openFileBrowser() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -364,7 +369,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             openWebBrowser(url);
         }
     }
-
+    
     private void openWebBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
@@ -379,14 +384,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             JOptionPane.showMessageDialog(this, "Desktop is not supported on this platform.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void initTree() {
         CVFile head = new CVFile();
         head.setFileId("head");
         head.setFileDescription("Drive");
         treeRoot = new DefaultMutableTreeNode(head);
     }
-
+    
     private void initTable() {
         fileTableModel.setDmsRepo(dmsRepo);
         fileTableModel.setTable(tblChild);
@@ -406,7 +411,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         tblChild.getColumnModel().getColumn(3).setPreferredWidth(70);
         tblChild.setTransferHandler(new FileDropHandler());
     }
-
+    
     private void getHeadFolder() {
         treeRoot.removeAllChildren();
         progress.setIndeterminate(true);
@@ -416,7 +421,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void getStorageInfo() {
         dmsRepo.getStorageInfo().doOnSuccess((t) -> {
             int total = Util1.getInteger(t.getTotalSpace() / 1024 / 1024);
@@ -427,7 +432,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblStorage.setText(Util1.bytesToSize(t.getUsedSpace()) + " of " + Util1.bytesToSize(t.getTotalSpace()));
         }).subscribe();
     }
-
+    
     private void addChildMenu(DefaultMutableTreeNode parent, List<CVFile> listVRM) {
         listVRM.forEach((menu) -> {
             if (menu.getChild() != null) {
@@ -445,7 +450,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         });
     }
-
+    
     private void searchChild(MouseEvent e) {
         if (e.getClickCount() == 1) {
 //            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
@@ -458,7 +463,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
 //            }
         }
     }
-
+    
     private void getFile(String parentId) {
         dmsRepo.getFile(parentId).doOnSuccess((t) -> {
             log.info(t.size() + "");
@@ -467,7 +472,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void getTrash() {
         progress.setIndeterminate(true);
         dmsRepo.getTrash().doOnSuccess((t) -> {
@@ -478,7 +483,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void setFileDetail(CVFile file) {
         if (file != null) {
             lastFile = file;
@@ -499,7 +504,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblCreated.setText(null);
         }
     }
-
+    
     public ImageIcon getFileIcon(String extension) {
         if (extension == null) {
             return null;
@@ -517,7 +522,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void createFolder() {
         String input = JOptionPane.showInputDialog(this, "New Folder");
         if (!Util1.isNullOrEmpty(input)) {
@@ -535,7 +540,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private void createFile() {
         FileDialog d = new FileDialog(Global.parentForm, "Choose CSV File", FileDialog.LOAD);
         d.setMultipleMode(true);
@@ -564,7 +569,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             lblPath.setText("");
         }).subscribe();
     }
-
+    
     private void setFileInfo(MouseEvent e) {
         int count = e.getClickCount();
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
@@ -586,7 +591,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -595,7 +600,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void saveOrder() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -610,7 +615,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private boolean isValidEntry() {
         if (lblStatus.getText().equals("DELETED")) {
             clear(true);
@@ -645,7 +650,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         }
         return true;
     }
-
+    
     private List<OrderFileJoin> getOrderFileJoin() {
         List<OrderFileJoin> listJoin = new ArrayList<>();
         List<CVFile> listFile = fileTableModel.getListDetail();
@@ -659,7 +664,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         });
         return listJoin;
     }
-
+    
     private void deleteOrderNote() {
         String status = lblStatus.getText();
         switch (status) {
@@ -683,14 +688,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     }).subscribe();
-
+                    
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void clear(boolean foucs) {
         disableForm(true);
         assignDefaultValue();
@@ -711,14 +716,14 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         }
         getStorageInfo();
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     public void historySale() {
         if (dialog == null) {
             dialog = new OrderNoteHistoryDialog(Global.parentForm, 1);
@@ -1342,7 +1347,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     public void setSaleVoucher(OrderNote sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
@@ -1351,7 +1356,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             setDetail(sh);
         }
     }
-
+    
     private void setListDetail(List<CVFile> list) {
         switch (type) {
             case ORDERNOTE -> {
@@ -1359,7 +1364,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void setDetail(OrderNote sh) {
         String vouNo = sh.getVouNo();
         inventoryRepo.getOrderNoteDetail(vouNo)
@@ -1375,12 +1380,12 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private Mono<CVFile> convertCVFile(OrderFileJoin od) {
         String fileId = od.getFileId();
         return dmsRepo.findFile(fileId);
     }
-
+    
     private void focusTable() {
         int rc = tblChild.getRowCount();
         if (rc >= 1) {
@@ -1391,7 +1396,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             txtCus.requestFocus();
         }
     }
-
+    
     private void setHeader(OrderNote on) {
         if (on.getDeleted()) {
             lblStatus.setText("DELETED");
@@ -1418,54 +1423,55 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
             stockAutoCompleter.setStock(t);
         }).subscribe();
     }
-
+    
     @Override
     public void save() {
         saveOrder();
     }
-
+    
     @Override
     public void delete() {
         deleteOrderNote();
     }
-
+    
     @Override
     public void newForm() {
         clear(true);
     }
-
+    
     @Override
     public void history() {
         historySale();
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         getHeadFolder();
         getStorageInfo();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObject = e.getSource();
@@ -1475,7 +1481,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
         } else if (sourceObject instanceof JTextFieldDateEditor jTextFieldDateEditor) {
             controlName = jTextFieldDateEditor.getName();
         }
-
+        
         switch (controlName) {
             case "txtOrderDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1499,7 +1505,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
                     txtOrderName.requestFocus();
                 }
             }
-
+            
         }
     }
 }

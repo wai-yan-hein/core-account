@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
@@ -41,12 +42,13 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+
 /**
  *
  * @author pann
  */
 public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
-
+    
     private final PurOrderHisTableModel tableModel = new PurOrderHisTableModel();
     private PurOrderHisDialog dialog;
     private InventoryRepo inventoryRepo;
@@ -56,15 +58,16 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
     private PurOrderHis po = new PurOrderHis();
     private SelectionObserver observer;
     private JProgressBar progress;
-
+    private FindDialog findDialog;
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
@@ -72,7 +75,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
@@ -89,20 +92,25 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         initDateListner();
         actionMapping();
     }
-
+    
     public void initMain() {
         initTable();
         initRowHeader();
         initCombo();
+        initFind();
         assingnDefault();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblPurOrder);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPurOrder, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -111,7 +119,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtDueDate.getDateEditor().getUiComponent().addFocusListener(fa);
         txtVou.addKeyListener(this);
-        txtRemark.addKeyListener(this);         
+        txtRemark.addKeyListener(this);        
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -119,22 +127,23 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
     };
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPurOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblPurOrder.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initCombo() {
 //        locaitonCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
 //        locaitonCompleter.setObserver(this);
@@ -144,7 +153,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
     }
-
+    
     private void initTable() {
         tableModel.setVouDate(txtDate);
         tableModel.setDueDate(txtDueDate);
@@ -180,7 +189,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         tblPurOrder.changeSelection(0, 0, false, false);
         tblPurOrder.requestFocus();
     }
-
+    
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -199,10 +208,10 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
                 if (yes_no == 0) {
                     po.setDeleted(false);
                     inventoryRepo.restore(po.getKey()).doOnSuccess((t) -> {
-                        if(t){
-                        lblStatus.setText("EDIT");
-                        lblStatus.setForeground(Color.blue);
-                        disableForm(true);
+                        if (t) {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
                         }
                     }).subscribe();
                 }
@@ -211,7 +220,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblPurOrder.convertRowIndexToModel(tblPurOrder.getSelectedRow());
         if (row >= 0) {
@@ -225,7 +234,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             }
         }
     }
-
+    
     public boolean saveVoucher(boolean print) {
         boolean status = false;
         if (isValidEntry() && tableModel.isValidEntry()) {
@@ -237,7 +246,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             observer.selected("save", false);
             progress.setIndeterminate(true);
             po.setListPurOrderDetail(tableModel.getListDetail());
-            po.setListDel(tableModel.getDelList());           
+            po.setListDel(tableModel.getDelList());            
             inventoryRepo.savePurOrder(po)
                     .subscribe((t) -> {
                         clear();
@@ -253,7 +262,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         }
         return status;
     }
-
+    
     private void assingnDefault() {
 //        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
 //            locaitonCompleter.setLocation(tt);
@@ -264,13 +273,14 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         txtDate.setDate(Util1.getTodayDate());
         txtDueDate.setDate(Util1.getTodayDate());        
         txtVou.setText(null);
-        txtRemark.setText(null);       
+        txtRemark.setText(null);        
     }
+    
     private void clear() {
         assingnDefault();
         po = new PurOrderHis();
         lblStatus.setForeground(Color.GREEN);
-        lblStatus.setText("NEW");     
+        lblStatus.setText("NEW");        
         txtRemark.setText(null);
         tableModel.clear();
         tableModel.addNewRow();
@@ -279,11 +289,11 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         progress.setIndeterminate(false);
         txtVou.setText(null);
         traderAutoCompleter.setTrader(null);        
-        disableForm(true);       
+        disableForm(true);        
         lblStatus.setForeground(Color.green);
         lblStatus.setText("NEW");
     }
-
+    
     private void focusOnTable() {
         int rc = tblPurOrder.getRowCount();
         if (rc > 1) {
@@ -294,19 +304,18 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             txtDate.requestFocusInWindow();
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
             status = true;
             clear();
-        }else if (!Util1.isDateBetween(txtDate.getDate())) {
+        } else if (!Util1.isDateBetween(txtDate.getDate())) {
             JOptionPane.showMessageDialog(this, "Invalid Date.",
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             txtDate.requestFocus();
             status = false;
-        } 
-        else {
+        } else {
             po.setRemark(txtRemark.getText());
             po.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             po.setDueDate(Util1.convertToLocalDateTime(txtDueDate.getDate()));
@@ -333,7 +342,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         }
         return status;
     }
-
+    
     private void setVoucher(PurOrderHis s, boolean local) {
         progress.setIndeterminate(true);
         this.po = s;
@@ -343,7 +352,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
 //        }).subscribe();      
         inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        }).subscribe();       
+        }).subscribe();        
         String vouNo = po.getKey().getVouNo();
         inventoryRepo.getPurOrderHisDetail(vouNo).subscribe((t) -> {
             tableModel.setListDetail(t);
@@ -351,14 +360,14 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             txtVou.setText(vouNo);
             txtDate.setDate(Util1.convertToDate(po.getVouDate()));
             txtDueDate.setDate(Util1.convertToDate(po.getDueDate()));
-            txtRemark.setText(po.getRemark());  
+            txtRemark.setText(po.getRemark());            
             po.setVouLock(!po.getDeptId().equals(Global.deptId));
             if (po.isVouLock()) {
-            lblStatus.setText("Voucher is Lock.");
-            lblStatus.setForeground(Color.RED);
-            disableForm(false);
-            observer.selected("print", true);
-            }else if (Util1.getBoolean(po.isDeleted())) {
+                lblStatus.setText("Voucher is Lock.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("print", true);
+            } else if (Util1.getBoolean(po.isDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
                 disableForm(false);
@@ -382,14 +391,14 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -398,7 +407,7 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void printVoucher(String vouNo) {
 //        inventoryRepo.getTransferReport(vouNo).doOnSuccess((t) -> {
 //            try {
@@ -637,45 +646,47 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
     public void save() {
         saveVoucher(false);
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         if (dialog == null) {
             dialog = new PurOrderHisDialog(Global.parentForm);
             dialog.setInventoryRepo(inventoryRepo);
-            dialog.setUserRepo(userRepo);          
+            dialog.setUserRepo(userRepo);            
             dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
-            dialog.setLocationRelativeTo(null);       
+            dialog.setLocationRelativeTo(null);            
         }
         dialog.search();
     }
+    
     @Override
     public void print() {
         saveVoucher(true);
     }
-
+    
     @Override
     public void refresh() {
         initCombo();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("PURORDER-HISTORY")) {
@@ -686,20 +697,20 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             }
         }
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -713,14 +724,14 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             case "txtDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    txtDate.setDate(Util1.formatDate(date));                  
+                    txtDate.setDate(Util1.formatDate(date));                    
                 }
-            }           
+            }            
             case "txtCustomer" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtRemark.requestFocus();
                 }
-            }                  
+            }            
         }
     }
 }

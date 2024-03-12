@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.acc.dialog.FindDialog;
 import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.ChartOfAccount;
@@ -59,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class SupplierSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private int selectRow = -1;
     private Trader supplier = new Trader();
     private SupplierTabelModel supplierTabelModel = new SupplierTabelModel();
@@ -69,37 +70,38 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private RegionAutoCompleter regionAutoCompleter;
     private TraderGroupAutoCompleter traderGroupAutoCompleter;
     private COAAutoCompleter cOAAutoCompleter;
-
+    
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private RegionSetup regionSetup;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -112,25 +114,30 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         initKeyListener();
         initSpinner();
     }
-
+    
     public void initMain() {
         ComponentUtil.addFocusListener(this);
         initCombo();
         initTable();
         initRowHeader();
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblCustomer);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblCustomer, 30);
         s1.setRowHeaderView(list);
     }
-
+    
     private void initSpinner() {
         SpinnerModel spinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
         spPercent.setModel(spinnerModel);
     }
-
+    
     private void initCombo() {
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, false);
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
@@ -150,7 +157,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         }).subscribe();
         assignDefault();
     }
-
+    
     private void assignDefault() {
         accountRepo.findCOA(ProUtil.getProperty(ProUtil.CREDITOR_ACC)).subscribe((tt) -> {
             cOAAutoCompleter.setCoa(tt);
@@ -159,7 +166,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             departmentUserAutoCompleter.setDepartment(t);
         }).subscribe();
     }
-
+    
     private void initTable() {
         tblCustomer.setModel(supplierTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
@@ -175,7 +182,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.setRowSorter(sorter);
         searchSupplier();
     }
-
+    
     private void searchSupplier() {
         progress.setIndeterminate(true);
         inventoryRepo.getSupplier()
@@ -191,9 +198,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     progress.setIndeterminate(false);
                 })
                 .subscribe();
-
+        
     }
-
+    
     private void setCustomer(Trader sup) {
         supplier = sup;
         txtSysCode.setText(supplier.getKey().getCode());
@@ -221,16 +228,16 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         userRepo.findDepartment(deptId).doOnSuccess(t -> {
             departmentUserAutoCompleter.setDepartment(t);
         }).subscribe();
-
+        
     }
-
+    
     private boolean isValidEntry() {
         boolean status;
         DepartmentUser department = departmentUserAutoCompleter.getDepartment();
         Region region = regionAutoCompleter.getRegion();
         ChartOfAccount coa = cOAAutoCompleter.getCOA();
         TraderGroup traderGroup = traderGroupAutoCompleter.getGroup();
-
+        
         if (txtCusName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(Global.parentForm, "Customer Name can't be empty");
             status = false;
@@ -253,7 +260,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             supplier.setCashDown(chkCD.isSelected());
             supplier.setMulti(chkMulti.isSelected());
             supplier.setGroupCode(traderGroup == null ? null : traderGroup.getKey().getGroupCode());
-
+            
             if (lblStatus.getText().equals("NEW")) {
                 supplier.setMacId(Global.macId);
                 supplier.setCreatedBy(Global.loginUser.getUserCode());
@@ -269,7 +276,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
         return status;
     }
-
+    
     private void saveCustomer() {
         if (isValidEntry()) {
             observer.selected("save", false);
@@ -286,10 +293,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 sendMessage(supplier.getTraderName());
                 clear();
             }).subscribe();
-
+            
         }
     }
-
+    
     private void sendMessage(String mes) {
         inventoryRepo.sendDownloadMessage(MessageType.TRADER_INV, mes)
                 .doOnSuccess((t) -> {
@@ -300,7 +307,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     log.info(t);
                 }).subscribe();
     }
-
+    
     public void clear() {
         observer.selected("save", true);
         progress.setIndeterminate(false);
@@ -326,7 +333,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         spPercent.setValue(0);
         assignDefault();
     }
-
+    
     private void initKeyListener() {
         txtCusCode.addKeyListener(this);
         txtCusName.addKeyListener(this);
@@ -336,7 +343,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtRemark.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
-
+        
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
@@ -349,15 +356,15 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
         }
     };
-
+    
     private void setSupplier() {
         if (tblCustomer.getSelectedRow() >= 0) {
             selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
             setCustomer(supplierTabelModel.getCustomer(selectRow));
-
+            
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -366,7 +373,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void regionSetup() {
         if (regionSetup == null) {
             regionSetup = new RegionSetup(Global.parentForm);
@@ -829,16 +836,16 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JComboBox jComboBox) {
             ctrlName = jComboBox.getName();
         } else if (sourceObj instanceof JFormattedTextField jFormattedTextField) {
@@ -867,7 +874,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtCusPhone.requestFocus();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -877,10 +884,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusName.requestFocus();
-
+                    
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCusEmail":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -888,10 +895,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusPhone.requestFocus();
-
+                    
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtRegion":
                 switch (e.getKeyCode()) {
@@ -906,7 +913,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 tabToTable(e);
                 break;
-
+            
             case "txtCusAddress":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                 }
@@ -914,7 +921,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtRegion.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboAccount":
                 switch (e.getKeyCode()) {
@@ -929,7 +936,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 tabToTable(e);
                 break;
-
+            
             case "cboPriceType":
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
@@ -943,7 +950,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 tabToTable(e);
                 break;
-
+            
             case "txtRemark":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     chkActive.requestFocus();
@@ -951,7 +958,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
                 tabToTable(e);
-
+                
                 break;
             case "chkActive":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -960,7 +967,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtRemark.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnSave":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -969,7 +976,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     chkActive.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnClear":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -984,7 +991,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setCustomer(supplierTabelModel.getCustomer(selectRow));
                 }
-
+                
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtCusName.requestFocus();
                 }
@@ -996,7 +1003,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 break;
         }
     }
-
+    
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblCustomer.requestFocus();
@@ -1005,12 +1012,12 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveCustomer();
     }
-
+    
     @Override
     public void delete() {
         if (selectRow >= 0) {
@@ -1027,35 +1034,36 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     JOptionPane.showMessageDialog(this, str);
                 }
             }).subscribe();
-
+            
         }
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchSupplier();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
 }

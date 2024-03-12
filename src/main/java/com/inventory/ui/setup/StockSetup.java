@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
@@ -73,7 +74,7 @@ import org.apache.commons.csv.CSVPrinter;
  */
 @Slf4j
 public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl, SelectionObserver {
-
+    
     private boolean noUnit = false;
     private int selectRow = -1;
     private CategorySetupDialog categorySetupDailog;
@@ -103,15 +104,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private final DepartmentComboBoxModel departmentComboBoxModel1 = new DepartmentComboBoxModel();
     private UserRepo userRepo;
     private RelationSetupDialog relationSetupDialog;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public enum StockHeader {
         UserCode,
         StockName,
@@ -123,19 +125,19 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         SaleUnit,
         SalePrice
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -151,28 +153,34 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initKeyListener();
         panelUnit.setVisible(!noUnit);
     }
-    private void initClientProperty(){
+    
+    private void initClientProperty() {
         //txtFilter.putClientProperty(ui, ui);
     }
-
+    
     public void initMain() {
         ComponentUtil.addFocusListener(this);
         initData();
         initCombo();
         initTable();
         initRowHeader();
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblStock);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblStock, 30);
         s1.setRowHeaderView(list);
     }
-
+    
     private void initData() {
         searchStock();
     }
-
+    
     private void initTable() {
         stockTableModel.setInventoryRepo(inventoryRepo);
         tblStock.setModel(stockTableModel);
@@ -191,7 +199,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setRowSorter(sorter);
         swrf = new StartWithRowFilter(txtFilter);
     }
-
+    
     private void setStock(int row) {
         stock = stockTableModel.getStock(row);
         txtStockCode.setText(stock.getKey().getStockCode());
@@ -242,23 +250,23 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         lblStatus.setText("EDIT");
         ComponentUtil.enableForm(panelStock, !stock.isDeleted());
     }
-
+    
     private String getBrand() {
         return brandAutoCompleterF == null ? "-" : brandAutoCompleterF.getBrand().getKey().getBrandCode();
     }
-
+    
     private String getType() {
         return typeAutoCompleterF == null ? "-" : typeAutoCompleterF.getStockType().getKey().getStockTypeCode();
     }
-
+    
     private String getStock() {
         return stockAutoCompleterF == null ? "-" : stockAutoCompleterF.getStock().getKey().getStockCode();
     }
-
+    
     private String getCategory() {
         return categoryAutoCompleterF == null ? "-" : categoryAutoCompleterF.getCategory().getKey().getCatCode();
     }
-
+    
     private void searchStock() {
         progress.setIndeterminate(true);
         Integer deptId = 0;
@@ -281,7 +289,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             progress.setIndeterminate(false);
         });
     }
-
+    
     private void initCombo() {
         typeAutoCompleter = new StockTypeAutoCompleter(txtType, null, false);
         typeAutoCompleter.setStockType(null);
@@ -342,7 +350,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         stockAutoCompleterF.setObserver(this);
         assignDefault();
     }
-
+    
     private void assignDefault() {
         userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setDepartment(t);
@@ -350,7 +358,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtFilter.setText(null);
         ComponentUtil.enableForm(panelStock, true);
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         StockUnit purUnit = purUnitCompleter.getStockUnit();
@@ -441,10 +449,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 stock.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
-
+        
         return status;
     }
-
+    
     private void saveStock() {
         if (isValidEntry()) {
             observer.selected("save", false);
@@ -469,14 +477,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }).subscribe();
         }
     }
-
+    
     private void sendMessage(String mes) {
         inventoryRepo.sendDownloadMessage(MessageType.STOCK, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-
+    
     public void clear() {
         observer.selected("save", true);
         progress.setIndeterminate(false);
@@ -511,7 +519,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         lblRecord.setText(stockTableModel.getListStock().size() + "");
         assignDefault();
     }
-
+    
     private void initKeyListener() {
         txtBarCode.addKeyListener(this);
         txtSalePriceE.addKeyListener(this);
@@ -537,7 +545,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSaleUnit.addKeyListener(this);
         txtRelation.addKeyListener(this);
     }
-
+    
     private void relationSetup() {
         if (relationSetupDialog == null) {
             relationSetupDialog = new RelationSetupDialog(Global.parentForm);
@@ -549,7 +557,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         relationSetupDialog.setListUnitRelation(relationAutoCompleter.getListRelation());
         relationSetupDialog.setVisible(true);
     }
-
+    
     private void printFile() {
         try {
             progress.setIndeterminate(true);
@@ -567,7 +575,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
+    
     private void categoryDialog() {
         if (categoryAutoCompleter != null) {
             if (categorySetupDailog == null) {
@@ -581,7 +589,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             categorySetupDailog.setVisible(true);
         }
     }
-
+    
     private void stockTypeDialog() {
         if (typeAutoCompleter != null) {
             if (typeSetupDialog == null) {
@@ -595,7 +603,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             typeSetupDialog.setVisible(true);
         }
     }
-
+    
     private void stockUnitDialog() {
         if (purUnitCompleter != null) {
             if (itemUnitSetupDailog == null) {
@@ -612,7 +620,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             itemUnitSetupDailog.setVisible(true);
         }
     }
-
+    
     private void brandDialog() {
         if (brandAutoCompleter != null) {
             if (itemBrandDailog == null) {
@@ -626,20 +634,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             itemBrandDailog.setVisible(true);
         }
     }
-
+    
     private void setSelectStock() {
         selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         if (selectRow >= 0) {
             setStock(selectRow);
         }
     }
-
+    
     private void calPurAmt() {
         double qty = Util1.getDoubleOne(txtPurQty.getText());
         double price = Util1.getDoubleOne(txtPurPrice.getText());
         txtPurAmt.setText(Util1.getString(price * qty));
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -2048,16 +2056,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JTable jTable) {
             ctrlName = jTable.getName();
         } else if (sourceObj instanceof JTextField jTextField) {
@@ -2078,14 +2086,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtStockName.requestFocus();
-
+                    
                 }
             }
             case "txtType" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtCat.requestFocus();
-
+                    
                 }
             }
             case "btnAddItemType" -> {
@@ -2098,7 +2106,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtBrand.requestFocus();
-
+                    
                 }
             }
             case "txtCat" -> {
@@ -2167,7 +2175,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         txtSalePrice.requestFocus();
                 }
             }
-
+            
             case "txtSaleWt" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
@@ -2180,51 +2188,51 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         txtWt.requestFocus();
                 }
             }
-
+            
             case "txtSalePrice" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceA.requestFocus();
                 }
             }
-
+            
             case "txtSalePriceA" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceB.requestFocus();
                 }
             }
-
+            
             case "txtSalePriceB" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceC.requestFocus();
                 }
             }
-
+            
             case "txtSalePriceC" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceD.requestFocus();
                 }
             }
-
+            
             case "txtSalePriceD" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceE.requestFocus();
-
+                    
                 }
             }
-
+            
             case "txtSalePriceStd" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> {
                     }
-
+                    
                 }
             }
-
+            
             case "tblStock" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_DOWN -> {
@@ -2240,18 +2248,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             txtUserCode.requestFocus();
                         }
                     }
-
+                    
                 }
             }
-
+            
         }
     }
-
+    
     @Override
     public void save() {
         saveStock();
     }
-
+    
     @Override
     public void delete() {
         StockKey key = stock.getKey();
@@ -2280,34 +2288,35 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         }
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchStock();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         searchStock();

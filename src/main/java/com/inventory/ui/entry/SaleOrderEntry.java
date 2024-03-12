@@ -5,11 +5,11 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
-import com.common.JasperReportUtil;
 import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -61,7 +61,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-
+    
     private final SaleOrderTableModel saleOrderTableModel = new SaleOrderTableModel();
     private OrderHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
@@ -72,35 +72,36 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
     private SelectionObserver observer;
     private OrderHis orderHis = new OrderHis();
     private JProgressBar progress;
-
+    private FindDialog findDialog;
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public SaleOrderEntry(int type) {
         initComponents();
         initButtonGroup();
@@ -125,53 +126,58 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         actionMapping();
         initFocus();
     }
-
+    
     private void initFocus() {
         ComponentUtil.addFocusListener(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblOrder.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initDateListner() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
         txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
     }
-
+    
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
         g.add(chkVou);
         g.add(chkA4);
         g.add(chkA5);
     }
-
+    
     public void initMain() {
         initCombo();
         initModel();
         assignDefaultValue();
+        initFind();
         txtOrderDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblOrder);
+    }
+    
     private void initModel() {
         initSaleOrderTable();
     }
-
+    
     private void initSaleOrderTable() {
         tblOrder.setModel(saleOrderTableModel);
         saleOrderTableModel.setParent(tblOrder);
@@ -194,17 +200,17 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
-
+        
         inventoryRepo.getOrderStatus().subscribe((t) -> {
             orderStatusComboModel.setList(t);
             cboOrderStatus.setModel(orderStatusComboModel);
         });
     }
-
+    
     private void initKeyListener() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtOrderDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -216,15 +222,15 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         tblOrder.addKeyListener(this);
 //        txtOrderStatus.addKeyListener(this);
     }
-
+    
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
     }
-
+    
     private void initTextBoxFormat() {
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void assignDefaultValue() {
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
@@ -240,7 +246,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         }
         cboOrderStatus.setSelectedItem(null);
     }
-
+    
     private void clear() {
         disableForm(true);
         saleOrderTableModel.removeListDetail();
@@ -257,7 +263,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         txtReference.setText(null);
         txtCus.requestFocus();
     }
-
+    
     public void saveOrder(boolean print) {
         if (isValidEntry() && saleOrderTableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtOrderDate.getDate())) {
@@ -282,7 +288,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             }).subscribe();
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -300,7 +306,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             txtOrderDate.requestFocus();
         } else {
             orderHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
-
+            
             orderHis.setRemark(txtRemark.getText());
             orderHis.setReference(txtReference.getText());
             orderHis.setDeleted(orderHis.isDeleted());
@@ -326,7 +332,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         }
         return status;
     }
-
+    
     private void deleteOrder() {
         String status = lblStatus.getText();
         switch (status) {
@@ -355,7 +361,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblOrder.convertRowIndexToModel(tblOrder.getSelectedRow());
         if (row >= 0) {
@@ -370,12 +376,12 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void calculateTotalAmount() {
         double ttlAmt = saleOrderTableModel.getListDetail().stream().mapToDouble((o) -> Util1.getDouble(o.getAmount())).sum();
         txtVouTotal.setValue(ttlAmt);
     }
-
+    
     public void historyOrder() {
         if (dialog == null) {
             dialog = new OrderHistoryDialog(Global.parentForm);
@@ -388,13 +394,13 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         }
         dialog.search();
     }
-
+    
     public void setOrderVoucher(OrderHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
             orderHis = sh;
             String vouNo = sh.getKey().getVouNo();
-
+            
             inventoryRepo.findTrader(orderHis.getTraderCode()).doOnSuccess((t) -> {
                 traderAutoCompleter.setTrader(t);
             }).subscribe();
@@ -448,14 +454,14 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
                     });
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         inventoryRepo.getOrderReport(vouNo).subscribe((t) -> {
@@ -463,9 +469,9 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-
+        
     }
-
+    
     private void viewReport(byte[] t, String reportName, boolean print) {
         if (reportName != null) {
             try {
@@ -488,14 +494,14 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             chkVou.requestFocus();
         }
     }
-
+    
     private void searchOrder(Order order) {
         traderAutoCompleter.setTrader(order.getTrader());
         txtRemark.setText(order.getDesp());
         lblStatus.setText("NEW");
-
+        
     }
-
+    
     private void focusTable() {
         int rc = tblOrder.getRowCount();
         if (rc >= 1) {
@@ -506,15 +512,15 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             txtCus.requestFocus();
         }
     }
-
+    
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-
+    
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1012,12 +1018,12 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
     private void cboOrderStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboOrderStatusActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cboOrderStatusActionPerformed
-
+    
     @Override
     public void keyEvent(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -1049,17 +1055,17 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1106,7 +1112,7 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void calDueDate(Integer day) {
         Date vouDate = txtOrderDate.getDate();
         Calendar calendar = Calendar.getInstance();
@@ -1155,35 +1161,36 @@ public class SaleOrderEntry extends javax.swing.JPanel implements SelectionObser
     public void delete() {
         deleteOrder();
     }
-
+    
     @Override
     public void print() {
         saveOrder(true);
     }
-
+    
     @Override
     public void save() {
         saveOrder(false);
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyOrder();
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

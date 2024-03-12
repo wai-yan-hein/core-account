@@ -306,7 +306,7 @@ public class MillingOutTableModel extends AbstractTableModel {
             if (!hasEmptyRow()) {
                 MillingOutDetail pd = new MillingOutDetail();
                 listDetail.add(pd);
-                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
+//                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
         }
     }

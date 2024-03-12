@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.acc.dialog.FindDialog;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.PanelControl;
@@ -35,32 +36,33 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JobSetup extends javax.swing.JPanel implements PanelControl {
-
+    
     private JProgressBar progress;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private SelectionObserver observer;
-
+    
     private int selectRow = - 1;
     private Job ord = new Job();
     private final JobTableModel jobTableModel = new JobTableModel();
-
+    
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -71,19 +73,24 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     public JobSetup() {
         initComponents();
     }
-
+    
     public void initMain() {
         initCombo();
         initTable();
         searchJob();
+        initFind();
         txtStartDate.setDate(Util1.getTodayDate());
         txtEndDate.setDate(Util1.getTodayDate());
         txtUserCode.requestFocus();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblVou);
+    }
+    
     private void searchJob() {
         progress.setIndeterminate(true);
-        ReportFilter ReportFilter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter ReportFilter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         ReportFilter.setFinished(rdoFinish.isSelected());
         ReportFilter.setFromDate("");
         ReportFilter.setToDate("");
@@ -94,7 +101,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void setSize() {
         List<Job> listData = jobTableModel.getListData();
         long countFinished = listData.stream().filter((t) -> t.isFinished()).count();
@@ -102,9 +109,9 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         lblFinised.setText(String.valueOf(countFinished));
         lblProcess.setText(String.valueOf(process));
         lblRecord.setText(String.valueOf(listData.size()));
-
+        
     }
-
+    
     private void initCombo() {
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
         userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
@@ -114,7 +121,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             departmentUserAutoCompleter.setListDepartment(t);
         }).subscribe();
     }
-
+    
     private void initTable() {
         tblVou.setModel(jobTableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
@@ -133,7 +140,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         });
         swrf = new StartWithRowFilter(txtFilter);
     }
-
+    
     private void setJob(Job cat) {
         ord = cat;
         ord.setKey(cat.getKey());
@@ -149,9 +156,9 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
         chkFinished.setEnabled(true);
-
+        
     }
-
+    
     private void saveJob() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -174,14 +181,14 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             }).subscribe();
         }
     }
-
+    
     private void sendMessage(String mes) {
         inventoryRepo.sendDownloadMessage(MessageType.JOB, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-
+    
     private void clear() {
         progress.setIndeterminate(false);
         txtUserCode.setText("");
@@ -198,7 +205,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         observeMain();
         setSize();
     }
-
+    
     private boolean isValidEntry() {
         if (txtName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Invalid Name");
@@ -227,7 +234,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         }
         return true;
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -635,34 +642,35 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchJob();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void save() {
         saveJob();

@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.acc.dialog.FindDialog;
 import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.PanelControl;
@@ -44,7 +45,7 @@ import org.apache.commons.csv.CSVPrinter;
  */
 @Slf4j
 public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private int selectRow = -1;
     private OutputCost outputCost = new OutputCost();
     private final OutputCostTabelModel outputCostTableModel = new OutputCostTabelModel();
@@ -53,15 +54,16 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     enum Header {
         UserCode,
         Name,
@@ -75,19 +77,19 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         Group,
         Department
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -99,16 +101,20 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         initComponents();
         initKeyListener();
     }
-
+    
     public void initMain() {
         initCombo();
         initTable();
         searchOutputCost();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblOutptCost);
+    }
+    
     private void initCombo() {
     }
-
+    
     private void initTable() {
         tblOutptCost.setModel(outputCostTableModel);
         tblOutptCost.getTableHeader().setFont(Global.textFont);
@@ -125,14 +131,14 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                     selectRow = tblOutptCost.convertRowIndexToModel(tblOutptCost.getSelectedRow());
                     setOutputCost(outputCostTableModel.getCutputCost(selectRow));
                 }
-
+                
             }
         });
         sorter = new TableRowSorter(tblOutptCost.getModel());
         tblOutptCost.setRowSorter(sorter);
         sorter.toggleSortOrder(1);
     }
-
+    
     private void searchOutputCost() {
         progress.setIndeterminate(true);
         inventoryRepo.getOutputCost()
@@ -144,9 +150,9 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
                 });
-
+        
     }
-
+    
     private void setOutputCost(OutputCost optCost) {
         outputCost = optCost;
         txtSysCode.setText(outputCost.getKey().getOutputCostCode());
@@ -156,7 +162,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         chkActive.setSelected(outputCost.isActive());
         lblStatus.setText("EDIT");
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtOutputName.getText().isEmpty()) {
@@ -183,7 +189,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         }
         return status;
     }
-
+    
     private void saveOutputCost() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -201,10 +207,10 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }).subscribe();
-
+            
         }
     }
-
+    
     private void sendMessage(String mes) { // later
         inventoryRepo.sendDownloadMessage(MessageType.TRADER_INV, mes)
                 .doOnSuccess((t) -> {
@@ -215,7 +221,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                     log.info(t);
                 }).subscribe();
     }
-
+    
     public void clear() {
         observer.selected("save", true);
         progress.setIndeterminate(false);
@@ -241,7 +247,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
             return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
         }
     };
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -535,25 +541,25 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
         txtCusCode.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblOutptCost.addKeyListener(this);
-
+        
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JComboBox) {
             ctrlName = ((JComboBox) sourceObj).getName();
         } else if (sourceObj instanceof JFormattedTextField) {
@@ -584,7 +590,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                     txtOutputPrice.requestFocus();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -592,7 +598,7 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                 break;
         }
     }
-
+    
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblOutptCost.requestFocus();
@@ -601,12 +607,12 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveOutputCost();
     }
-
+    
     @Override
     public void delete() {
         if (selectRow >= 0) {
@@ -618,37 +624,38 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
                     JOptionPane.showMessageDialog(this, "Deleted.");
                 }
             });
-
+            
         }
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchOutputCost();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     private void printFile() {
         try {
             progress.setIndeterminate(true);
@@ -666,5 +673,5 @@ public class OutputCostSetup extends javax.swing.JPanel implements KeyListener, 
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
+    
 }
