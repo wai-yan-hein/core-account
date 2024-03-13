@@ -173,7 +173,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                     }
                 }
             }
-
         });
     }
 

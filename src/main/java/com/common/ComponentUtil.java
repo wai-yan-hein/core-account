@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ComponentUtil {
-
     public static void setComponentHierarchyEnabled(Component component, boolean enabled) {
         component.setEnabled(enabled);
         if (component instanceof JPanel panel) {
@@ -143,4 +142,5 @@ public class ComponentUtil {
             }
         });
     }
+
 }
