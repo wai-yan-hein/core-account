@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ReOrderCellRender;
 import com.common.ComponentUtil;
 import com.common.Global;
@@ -44,7 +45,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     private final ButtonGroup g = new ButtonGroup();
     private InventoryRepo inventoryRepo;
     private final ReorderTableModel reorderTableModel = new ReorderTableModel();
@@ -57,23 +58,24 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private SelectionObserver observer;
     private Mono<List<StockUnit>> monoUnit;
     private TableRowSorter<TableModel> sorter;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -86,16 +88,21 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         chkGroup();
         initFoucsAdapter();
     }
-
+    
     private void initFoucsAdapter() {
         ComponentUtil.addFocusListener(this);
     }
-
+    
     public void initMain() {
         initCombo();
         initTable();
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblOrder);
+    }
+    
     private void chkGroup() {
         g.add(chk1);
         g.add(chk2);
@@ -112,12 +119,12 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         chk3.addActionListener(a);
         chk4.addActionListener(a);
         chk5.addActionListener(a);
-
+        
     }
-
+    
     private void filterStatus() {
         sorter.setRowFilter(startsWithFilter);
-
+        
     }
     private ActionListener a = (ActionEvent e) -> {
         if (e.getActionCommand().equals("All")) {
@@ -127,7 +134,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         }
         calQty();
     };
-
+    
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, true, true);
         locationAutoCompleter.setObserver(this);
@@ -154,9 +161,9 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
-
+        
     }
-
+    
     private void initTable() {
         monoUnit = inventoryRepo.getStockUnit();
         reorderTableModel.setTable(tblOrder);
@@ -199,30 +206,30 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
             String tmp1 = entry.getStringValue(9).toUpperCase().replace(" ", "");
             String text = g.getSelection().getActionCommand().toUpperCase();
             return tmp1.startsWith(text);
-
+            
         }
     };
-
+    
     private String getBrandCode() {
         return brandAutoCompleter.getBrand() == null ? "-" : brandAutoCompleter.getBrand().getKey().getBrandCode();
     }
-
+    
     private String getCatCode() {
         return categoryAutoCompleter.getCategory() == null ? "-" : categoryAutoCompleter.getCategory().getKey().getCatCode();
     }
-
+    
     private String getTypeCode() {
         return typeAutoCompleter.getStockType() == null ? "-" : typeAutoCompleter.getStockType().getKey().getStockTypeCode();
     }
-
+    
     private String getStockCode() {
         return stockAutoCompleter.getStock() == null ? "-" : stockAutoCompleter.getStock().getKey().getStockCode();
     }
-
+    
     private String getLocCode() {
         return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-
+    
     private void getReorderLevel() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
@@ -244,7 +251,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
             progress.setIndeterminate(false);
         });
     }
-
+    
     private void calQty() {
         int lowMin = 0;
         int overMin = 0;
@@ -268,9 +275,9 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         txtOMin.setText(String.valueOf(overMin));
         txtBMax.setText(String.valueOf(lowMax));
         txtOMax.setText(String.valueOf(overMax));
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source != null) {
@@ -556,32 +563,33 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         getReorderLevel();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

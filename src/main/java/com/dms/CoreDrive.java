@@ -4,6 +4,7 @@
  */
 package com.dms;
 
+import com.acc.dialog.FindDialog;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -47,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     private DefaultMutableTreeNode treeRoot;
     private DefaultTreeModel treeModel;
     private JProgressBar progress;
@@ -60,15 +61,16 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     private FileRenameDialog fileRenameDialog;
     private Map<String, ImageIcon> hmIcon = new HashMap<>();
     private CVFile lastFile;
-
+    private FindDialog findDialog;
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setDmsRepo(DMSRepo dmsRepo) {
         this.dmsRepo = dmsRepo;
     }
@@ -79,7 +81,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     public CoreDrive() {
         initComponents();
     }
-
+    
     public void initMain() {
         initNewPopup();
         initMorePopup();
@@ -89,7 +91,11 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         getHeadFolder();
         getStorageInfo();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblChild);
+    }
+    
     private void initNewPopup() {
         newPopup = new JPopupMenu("Edit");
         newPopup.setFont(Global.textFont);
@@ -104,7 +110,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         newPopup.add(file);
         newPopup.add(fu);
     }
-
+    
     private void initMorePopup() {
         morePopup = new JPopupMenu("More");
         morePopup.setFont(Global.textFont);
@@ -125,7 +131,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         morePopup.addSeparator();
         morePopup.add(trash);
     }
-
+    
     private void initTrashPopup() {
         trashPopup = new JPopupMenu("Edit");
         trashPopup.setFont(Global.textFont);
@@ -161,11 +167,11 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
                     deleteForever();
                 case "Download" ->
                     downloadFile();
-
+                
             }
         }
     };
-
+    
     private void viewFile() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -173,7 +179,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             openWebBrowser(url);
         }
     }
-
+    
     private void downloadFile() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -181,7 +187,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             openWebBrowser(url);
         }
     }
-
+    
     private CVFile getSelectFile() {
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
         if (row >= 0) {
@@ -189,7 +195,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         }
         return null;
     }
-
+    
     private void copyLink() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -197,7 +203,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             Util1.copyToClipboard(url);
         }
     }
-
+    
     private void renameFile() {
         if (fileRenameDialog == null) {
             fileRenameDialog = new FileRenameDialog(Global.parentForm);
@@ -219,7 +225,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-
+    
     private void moveToTrash() {
         CVFile file = getSelectFile();
         if (file != null) {
@@ -229,7 +235,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }).subscribe();
         }
     }
-
+    
     private void restore() {
         progress.setIndeterminate(true);
         CVFile file = getSelectFile();
@@ -242,7 +248,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }).subscribe();
         }
     }
-
+    
     private void deleteForever() {
         progress.setIndeterminate(true);
         CVFile file = getSelectFile();
@@ -255,7 +261,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }).subscribe();
         }
     }
-
+    
     private void openWebBrowser(String url) {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
@@ -270,7 +276,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             JOptionPane.showMessageDialog(this, "Desktop is not supported on this platform.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void initTree() {
         treeModel = (DefaultTreeModel) tree.getModel();
         tree.setRowHeight(Global.tblRowHeight - 2);
@@ -281,7 +287,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         head.setFileDescription("Drive");
         treeRoot = new DefaultMutableTreeNode(head);
     }
-
+    
     private void initTable() {
         fileTableModel.setDmsRepo(dmsRepo);
         fileTableModel.setTable(tblChild);
@@ -301,7 +307,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
         tblChild.getColumnModel().getColumn(3).setPreferredWidth(70);
         tblChild.setTransferHandler(new FileDropHandler());
     }
-
+    
     private void getHeadFolder() {
         treeRoot.removeAllChildren();
         treeModel.reload();
@@ -313,7 +319,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void getStorageInfo() {
         dmsRepo.getStorageInfo().doOnSuccess((t) -> {
             int total = Util1.getInteger(t.getTotalSpace() / 1024 / 1024);
@@ -324,7 +330,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             lblStorage.setText(Util1.bytesToSize(t.getUsedSpace()) + " of " + Util1.bytesToSize(t.getTotalSpace()));
         }).subscribe();
     }
-
+    
     private void addChildMenu(DefaultMutableTreeNode parent, List<CVFile> listVRM) {
         listVRM.forEach((menu) -> {
             if (menu.getChild() != null) {
@@ -342,7 +348,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
     }
-
+    
     private void searchChild(MouseEvent e) {
         int selRow = tree.getRowForLocation(e.getX(), e.getY());
         TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
@@ -357,7 +363,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-
+    
     private void getFile(String parentId) {
         dmsRepo.getFile(parentId).doOnSuccess((t) -> {
             log.info(t.size() + "");
@@ -366,7 +372,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void getTrash() {
         progress.setIndeterminate(true);
         dmsRepo.getTrash().doOnSuccess((t) -> {
@@ -377,7 +383,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             progress.setIndeterminate(false);
         }).subscribe();
     }
-
+    
     private void setFileDetail(CVFile file) {
         if (file != null) {
             lastFile = file;
@@ -390,7 +396,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             lblCreated.setText(Util1.toDateStr(file.getCreatedDate(), "dd/MM/yyyy hh:mm:ss a"));
         }
     }
-
+    
     public ImageIcon getFileIcon(String extension) {
         if (extension == null) {
             return null;
@@ -408,7 +414,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-
+    
     private void createFolder() {
         String input = JOptionPane.showInputDialog(this, "New Folder");
         if (!Util1.isNullOrEmpty(input)) {
@@ -426,7 +432,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }).subscribe();
         }
     }
-
+    
     private void createFile() {
         if (lastFile != null) {
             FileDialog d = new FileDialog(Global.parentForm, "Choose CSV File", FileDialog.LOAD);
@@ -444,7 +450,7 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-
+    
     private void setFileInfo(MouseEvent e) {
         int count = e.getClickCount();
         int row = tblChild.convertRowIndexToModel(tblChild.getSelectedRow());
@@ -466,11 +472,11 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-
+    
     private void showPopup(MouseEvent e) {
         newPopup.show(btnNew, e.getX(), e.getY());
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -901,37 +907,38 @@ public class CoreDrive extends javax.swing.JPanel implements SelectionObserver, 
     @Override
     public void selected(Object source, Object selectObj) {
     }
-
+    
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         getHeadFolder();
         getStorageInfo();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

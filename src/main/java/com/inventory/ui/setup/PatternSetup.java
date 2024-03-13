@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.acc.dialog.FindDialog;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ReportFilter;
@@ -46,7 +47,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PatternSetup extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-
+    
     private final StockCompleterTableModel stockTableModel = new StockCompleterTableModel();
     private final PatternTableModel patternTableModel = new PatternTableModel();
     private SelectionObserver observer;
@@ -56,23 +57,24 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private CategoryAutoCompleter categoryAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private InventoryRepo inventoryRepo;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -83,7 +85,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 jtf.selectAll();
             }
         }
-
+        
     };
 
     /**
@@ -93,22 +95,26 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         initComponents();
         initFocus();
     }
-
+    
     public void initMain() {
         initCombo();
         initTableStock();
         initTablePD();
         initRowHeader();
+        initFind();
         actionMapping();
-
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblPD);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPD, 30);
         s2.setRowHeaderView(list);
     }
-
+    
     private void initFocus() {
         txtBrand.addFocusListener(fa);
         txtCat.addFocusListener(fa);
@@ -116,7 +122,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         txtStock.addFocusListener(fa);
         txtPrice.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void initCombo() {
         typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, null, true);
         typeAutoCompleter.setObserver(this);
@@ -136,7 +142,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
     }
-
+    
     private void focusOnPD() {
         int row = tblPD.getRowCount();
         if (row >= 1) {
@@ -145,23 +151,23 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         }
         tblPD.requestFocusInWindow();
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPD.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblPD.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initTableStock() {
         tblStock.setModel(stockTableModel);
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
@@ -180,23 +186,23 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         searchStock();
     }
-
+    
     private String getBrand() {
         return brandAutoCompleter == null ? "-" : brandAutoCompleter.getBrand().getKey().getBrandCode();
     }
-
+    
     private String getType() {
         return typeAutoCompleter == null ? "-" : typeAutoCompleter.getStockType().getKey().getStockTypeCode();
     }
-
+    
     private String getStock() {
         return stockAutoCompleter == null ? "-" : stockAutoCompleter.getStock().getKey().getStockCode();
     }
-
+    
     private String getCategory() {
         return categoryAutoCompleter == null ? "-" : categoryAutoCompleter.getCategory().getKey().getCatCode();
     }
-
+    
     private void searchStock() {
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setBrandCode(getBrand());
@@ -212,7 +218,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                     progress.setIndeterminate(false);
                 });
     }
-
+    
     private void initTablePD() {
         inventoryRepo.getDefaultLocation().subscribe((t) -> {
             patternTableModel.setLocation(t);
@@ -252,7 +258,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPD.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void select() {
         int row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         if (row >= 0) {
@@ -267,10 +273,10 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 calPrice();
                 focusOnPD();
             });
-
+            
         }
     }
-
+    
     private void deleteTran() {
         int row = tblPD.convertRowIndexToModel(tblPD.getSelectedRow());
         if (row >= 0) {
@@ -289,14 +295,14 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             }
         }
     }
-
+    
     private void calPrice() {
         List<Pattern> list = patternTableModel.getListPattern();
         double amt = list.stream().mapToDouble((p) -> Util1.getDouble(p.getAmount())).sum();
         txtPrice.setValue(amt);
-
+        
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -577,36 +583,37 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void save() {
         JOptionPane.showMessageDialog(this, "Pattern Creation is auto saved.");
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void refresh() {
         searchStock();
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

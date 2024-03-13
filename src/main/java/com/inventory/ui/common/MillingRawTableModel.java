@@ -284,7 +284,7 @@ public class MillingRawTableModel extends AbstractTableModel {
             if (!hasEmptyRow()) {
                 MillingRawDetail pd = new MillingRawDetail();
                 listDetail.add(pd);
-                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
+//                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
         }
     }
@@ -383,6 +383,7 @@ public class MillingRawTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            addNewRow();
             fireTableDataChanged();
         }
     }

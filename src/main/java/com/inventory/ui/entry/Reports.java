@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.acc.editor.DateAutoCompleter;
 import com.common.ComponentUtil;
 import com.common.ExcelExporter;
@@ -75,7 +76,7 @@ import org.springframework.core.task.TaskExecutor;
  */
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-
+    
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -107,27 +108,28 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private TableRowSorter<TableModel> sorter;
     private final ExcelExporter exporter = new ExcelExporter();
     private Set<String> excelReport = new HashSet<>();
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -138,7 +140,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     public Reports() {
         initComponents();
     }
-
+    
     public void initMain() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
@@ -149,15 +151,20 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         initCombo();
         initData();
         initDate();
+        initFind();
         getReport();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblReport);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblReport, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initExcel() {
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
@@ -191,14 +198,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         excelReport.add("StockInOutQtyDetail");
         excelReport.add("StockInOutQtySummary");
     }
-
+    
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
         txtFromDueDate.setDate(Util1.getTodayDate());
         txtToDueDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initTableReport() {
         tableModel.setExcelReport(excelReport);
         tblReport.setModel(tableModel);
@@ -209,17 +216,17 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(900);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(50);
     }
-
+    
     private void initRowSorter() {
         sorter = new TableRowSorter(tblReport.getModel());
         tblReport.setRowSorter(sorter);
     }
-
+    
     private void setEnableExcel() {
         int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         btnExcel.setEnabled(row > 0 ? excelReport.contains(tableModel.getReport(row).getMenuUrl()) : false);
     }
-
+    
     private void getReport() {
         progress.setIndeterminate(true);
         userRepo.getReport("Inventory").doOnSuccess((t) -> {
@@ -231,7 +238,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }).subscribe();
     }
-
+    
     private void initData() {
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
@@ -270,7 +277,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             departmentUserAutoCompleter.setListDepartment(t);
         }).subscribe();
     }
-
+    
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
         locationAutoCompleter.setObserver(this);
@@ -295,7 +302,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         departmentUserAutoCompleter.setObserver(this);
     }
-
+    
     private void report(boolean excel) {
         int row = tblReport.getSelectedRow();
         if (row >= 0) {
@@ -373,14 +380,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
     }
-
+    
     private String getCurCode() {
         if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currencyAutoCompleter.getCurrency().getCurCode();
     }
-
+    
     private boolean isValidReport(String url) {
         if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight") || url.equals("StockInOutQtyDetail")
                 || url.equals("StockInOutPaddyDetail") || url.equals("StockInOutPaddyDetailWetRice")) {
@@ -392,7 +399,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         }
         return true;
     }
-
+    
     private void printReport(String reportUrl, String reportName, Map<String, Object> param, boolean excel) {
         filter.setReportName(reportName);
         inventoryRepo.getReport(filter).doOnSuccess((t) -> {
@@ -444,7 +451,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             return tmp1.startsWith(text) || tmp2.startsWith(text);
         }
     };
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -453,7 +460,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         observer.selected("delete", false);
         observer.selected("refresh", true);
     }
-
+    
     private void excel(byte[] file) {
         int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         if (row >= 0) {
@@ -566,7 +573,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     JOptionPane.showMessageDialog(this, String.format("%s report can't export excel.",
                             reportName), "Excel Validation", JOptionPane.ERROR_MESSAGE);
                 }
-
+                
             }
         } else {
             btnExcel.setEnabled(true);
@@ -1378,39 +1385,40 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
         report(false);
     }
-
+    
     @Override
     public void refresh() {
         getReport();
         initData();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Date")) {
@@ -1428,5 +1436,5 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             lblMessage.setText(selectObj.toString());
         }
     }
-
+    
 }

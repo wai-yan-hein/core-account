@@ -8,6 +8,7 @@ package com.inventory.ui.entry;
 import com.CloudIntegration;
 import com.H2Repo;
 import com.acc.common.COAComboBoxModel;
+import com.acc.dialog.FindDialog;
 import com.acc.model.ChartOfAccount;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
@@ -109,10 +110,10 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-
+    
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleTableModel saleTableModel = new SaleTableModel();
-
+    
     private SaleHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
     private H2Repo h2Repo;
@@ -143,51 +144,52 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private SaleExpenseFrame saleExpenseFrame;
     private SaleWeightLossPriceDialog saleWeightLossPriceDialog;
     private AccountOptionDialog optionDialog;
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setH2Repo(H2Repo h2Repo) {
         this.h2Repo = h2Repo;
     }
-
+    
     public void setIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-
+    
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
     }
-
+    
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setStockBalanceDialog(StockBalanceFrame stockBalanceDialog) {
         this.stockBalanceDialog = stockBalanceDialog;
     }
@@ -205,7 +207,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initDateListner();
         actionMapping();
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -214,11 +216,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK), "loss-price");
         tblSale.getActionMap().put("loss-price", new LossPriceAction());
-
+        
     }
-
+    
     private class LossPriceAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
@@ -242,11 +244,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 if (saleWeightLossPriceDialog.isConfirm()) {
                     saleTableModel.setValueAt(pd, row, 0);
                 }
-
+                
             }
         }
     }
-
+    
     private void setSaleVoucherDetail(OrderHis oh) {
         clear(false);
         if (oh != null) {
@@ -282,7 +284,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtVouTotal.setValue(Util1.getDouble(oh.getVouTotal()));
         }
     }
-
+    
     private Mono<List<SaleHisDetail>> getSaleDetailFromOrder(int deptId) {
         return Flux.fromIterable(orderDialog.getListOrder())
                 .flatMap(vouNo -> inventoryRepo.getOrderDetail(vouNo, deptId)
@@ -305,15 +307,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     return sd;
                 })).collectList();
     }
-
+    
     private class DeleteSale extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTranSale();
         }
     }
-
+    
     private void initDateListner() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -339,14 +341,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     };
-
+    
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
         g.add(chkVou);
         g.add(chkA4);
         g.add(chkA5);
     }
-
+    
     public void initMain() {
         initStockBalance();
         initCombo();
@@ -354,21 +356,26 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initRowHeader();
         initPanelExpense();
         assignDefaultValue();
+        initFind();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblSale);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblSale, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initStockBalance() {
         stockBalanceDialog.setVisible(ProUtil.isCalStock());
         deskPane.add(stockBalanceDialog);
     }
-
+    
     private void setStockInfo() {
         int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
         if (row >= 0) {
@@ -376,7 +383,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             stockInfoPanel.setStock(shd.getStockCode());
         }
     }
-
+    
     private void initSaleTable() {
         tblSale.setModel(saleTableModel);
         saleTableModel.setLblRecord(lblRec);
@@ -413,7 +420,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             } else {
                 tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
             }
-
+            
         } else {
             tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
         }
@@ -423,7 +430,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
@@ -463,7 +470,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleManCompleter.setSaleMan(tt);
         }).subscribe();
     }
-
+    
     private void initKeyListener() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -483,7 +490,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtVouPaid.addKeyListener(this);
         txtProjectNo.addKeyListener(this);
     }
-
+    
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
         txtVouDiscount.setValue(0);
@@ -494,12 +501,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtVouDiscP.setValue(0);
         txtGrandTotal.setValue(0);
     }
-
+    
     private void initTextBoxFormat() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
     }
-
+    
     private void assignDefaultValue() {
         coaComboModel.setSelectedItem(null);
         batchAutoCompeter.setBatch(null);
@@ -518,7 +525,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtSaleDate.setDate(Util1.getTodayDate());
         }
     }
-
+    
     private void clear(boolean foucs) {
         disableForm(true);
         saleTableModel.removeListDetail();
@@ -539,7 +546,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtCus.requestFocus();
         }
     }
-
+    
     private void orderDialog() {
         String status = btnOrder.getText();
         if (status.equals("Order")) {
@@ -565,11 +572,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     private List<String> getOrderList() {
         return orderDialog == null ? null : orderDialog.getListOrder();
     }
-
+    
     public void saveSale(boolean print) {
         if (isValidEntry() && saleTableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtSaleDate.getDate())) {
@@ -612,7 +619,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }).subscribe();
         }
     }
-
+    
     private boolean isValidEntry() {
         if (lblStatus.getText().equals("DELETED")) {
             clear(true);
@@ -692,7 +699,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         return true;
     }
-
+    
     private void deleteSale() {
         String status = lblStatus.getText();
         switch (status) {
@@ -723,7 +730,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTranSale() {
         int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
         if (row >= 0) {
@@ -738,7 +745,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     private void calculateTotalAmount(boolean partial) {
         double totalVouBalance;
         double totalAmount = 0.0f;
@@ -788,7 +795,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         totalVouBalance = grandTotal - paid;
         txtVouBalance.setValue(Util1.getDouble(totalVouBalance));
     }
-
+    
     public void historySale() {
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm, 1);
@@ -803,7 +810,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         dialog.search();
     }
-
+    
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
@@ -876,7 +883,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleExpenseFrame.setExpense(saleHis.getExpense());
         }
     }
-
+    
     private void checkOrderNo(String vouNo) {
         if (!Util1.isNullOrEmpty(vouNo)) {
             inventoryRepo.getSaleOrder(vouNo).doOnSuccess((t) -> {
@@ -886,14 +893,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }).subscribe();
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void setAllLocation() {
         List<SaleHisDetail> listSaleDetail = saleTableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -905,7 +912,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         saleTableModel.setListDetail(listSaleDetail);
     }
-
+    
     private void printVoucher(SaleHis sh) {
         String reportName = getReportName();
         String vouNo = sh.getKey().getVouNo();
@@ -953,7 +960,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     private Map<String, Object> getDefaultParam(SaleHis sh) throws JsonProcessingException, JRException {
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -978,7 +985,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         param.put("p_sub_exp_data", d);
         return param;
     }
-
+    
     private void viewReport(List<VSale> list, SaleHis sh, String reportName) {
         if (reportName != null) {
             try {
@@ -1002,7 +1009,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             chkVou.requestFocus();
         }
     }
-
+    
     private String getReportName() {
         String name = null;
         if (chkVou.isSelected()) {
@@ -1016,7 +1023,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         return name;
     }
-
+    
     private void focusTable() {
         int rc = tblSale.getRowCount();
         if (rc >= 1) {
@@ -1027,15 +1034,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtCus.requestFocus();
         }
     }
-
+    
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-
+    
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-
+    
     private void calDueDate(Integer day) {
         Date vouDate = txtSaleDate.getDate();
         Calendar calendar = Calendar.getInstance();
@@ -1044,7 +1051,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         Date dueDate = calendar.getTime();
         txtDueDate.setDate(dueDate);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1053,7 +1060,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         observer.selected("delete", true);
         observer.selected("refresh", false);
     }
-
+    
     private void initPanelExpense() {
         saleExpenseFrame = new SaleExpenseFrame();
         saleExpenseFrame.setInventoryRepo(inventoryRepo);
@@ -1062,7 +1069,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleExpenseFrame.initMain();
         deskPane.add(saleExpenseFrame);
     }
-
+    
     private void batchDialog() {
         String text = btnBatch.getText();
         if (text.equals("Batch")) {
@@ -1085,7 +1092,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             grnDialog.searchGRNDetail(txtBatchNo.getText());
         }
     }
-
+    
     private void trasnferDialog() {
         if (transferHistoryDialog == null) {
             transferHistoryDialog = new TransferHistoryDialog(Global.parentForm);
@@ -1098,7 +1105,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         transferHistoryDialog.search();
     }
-
+    
     private void setTransferVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
         saleTableModel.clear();
@@ -1130,9 +1137,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-
+        
     }
-
+    
     private void optionDialog() {
         Trader trader = traderAutoCompleter.getTrader();
         if (trader != null) {
@@ -2064,7 +2071,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }//GEN-LAST:event_txtCusMouseExited
 
     private void txtSaleDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtSaleDatePropertyChange
-
+        
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             calDueDate(Util1.getInteger(t.getCreditDays()));
@@ -2106,12 +2113,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtVouNoActionPerformed
-
+    
     @Override
     public void keyEvent(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -2173,19 +2180,19 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e
     ) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e
     ) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -2204,7 +2211,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             case "txtCus" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtLocation.requestFocus();
-
+                    
                 }
             }
             case "txtLocation" -> {
@@ -2288,7 +2295,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     public String addCreditDay(String date, Integer dCount) {
         return LocalDateTime
                 .parse(date)
@@ -2362,35 +2369,36 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void delete() {
         deleteSale();
     }
-
+    
     @Override
     public void print() {
         saveSale(true);
     }
-
+    
     @Override
     public void save() {
         saveSale(false);
     }
-
+    
     @Override
     public void newForm() {
         clear(true);
     }
-
+    
     @Override
     public void history() {
         historySale();
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

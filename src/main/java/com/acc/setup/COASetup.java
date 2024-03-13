@@ -9,6 +9,7 @@ import com.repo.AccountRepo;
 import com.acc.common.COAGroupChildTableModel;
 import com.acc.common.COAGroupTableModel;
 import com.acc.common.COAHeadTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.editor.COA3CellEditor;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -33,7 +34,7 @@ import javax.swing.ListSelectionModel;
  * @author Lenovo
  */
 public class COASetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private int selectRow = -1;
     private final COAHeadTableModel coaHeadTableModel = new COAHeadTableModel();
     private final COAGroupTableModel coaGroupTableModel = new COAGroupTableModel();
@@ -41,15 +42,16 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private AccountRepo accountRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
-
+    private FindDialog findDialog;
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -60,13 +62,18 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     public COASetup() {
         initComponents();
     }
-
+    
     public void initMain() {
         batchLock(!Global.batchLock);
         initKeyListener();
         initTable();
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblCoaHead, tblCoaGroup, tblCOAGroupChild);
+    }
+    
     private void initTable() {
         tblCOAHead();
         tblCOAGroup();
@@ -74,26 +81,26 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         initRowHeaderGroup();
         initRowHeaderChild();
     }
-
+    
     private void initRowHeaderGroup() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblCoaGroup, 30);
         s2.setRowHeaderView(list);
     }
-
+    
     private void initRowHeaderChild() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblCOAGroupChild, 30);
         s3.setRowHeaderView(list);
     }
-
+    
     private void batchLock(boolean lock) {
         coaGroupTableModel.setEdit(lock);
         cOAGroupChildTableModel.setEdit(lock);
         observer.selected("save", lock);
         observer.selected("delete", lock);
     }
-
+    
     private void tblCOAHead() {
         tblCoaHead.setModel(coaHeadTableModel);
         tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
@@ -105,7 +112,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         searchHead();
     }
-
+    
     private void searchHead() {
         progress.setIndeterminate(true);
         accountRepo.getCOAChild("#").collectList().subscribe((t) -> {
@@ -117,7 +124,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
-
+    
     private void tblCOAGroup() {
         tblCoaGroup.setCellSelectionEnabled(true);
         tblCoaGroup.setShowGrid(true);
@@ -145,9 +152,9 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 }
             }
         });
-
+        
     }
-
+    
     private void tblCOA() {
         tblCOAGroupChild.setCellSelectionEnabled(true);
         tblCOAGroupChild.setShowGrid(true);
@@ -171,15 +178,15 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblCOAGroupChild.getActionMap().put(solve, new DeleteAction());
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteLv3();
         }
     }
-
+    
     private void deleteLv3() {
         int row = tblCOAGroupChild.convertRowIndexToModel(tblCOAGroupChild.getSelectedRow());
         if (row >= 0) {
@@ -198,7 +205,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             }
         }
     }
-
+    
     private void getCOAGroup(int row) {
         clear();
         ChartOfAccount c = coaHeadTableModel.getChartOfAccount(row);
@@ -221,7 +228,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             coaGroupTableModel.addEmptyRow();
         }
     }
-
+    
     private void reqCoaGroup() {
         int row = tblCoaGroup.getRowCount();
         if (row > 0) {
@@ -234,7 +241,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             tblCoaGroup.requestFocus();
         }
     }
-
+    
     private void getCOAGroupChild(int row) {
         cOAGroupChildTableModel.clear();
         ChartOfAccount c = coaGroupTableModel.getChartOfAccount(row);
@@ -257,7 +264,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             cOAGroupChildTableModel.addEmptyRow();
         }
     }
-
+    
     private void reqCOAGroupChild() {
         int row = tblCOAGroupChild.getRowCount();
         if (row > 0) {
@@ -270,21 +277,21 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
             tblCOAGroupChild.requestFocus();
         }
     }
-
+    
     private void clear() {
         coaGroupTableModel.clear();
         cOAGroupChildTableModel.clear();
         lblCoaChild.setText("...");
         lblCoaGroup.setText("...");
     }
-
+    
     private void setCOAHead() {
         selectRow = tblCoaHead.convertRowIndexToModel(tblCoaHead.getSelectedRow());
         if (selectRow >= 0) {
             getCOAGroup(selectRow);
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -516,54 +523,55 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-
+        
     }
-
+    
     private void initKeyListener() {
         tblCoaHead.addKeyListener(this);
         tblCoaGroup.addKeyListener(this);
         tblCOAGroupChild.addKeyListener(this);
     }
-
+    
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchHead();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

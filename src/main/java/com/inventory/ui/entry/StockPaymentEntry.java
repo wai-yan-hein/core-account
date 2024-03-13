@@ -5,6 +5,7 @@
 package com.inventory.ui.entry;
 
 import com.acc.common.COAComboBoxModel;
+import com.acc.dialog.FindDialog;
 import com.common.ColumnColorCellRenderer;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
@@ -55,7 +56,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class StockPaymentEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     public static final int QTY = 1;
     public static final int BAG = 2;
     private final StockPaymentQtyTableModel qtyTableModel = new StockPaymentQtyTableModel();
@@ -70,15 +71,16 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
     private StockPaymentHistoryDialog dialog;
     private String tranOption;
     private int type;
-
+    private FindDialog findDialog;
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -95,34 +97,39 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         initComponents();
         initFocusAdapter();
         initFormat();
+        initFind();
         configureOption();
         actionMapping();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblPayment);
+    }
+    
     private void configureOption() {
         lblTrader.setText(tranOption.equals("C") ? "Customer" : "Supplier");
         lblDate.setText(tranOption.equals("C") ? "Issue Date" : "Received Date");
     }
-
+    
     private void initFormat() {
         ComponentUtil.setTextProperty(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
         tblPayment.getActionMap().put(solve, new DeleteAction());
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void deleteTran() {
         if (lblStatus.getText().equals("EDIT")) {
             int row = tblPayment.convertRowIndexToModel(tblPayment.getSelectedRow());
@@ -141,7 +148,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             JOptionPane.showMessageDialog(this, "Can't delete in payment mode.");
         }
     }
-
+    
     private void delete(int row) {
         switch (type) {
             case QTY ->
@@ -150,7 +157,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 bagTableModel.delete(row);
         }
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
@@ -161,11 +168,11 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             locationAutoCompleter.setLocation(t);
         })).subscribe();
     }
-
+    
     private void initFocusAdapter() {
         ComponentUtil.addFocusListener(this);
     }
-
+    
     public void initMain() {
         initDate();
         initCombo();
@@ -173,17 +180,17 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         initModel();
         initRowHeader();
     }
-
+    
     private void initDate() {
         txtVouDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPayment, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initModel() {
         switch (type) {
             case QTY ->
@@ -192,7 +199,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 initTableBag();
         }
     }
-
+    
     private void initTable() {
         tblPayment.getTableHeader().setFont(Global.tblHeaderFont);
         tblPayment.setCellSelectionEnabled(true);
@@ -202,7 +209,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         tblPayment.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblPayment.setDefaultRenderer(Double.class, new DecimalFormatRender());
     }
-
+    
     private void initTableQty() {
         qtyTableModel.changeColumnName(9, tranOption.equals("C") ? "Issue Qty" : "Receive Qty");
         qtyTableModel.changeColumnName(10, tranOption.equals("C") ? "Single Isuue" : "Single Receive");
@@ -227,9 +234,9 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initTableBag() {
-
+        
         bagTableModel.changeColumnName(9, tranOption.equals("C") ? "Issue Qty" : "Receive Qty");
         bagTableModel.changeColumnName(10, tranOption.equals("C") ? "Single Isuue" : "Single Receive");
         bagTableModel.setObserver(this);
@@ -253,7 +260,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void calTraderBalance() {
         Trader trader = traderAutoCompleter.getTrader();
         if (trader != null) {
@@ -278,20 +285,20 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                     default ->
                         throw new AssertionError();
                 }
-
+                
             } else {
                 JOptionPane.showMessageDialog(this, "Create New Payment Voucher.");
             }
         }
     }
-
+    
     private void calTotalPayment() {
         int size = getPaymentList().size();
         txtRecord.setValue(size);
         lblMessage.setForeground(Color.red);
         lblMessage.setText(size == 0 ? "No Data Records." : "");
     }
-
+    
     private boolean isValidDetail() {
         return switch (type) {
             case QTY ->
@@ -302,7 +309,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 false;
         };
     }
-
+    
     private List<StockPaymentDetail> getPaymentList() {
         return switch (type) {
             case QTY ->
@@ -313,7 +320,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 null;
         };
     }
-
+    
     private List<StockPaymentDetailKey> getListDelete() {
         return switch (type) {
             case QTY ->
@@ -324,7 +331,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 null;
         };
     }
-
+    
     private void savePayment(boolean print) {
         if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
@@ -350,7 +357,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             }).subscribe();
         }
     }
-
+    
     private void enableToolBar(boolean status) {
         progress.setIndeterminate(!status);
         observer.selected("refresh", status);
@@ -358,7 +365,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         observer.selected("save", false);
         observer.selected("history", true);
     }
-
+    
     private String getReportName() {
         return switch (type) {
             case QTY ->
@@ -369,7 +376,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 null;
         };
     }
-
+    
     private void printVoucher(StockPayment spd) {
         try {
             enableToolBar(false);
@@ -387,7 +394,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
+    
     private Map<String, Object> getDefaultParam(StockPayment p) {
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -413,7 +420,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         }
         return param;
     }
-
+    
     private boolean isValidEntry() {
         Trader t = traderAutoCompleter.getTrader();
         Location l = locationAutoCompleter.getLocation();
@@ -459,7 +466,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         }
         return true;
     }
-
+    
     private void clear() {
         traderAutoCompleter.setTrader(null);
         coaComboModel.setSelectedItem(null);
@@ -476,7 +483,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         enableForm(true);
         ph = new StockPayment();
     }
-
+    
     private void clearModel() {
         switch (type) {
             case QTY ->
@@ -485,7 +492,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 bagTableModel.clear();
         }
     }
-
+    
     private void historyPayment() {
         if (dialog == null) {
             dialog = new StockPaymentHistoryDialog(Global.parentForm, tranOption);
@@ -498,7 +505,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
         }
         dialog.search();
     }
-
+    
     private void setVoucherDetail(StockPayment ph) {
         this.ph = ph;
         String vouNo = ph.getVouNo();
@@ -547,7 +554,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             tblPayment.requestFocus();
         }).subscribe();
     }
-
+    
     private void setListDetail(List<StockPaymentDetail> list) {
         switch (type) {
             case QTY ->
@@ -556,14 +563,14 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 bagTableModel.setListDetail(list);
         }
     }
-
+    
     private void enableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void deletePayment() {
         String status = lblStatus.getText();
         switch (status) {
@@ -593,7 +600,7 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -893,40 +900,41 @@ public class StockPaymentEntry extends javax.swing.JPanel implements SelectionOb
             calTraderBalance();
         }
     }
-
+    
     @Override
     public void save() {
         savePayment(false);
     }
-
+    
     @Override
     public void delete() {
         deletePayment();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyPayment();
     }
-
+    
     @Override
     public void print() {
         savePayment(true);
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

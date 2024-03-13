@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.*;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
@@ -62,7 +63,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class WeightEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
-
+    
     private SelectionObserver observer;
     private JProgressBar progress;
     private TraderAutoCompleter traderAutoCompleter;
@@ -72,19 +73,20 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     private final WeightDetailTableModel tableModel = new WeightDetailTableModel();
     private WeightHistoryDialog dialog;
     private WeightHis his = new WeightHis();
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -100,33 +102,38 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         ComponentUtil.addFocusListener(panelHeader);
         txtTrader.requestFocus();
     }
-
+    
     public void initMain() {
         initCombo();
         initTable();
         initModel();
         initRowHeader();
+        initFind();
         assignDefaultValue();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblWeight);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblWeight, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initTextBox() {
         txtQty.setFormatterFactory(Util1.getDecimalFormat2());
         txtWeightTotal.setFormatterFactory(Util1.getDecimalFormat2());
         txtBag.setFormatterFactory(Util1.getDecimalFormat2());
         txtWeight.setFormatterFactory(Util1.getDecimalFormat2());
-
+        
         txtQty.setFont(Global.amtFont);
         txtWeightTotal.setFont(Global.amtFont);
         txtBag.setFont(Global.amtFont);
         txtWeight.setFont(Global.amtFont);
     }
-
+    
     private void initKeyListener() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -134,14 +141,14 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         txtRemark.addKeyListener(this);
         txtStock.addKeyListener(this);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
         stockAutoCompleter = new StockAutoCompleter1(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
     }
-
+    
     private void assignDefaultValue() {
         txtDate.setDate(Util1.getTodayDate());
         inventoryRepo.getDefaultSupplier().doOnSuccess((t) -> {
@@ -149,23 +156,23 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         }).subscribe();
         progress.setIndeterminate(false);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblWeight.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblWeight.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void deleteTran() {
         int row = tblWeight.convertRowIndexToModel(tblWeight.getSelectedRow());
         if (row >= 0) {
@@ -181,7 +188,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             }
         }
     }
-
+    
     private void initTable() {
         tableModel.setObserver(this);
         tableModel.setTable(tblWeight);
@@ -199,9 +206,9 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         tblWeight.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblWeight.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        
     }
-
+    
     public boolean saveWeight(boolean print) {
         boolean status = false;
         try {
@@ -225,7 +232,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                     progress.setIndeterminate(false);
                     observer.selected("save", false);
                 }).subscribe();
-
+                
             }
         } catch (HeadlessException ex) {
             log.error("savePur :" + ex.getMessage());
@@ -233,7 +240,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         }
         return status;
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         WeightStatus weightStatus = (WeightStatus) cboStatus.getSelectedItem();
@@ -287,12 +294,12 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         }
         return status;
     }
-
+    
     private void clearTableModel() {
         tableModel.clear();
         tableModel.addNewRow(false);
     }
-
+    
     private void clearTextBox() {
         lblRec.setText("0");
         txtQty.setValue(0);
@@ -310,7 +317,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         chkDraft.setSelected(false);
         progress.setIndeterminate(false);
     }
-
+    
     private void clear(boolean focus) {
         his = new WeightHis();
         assignDefaultValue();
@@ -321,14 +328,14 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             txtTrader.requestFocus();
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("print", status);
         observer.selected("deleted", status);
     }
-
+    
     private void printWeightVoucher(WeightHis his) {
         String vouNo = his.getKey().getVouNo();
         inventoryRepo.getWeightColumn(vouNo).doOnSuccess((t) -> {
@@ -347,7 +354,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             clear(false);
         }).subscribe();
     }
-
+    
     private Map<String, Object> getDefaultParam(WeightHis p) {
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -360,7 +367,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         param.put("p_vou_date", Util1.getDate(p.getVouDate()));
         param.put("p_vou_time", Util1.getTime(p.getVouDate()));
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
-        String type =WeightStatus.values()[cboStatus.getSelectedIndex()].name();
+        String type = WeightStatus.values()[cboStatus.getSelectedIndex()].name();
         log.info(type);
         param.put("p_type", type);
         Trader t = traderAutoCompleter.getTrader();
@@ -371,7 +378,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         }
         return param;
     }
-
+    
     private void focusTable() {
         int rc = tblWeight.getRowCount();
         if (rc >= 1) {
@@ -382,7 +389,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             txtDate.requestFocusInWindow();
         }
     }
-
+    
     private void historyWeight() {
         if (dialog == null) {
             dialog = new WeightHistoryDialog(Global.parentForm);
@@ -395,7 +402,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         }
         dialog.search();
     }
-
+    
     public void setVoucher(WeightHis g) {
         if (g != null) {
             progress.setIndeterminate(true);
@@ -442,10 +449,10 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                 focusTable();
                 progress.setIndeterminate(false);
             }).subscribe();
-
+            
         }
     }
-
+    
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -470,14 +477,14 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                             disableForm(true);
                         }
                     }).subscribe();
-
+                    
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void calTotal() {
         int rowCount = tblWeight.getRowCount();
         int colCount = tblWeight.getColumnCount();
@@ -494,7 +501,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         txtBag.setValue(getListDetail().size());
         lblRec.setText(String.valueOf(rowCount));
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -503,7 +510,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void initModel() {
         for (int i = 1; i <= 15; i++) {
             tableModel.addColumn(i);
@@ -511,13 +518,13 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         tableModel.addColumn("Total");
         tblWeight.setModel(tableModel);
     }
-
+    
     private void setData(List<WeightHisDetail> list) {
         tableModel.clear();
         if (list != null) {
             int rowCount = list.size() / 15;
             int remainingElements = list.size() % 15;
-
+            
             for (int i = 0; i < rowCount; i++) {
                 Double[] rowData = new Double[15];
                 for (int j = 0; j < 15; j++) {
@@ -545,12 +552,12 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             addNewRow();
         }
     }
-
+    
     private void addNewRow() {
         Double[] rowData = new Double[15];
         tableModel.addRow(rowData);
     }
-
+    
     public List<WeightHisDetail> getListDetail() {
         List<WeightHisDetail> list = new ArrayList<>();
         for (int row = 0; row < tblWeight.getRowCount(); row++) {
@@ -969,19 +976,19 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
                 calTotal();
             }
         }
-
+        
     }
-
+    
     @Override
     public void save() {
         saveWeight(false);
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         boolean yes = ComponentUtil.checkClear(lblStatus.getText());
@@ -989,38 +996,39 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
             clear(true);
         }
     }
-
+    
     @Override
     public void history() {
         historyWeight();
     }
-
+    
     @Override
     public void print() {
         saveWeight(true);
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();

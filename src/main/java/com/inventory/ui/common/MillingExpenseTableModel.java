@@ -254,7 +254,7 @@ public class MillingExpenseTableModel extends AbstractTableModel {
             if (!hasEmptyRow()) {
                 MillingExpense pd = new MillingExpense();
                 listDetail.add(pd);
-                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
+//                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
         }
     }
@@ -281,6 +281,7 @@ public class MillingExpenseTableModel extends AbstractTableModel {
     }
     public void clear(){
         listDetail.clear();
+        addNewRow();
         fireTableDataChanged();
     }
 

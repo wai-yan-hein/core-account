@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.acc.dialog.FindDialog;
 import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.ChartOfAccount;
@@ -59,7 +60,7 @@ import org.springframework.core.task.TaskExecutor;
  */
 @Slf4j
 public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private int selectRow = -1;
     private Trader employee = new Trader();
     private final EmployeeTabelModel employeeTabelModel = new EmployeeTabelModel();
@@ -74,7 +75,8 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
     private RegionSetup regionSetup;
-
+    private FindDialog findDialog;
+    
     enum Header {
         UserCode,
         Name,
@@ -88,35 +90,35 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
         Group,
         Department
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
@@ -128,34 +130,39 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
         initComponents();
         initKeyListener();
     }
-
+    
     public void initMain() {
         initCombo();
         initData();
         initTable();
         initRowHeader();
+        initFind();
         searchEmployee();
         assignDefault();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblCustomer);
+    }
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblCustomer, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initCombo() {
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, false);
         countryAutoCompleter = new CountryAutoCompleter(txtCountry, null, false);
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
     }
-
+    
     private void assignDefault() {
         accountRepo.findCOA(ProUtil.getProperty(ProUtil.EMP_ACC)).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
         }).subscribe();
     }
-
+    
     private void initData() {
         inventoryRepo.getRegion().doOnSuccess((t) -> {
             regionAutoCompleter.setListRegion(t);
@@ -167,7 +174,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
             cOAAutoCompleter.setListCOA(t);
         }).subscribe();
     }
-
+    
     private void initTable() {
         tblCustomer.setModel(employeeTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
@@ -183,14 +190,14 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setEmployee(employeeTabelModel.getEmployee(selectRow));
                 }
-
+                
             }
         });
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
         sorter.toggleSortOrder(1);
     }
-
+    
     private void searchEmployee() {
         progress.setIndeterminate(true);
         inventoryRepo.getEmployee()
@@ -202,9 +209,9 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
                 });
-
+        
     }
-
+    
     private void setEmployee(Trader emp) {
         employee = emp;
         txtSysCode.setText(employee.getKey().getCode());
@@ -227,9 +234,9 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
         accountRepo.findCOA(employee.getAccount()).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
         }).subscribe();
-
+        
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtCusName.getText().isEmpty()) {
@@ -278,7 +285,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
         return status;
     }
-
+    
     private void saveEmployee() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -296,10 +303,10 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }).subscribe();
-
+            
         }
     }
-
+    
     private void sendMessage(String mes) {
         inventoryRepo.sendDownloadMessage(MessageType.TRADER_INV, mes)
                 .doOnSuccess((t) -> {
@@ -310,7 +317,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     log.info(t);
                 }).subscribe();
     }
-
+    
     public void clear() {
         observer.selected("save", true);
         progress.setIndeterminate(false);
@@ -346,7 +353,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
             return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
         }
     };
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -821,25 +828,25 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtConPerson.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
-
+        
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JComboBox) {
             ctrlName = ((JComboBox) sourceObj).getName();
         } else if (sourceObj instanceof JFormattedTextField) {
@@ -870,7 +877,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtConPerson.requestFocus();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -880,7 +887,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusName.requestFocus();
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -890,10 +897,10 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtConPerson.requestFocus();
-
+                    
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCusEmail":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -901,10 +908,10 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusPhone.requestFocus();
-
+                    
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboRegion":
                 switch (e.getKeyCode()) {
@@ -923,7 +930,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCusAddress":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -932,7 +939,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtRegion.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboAccount":
                 switch (e.getKeyCode()) {
@@ -949,7 +956,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCreditLimit":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -957,7 +964,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
                 tabToTable(e);
-
+                
                 break;
             case "chkActive":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -966,7 +973,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtConPerson.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnSave":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -975,7 +982,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     chkActive.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnClear":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -984,14 +991,14 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
                 tabToTable(e);
-
+                
                 break;
             case "tblCustomer":
                 if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setEmployee(employeeTabelModel.getEmployee(selectRow));
                 }
-
+                
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtCusName.requestFocus();
                 }
@@ -1003,7 +1010,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                 break;
         }
     }
-
+    
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblCustomer.requestFocus();
@@ -1012,12 +1019,12 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveEmployee();
     }
-
+    
     @Override
     public void delete() {
         if (selectRow >= 0) {
@@ -1034,37 +1041,38 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
                     JOptionPane.showMessageDialog(this, str);
                 }
             });
-
+            
         }
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchEmployee();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     private void printFile() {
         try {
             progress.setIndeterminate(true);
@@ -1082,5 +1090,5 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-
+    
 }

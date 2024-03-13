@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.COA3CellEditor;
 import com.repo.AccountRepo;
@@ -61,7 +62,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     private final LabourPaymentTableModel tableModel = new LabourPaymentTableModel();
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -75,23 +76,24 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
     private DepartmentAutoCompleter departmentAutoCompleter;
     private LabourPaymentDto ph = new LabourPaymentDto();
     private LabourPaymentHistory dialog;
-
+    private FindDialog findDialog;
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
@@ -106,26 +108,26 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         initFormat();
         actionMapping();
     }
-
+    
     private void initFormat() {
         ComponentUtil.setTextProperty(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
         tblPayment.getActionMap().put(solve, new DeleteAction());
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void deleteTran() {
         if (lblStatus.getText().equals("EDIT")) {
             int row = tblPayment.convertRowIndexToModel(tblPayment.getSelectedRow());
@@ -144,7 +146,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             JOptionPane.showMessageDialog(this, "Can't delete in payment mode.");
         }
     }
-
+    
     private void initCombo() {
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLabourGroup, null, false);
@@ -153,7 +155,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountRepo, null, false, 3);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
     }
-
+    
     private void initData() {
         userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
@@ -175,31 +177,36 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
     }
-
+    
     private void initFocusAdapter() {
         ComponentUtil.addFocusListener(this);
     }
-
+    
     public void initMain() {
         initDate();
         initCombo();
         initData();
         initTable();
         initRowHeader();
+        initFind();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblPayment);
+    }
+    
     private void initDate() {
         txtVouDate.setDate(Util1.getTodayDate());
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPayment, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initTable() {
         tableModel.addNewRow();
         tableModel.setObserver(this);
@@ -229,7 +236,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void savePayment(boolean print) {
         if (isValidEntry() && tableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
@@ -260,7 +267,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             }).subscribe();
         }
     }
-
+    
     private void enableToolBar(boolean status) {
         progress.setIndeterminate(!status);
         observer.selected("refresh", status);
@@ -268,7 +275,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         observer.selected("save", false);
         observer.selected("history", true);
     }
-
+    
     private void printVoucher(LabourPaymentDto dto) {
         try {
             enableToolBar(false);
@@ -300,9 +307,9 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         } catch (JRException e) {
             log.error("printVoucher : " + e.getMessage());
         }
-
+        
     }
-
+    
     private boolean isValidEntry() {
         Date fromDate = txtFromDate.getDate();
         Date toDate = txtToDate.getDate();
@@ -367,7 +374,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         }
         return true;
     }
-
+    
     private void clear() {
         progress.setIndeterminate(false);
         labourGroupAutoCompleter.setObject(null);
@@ -387,9 +394,9 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         ph = new LabourPaymentDto();
         enableForm(true);
         observeMain();
-
+        
     }
-
+    
     private void historyPayment() {
         if (dialog == null) {
             dialog = new LabourPaymentHistory(Global.parentForm);
@@ -402,7 +409,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         }
         dialog.search();
     }
-
+    
     private void setVoucherDetail(LabourPaymentDto ph) {
         this.ph = ph;
         String vouNo = ph.getVouNo();
@@ -451,12 +458,12 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             tblPayment.requestFocus();
         }).subscribe();
     }
-
+    
     private void enableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
     }
-
+    
     private void deletePayment() {
         String status = lblStatus.getText();
         switch (status) {
@@ -489,7 +496,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void calculatePayment() {
         Date fromDate = txtFromDate.getDate();
         Date toDate = txtToDate.getDate();
@@ -519,7 +526,7 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             }).subscribe();
         }
     }
-
+    
     private void calTotal() {
         List<LabourPaymentDetail> list = tableModel.getListDetail();
         double total = list.stream().mapToDouble((t) -> t.getAmount()).sum();
@@ -529,14 +536,14 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
         txtLabourPrice.setValue(price);
         txtRecord.setValue(list.size());
     }
-
+    
     private void setMemberCount() {
         LabourGroup group = labourGroupAutoCompleter.getObject();
         if (group != null) {
             txtMember.setText(Util1.getString(group.getMemberCount()));
         }
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -984,40 +991,41 @@ public class LabourPaymentEntry extends javax.swing.JPanel implements SelectionO
             calTotal();
         }
     }
-
+    
     @Override
     public void save() {
         savePayment(false);
     }
-
+    
     @Override
     public void delete() {
         deletePayment();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyPayment();
     }
-
+    
     @Override
     public void print() {
         savePayment(true);
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

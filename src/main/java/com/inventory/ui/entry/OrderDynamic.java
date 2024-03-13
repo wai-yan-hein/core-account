@@ -5,11 +5,11 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
-import com.common.JasperReportUtil;
 import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -75,7 +75,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class OrderDynamic extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-
+    
     public static final int ORDER = 1;
     public static final int PUR_ORDER = 2;
     private final OrderTableModel orderTableModel = new OrderTableModel();
@@ -94,43 +94,44 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     private OrderHis orderHis = new OrderHis();
     private JProgressBar progress;
     private int type;
-
+    private FindDialog findDialog;
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
-
+    
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-
+    
     public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
         this.locationAutoCompleter = locationAutoCompleter;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public OrderDynamic(int type) {
         this.type = type;
         initComponents();
@@ -156,49 +157,54 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         actionMapping();
         initFocus();
     }
-
+    
     private void initFocus() {
         ComponentUtil.addFocusListener(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblOrder.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initDateListner() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
         txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
     }
-
+    
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
         g.add(chkVou);
         g.add(chkA4);
         g.add(chkA5);
     }
-
+    
     public void initMain() {
         initCombo();
         initModel();
         assignDefaultValue();
+        initFind();
         txtOrderDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblOrder);
+    }
+    
     private void initModel() {
         switch (type) {
             case ORDER ->
@@ -207,7 +213,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 initPurchaseOrderTable();
         }
     }
-
+    
     private void initPurchaseOrderTable() {
         tblOrder.setModel(purchaseOrderTableModel);
         purchaseOrderTableModel.setParent(tblOrder);
@@ -248,7 +254,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initOrderTable() {
         tblOrder.setModel(orderTableModel);
         orderTableModel.setParent(tblOrder);
@@ -289,7 +295,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
@@ -313,7 +319,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
     }
-
+    
     private void initKeyListener() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtOrderDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -328,15 +334,15 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         tblOrder.addKeyListener(this);
 //        txtOrderStatus.addKeyListener(this);
     }
-
+    
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
     }
-
+    
     private void initTextBoxFormat() {
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void assignDefaultValue() {
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
@@ -362,7 +368,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         }
         cboOrderStatus.setSelectedItem(null);
     }
-
+    
     private void clear() {
         disableForm(true);
         orderTableModel.removeListDetail();
@@ -380,7 +386,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
     }
-
+    
     public void saveOrder(boolean print) {
         if (isValidEntry() && orderTableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtOrderDate.getDate())) {
@@ -405,7 +411,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -466,7 +472,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         }
         return status;
     }
-
+    
     private void deleteOrder() {
         String status = lblStatus.getText();
         switch (status) {
@@ -495,7 +501,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblOrder.convertRowIndexToModel(tblOrder.getSelectedRow());
         if (row >= 0) {
@@ -510,12 +516,12 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-
+    
     private void calculateTotalAmount() {
         double ttlAmt = orderTableModel.getListDetail().stream().mapToDouble((o) -> Util1.getDouble(o.getAmount())).sum();
         txtVouTotal.setValue(ttlAmt);
     }
-
+    
     public void historyOrder() {
         if (dialog == null) {
             dialog = new OrderHistoryDialog(Global.parentForm);
@@ -528,7 +534,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         }
         dialog.search();
     }
-
+    
     public void setOrderVoucher(OrderHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
@@ -599,14 +605,14 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                     });
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void setAllLocation() {
         List<OrderHisDetail> listSaleDetail = orderTableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -618,7 +624,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         }
         orderTableModel.setListDetail(listSaleDetail);
     }
-
+    
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         inventoryRepo.getOrderReport(vouNo).subscribe((t) -> {
@@ -626,9 +632,9 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-
+        
     }
-
+    
     private void viewReport(byte[] t, String reportName, boolean print) {
         if (reportName != null) {
             try {
@@ -652,14 +658,14 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             chkVou.requestFocus();
         }
     }
-
+    
     private void searchOrder(Order order) {
         traderAutoCompleter.setTrader(order.getTrader());
         txtRemark.setText(order.getDesp());
         lblStatus.setText("NEW");
-
+        
     }
-
+    
     private void focusTable() {
         int rc = tblOrder.getRowCount();
         if (rc >= 1) {
@@ -670,15 +676,15 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             txtCus.requestFocus();
         }
     }
-
+    
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-
+    
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1271,12 +1277,12 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             calDueDate(Util1.getInteger(t.getCreditDays()));
         }
     }//GEN-LAST:event_txtOrderDatePropertyChange
-
+    
     @Override
     public void keyEvent(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -1310,17 +1316,17 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1382,7 +1388,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-
+    
     private void calDueDate(Integer day) {
         Date vouDate = txtOrderDate.getDate();
         Calendar calendar = Calendar.getInstance();
@@ -1439,35 +1445,36 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     public void delete() {
         deleteOrder();
     }
-
+    
     @Override
     public void print() {
         saveOrder(true);
     }
-
+    
     @Override
     public void save() {
         saveOrder(false);
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyOrder();
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

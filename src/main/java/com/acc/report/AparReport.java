@@ -11,6 +11,7 @@ import com.repo.AccountRepo;
 import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.GLTableCellRender;
+import com.acc.dialog.FindDialog;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
@@ -61,7 +62,7 @@ import org.springframework.core.task.TaskExecutor;
 @Slf4j
 public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
-
+    
     private int row = 0;
     /**
      * Creates new form AparReport
@@ -90,25 +91,26 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
     private final ExcelExporter exporter = new ExcelExporter();
-
+    private FindDialog findDialog;
+    
     public AparReport() {
         initComponents();
         initKeyListener();
         initTextBoxFormat();
         initDateDecorator();
     }
-
+    
     private void assingDefaultValue() {
         ComponentUtil.setTextProperty(this);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
     }
-
+    
     private void initDateDecorator() {
         decorator = DateTableDecorator.decorate(panelDate);
         decorator.setObserver(this);
     }
-
+    
     private void initKeyListener() {
         txtDep.addKeyListener(this);
         txtPerson.addKeyListener(this);
@@ -116,15 +118,20 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         txtProjectNo.addKeyListener(this);
         ComponentUtil.addFocusListener(this);
     }
-
+    
     public void initMain() {
         assingDefaultValue();
         initCombo();
         initTable();
+        initFind();
         createDateFilter();
         searchAPAR();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblAPAR);
+    }
+    
     private void createDateFilter() {
         HashMap<Integer, String> hmDate = new HashMap<>();
         HashMap<String, Integer> hmPage = new HashMap<>();
@@ -139,13 +146,13 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         decorator.setHmData(hmDate);
         decorator.refreshButton(dateAutoCompleter.getDateModel().getStartDate());
     }
-
+    
     private void initTextBoxFormat() {
         ComponentUtil.setTextProperty(this);
         txtDrAmt.setFont(Global.menuFont);
         txtCrAmt.setFont(Global.menuFont);
     }
-
+    
     private void initTable() {
         tblAPAR.setModel(aPARTableModel);
         tblAPAR.getTableHeader().setFont(Global.tblHeaderFont);
@@ -158,7 +165,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         tblAPAR.getColumnModel().getColumn(5).setPreferredWidth(100);
         tblAPAR.setDefaultRenderer(Double.class, new GLTableCellRender(4, 5));
         tblAPAR.setDefaultRenderer(Object.class, new GLTableCellRender(4, 5));
-
+        
         tblAPAR.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -175,7 +182,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
     }
-
+    
     private void openTBDDialog(String coaCode, String traderCode, String traderName) {
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
@@ -194,20 +201,20 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setDateModel(dateAutoCompleter.getDateModel());
         dialog.searchTriBalDetail();
     }
-
+    
     private List<String> getListDep() {
         return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
-
+    
     private String getCoaCode() {
         return cOAAutoCompleter.getCOA() == null ? "-"
                 : cOAAutoCompleter.getCOA().getKey().getCoaCode();
     }
-
+    
     private String getCurCode() {
         return currencyAutoCompleter.getCurrency() == null ? Global.currency : currencyAutoCompleter.getCurrency().getCurCode();
     }
-
+    
     private void searchAPAR() {
         if (!isApPrCal) {
             long start = new GregorianCalendar().getTimeInMillis();
@@ -250,18 +257,18 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             }).subscribe();
         }
     }
-
+    
     private void removeZero() {
         if (chkZero.isSelected()) {
             List<VApar> mutableList = new ArrayList<>(aPARTableModel.getListAPAR());
             List<VApar> listFilter = mutableList.stream().filter(t -> t.getDrAmt() + t.getCrAmt() != 0).toList();
             aPARTableModel.setListAPAR(listFilter);
-
+            
         } else {
             aPARTableModel.setListAPAR(aPARTableModel.getListOrg());
         }
     }
-
+    
     private void filterRegion() {
         Region r = regionAutoCompleter.getRegion();
         String regCode = r.getKey().getRegCode();
@@ -270,9 +277,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             List<VApar> listFilter = mutableList.stream().filter(t -> Util1.isNull(t.getRegCode(), "-").equals(regCode)).toList();
             aPARTableModel.setListAPAR(listFilter);
         }
-
+        
     }
-
+    
     private void calTotal() {
         List<VApar> list = aPARTableModel.getListAPAR();
         double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
@@ -281,7 +288,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         txtCrAmt.setValue(crAmt);
         txtFOFB.setValue(drAmt - crAmt);
     }
-
+    
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
@@ -312,9 +319,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         traderAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
-
+        
     }
-
+    
     private void printARAP() {
         try {
             progress.setIndeterminate(true);
@@ -339,22 +346,22 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printARAP : " + ex.getMessage());
         }
-
+        
     }
-
+    
     private void exportExcel() {
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
         exporter.exportArAp(aPARTableModel.getListAPAR(), "AR-AP");
     }
-
+    
     public void clear() {
         txtCurrency.setText(null);
         txtDate.setText(null);
         txtDep.setText(null);
         txtPerson.setText(null);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -862,51 +869,52 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-
+    
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
         searchAPAR();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
         printARAP();
     }
-
+    
     @Override
     public void refresh() {
         searchAPAR();
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
     }

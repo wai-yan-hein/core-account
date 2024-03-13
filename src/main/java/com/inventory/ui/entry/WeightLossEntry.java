@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.dialog.FindDialog;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -42,7 +43,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class WeightLossEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-
+    
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
@@ -51,20 +52,20 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     private SelectionObserver observer;
     private JProgressBar progress;
     private WeightLossHis his = new WeightLossHis();
-
+    private FindDialog findDialog;
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
     
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -76,13 +77,18 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         initComponents();
         actionMapping();
     }
-
+    
     public void initMain() {
         txtDate.setDate(Util1.getTodayDate());
         initTable();
+        initFind();
         assignDefault();
     }
-
+    
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblWeight);
+    }
+    
     private void initTable() {
         Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
         tableModel.setVouDate(txtDate);
@@ -129,23 +135,23 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblWeight.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblWeight.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblWeight.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void deleteTran() {
         int row = tblWeight.convertRowIndexToModel(tblWeight.getSelectedRow());
         if (row >= 0) {
@@ -159,7 +165,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-
+    
     private void saveVoucher() {
         if (isValidEntry() && tableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtDate.getDate())) {
@@ -180,7 +186,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             });
         }
     }
-
+    
     private void deleteVoucher() {
         if (lblStatus.getText().equals("EDIT")) {
             int status = JOptionPane.showConfirmDialog(this, "Are you sure to delete?", "Delete Voucher", JOptionPane.ERROR_MESSAGE, JOptionPane.NO_OPTION);
@@ -198,11 +204,11 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
                     enableControl(true);
                     focusTable();
                 });
-
+                
             }
         }
     }
-
+    
     private void focusTable() {
         int rc = tblWeight.getRowCount();
         if (rc > 1) {
@@ -213,7 +219,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             txtDate.requestFocus();
         }
     }
-
+    
     private void enableControl(boolean status) {
         txtDate.setEnabled(status);
         txtRemark.setEnabled(status);
@@ -222,7 +228,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void clear() {
         assignDefault();
         progress.setIndeterminate(false);
@@ -234,13 +240,13 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         tableModel.clear();
         tableModel.addNewRow();
     }
-
+    
     private void assignDefault() {
         inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
             tableModel.setLocation(t);
         }).subscribe();
     }
-
+    
     private boolean isValidEntry() {
         if (txtDate.getDate() == null) {
             JOptionPane.showMessageDialog(this, "Invalid Date.");
@@ -270,7 +276,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         }
         return true;
     }
-
+    
     public void historyWeight() {
         if (dialog == null) {
             dialog = new WeightLossHistoryDialog(Global.parentForm);
@@ -284,7 +290,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         }
         dialog.search();
     }
-
+    
     private void setVoucher(WeightLossHis his) {
         this.his = his;
         String vouNo = his.getKey().getVouNo();
@@ -318,7 +324,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             focusTable();
         });
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -525,42 +531,43 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveVoucher();
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyWeight();
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
 }

@@ -6,6 +6,7 @@
 package com.user.setup;
 
 import com.acc.common.CurExchangeRateTableModel;
+import com.acc.dialog.FindDialog;
 import com.acc.editor.DateAutoCompleter;
 import com.user.dialog.ExchangeDialog;
 import com.common.Global;
@@ -37,6 +38,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private DateAutoCompleter dateAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
     private UserRepo userRepo;
+    private FindDialog findDialog;
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -49,7 +51,6 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
 
     /**
      * Creates new form CurrencyExchange
@@ -61,6 +62,11 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     public void initMain() {
         initComobo();
         initTable();
+        initFind();
+    }
+
+    private void initFind() {
+        findDialog = new FindDialog(Global.parentForm, tblExchange);
     }
 
     private void initComobo() {
