@@ -13,7 +13,6 @@ import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
-import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.BrandAutoCompleter;
@@ -61,8 +60,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -95,8 +92,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private UnitRelationAutoCompleter relationAutoCompleter;
     private StockFormulaCompleter stockFormulaCompleter;
     private Stock stock = new Stock();
-    private TableRowSorter<TableModel> sorter;
-    private StartWithRowFilter swrf;
     private SelectionObserver observer;
     private JProgressBar progress;
     private InventoryRepo inventoryRepo;
@@ -154,9 +149,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         panelUnit.setVisible(!noUnit);
     }
     
-    private void initClientProperty() {
-        //txtFilter.putClientProperty(ui, ui);
-    }
     
     public void initMain() {
         ComponentUtil.addFocusListener(this);
@@ -195,9 +187,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
         tblStock.setDefaultRenderer(Double.class, new TableCellRender());
-        sorter = new TableRowSorter<>(tblStock.getModel());
-        tblStock.setRowSorter(sorter);
-        swrf = new StartWithRowFilter(txtFilter);
     }
     
     private void setStock(int row) {
@@ -355,7 +344,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setDepartment(t);
         }).subscribe();
-        txtFilter.setText(null);
         ComponentUtil.enableForm(panelStock, true);
     }
     
@@ -745,8 +733,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel29 = new javax.swing.JLabel();
         cboDept1 = new javax.swing.JComboBox<>();
         jPanel6 = new javax.swing.JPanel();
-        jLabel22 = new javax.swing.JLabel();
-        txtFilter = new javax.swing.JTextField();
         lblRecord = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
@@ -1632,21 +1618,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jLabel22.setFont(Global.lableFont);
-        jLabel22.setText("Search Contains :");
-
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtFilterActionPerformed(evt);
-            }
-        });
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
-
         lblRecord.setEditable(false);
         lblRecord.setFont(Global.lableFont);
         lblRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
@@ -1664,11 +1635,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addComponent(jLabel19)
                 .addGap(18, 18, 18)
                 .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(83, 83, 83)
-                .addComponent(jLabel22)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFilter)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1676,9 +1643,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addContainerGap()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel19)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel22))
+                    .addComponent(jLabel19))
                 .addContainerGap())
         );
 
@@ -1747,7 +1712,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 511, Short.MAX_VALUE)
+                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 515, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1758,15 +1723,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
         observeMain();
     }//GEN-LAST:event_formComponentShown
-
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
-        // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(swrf);
-        }
-    }//GEN-LAST:event_txtFilterKeyReleased
 
     private void btnDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadActionPerformed
         printFile();
@@ -1933,10 +1889,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         calPurAmt();
     }//GEN-LAST:event_txtPurQtyActionPerformed
 
-    private void txtFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFilterActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtFilterActionPerformed
-
     private void rdoActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdoActiveActionPerformed
         // TODO add your handling code here:
         searchStock();
@@ -1990,7 +1942,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
@@ -2028,7 +1979,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtCat1;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtFormula;
     private javax.swing.JTextField txtGroup1;
     private javax.swing.JTextField txtPurAmt;

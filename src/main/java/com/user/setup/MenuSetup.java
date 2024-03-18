@@ -10,6 +10,7 @@ import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.OfflineOptionPane;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
@@ -24,6 +25,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.DropMode;
+import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -36,6 +38,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -119,14 +122,24 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private void deleteMenu() {
         if (selectedNode.getUserObject() != null) {
             Menu menu = (Menu) selectedNode.getUserObject();
-            userRepo.delete(menu).subscribe((t) -> {
+            userRepo.delete(menu.getKey()).doOnSuccess((t) -> {
                 if (t) {
                     treeModel.removeNodeFromParent(selectedNode);
                     observer.selected("menu", "menu");
                 }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).doOnError((e) -> {
+                if (e instanceof WebClientRequestException) {
+                    OfflineOptionPane pane = new OfflineOptionPane();
+                    JDialog dialog = pane.createDialog("Offline");
+                    dialog.setVisible(true);
+                    int yn = (int) pane.getValue();
+                    if (yn == JOptionPane.YES_OPTION) {
+                        deleteMenu();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }).subscribe();
         } else {
             JOptionPane.showMessageDialog(this, "Select Menu.");
         }

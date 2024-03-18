@@ -46,11 +46,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,7 +70,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     
     private SelectionObserver observer;
     private JProgressBar progress;
-    private TableRowSorter<TableModel> sorter;
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private RegionSetup regionSetup;
     private FindDialog findDialog;
@@ -178,8 +174,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        sorter = new TableRowSorter(tblCustomer.getModel());
-        tblCustomer.setRowSorter(sorter);
         searchSupplier();
     }
     
@@ -345,17 +339,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.addKeyListener(this);
         
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(2).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String text = txtFilter.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
-        }
-    };
     
     private void setSupplier() {
         if (tblCustomer.getSelectedRow() >= 0) {
@@ -430,7 +413,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
-        txtFilter = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -694,18 +676,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
         lblRecord.setText("0");
 
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtFilterFocusGained(evt);
-            }
-        });
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -714,9 +684,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(s1)
-                            .addComponent(txtFilter))
+                        .addComponent(s1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
@@ -730,11 +698,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE))
-                    .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(s1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
@@ -760,20 +725,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         // TODO add your handling code here:
         regionSetup();
     }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
-        // TODO add your handling code here:
-        String filter = txtFilter.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-        }
-    }//GEN-LAST:event_txtFilterKeyReleased
-
-    private void txtFilterFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtFilterFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtFilterFocusGained
 
     private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
         // TODO add your handling code here:
@@ -826,7 +777,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JTextField txtCusName;
     private javax.swing.JTextField txtCusPhone;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtGroup;
     private javax.swing.JTextField txtRegion;
     private javax.swing.JTextField txtRemark;

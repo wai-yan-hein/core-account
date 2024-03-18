@@ -63,6 +63,12 @@ public class CompanyInfo {
     private LocalDateTime updatedDate;
     @Column(name = "security_code")
     private String securityCode;
+    @Column(name = "sync")
+    private boolean sync;
+    @Column(name = "report_company")
+    private String reportCompany;
+    @Column(name = "report_url")
+    private String reportUrl;
     @Transient
     private String token;
     @Transient

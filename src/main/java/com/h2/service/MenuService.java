@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.Menu;
+import com.user.model.MenuKey;
 import java.util.List;
 
 /**
@@ -21,5 +22,5 @@ public interface MenuService {
 
     List<Menu> getMenuDynamic(String compCode);
 
-    boolean delete(Menu obj);
+    boolean delete(MenuKey obj);
 }

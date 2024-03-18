@@ -36,6 +36,7 @@ import com.user.model.PrivilegeMenu;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.CompanyInfo;
+import com.user.model.MenuKey;
 import com.user.model.YearEnd;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -555,6 +556,9 @@ public class UserRepo {
     }
 
     public Mono<BusinessType> find(Integer id) {
+        if(Util1.isNullOrEmpty(id)){
+            return Mono.empty();
+        }
         if (localdatabase) {
             return h2Repo.find(id);
         }
@@ -625,15 +629,15 @@ public class UserRepo {
                 });
     }
 
-    public Mono<Boolean> delete(Menu menu) {
+    public Mono<Boolean> delete(MenuKey key) {
         return userApi.post()
                 .uri("/user/deleteMenu")
-                .body(Mono.just(menu), Menu.class)
+                .body(Mono.just(key), MenuKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .doOnSuccess((t) -> {
                     if (localdatabase && t) {
-                        h2Repo.delete(menu);
+                        h2Repo.delete(key);
                     }
                 });
     }

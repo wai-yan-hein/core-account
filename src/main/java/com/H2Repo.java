@@ -168,6 +168,7 @@ import com.inventory.entity.WareHouseKey;
 import com.inventory.entity.WeightLossHis;
 import com.user.model.DateLock;
 import com.user.model.DepartmentKey;
+import com.user.model.MenuKey;
 import com.user.model.PrivilegeMenu;
 import java.util.HashMap;
 import java.util.List;
@@ -969,7 +970,7 @@ public class H2Repo {
         return Mono.justOrEmpty(true);
     }
 
-    public boolean delete(Menu obj) {
+    public boolean delete(MenuKey obj) {
         return menuService.delete(obj);
     }
 

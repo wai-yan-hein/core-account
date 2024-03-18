@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.MenuDao;
 import com.user.model.Menu;
+import com.user.model.MenuKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -45,8 +46,8 @@ public class MenuServiceimpl implements MenuService {
     }
 
     @Override
-    public boolean delete(Menu obj) {
-        return dao.delete(obj);
+    public boolean delete(MenuKey key){
+        return dao.delete(key);
     }
 
 }

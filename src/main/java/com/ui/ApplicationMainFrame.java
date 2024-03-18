@@ -356,7 +356,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     popupmenu.show(tabMain, e.getX(), e.getY());
                 }
             }
-
         });
 
     }
@@ -389,7 +388,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
             @Override
             public void mouseExited(MouseEvent e) {
-                closeButton.setForeground(Color.BLACK);
+                closeButton.setForeground(Util1.DARK_MODE ? Color.white : Color.BLACK);
             }
         });
 
@@ -480,16 +479,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return rfid;
             }
             case "Purchase" -> {
-                Purchase purchase = new Purchase();
-                purchase.setName(menuName);
-                purchase.setObserver(this);
-                purchase.setProgress(progress);
-                purchase.setUserRepo(userRepo);
-                purchase.setInventoryRepo(inventoryRepo);
-                purchase.setAccountRepo(accounRepo);
-                purchase.setIntegration(integration);
-                purchase.initMain();
-                return purchase;
+                Purchase p = new Purchase();
+                p.setName(menuName);
+                p.setObserver(this);
+                p.setProgress(progress);
+                p.setUserRepo(userRepo);
+                p.setInventoryRepo(inventoryRepo);
+                p.setAccountRepo(accounRepo);
+                p.setIntegration(integration);
+                p.initMain();
+                return p;
             }
             case "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy", "Purchase Other" -> {
                 int type = getPurType(menuName, version);
@@ -504,15 +503,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return p;
             }
             case "Return In" -> {
-                ReturnIn retIn = new ReturnIn();
-                retIn.setName(menuName);
-                retIn.setObserver(this);
-                retIn.setProgress(progress);
-                retIn.setUserRepo(userRepo);
-                retIn.setInventoryRepo(inventoryRepo);
-                retIn.setIntegration(integration);
-                retIn.initMain();
-                return retIn;
+                ReturnIn r = new ReturnIn();
+                r.setName(menuName);
+                r.setObserver(this);
+                r.setProgress(progress);
+                r.setUserRepo(userRepo);
+                r.setInventoryRepo(inventoryRepo);
+                r.setIntegration(integration);
+                r.initMain();
+                return r;
             }
             case "Return Out" -> {
                 ReturnOut retOut = new ReturnOut();

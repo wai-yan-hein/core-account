@@ -188,8 +188,8 @@ public class MillingRawTableModel extends AbstractTableModel {
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0);
                             sd.setWeight(s.getWeight());
-                            sd.setWeightUnit(s.getWeightUnit());
-                            sd.setUnitCode(s.getSaleUnitCode());
+                            sd.setWeightUnit(Util1.isNull(s.getWeightUnit(), "-"));
+                            sd.setUnitCode("-");
                             sd.setStock(s);
                             sd.setPrice(Util1.getDouble(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             setSelection(row, 3);
@@ -383,7 +383,6 @@ public class MillingRawTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
-            addNewRow();
             fireTableDataChanged();
         }
     }

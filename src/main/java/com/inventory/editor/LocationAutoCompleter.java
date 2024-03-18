@@ -96,7 +96,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     public List<String> getListOption() {
-        return listOption;
+        return listOption.stream().filter((t) -> !t.equals("-")).toList();
     }
 
     public void setListOption(List<String> listOption) {

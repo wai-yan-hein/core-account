@@ -196,8 +196,8 @@ public class MillingOutTableModel extends AbstractTableModel {
                             sd.setRelName(s.getRelName());
                             sd.setQty(1);
                             sd.setWeight(s.getWeight());
-                            sd.setWeightUnit(s.getWeightUnit());
-                            sd.setUnitCode(s.getSaleUnitCode());
+                            sd.setWeightUnit(Util1.isNull(s.getWeightUnit(), "-"));
+                            sd.setUnitCode("-");
                             sd.setStock(s);
                             setSelection(row, 3);
                             addNewRow();
@@ -410,9 +410,13 @@ public class MillingOutTableModel extends AbstractTableModel {
     }
 
     public void setObject(int row, MillingOutDetail mod) {
-        if (!listDetail.isEmpty()) {
-            listDetail.set(row, mod);
-            fireTableRowsUpdated(row, row);
+        try {
+            if (!listDetail.isEmpty()) {
+                listDetail.set(row, mod);
+                fireTableRowsUpdated(row, row);
+            }
+        } catch (Exception e) {
+            log.error("setObject : " + e.getMessage());
         }
     }
 
@@ -423,7 +427,6 @@ public class MillingOutTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
-            addNewRow();
             fireTableDataChanged();
         }
     }

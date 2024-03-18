@@ -66,8 +66,8 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
     }
 
     @Override
-    public boolean delete(Menu obj) {
-        remove(obj.getKey());
+    public boolean delete(MenuKey key) {
+        remove(key);
         return true;
     }
 

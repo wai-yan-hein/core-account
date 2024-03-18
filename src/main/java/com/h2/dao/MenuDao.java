@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.user.model.Menu;
+import com.user.model.MenuKey;
 import java.util.List;
 
 /**
@@ -21,6 +22,6 @@ public interface MenuDao {
 
     List<Menu> getMenuDynamic(String compCode);
 
-    boolean delete(Menu obj);
+    boolean delete(MenuKey obj);
 
 }
