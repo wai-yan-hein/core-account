@@ -4,11 +4,13 @@
  */
 package com.inventory.ui.setup.dialog;
 
+import com.common.FontUtil;
 import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.entity.CFont;
 import com.inventory.entity.Region;
 import com.inventory.entity.RegionKey;
 import com.inventory.entity.Trader;
@@ -42,7 +44,7 @@ import org.springframework.core.task.TaskExecutor;
  */
 @Slf4j
 public class CustomerImportDialog extends javax.swing.JDialog {
-    
+
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private AccountRepo accountRepo;
@@ -51,35 +53,37 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     private final HashMap<String, String> hmRegion = new HashMap<>();
     private final HashMap<String, String> hmTraderGp = new HashMap<>();
     private final HashMap<String, String> hmDepartment = new HashMap<>();
-    
+    private HashMap<Integer, Integer> hmZG = new HashMap<>();
+    List<CFont> listFont = new ArrayList<>();
+
     public AccountRepo getAccountRepo() {
         return accountRepo;
     }
-    
+
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
+
     public TaskExecutor getTaskExecutor() {
         return taskExecutor;
     }
-    
+
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-    
+
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public UserRepo getUserRepo() {
         return userRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
@@ -95,13 +99,13 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         initTable();
         progress.setVisible(false);
     }
-    
+
     private void initTable() {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
     }
-    
+
     private void chooseFile() {
         FileDialog dialog = new FileDialog(this, "Choose CSV File", FileDialog.LOAD);
         dialog.setDirectory("D:\\");
@@ -113,7 +117,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             readFile(dialog.getDirectory() + "\\" + directory);
         }
     }
-    
+
     private void save() {
         List<Trader> traders = tableModel.getListTrader();
         btnSave.setEnabled(false);
@@ -134,7 +138,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         tableModel.clear();
         btnSave.setEnabled(true);
     }
-    
+
     private String getRegion(String str) {
         if (hmRegion.isEmpty()) {
             List<Region> list = inventoryRepo.getRegion().block();
@@ -150,7 +154,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         }
         return hmRegion.get(str);
     }
-    
+
     private Region saveRegion(String str) {
         Region region = new Region();
         region.setUserCode(Global.loginUser.getUserCode());
@@ -165,7 +169,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         region.setMacId(Global.macId);
         return inventoryRepo.saveRegion(region).block();
     }
-    
+
     private String getTraderGroup(String str) {
         if (hmTraderGp.isEmpty()) {
             List<TraderGroup> list = inventoryRepo.getTraderGroup().block();
@@ -181,7 +185,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         }
         return hmTraderGp.get(str);
     }
-    
+
     private TraderGroup saveTraderGroup(String str) {
         TraderGroup group = new TraderGroup();
         TraderGroupKey key = new TraderGroupKey();
@@ -192,7 +196,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         group.setGroupName(str);
         return inventoryRepo.saveTraderGroup(group).block();
     }
-    
+
     private Integer getDepartment(String str) {
         if (hmDepartment.isEmpty()) {
             List<DepartmentUser> list = userRepo.getDeparment(true).block();
@@ -209,7 +213,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         }
         return Integer.valueOf(hmDepartment.get(str));
     }
-    
+
     private DepartmentUser saveDepartment(String str) {
         DepartmentUser user = new DepartmentUser();
         DepartmentKey key = new DepartmentKey();
@@ -220,14 +224,21 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         user.setDeptName(str);
         user.setActive(true);
         user.setUpdatedDate(LocalDateTime.now());
-        
+
         return userRepo.saveDepartment(user).block();
-    }
-    
+    }    
+
     private void readFile(String path) {
         List<Trader> listTrader = new ArrayList<>();
         try {
             progress.setIndeterminate(true);
+            listFont = FontUtil.generateCFonts();
+            hmZG = new HashMap<>();
+            if (listFont != null) {
+                listFont.forEach(f -> {
+                    hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+                });
+            }
             Reader in = new FileReader(path);
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
@@ -239,7 +250,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach((row) -> {
                 Trader t = new Trader();
-                t.setTraderName(row.isMapped("Name") ? Util1.convertToUniCode(row.get("Name")) : "");
+                String name = row.isMapped("Name") ? row.get("Name") : ""; // Util1.convertToUniCode(row.get("Name"))
+                t.setTraderName(chkIntegra.isSelected() ? Util1.convertToUniCode(FontUtil.getZawgyiText(name, hmZG)) : Util1.convertToUniCode(name));
                 if (!t.getTraderName().equals("")) {
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
@@ -263,7 +275,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setAccount(getAccount());
                     listTrader.add(t);
                 }
-                
+
             });
             tableModel.setListTrader(listTrader);
             progress.setIndeterminate(false);
@@ -273,7 +285,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Invalid Format.");
         }
     }
-    
+
     private String getAccount() {
         String type = cboType.getSelectedItem().toString();
         return switch (type) {
@@ -285,7 +297,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 null;
         };
     }
-    
+
     private String getImportType() {
         String type = cboType.getSelectedItem().toString();
         return switch (type) {

@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.setup.dialog;
 
+import com.common.FontUtil;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -48,7 +49,7 @@ import org.springframework.core.task.TaskExecutor;
  */
 @Slf4j
 public class StockImportDialog extends javax.swing.JDialog {
-
+    
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
@@ -56,12 +57,13 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final HashMap<String, String> hmGroup = new HashMap<>();
     private final HashMap<String, String> hmCat = new HashMap<>();
     private final HashMap<String, String> hmBrand = new HashMap<>();
-
-
+    private HashMap<Integer, Integer> hmZG = new HashMap<>();
+    List<CFont> listFont = new ArrayList<>();
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
@@ -76,16 +78,16 @@ public class StockImportDialog extends javax.swing.JDialog {
         initComponents();
         initTable();
     }
-
+    
     private void initTable() {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
         tblTrader.setFont(Global.textFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
         tblTrader.setDefaultRenderer(Float.class, new TableCellRender());
-
+        
     }
-
+    
     private void chooseFile() {
         FileDialog dialog = new FileDialog(this, "Choose CSV File", FileDialog.LOAD);
         dialog.setDirectory("D:\\");
@@ -99,7 +101,7 @@ public class StockImportDialog extends javax.swing.JDialog {
             readFile(filePath);
         }
     }
-
+    
     private void removeBOMFromFile(String filePath) {
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8); BufferedReader bufferedReader = new BufferedReader(reader)) {
 
@@ -128,7 +130,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         } catch (IOException e) {
         }
     }
-
+    
     private void save() {
         List<Stock> traders = tableModel.getListStock();
         btnSave.setEnabled(false);
@@ -139,7 +141,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         lblLog.setText("Success.");
         dispose();
     }
-
+    
     private static int parseIntegerOrDefault(String value, int defaultValue) {
         try {
             return Integer.parseInt(value);
@@ -147,15 +149,15 @@ public class StockImportDialog extends javax.swing.JDialog {
             return defaultValue;
         }
     }
-
+    
     private static boolean isContainBOM(Path path) throws IOException {
-
+        
         if (Files.notExists(path)) {
             throw new IllegalArgumentException("Path: " + path + " does not exists!");
         }
-
+        
         boolean result = false;
-
+        
         byte[] bom = new byte[3];
         try (InputStream is = new FileInputStream(path.toFile())) {
 
@@ -167,17 +169,20 @@ public class StockImportDialog extends javax.swing.JDialog {
             if ("efbbbf".equalsIgnoreCase(content)) {
                 result = true;
             }
-
+            
         }
-
+        
         return result;
     }
-
+    
     private void readFile(String path) {
-        List<CFont> listFont = new ArrayList<>();
-        listFont.forEach(f -> {
-            hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
-        });
+        listFont = FontUtil.generateCFonts();
+        hmZG = new HashMap<>();
+        if (listFont != null) {
+            listFont.forEach(f -> {
+                hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+            });
+        }
 
 //        HashMap<String, StockType> hm = new HashMap<>();
 //        List<StockType> listST = inventoryRepo.getStockType().block();
@@ -199,7 +204,8 @@ public class StockImportDialog extends javax.swing.JDialog {
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach(r -> {
                 Stock t = new Stock();
-                t.setStockName(r.isMapped("StockName") ? Util1.convertToUniCode(r.get("StockName")) : "");
+                String name = r.isMapped("StockName") ? r.get("StockName") : "";
+                t.setStockName(chkIntegra.isSelected() ? Util1.convertToUniCode(FontUtil.getZawgyiText(name, hmZG)) : Util1.convertToUniCode(name));
                 if (!t.getStockName().equals("")) {
                     StockKey key = new StockKey();
                     key.setCompCode(Global.compCode);
@@ -209,7 +215,6 @@ public class StockImportDialog extends javax.swing.JDialog {
                     t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
                     t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getDouble(r.get("SalePrice")) : Util1.getDouble("0"));
                     t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup"), t.getDeptId()) : "");
-                    log.info(t.getTypeCode());
                     t.setCatCode(r.isMapped("Category") ? getCategoryCode(r.get("Category"), t.getDeptId()) : "");
                     t.setCatName(r.isMapped("Category") ? Util1.convertToUniCode(r.get("Category")) : "");
                     t.setBrandCode(r.isMapped("Brand") ? getBrandCode(r.get("Brand"), t.getDeptId()) : "");
@@ -225,10 +230,10 @@ public class StockImportDialog extends javax.swing.JDialog {
             tableModel.setListStock(listStock);
         } catch (IOException e) {
             log.error("Read CSV File :" + e.getMessage());
-
+            
         }
     }
-
+    
     private String getZawgyiText(String text) {
         String tmpStr = "";
         if (text != null) {
@@ -255,10 +260,10 @@ public class StockImportDialog extends javax.swing.JDialog {
                 }
             }
         }
-
+        
         return tmpStr;
     }
-
+    
     private String getGroupCode(String str, Integer deptId) {
         if (hmGroup.isEmpty()) {
             List<StockType> list = inventoryRepo.getStockType().block();
@@ -267,7 +272,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                     hmGroup.put(t.getStockTypeName(), t.getKey().getStockTypeCode());
                 });
             }
-
+            
         }
         if (hmGroup.get(str) == null && !str.isEmpty()) {
             StockType st = saveGroup(str, deptId);
@@ -275,7 +280,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
         return hmGroup.get(str);
     }
-
+    
     private StockType saveGroup(String str, Integer deptId) {
         StockType stockType = new StockType();
         stockType.setUserCode(Global.loginUser.getUserCode());
@@ -292,7 +297,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         stockType.setActive(true);
         return inventoryRepo.saveStockType(stockType).block();
     }
-
+    
     private String getCategoryCode(String str, Integer deptId) {
         if (hmCat.isEmpty()) {
             List<Category> list = inventoryRepo.getCategory().block();
@@ -301,7 +306,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                     hmCat.put(t.getCatName(), t.getKey().getCatCode());
                 });
             }
-
+            
         }
         if (hmCat.get(str) == null && !str.isEmpty()) {
             Category ct = saveCategory(str, deptId);
@@ -309,7 +314,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
         return hmCat.get(str);
     }
-
+    
     private Category saveCategory(String str, Integer deptId) {
         Category category = new Category();
         CategoryKey key = new CategoryKey();
@@ -325,9 +330,9 @@ public class StockImportDialog extends javax.swing.JDialog {
         category.setCatName(str);
         category.setActive(true);
         return inventoryRepo.saveCategory(category).block();
-
+        
     }
-
+    
     private String getBrandCode(String str, Integer deptId) {
         if (hmBrand.isEmpty()) {
             List<StockBrand> list = inventoryRepo.getStockBrand().block();
@@ -343,7 +348,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
         return hmBrand.get(str);
     }
-
+    
     private StockBrand saveBrand(String str, Integer deptId) {
         StockBrand brand = new StockBrand();
         brand.setUserCode(Global.loginUser.getUserCode());
@@ -375,6 +380,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         btnSave = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         lblLog = new javax.swing.JLabel();
+        chkIntegra = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -406,6 +412,8 @@ public class StockImportDialog extends javax.swing.JDialog {
             }
         });
 
+        chkIntegra.setText("Integra Font");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -419,7 +427,9 @@ public class StockImportDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkIntegra, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -428,10 +438,12 @@ public class StockImportDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnSave, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblLog, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnSave, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblLog, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkIntegra))
                 .addContainerGap())
         );
 
@@ -454,6 +466,7 @@ public class StockImportDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSave;
+    private javax.swing.JCheckBox chkIntegra;
     private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblLog;
