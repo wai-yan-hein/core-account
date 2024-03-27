@@ -4012,6 +4012,19 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> cleanData() {
+        return inventoryApi.delete()
+                .uri(uriBuilder -> uriBuilder
+                .path("/setup/cleanData")
+                .build())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.just(false);
+                });
+    }
+
     public Mono<Boolean> restore(String vouNo) {
         return inventoryApi.delete()
                 .uri(uriBuilder -> uriBuilder

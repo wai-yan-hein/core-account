@@ -972,6 +972,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 companySetup.setObserver(this);
                 companySetup.setProgress(progress);
                 companySetup.setUserRepo(userRepo);
+                companySetup.setInventoryRepo(inventoryRepo);
                 companySetup.setAccountRepo(accounRepo);
                 companySetup.setEnvironment(environment);
                 companySetup.setToken(getToken);

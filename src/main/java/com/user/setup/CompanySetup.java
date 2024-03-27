@@ -18,8 +18,10 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
+import com.repo.InventoryRepo;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
+import com.ui.SecurityDialog;
 import com.user.dialog.DateLockDialog;
 import com.user.dialog.DepartmentSetupDialog;
 import com.user.dialog.MachineInfoDialog;
@@ -28,10 +30,12 @@ import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
@@ -47,7 +51,9 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 @Slf4j
 public class CompanySetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
+    private Image appIcon;
     private UserRepo userRepo;
+    private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
     private Environment environment;
     private String token;
@@ -62,12 +68,24 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private DateLockDialog dateLockDialog;
     private MachineInfoDialog machineInfoDialog;
 
+    public Image getAppIcon() {
+        return appIcon;
+    }
+
+    public void setAppIcon(Image appIcon) {
+        this.appIcon = appIcon;
+    }
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     public void setEnvironment(Environment environment) {
@@ -388,6 +406,36 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         machineInfoDialog.search();
     }
 
+    private void showSecurityDialog() {
+        JFrame frame = new JFrame();
+        frame.setIconImage(appIcon);
+        SecurityDialog dialog = new SecurityDialog(frame);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+        String inputKey = dialog.getKey();
+        String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
+        toDayKey = toDayKey.replaceAll("-", "");
+        if (inputKey == null) {
+            System.exit(0);
+        }
+        if (inputKey.equals(toDayKey)) {
+            confirmToReset();
+        } else {
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
+            System.exit(0);
+        }
+    }
+
+    private void confirmToReset() {
+        int yn = JOptionPane.showConfirmDialog(Global.parentForm, "Do you want to reset program?", "Reset Program.", JOptionPane.WARNING_MESSAGE);
+        if (yn == JOptionPane.YES_OPTION) {
+            Message message = new Message();
+            message.setHeader("RESET_PROGRAM");
+            userRepo.cleanData(company).block();
+            inventoryRepo.cleanData().block();
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -440,6 +488,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
+        btnReset = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -579,7 +628,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelAdvLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtReportUrl)
-                    .addComponent(txtReportCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
+                    .addComponent(txtReportCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 303, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelAdvLayout.setVerticalGroup(
@@ -629,10 +678,10 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
+                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
                             .addComponent(txtSecurity)))
                     .addGroup(panelEntryLayout.createSequentialGroup()
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -785,6 +834,14 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        btnReset.setFont(Global.lableFont);
+        btnReset.setText("Reset");
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -800,9 +857,13 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jButton3)
                     .addComponent(jButton4)
                     .addComponent(jButton5)
-                    .addComponent(jButton6))
+                    .addComponent(jButton6)
+                    .addComponent(btnReset))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnReset, jButton1, jButton2, jButton3, jButton4, jButton5, jButton6, jButton7});
+
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -819,9 +880,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton6))
+                        .addComponent(jButton6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnReset))
                     .addComponent(jButton7))
-                .addContainerGap(293, Short.MAX_VALUE))
+                .addContainerGap(264, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -830,7 +893,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 451, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -901,8 +964,13 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         panelAdv.setVisible(chkSync.isSelected());
     }//GEN-LAST:event_chkSyncActionPerformed
 
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        showSecurityDialog();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnResetActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnReset;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkMenuUpdate;
     private javax.swing.JCheckBox chkSync;

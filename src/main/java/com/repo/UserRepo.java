@@ -204,6 +204,19 @@ public class UserRepo {
                 });
     }
 
+    public Mono<Boolean> cleanData(CompanyInfo app) {
+        return userApi.post()
+                .uri("/user/cleanData")
+                .body(Mono.just(app), CompanyInfo.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+//                        h2Repo.save(t);
+                    }
+                });
+    }
+
     public Mono<Currency> saveCurrency(Currency app) {
         return userApi.post()
                 .uri("/user/saveCurrency")
@@ -278,7 +291,8 @@ public class UserRepo {
                     return Mono.empty();
                 });
     }
-     public Mono<MachineInfo> findMachine(Integer macId) {
+
+    public Mono<MachineInfo> findMachine(Integer macId) {
         if (Util1.isNullOrEmpty(macId)) {
             return Mono.empty();
         }
@@ -556,7 +570,7 @@ public class UserRepo {
     }
 
     public Mono<BusinessType> find(Integer id) {
-        if(Util1.isNullOrEmpty(id)){
+        if (Util1.isNullOrEmpty(id)) {
             return Mono.empty();
         }
         if (localdatabase) {
