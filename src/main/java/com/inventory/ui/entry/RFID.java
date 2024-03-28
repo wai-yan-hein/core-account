@@ -53,7 +53,6 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -61,7 +60,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-    
+
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final RFIDTableModel tableModel = new RFIDTableModel();
     private SaleHistoryDialog dialog;
@@ -73,27 +72,27 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private JProgressBar progress;
     private String locCode;
     private FindDialog findDialog;
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -110,7 +109,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initDateListner();
         actionMapping();
     }
-    
+
     private void checkValidation() {
         inventoryRepo.getDefaultLocation().subscribe((l) -> {
             if (l == null) {
@@ -121,22 +120,22 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         });
         chkPrint.setSelected(Util1.getBoolean(ProUtil.getProperty("printer.print")));
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblRFID.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblRFID.getActionMap().put(solve, new DeleteAction());
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     private void initDateListner() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -153,9 +152,9 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txt.selectAll();
             }
         }
-        
+
     };
-    
+
     public void initMain() {
         checkValidation();
         initCombo();
@@ -163,11 +162,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         assignDefaultValue();
         initFind();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblRFID);
     }
-    
+
     private void initSaleTable() {
         tblRFID.setModel(tableModel);
         tableModel.setObserver(this);
@@ -193,12 +192,12 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblRFID.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-    
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
     }
-    
+
     private void initKeyListener() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -206,15 +205,15 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtCus.addKeyListener(this);
         tblRFID.addKeyListener(this);
     }
-    
+
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
     }
-    
+
     private void initTextBoxFormat() {
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
     }
-    
+
     private void assignDefaultValue() {
         txtSaleDate.setDate(Util1.getTodayDate());
         inventoryRepo.getDefaultCustomer().subscribe((t) -> {
@@ -225,7 +224,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtRFID.setText(null);
         setSaleInfo();
     }
-    
+
     private void clear() {
         disableForm(true);
         tableModel.removeListDetail();
@@ -241,15 +240,15 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         progress.setIndeterminate(false);
         txtRFID.requestFocus();
     }
-    
+
     private void setSaleInfo() {
         inventoryRepo.getSaleVoucherInfo(Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd")).subscribe((t) -> {
             txtVouCount.setValue(Util1.getInteger(t.getQty()));
             txtVouAmt.setValue(Util1.getFloat(t.getAmount()));
         });
-        
+
     }
-    
+
     public void saveSale(boolean print) {
         try {
             if (isValidEntry() && tableModel.isValidEntry()) {
@@ -259,27 +258,26 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     return;
                 }
                 saleHis.setListSH(tableModel.getListDetail());
-                saleHis.setListDel(tableModel.getDelList());
                 observer.selected("save", false);
                 inventoryRepo.save(saleHis).subscribe((t) -> {
                     clear();
                     if (chkPrint.isSelected() || print) {
                         printVoucher(t.getKey().getVouNo());
                     }
-                    
+
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     observer.selected("save", false);
                     progress.setIndeterminate(false);
                 });
-                
+
             }
         } catch (HeadlessException ex) {
             log.error("Save Sale :" + ex.getMessage());
             JOptionPane.showMessageDialog(this, "Could'nt saved.");
         }
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -316,7 +314,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         return status;
     }
-    
+
     private void deleteSale() {
         String status = lblStatus.getText();
         switch (status) {
@@ -339,15 +337,15 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-                    
+
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
-        
+
     }
-    
+
     private void deleteTran() {
         int row = tblRFID.convertRowIndexToModel(tblRFID.getSelectedRow());
         if (row >= 0) {
@@ -362,14 +360,14 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-    
+
     private void calculateTotalAmount() {
         float totalAmount = 0.0f;
         listDetail = tableModel.getListDetail();
         totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
         txtVouTotal.setValue(totalAmount);
     }
-    
+
     public void historySale() {
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm, 1);
@@ -382,18 +380,16 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         dialog.search();
     }
-    
-    public void setSaleVoucher(SaleHis sh, boolean local) {
+
+    public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
-            Integer deptId = sh.getDeptId();
-            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode());
-            trader.subscribe((t) -> {
+            inventoryRepo.findTrader(saleHis.getTraderCode()).doOnSuccess((t) -> {
                 traderAutoCompleter.setTrader(t);
-            });
+            }).subscribe();
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, deptId, local).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo).subscribe((t) -> {
                 tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (sh.isVouLock()) {
@@ -429,7 +425,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             });
         }
     }
-    
+
     private void disableForm(boolean status) {
         tblRFID.setEnabled(status);
         panelSale.setEnabled(status);
@@ -438,9 +434,9 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtRFID.setEnabled(status);
         observer.selected("save", status);
         observer.selected("print", status);
-        
+
     }
-    
+
     private void findTrader() {
         String rfId = txtRFID.getText();
         if (!rfId.isEmpty()) {
@@ -448,10 +444,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 traderAutoCompleter.setTrader(t);
                 generateTransaction(t);
             });
-            
+
         }
     }
-    
+
     private void generateTransaction(Trader t) {
         if (t == null) {
             JOptionPane.showMessageDialog(this, "Customer Not Found.", "Message", JOptionPane.WARNING_MESSAGE);
@@ -478,10 +474,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     }
                 }
             });
-            
+
         }
     }
-    
+
     private void printVoucher(String vouNo) {
         inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
             try {
@@ -504,9 +500,9 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-        
+
     }
-    
+
     private void focusTable() {
         int rc = tblRFID.getRowCount();
         if (rc >= 1) {
@@ -517,11 +513,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtRFID.requestFocus();
         }
     }
-    
+
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-    
+
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
@@ -831,12 +827,12 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void chkPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPrintActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_chkPrintActionPerformed
-    
+
     @Override
     public void keyEvent(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -854,8 +850,8 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 calculateTotalAmount();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
-                        setSaleVoucher(t, s.isLocal());
+                    inventoryRepo.findSale(s.getVouNo()).subscribe((t) -> {
+                        setSaleVoucher(t);
                     });
                 }
             }
@@ -866,20 +862,20 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
-        
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -909,36 +905,36 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void delete() {
         deleteSale();
     }
-    
+
     @Override
     public void print() {
         saveSale(true);
     }
-    
+
     @Override
     public void save() {
         saveSale(false);
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
         historySale();
     }
-    
+
     @Override
     public void refresh() {
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();

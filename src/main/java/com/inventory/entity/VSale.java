@@ -96,5 +96,7 @@ public class VSale {
     private String saleUnitName;
     private String weightUnitName;
     private ZonedDateTime vouDateTime;
-    List<VouDiscount> listDiscount;
+    private List<VouDiscount> listDiscount;
+    private boolean sPay;
+
 }

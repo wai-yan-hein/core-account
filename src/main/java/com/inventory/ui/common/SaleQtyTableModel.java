@@ -12,11 +12,9 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.entity.Location;
 import com.inventory.entity.OrderHisDetail;
-import com.inventory.entity.SaleDetailKey;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
-import com.inventory.ui.entry.Sale;
 import com.inventory.ui.entry.SaleDynamic;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -40,7 +38,6 @@ public class SaleQtyTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<SaleDetailKey> deleteList = new ArrayList();
     @Setter
     private SaleDynamic sale;
     private InventoryRepo inventoryRepo;
@@ -322,11 +319,6 @@ public class SaleQtyTableModel extends AbstractTableModel {
         lblRecord.setText("Records : " + size);
     }
 
-    public void removeListDetail() {
-        this.listDetail.clear();
-        addNewRow();
-    }
-
     private void calculateAmount(SaleHisDetail sale) {
         if (sale.getStockCode() != null) {
             double qty = Util1.getDouble(sale.getQty());
@@ -362,23 +354,8 @@ public class SaleQtyTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<SaleDetailKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
     public void delete(int row) {
-        SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
         listDetail.remove(row);
-        addNewRow();
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {
             parent.setRowSelectionInterval(row - 1, row - 1);
@@ -402,6 +379,7 @@ public class SaleQtyTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 }

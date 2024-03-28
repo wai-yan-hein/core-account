@@ -10,6 +10,7 @@ import com.user.model.Currency;
 import com.common.Global;
 import com.common.IconUtil;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -31,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -39,6 +39,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 
 /**
  *
@@ -57,11 +58,10 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
     private int x = 0;
     private int y = 0;
     private boolean popupOpen = false;
+    @Setter
     private SelectionObserver observer;
+    private StartWithRowFilter filter;
 
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public void setListCurrency(List<Currency> list) {
         currencyTabelModel.setListCurrency(list);
@@ -76,17 +76,18 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
     public CurrencyAutoCompleter(JTextComponent comp, AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
+        filter = new StartWithRowFilter(comp);
         initTable();
     }
 
     private void initTable() {
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.CURRENCY));
         textComp.setFont(Global.textFont);
         table.setModel(currencyTabelModel);
-        table.setFont(Global.lableFont); // NOI18N
+        table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
@@ -95,6 +96,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
         scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);//Code
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -106,7 +108,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
 
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
-        popup.setPopupSize(170, 300);
+        popup.setPopupSize(300, 500);
 
         popup.add(scroll);
 
@@ -160,7 +162,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
         if (table.getSelectedRow() != -1) {
             currency = currencyTabelModel.getCurrency(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(currency.getCurrencySymbol());
+            ((JTextField) textComp).setText(currency.getCurCode());
             if (editor == null) {
                 if (observer != null) {
                     String code = Util1.isNull(currency.getCurCode(), "-");
@@ -320,7 +322,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
-        textComp.setText(currency == null ? null : currency.getCurrencyName());
+        textComp.setText(currency == null ? null : currency.getCurCode());
     }
 
     /*
@@ -345,11 +347,11 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
+        String text = textComp.getText();
+        if (text.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(startsWithFilter);
+            sorter.setRowFilter(filter);
             try {
                 if (!containKey(e)) {
                     if (table.getRowCount() >= 0) {
@@ -361,19 +363,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
+    
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

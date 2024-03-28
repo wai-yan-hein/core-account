@@ -70,6 +70,12 @@ public class RetInHis {
     private String projectNo;
     @Column(name = "print_count")
     private Integer printCount;
+    @Column(name = "tax_amt")
+    private double taxAmt;
+    @Column(name = "tax_p")
+    private double taxP;
+    @Column(name = "grand_total")
+    private double grandTotal;
     @Transient
     private String status = "STATUS";
     @Transient

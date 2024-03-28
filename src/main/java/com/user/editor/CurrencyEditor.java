@@ -6,7 +6,6 @@
 package com.user.editor;
 
 import com.common.Global;
-import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.Currency;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -30,18 +29,6 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
     private JComponent component = null;
     private CurrencyAutoCompleter completer;
     private List<Currency> listCurrency;
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusLost(FocusEvent e) {
-        }
-
-        @Override
-        public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            jtf.setCaretPosition(jtf.getText().length());
-        }
-
-    };
 
     public CurrencyEditor(List<Currency> listCurrency) {
         this.listCurrency = listCurrency;
@@ -78,7 +65,6 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
         };
 
         jtf.addKeyListener(keyListener);
-        jtf.addFocusListener(fa);
         component = jtf;
         if (value != null) {
             jtf.setText(value.toString());

@@ -509,20 +509,19 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 r.setProgress(progress);
                 r.setUserRepo(userRepo);
                 r.setInventoryRepo(inventoryRepo);
-                r.setIntegration(integration);
                 r.initMain();
                 return r;
             }
             case "Return Out" -> {
-                ReturnOut retOut = new ReturnOut();
-                retOut.setName(menuName);
-                retOut.setObserver(this);
-                retOut.setProgress(progress);
-                retOut.setUserRepo(userRepo);
-                retOut.setInventoryRepo(inventoryRepo);
-                retOut.setIntegration(integration);
-                retOut.initMain();
-                return retOut;
+                ReturnOut r = new ReturnOut();
+                r.setName(menuName);
+                r.setObserver(this);
+                r.setProgress(progress);
+                r.setUserRepo(userRepo);
+                r.setInventoryRepo(inventoryRepo);
+                r.setIntegration(integration);
+                r.initMain();
+                return r;
             }
             case "Stock In/Out", "Stock In/Out By Weight", "Stock In/Out Paddy" -> {
                 int type = getStockIOType(menuName);

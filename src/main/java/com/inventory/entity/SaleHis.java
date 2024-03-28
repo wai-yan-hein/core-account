@@ -12,6 +12,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -36,8 +37,8 @@ public class SaleHis {
     private String saleManCode;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime vouDate;
-    @Column(name = "credit_term", columnDefinition = "TIMESTAMP")
-    private LocalDateTime creditTerm;
+    @Column(name = "credit_term", columnDefinition = "DATE")
+    private LocalDate creditTerm;
     @Column(name = "cur_code")
     private String curCode;
     @Column(name = "remark")
@@ -131,7 +132,6 @@ public class SaleHis {
     private List<String> listOrder;
     private transient String status = "STATUS";
     private transient List<SaleHisDetail> listSH;
-    private transient List<SaleDetailKey> listDel;
     private transient boolean backup;
     private transient List<String> location;
     private transient boolean local = false;

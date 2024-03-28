@@ -42,7 +42,6 @@ public class SaleTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<SaleDetailKey> deleteList = new ArrayList();
     private Sale sale;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
@@ -63,6 +62,7 @@ public class SaleTableModel extends AbstractTableModel {
     public void setSale(Sale sale) {
         this.sale = sale;
     }
+
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
@@ -154,7 +154,7 @@ public class SaleTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 4, 6, 7 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -404,17 +404,11 @@ public class SaleTableModel extends AbstractTableModel {
     public void setListDetail(List<SaleHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
-        addNewRow();
         fireTableDataChanged();
     }
 
     private void setRecord(int size) {
         lblRecord.setText("Records : " + size);
-    }
-
-    public void removeListDetail() {
-        this.listDetail.clear();
-        addNewRow();
     }
 
     private void calculateAmount(SaleHisDetail sale) {
@@ -482,23 +476,8 @@ public class SaleTableModel extends AbstractTableModel {
         return price;
     }
 
-    public List<SaleDetailKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
     public void delete(int row) {
-        SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
         listDetail.remove(row);
-        addNewRow();
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {
             parent.setRowSelectionInterval(row - 1, row - 1);
@@ -522,6 +501,7 @@ public class SaleTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 

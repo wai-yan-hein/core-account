@@ -44,12 +44,8 @@ public class SaleHisServiceImpl implements SaleHisService {
             saleHis.getKey().setVouNo(getVoucherNo(saleHis.getDeptId(), saleHis.getMacId(), saleHis.getKey().getCompCode()));
         }
         List<SaleHisDetail> listSD = saleHis.getListSH();
-        List<SaleDetailKey> listDel = saleHis.getListDel();
         String vouNo = saleHis.getKey().getVouNo();
         //backup
-        if (listDel != null) {
-            listDel.forEach(key -> sdDao.delete(key));
-        }
         for (int i = 0; i < listSD.size(); i++) {
             SaleHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {

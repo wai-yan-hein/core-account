@@ -29,6 +29,7 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -267,11 +268,11 @@ public class DayBookTableModel extends AbstractTableModel {
                             gl.setTraderName(t.getTraderName());
                             if (t.getAccount() != null) {
                                 gl.setAccCode(t.getAccount());
-                                accountRepo.findCOA(t.getAccount()).subscribe((coa) -> {
+                                accountRepo.findCOA(t.getAccount()).doOnSuccess((coa) -> {
                                     if (coa != null) {
                                         gl.setAccName(coa.getCoaNameEng());
                                     }
-                                });
+                                }).subscribe();
                                 if (ProUtil.isMultiCur()) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
@@ -300,7 +301,6 @@ public class DayBookTableModel extends AbstractTableModel {
                                 }
                             }
                         }
-
                     }
                 }
                 case 9 -> {
@@ -341,15 +341,22 @@ public class DayBookTableModel extends AbstractTableModel {
             accountRepo.save(gl).doOnSuccess((t) -> {
                 if (t != null) {
                     listVGl.set(row, t);
+                    observer.selected("CAL-TOTAL", "-");
+                    addNewRow();
+                    ComponentUtil.scrollTable(parent, row + 1, 0);
                 }
             }).doOnError((e) -> {
-                JOptionPane.showMessageDialog(parent, e.getMessage());
                 progress.setIndeterminate(false);
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(parent, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        save(gl, row, column);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(parent, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).doOnTerminate(() -> {
-                addNewRow();
-                ComponentUtil.scrollTable(parent, row + 1, 0);
                 progress.setIndeterminate(false);
-                observer.selected("CAL-TOTAL", "-");
             }).subscribe();
         }
     }
@@ -497,7 +504,7 @@ public class DayBookTableModel extends AbstractTableModel {
         }
     }
 
-    public  void addObject(Gl gl) {
+    public void addObject(Gl gl) {
         listVGl.add(gl);
         drAmt += gl.getDrAmt();
         crAmt += gl.getCrAmt();

@@ -115,22 +115,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 SecurityDialog dialog = new SecurityDialog(frame);
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
-                String inputKey = dialog.getKey();
-                String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
-                toDayKey = toDayKey.replaceAll("-", "");
-                if (inputKey == null) {
-                    System.exit(0);
-                }
-                if (inputKey.equals(toDayKey)) {
+                if (dialog.isCorrect()) {
                     register(serialNo).doOnSuccess((response) -> {
                         file.write(response);
                     }).doOnTerminate(() -> {
                         JOptionPane.showMessageDialog(this, "Logout");
                         logout();
                     }).subscribe();
-                } else {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
-                    System.exit(0);
                 }
             } else {
                 Global.macId = t.getMacId();

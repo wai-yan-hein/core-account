@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui.entry.dialog.common;
+package com.inventory.ui.common;
 
+import com.inventory.ui.entry.dialog.common.*;
+import com.common.Global;
 import com.common.Util1;
 import com.inventory.entity.VSale;
-import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,22 +20,20 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class SalePaddySearchTableModel extends AbstractTableModel {
+public class DeliveryOrderTableModel extends AbstractTableModel {
 
     private List<VSale> listSaleHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Qty", "Bag", "Paid Amt", "V-Total", "S-Pay"};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Vou Total", "Issue"};
     @Getter
     private double vouTotal;
     @Getter
     private double paidTotal;
     @Getter
-    private int size;
-    @Getter
     private double qty;
     @Getter
     private double bag;
-    @Setter
-    private InventoryRepo inventoryRepo;
+    @Getter
+    private int size;
 
     @Override
     public String getColumnName(int column) {
@@ -57,15 +55,15 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == 9;
+        return column==6;
     }
 
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 5, 6, 7, 8 ->
+            case 5 ->
                 Double.class;
-            case 9 ->
+            case 6 ->
                 Boolean.class;
             default ->
                 String.class;
@@ -91,7 +89,6 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
                         }
                     }
                     case 2 -> {
-                        //customer
                         return his.getTraderName();
                     }
                     case 3 -> {
@@ -102,21 +99,9 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
                         return his.getReference();
                     }
                     case 5 -> {
-                        //user
-                        return his.getQty();
-                    }
-                    case 6 -> {
-                        //user
-                        return his.getBag();
-                    }
-                    case 7 -> {
-                        //paid
-                        return his.getPaid();
-                    }
-                    case 8 -> {
                         return his.getVouTotal();
                     }
-                    case 9 -> {
+                    case 6 -> {
                         return his.isSPay();
                     }
                 }
@@ -125,25 +110,6 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
         return null;
-    }
-
-    @Override
-    public void setValueAt(Object value, int row, int column) {
-        try {
-            VSale obj = listSaleHis.get(row);
-            switch (column) {
-                case 9 -> {
-                    if (value instanceof Boolean v) {
-                        obj.setSPay(v);
-                        inventoryRepo.updateSaleSPay(obj.getVouNo(), v).doOnSuccess((t) -> {
-                            fireTableRowsUpdated(row, row);
-                        }).subscribe();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("setValueAt : " + e.getMessage());
-        }
     }
 
     public List<VSale> getListSaleHis() {

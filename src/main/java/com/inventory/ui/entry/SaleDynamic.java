@@ -32,7 +32,6 @@ import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.Location;
-import com.inventory.entity.SaleDetailKey;
 import com.inventory.entity.SaleHis;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.SaleHisKey;
@@ -366,9 +365,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         saleExportTableModel.setSale(this);
         saleExportTableModel.addNewRow();
         saleExportTableModel.setObserver(this);
-        saleExportTableModel.setVouDate(txtSaleDate);
-        saleExportTableModel.setInventoryRepo(inventoryRepo);
-        saleExportTableModel.setObserver(this);
         saleExportTableModel.setDialog(stockBalanceDialog);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblSale.getColumnModel().getColumn(1).setPreferredWidth(300);//Name
@@ -396,7 +392,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         salePaddyTableModel.setParent(tblSale);
         salePaddyTableModel.addNewRow();
         salePaddyTableModel.setObserver(this);
-        salePaddyTableModel.setDialog(stockBalanceDialog);
         salePaddyTableModel.setLblRec(lblRec);
         salePaddyTableModel.setSale(this);
         tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
@@ -572,28 +567,22 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private void clearList() {
         switch (type) {
             case WEIGHT -> {
-                saleWeightTableModel.removeListDetail();
-                saleWeightTableModel.clearDelList();
+                saleWeightTableModel.clear();
             }
             case EXPORT -> {
-                saleExportTableModel.removeListDetail();
-                saleExportTableModel.clearDelList();
+                saleExportTableModel.clear();
             }
             case RICE -> {
-                saleRiceTableModel.removeListDetail();
-                saleRiceTableModel.clearDelList();
+                saleRiceTableModel.clear();
             }
             case PADDY -> {
-                salePaddyTableModel.removeListDetail();
-                salePaddyTableModel.clearDelList();
+                salePaddyTableModel.clear();
             }
             case BATCH -> {
-                saleByBatchTableModel.removeListDetail();
-                saleByBatchTableModel.clearDelList();
+                saleByBatchTableModel.clear();
             }
             case QTY -> {
-                saleQtyTableModel.removeListDetail();;
-                saleQtyTableModel.clearDelList();
+                saleQtyTableModel.clear();
             }
         }
     }
@@ -689,7 +678,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             observer.selected("save", false);
             progress.setIndeterminate(true);
             sh.setListSH(getListDetail());
-            sh.setListDel(getListDel());
             inventoryRepo.save(sh).doOnSuccess((t) -> {
                 if (print) {
                     if (!Util1.isNullOrEmpty(t.getWeightVouNo())) {
@@ -826,11 +814,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             status = false;
             txtSaleDate.requestFocus();
         } else {
-            sh.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
+            Project p = projectAutoCompleter.getProject();
             SaleMan sm = saleManCompleter.getSaleMan();
-            if (sm != null) {
-                sh.setSaleManCode(sm.getKey().getSaleManCode());
-            }
+            sh.setCreditTerm(Util1.toLocalDate(txtDueDate.getDate()));
+            sh.setSaleManCode(sm == null ? null : sm.getKey().getSaleManCode());
             String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             sh.setRemark(txtRemark.getText());
             sh.setReference(txtReference.getText());
@@ -852,7 +839,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             sh.setCarNo(txtCarNo.getText());
             sh.setSPay(rdoPay.isSelected());
             sh.setTranSource(type);
-            Project p = projectAutoCompleter.getProject();
             sh.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             if (vouDiscountDialog != null) {
                 sh.setListVouDiscount(vouDiscountDialog.getListDetail());
@@ -981,30 +967,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    private List<SaleDetailKey> getListDel() {
-        switch (type) {
-            case WEIGHT -> {
-                return saleWeightTableModel.getDelList();
-            }
-            case EXPORT -> {
-                return saleExportTableModel.getDelList();
-            }
-            case RICE -> {
-                return saleRiceTableModel.getDelList();
-            }
-            case PADDY -> {
-                salePaddyTableModel.getDelList();
-            }
-            case BATCH -> {
-                saleByBatchTableModel.getDelList();
-            }
-            case QTY -> {
-                saleQtyTableModel.getDelList();
-            }
-        }
-        return null;
-    }
-
     private void calculateTotalAmount(boolean partial) {
         double totalVouBalance;
         double totalAmount = 0.0f;
@@ -1081,7 +1043,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     private void setDetail(SaleHis sh) {
         String vouNo = sh.getKey().getVouNo();
-        inventoryRepo.getSaleDetail(vouNo, sh.getDeptId(), sh.isLocal()).doOnSuccess((t) -> {
+        inventoryRepo.getSaleDetail(vouNo).doOnSuccess((t) -> {
             setListDetail(t);
         }).doOnError((e) -> {
             progress.setIndeterminate(false);
@@ -2463,7 +2425,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     boolean local = s.isLocal();
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).doOnSuccess((t) -> {
+                    inventoryRepo.findSale(s.getVouNo()).doOnSuccess((t) -> {
                         t.setLocal(local);
                         setSaleVoucher(t);
                     }).subscribe();

@@ -20,6 +20,7 @@ import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
+import com.ui.SecurityDialog;
 import com.user.dialog.DateLockDialog;
 import com.user.dialog.DepartmentSetupDialog;
 import com.user.dialog.MachineInfoDialog;
@@ -36,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -47,44 +49,26 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 @Slf4j
 public class CompanySetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private Environment environment;
+    @Setter
     private String token;
+    @Setter
+    private JProgressBar progress;
+    @Setter
+    private SelectionObserver observer;
 
     private int selectRow = -1;
     private CompanyInfo company = new CompanyInfo();
     private CurrencyAutoCompleter currencyAutoCompleter;
     private BusinessTypeAutoCompleter businessTypeAutoCompleter;
     private final CompanyTableModel tableModel = new CompanyTableModel();
-    private SelectionObserver observer;
-    private JProgressBar progress;
     private DateLockDialog dateLockDialog;
     private MachineInfoDialog machineInfoDialog;
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     /**
      * Creates new form Company
@@ -169,7 +153,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtReportUrl.setText(company.getReportUrl());
         lblStatus.setText("EDIT");
         txtBusType.setEditable(company.getBusId() == null);
-        panelAdv.setVisible(chkSync.isSelected());
     }
 
     private void saveCompany() {
@@ -386,6 +369,13 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             machineInfoDialog.initMain();
         }
         machineInfoDialog.search();
+    }
+
+    private void openSync() {
+        SecurityDialog d = new SecurityDialog(Global.parentForm);
+        d.setLocationRelativeTo(null);
+        d.setVisible(true);
+        panelAdv.setVisible(d.isCorrect());
     }
 
     /**
@@ -898,7 +888,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void chkSyncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSyncActionPerformed
         // TODO add your handling code here:
-        panelAdv.setVisible(chkSync.isSelected());
+        openSync();
     }//GEN-LAST:event_chkSyncActionPerformed
 
 

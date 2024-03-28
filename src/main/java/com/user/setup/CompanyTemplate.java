@@ -55,17 +55,17 @@ public class CompanyTemplate extends javax.swing.JPanel {
     /**
      * Creates new form SystemTemplate
      */
-    public CompanyTemplate() {
+    public CompanyTemplate() { 
         initComponents();
     }
 
     private void initCombo() {
         cboBusType.setFont(Global.textFont);
-        userRepo.getBusinessType().subscribe((t) -> {
+        userRepo.getBusinessType().doOnSuccess((t) -> {
             businessTypeComboBoxModel = new BusinessTypeComboBoxModel(t);
             cboBusType.setModel(businessTypeComboBoxModel);
             cboBusType.setSelectedIndex(t.size() - 1);
-        });
+        }).subscribe();
     }
 
     private void search() {

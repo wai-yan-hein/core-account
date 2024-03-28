@@ -31,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,41 +47,18 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
-
-    private UserRepo userRepo;
-    private InventoryRepo inventoryRepo;
-    private AccountRepo accountRepo;
     private RoleAutoCompleter roleAutoCompleter;
+
+    @Setter
+    private UserRepo userRepo;
+    @Setter
+    private InventoryRepo inventoryRepo;
+    @Setter
+    private AccountRepo accountRepo;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     /**
      * Creates new form UserSetup
@@ -112,7 +90,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private void initTable() {
         tblUser.setDefaultRenderer(Object.class, new TableCellRender());
         tblUser.setModel(userTableModel);
-        tblUser.getTableHeader().setFont(Global.textFont);
+        tblUser.getTableHeader().setFont(Global.tblHeaderFont);
         tblUser.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblUser.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
@@ -134,9 +112,12 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void searchUser() {
-        userRepo.getAppUser().subscribe((t) -> {
+        progress.setIndeterminate(true);
+        userRepo.getAppUser().doOnSuccess((t) -> {
             userTableModel.setListUser(t);
-        });
+        }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+        }).subscribe();
     }
 
     private void setUser(AppUser user) {

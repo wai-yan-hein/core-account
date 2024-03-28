@@ -5,8 +5,6 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.CloudIntegration;
-import com.MessageDialog;
 import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
@@ -36,6 +34,7 @@ import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -43,8 +42,8 @@ import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -57,10 +56,15 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
      * Creates new form SaleVouSearchDialog
      *
      */
+    @Setter
+    private SelectionObserver observer;
+    @Setter
+    private UserRepo userRepo;
+    @Setter
+    private InventoryRepo inventoryRepo;
+
     private final SaleVouSearchTableModel saleVouTableModel = new SaleVouSearchTableModel();
     private final SalePaddySearchTableModel salePaddySearchTableModel = new SalePaddySearchTableModel();
-    private InventoryRepo inventoryRepo;
-    private CloudIntegration integration;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
@@ -69,37 +73,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private BatchAutoCompeter batchAutoCompeter;
     private ProjectAutoCompleter projectAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
-    private SelectionObserver observer;
-    private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-    private TaskExecutor taskExecutor;
     private int type;
     private int row = 0;
 
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
-    public void setIntegration(CloudIntegration integration) {
-        this.integration = integration;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
     public SaleHistoryDialog(JFrame frame, int type) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         this.type = type;
         initComponents();
         initKeyListener();
@@ -165,18 +146,10 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
         }).subscribe();
-        if (inventoryRepo.localDatabase) {
-            chkLocal.setVisible(true);
-            btnUpload.setVisible(true);
-        } else {
-            chkLocal.setVisible(false);
-            btnUpload.setVisible(false);
-        }
     }
 
     private void initTableVoucher() {
         tblVoucher.setModel(saleVouTableModel);
-        tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
@@ -188,6 +161,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void initTablePaddy() {
+        salePaddySearchTableModel.setInventoryRepo(inventoryRepo);
         tblVoucher.setModel(salePaddySearchTableModel);
         tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);//d
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(40);//v
@@ -198,11 +172,13 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(20);//b
         tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(100);//p
         tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(100);//v
+        tblVoucher.getColumnModel().getColumn(9).setPreferredWidth(10);//v
     }
 
     private void initTable() {
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtSearch);
@@ -380,33 +356,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         currAutoCompleter.setCurrency(null);
     }
 
-    private void upload() {
-        int count = integration.uploadSaleCount();
-        if (count > 0) {
-            MessageDialog dialog = new MessageDialog(this, "Uploading to server.");
-            int yn = JOptionPane.showConfirmDialog(this, "Are you to upload sale voucher : " + count);
-            if (yn == JOptionPane.YES_OPTION) {
-                btnUpload.setEnabled(false);
-                taskExecutor.execute(() -> {
-                    try {
-                        String message = integration.uploadSale();
-                        JOptionPane.showMessageDialog(this, message);
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        btnUpload.setEnabled(true);
-                        dialog.setVisible(false);
-                    }
-                    btnUpload.setEnabled(true);
-                    dialog.setVisible(false);
-                });
-                dialog.setVisible(true);
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Empty.");
-        }
-
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -450,7 +399,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         jLabel15 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         chkLocal = new javax.swing.JCheckBox();
-        btnUpload = new javax.swing.JButton();
         txtSearch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -659,14 +607,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
             }
         });
 
-        btnUpload.setFont(Global.lableFont);
-        btnUpload.setText("Upload");
-        btnUpload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUploadActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -717,8 +657,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                             .addComponent(txtVouNo))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(txtProjectNo)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnUpload, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -787,9 +726,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                             .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkBatch)
-                            .addComponent(btnUpload))
+                        .addComponent(chkBatch)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkLocal)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -1056,10 +993,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         // TODO add your handling code here:
     }//GEN-LAST:event_chkLocalActionPerformed
 
-    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        upload();
-    }//GEN-LAST:event_btnUploadActionPerformed
-
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         // TODO add your handling code here:
     }//GEN-LAST:event_formComponentResized
@@ -1081,7 +1014,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSearch1;
-    private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;

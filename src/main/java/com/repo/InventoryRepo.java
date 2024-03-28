@@ -2320,13 +2320,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<SaleHis> findSale(String vouNo, Integer deptId, boolean local) {
+    public Mono<SaleHis> findSale(String vouNo) {
         SaleHisKey key = new SaleHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
-        if (local) {
-            return h2Repo.findSale(key);
-        }
         return inventoryApi.post()
                 .uri("/sale/findSale")
                 .body(Mono.just(key), SaleHisKey.class)
@@ -2425,15 +2422,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId, boolean local) {
+    public Mono<RetInHis> findReturnIn(String vouNo) {
         RetInHisKey key = new RetInHisKey();
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);
-        if (local) {
-            return h2Repo.findRetInHis(key);
-        }
         return inventoryApi.post()
-                .uri("/retin/findReturnIn")
+                .uri("/returnIn/findReturnIn")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class)
@@ -2446,7 +2440,7 @@ public class InventoryRepo {
     public Flux<VReturnIn> getReturnInVoucher(ReportFilter filter) {
         return inventoryApi
                 .post()
-                .uri("/retin/getReturnIn")
+                .uri("/returnIn/getReturnIn")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VReturnIn.class)
@@ -2456,15 +2450,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo, Integer depId, boolean local) {
-        if (local) {
-            return h2Repo.searchReturnInDetail(vouNo, depId);
-        }
+    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/retin/getReturnInDetail")
+                .uri(builder -> builder.path("/returnIn/getReturnInDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", depId)
                 .build())
                 .retrieve()
                 .bodyToFlux(RetInHisDetail.class)
@@ -2665,6 +2655,21 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> updateSaleSPay(String vouNo, boolean sPay) {
+        return inventoryApi.put()
+                .uri(builder -> builder.path("/sale/updateSPay")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("sPay", sPay)
+                .build())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<Boolean> delete(OrderNote sh) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/orderNote/updateOrderNote")
@@ -2747,7 +2752,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(RetInHisKey key) {
         return inventoryApi.post()
-                .uri("/retin/restoreReturnIn")
+                .uri("/returnIn/restoreReturnIn")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2795,7 +2800,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(RetInHisKey key) {
         return inventoryApi.post()
-                .uri("/retin/deleteReturnIn")
+                .uri("/returnIn/deleteReturnIn")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -3086,7 +3091,6 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/sale/getSaleVoucherInfo")
                 .queryParam("vouDate", vouDate)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class)
                 .onErrorResume((e) -> {
@@ -3353,7 +3357,7 @@ public class InventoryRepo {
 
     public Mono<RetInHis> save(RetInHis rh) {
         return inventoryApi.post()
-                .uri("/retin/saveReturnIn")
+                .uri("/returnIn/saveReturnIn")
                 .body(Mono.just(rh), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class);
@@ -3362,7 +3366,7 @@ public class InventoryRepo {
 
     public Mono<RetInHis> uploadRetIn(RetInHis rh) {
         return inventoryApi.post()
-                .uri("/retin/saveReturnIn")
+                .uri("/returnIn/saveReturnIn")
                 .body(Mono.just(rh), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class)
@@ -3681,15 +3685,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId, boolean local) {
-        if (local) {
-            return h2Repo.getSaleDetail(vouNo, deptId);
-        }
+    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/getSaleDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve().bodyToFlux(SaleHisDetail.class)
                 .collectList()

@@ -5,7 +5,11 @@
  */
 package com.ui;
 
+import com.common.Util1;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -13,19 +17,15 @@ import javax.swing.JFrame;
  */
 public class SecurityDialog extends javax.swing.JDialog {
 
+    @Getter
+    @Setter
+    private boolean correct;
+
     /**
      * Creates new form SecurityDialog
+     *
+     * @param frame
      */
-    private String key;
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
     public SecurityDialog(JFrame frame) {
         super(frame, true);
         initComponents();
@@ -72,7 +72,7 @@ public class SecurityDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtKey, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -83,10 +83,16 @@ public class SecurityDialog extends javax.swing.JDialog {
     private void txtKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtKeyActionPerformed
         // TODO add your handling code here:
         if (txtKey.getPassword().length > 0) {
-            key = new String(txtKey.getPassword());
-            this.dispose();
+            String key = new String(txtKey.getPassword());
+            if (key.equals(Util1.getPassword())) {
+                setCorrect(true);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid Security Key.", "Wrong", JOptionPane.ERROR_MESSAGE);
+                dispose();
+                System.exit(0);
+            }
         }
-
     }//GEN-LAST:event_txtKeyActionPerformed
 
     /**

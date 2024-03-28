@@ -528,8 +528,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     
     private void clear(boolean foucs) {
         disableForm(true);
-        saleTableModel.removeListDetail();
-        saleTableModel.clearDelList();
+        saleTableModel.clear();
         saleTableModel.setChange(false);
         saleExpenseFrame.clear();
         stockBalanceDialog.clear();
@@ -594,7 +593,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
             saleHis.setListSH(saleTableModel.getListDetail());
-            saleHis.setListDel(saleTableModel.getDelList());
             saleHis.setBackup(saleTableModel.isChange());
             saleHis.setListOrder(getOrderList());
             observer.selected("save", false);
@@ -650,7 +648,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtSaleDate.requestFocus();
             return false;
         } else {
-            saleHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
+            saleHis.setCreditTerm(Util1.toLocalDate(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();
             if (sm != null) {
                 saleHis.setSaleManCode(sm.getKey().getSaleManCode());
@@ -800,9 +798,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm, 1);
             dialog.setInventoryRepo(inventoryRepo);
-            dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);
-            dialog.setTaskExecutor(taskExecutor);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
@@ -873,7 +869,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             chkPaid.setSelected(saleHis.getPaid() > 0);
             String vouNo = sh.getKey().getVouNo();
             checkOrderNo(vouNo);
-            inventoryRepo.getSaleDetail(vouNo, sh.getDeptId(), saleHis.isLocal()).doOnSuccess((t) -> {
+            inventoryRepo.getSaleDetail(vouNo).doOnSuccess((t) -> {
                 saleTableModel.setListDetail(t);
                 saleTableModel.addNewRow();
                 focusTable();
@@ -2136,17 +2132,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 setStockInfo();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    boolean local = s.isLocal();
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).doOnSuccess((t) -> {
-                        t.setLocal(local);
+                    inventoryRepo.findSale(s.getVouNo()).doOnSuccess((t) -> {
                         setSaleVoucher(t);
                     }).subscribe();
                 }
             }
             case "PRINT" -> {
                 if (selectObj instanceof VSale s) {
-                    boolean local = s.isLocal();
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).doOnSuccess((t) -> {
+                    inventoryRepo.findSale(s.getVouNo()).doOnSuccess((t) -> {
                         printVoucher(t);
                     }).subscribe();
                 }

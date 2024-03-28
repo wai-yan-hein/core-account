@@ -37,19 +37,13 @@ public class SalePaddyTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<SaleDetailKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
     private SaleDynamic sale;
-    private StockBalanceFrame dialog;
 
     public void setSale(SaleDynamic sale) {
         this.sale = sale;
-    }
-
-    public void setDialog(StockBalanceFrame dialog) {
-        this.dialog = dialog;
     }
 
     public JLabel getLblRec() {
@@ -328,23 +322,8 @@ public class SalePaddyTableModel extends AbstractTableModel {
         return true;
     }
 
-    public List<SaleDetailKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
     public void delete(int row) {
-        SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
         listDetail.remove(row);
-        addNewRow();
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {
             parent.setRowSelectionInterval(row - 1, row - 1);

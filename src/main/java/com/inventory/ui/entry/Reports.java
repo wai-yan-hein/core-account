@@ -59,6 +59,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -76,8 +77,15 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
+    @Setter
+    private SelectionObserver observer;
+    @Setter
+    private JProgressBar progress;
+    @Setter
     private TaskExecutor taskExecutor;
     private boolean isReport = false;
     private String stDate;
@@ -101,35 +109,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private WareHouseAutoCompleter wareHouseAutoCompleter;
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private ReportFilter filter;
-    private SelectionObserver observer;
-    private JProgressBar progress;
     private final ExcelExporter exporter = new ExcelExporter();
     private Set<String> excelReport = new HashSet<>();
     private FindDialog findDialog;
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
+    private int row = 0;
 
     /**
      * Creates new form Reports
@@ -150,7 +133,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         initFind();
         getReport();
     }
-
 
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblReport);
@@ -215,7 +197,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void setEnableExcel() {
-        int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
+        row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         btnExcel.setEnabled(row > 0 ? excelReport.contains(tableModel.getReport(row).getMenuUrl()) : false);
     }
 
@@ -228,6 +210,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         }).doOnError((e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }).doOnTerminate(() -> {
+            ComponentUtil.scrollTable(tblReport, row, 0);
         }).subscribe();
     }
 
@@ -296,7 +280,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void report(boolean excel) {
-        int row = tblReport.getSelectedRow();
         if (row >= 0) {
             int selectRow = tblReport.convertRowIndexToModel(row);
             VRoleMenu report = tableModel.getReport(selectRow);
@@ -452,7 +435,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void excel(byte[] file) {
-        int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         if (row >= 0) {
             btnExcel.setEnabled(false);
             VRoleMenu report = tableModel.getReport(row);

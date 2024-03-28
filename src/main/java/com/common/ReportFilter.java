@@ -101,6 +101,7 @@ public class ReportFilter {
     private List<String> listDepartment;
     private String deptCode;
     private String cashGroup;
+    private String bankGroup;
     private String fixedAcc;
     private String currentAcc;
     private String capitalAcc;

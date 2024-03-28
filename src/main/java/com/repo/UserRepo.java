@@ -84,6 +84,15 @@ public class UserRepo {
 
     }
 
+    public Mono<Boolean> importCurrency() {
+        return userApi.put()
+                .uri(builder -> builder.path("/user/importCurrency")
+                .build())
+                .retrieve()
+                .bodyToMono(Boolean.class);
+
+    }
+
     public Mono<List<CompanyInfo>> getCompany(boolean active) {
         if (localdatabase) {
             return h2Repo.getCompany(active);
@@ -278,7 +287,8 @@ public class UserRepo {
                     return Mono.empty();
                 });
     }
-     public Mono<MachineInfo> findMachine(Integer macId) {
+
+    public Mono<MachineInfo> findMachine(Integer macId) {
         if (Util1.isNullOrEmpty(macId)) {
             return Mono.empty();
         }
@@ -556,7 +566,7 @@ public class UserRepo {
     }
 
     public Mono<BusinessType> find(Integer id) {
-        if(Util1.isNullOrEmpty(id)){
+        if (Util1.isNullOrEmpty(id)) {
             return Mono.empty();
         }
         if (localdatabase) {

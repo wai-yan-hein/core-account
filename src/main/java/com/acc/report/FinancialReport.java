@@ -39,9 +39,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -55,10 +53,16 @@ import net.sf.jasperreports.swing.JRViewer;
  */
 @Slf4j
 public class FinancialReport extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-    
+
     private final ReportTableModel tableModel = new ReportTableModel("Financial Report");
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
+    @Setter
+    private SelectionObserver observer;
+    @Setter
+    private JProgressBar progress;
     private boolean isReport = false;
     private TraderAAutoCompleter traderAutoCompleter;
     private DateAutoCompleter dateAutoCompleter;
@@ -66,27 +70,9 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private COA3AutoCompleter cOA3AutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private ReportFilter filter;
-    private SelectionObserver observer;
-    private JProgressBar progress;
-    private TableRowSorter<TableModel> sorter;
-    private COAOptionDialog dialog;    
+    private COAOptionDialog dialog;
     private FindDialog findDialog;
-    
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-    
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
+    private int row = 0;
 
     /**
      * Creates new form Reports
@@ -95,7 +81,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         initComponents();
         ComponentUtil.addFocusListener(panelFilter);
     }
-    
+
     public void initMain() {
         initTableReport();
         initRowHeader();
@@ -103,17 +89,17 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         initFind();
         getReport();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblReport);
     }
-    
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblReport, 30);
         scroll.setRowHeaderView(list);
     }
-    
+
     private void initTableReport() {
         tblReport.setModel(tableModel);
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
@@ -122,18 +108,20 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         tblReport.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(400);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(50);
-        sorter = new TableRowSorter(tblReport.getModel());
-        tblReport.setRowSorter(sorter);
     }
-    
+
     private void getReport() {
-        userRepo.getReport("Account").subscribe((t) -> {
+        progress.setIndeterminate(true);
+        userRepo.getReport("Account").doOnSuccess((t) -> {
             tableModel.setListReport(t);
             lblRecord.setText(String.valueOf(tableModel.getListReport().size()));
-        });
-        
+            progress.setIndeterminate(true);
+        }).doOnTerminate(() -> {
+            ComponentUtil.scrollTable(tblReport, row, 0);
+        }).subscribe();
+
     }
-    
+
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
@@ -149,13 +137,12 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
     }
-    
+
     private List<String> getDepartment() {
         return departmentAutoCompleter.getDepartment() == null ? null : departmentAutoCompleter.getListOption();
     }
-    
+
     private void report() {
-        int row = tblReport.getSelectedRow();
         if (row >= 0) {
             int selectRow = tblReport.convertRowIndexToModel(row);
             VRoleMenu report = tableModel.getReport(selectRow);
@@ -185,7 +172,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setReAcc(ProUtil.getProperty(ProUtil.RE));
                     filter.setInvGroup(ProUtil.getInvGroup());
                     filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
-                    filter.setCashGroup(ProUtil.getProperty("cash.group"));
+                    filter.setCashGroup(ProUtil.getProperty(ProUtil.CASH_GROUP));
+                    filter.setBankGroup(ProUtil.getProperty(ProUtil.BANK_GROUP));
                     filter.setListCOAGroup(dialog == null ? null : dialog.getSelectCOA());
                     log.info("Report Date : " + stDate + " - " + enDate);
                     Map<String, Object> param = new HashMap<>();
@@ -210,11 +198,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
     }
-    
+
     private String getLogoPath() {
         return String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
     }
-    
+
     private boolean isValidReport(String url) {
         switch (url) {
             case "CreditDetail", "SharerHolderStatement" -> {
@@ -231,19 +219,10 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     return false;
                 }
             }
-            case "CashBankSummary" -> {
-                if (dialog == null || dialog.getSelectCOA().isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Select COA Group.");
-                    btnGroup.requestFocus();
-                    return false;
-                }
-            }
-            default -> {
-            }
         }
         return true;
     }
-    
+
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         filter.setReportName(reportName);
         long start = new GregorianCalendar().getTimeInMillis();
@@ -295,9 +274,9 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
             progress.setIndeterminate(false);
         }).subscribe();
-        
+
     }
-    
+
     private void initTraderParameter(Map<String, Object> param) {
         TraderA t = traderAutoCompleter.getTrader();
         t = accountRepo.findTrader(t.getKey().getCode()).block();
@@ -308,17 +287,9 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             param.put("p_nrc", t.getNrc());
             param.put("p_address", t.getAddress());
         }
-        
+
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String text = txtFilter.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text);
-        }
-    };
-    
+
     private void coaGroup() {
         if (dialog == null) {
             dialog = new COAOptionDialog(Global.parentForm);
@@ -329,7 +300,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         }
         dialog.searchCOA();
     }
-    
+
     private void clearFilter() {
         lblMessage.setText("");
         dateAutoCompleter.clear();
@@ -338,7 +309,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         cOA3AutoCompleter.clear();
         projectAutoCompleter.clear();
     }
-    
+
     private void setTraderCOA() {
         TraderA trader = traderAutoCompleter.getTrader();
         if (trader != null) {
@@ -347,7 +318,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             }).subscribe();
         }
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -370,7 +341,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         tblReport = new javax.swing.JTable();
         jLabel12 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
-        txtFilter = new javax.swing.JTextField();
         panelFilter = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
         txtDate = new javax.swing.JTextField();
@@ -406,6 +376,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             }
         ));
         tblReport.setRowHeight(26);
+        tblReport.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblReportMouseClicked(evt);
+            }
+        });
         scroll.setViewportView(tblReport);
 
         jLabel12.setFont(Global.lableFont);
@@ -413,13 +388,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
 
         lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
-
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
 
         panelFilter.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -522,7 +490,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
                     .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
                     .addGroup(panelFilterLayout.createSequentialGroup()
-                        .addComponent(txtCOA)
+                        .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnGroup)))
                 .addContainerGap())
@@ -578,8 +546,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                         .addComponent(lable2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(lblTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
-                    .addComponent(txtFilter))
+                    .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panelFilter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -592,14 +559,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(scroll, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(panelFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblMessage)
-                        .addGap(0, 248, Short.MAX_VALUE)))
+                        .addGap(0, 248, Short.MAX_VALUE))
+                    .addComponent(scroll))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
@@ -633,16 +597,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDateKeyReleased
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
-        // TODO add your handling code here:
-        String f = txtFilter.getText();
-        if (f.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-        }
-    }//GEN-LAST:event_txtFilterKeyReleased
-
     private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepFocusGained
@@ -672,6 +626,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         coaGroup();
     }//GEN-LAST:event_btnGroupActionPerformed
 
+    private void tblReportMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblReportMouseClicked
+        // TODO add your handling code here:
+        row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
+    }//GEN-LAST:event_tblReportMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnGroup;
@@ -691,7 +650,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JTextField txtCOA;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtTrader;
     // End of variables declaration//GEN-END:variables
@@ -699,40 +657,40 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     @Override
     public void save() {
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
         clearFilter();
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
         report();
     }
-    
+
     @Override
     public void refresh() {
         getReport();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("SELECT_GROUP")) {
@@ -742,5 +700,5 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             setTraderCOA();
         }
     }
-    
+
 }

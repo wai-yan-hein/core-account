@@ -8,29 +8,18 @@ package com.acc.common;
 import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class CurrencyATableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(CurrencyATableModel.class);
     private List<Currency> listCurrency = new ArrayList<>();
-    private final String[] columnNames = {"Currency"};
-    private JTable table;
-
-    public JTable getTable() {
-        return table;
-    }
-
-    public void setTable(JTable table) {
-        this.table = table;
-    }
+    private final String[] columnNames = {"Code", "Name"};
 
     public CurrencyATableModel() {
     }
@@ -66,6 +55,8 @@ public class CurrencyATableModel extends AbstractTableModel {
             Currency cur = listCurrency.get(row);
             return switch (column) {
                 case 0 ->
+                    cur.getCurCode();
+                case 1 ->
                     cur.getCurrencyName();
                 default ->
                     null;

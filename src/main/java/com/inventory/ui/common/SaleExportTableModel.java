@@ -38,10 +38,7 @@ public class SaleExportTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<SaleDetailKey> deleteList = new ArrayList();
     private StockBalanceFrame dialog;
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
     private JLabel lblRecord;
     private SaleDynamic sale;
 
@@ -57,16 +54,9 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.dialog = dialog;
     }
 
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     public void setLblRecord(JLabel lblRecord) {
         this.lblRecord = lblRecord;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
     }
 
     public void setParent(JTable parent) {
@@ -316,9 +306,7 @@ public class SaleExportTableModel extends AbstractTableModel {
         lblRecord.setText("Records : " + size);
     }
 
-    public void removeListDetail() {
-        this.listDetail.clear();
-    }
+    
 
     private void calculateAmount(SaleHisDetail s) {
         double price = Util1.getDouble(s.getPrice());
@@ -363,23 +351,8 @@ public class SaleExportTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<SaleDetailKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
-    public void delete(int row) {
-        SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
+     public void delete(int row) {
         listDetail.remove(row);
-        addNewRow();
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {
             parent.setRowSelectionInterval(row - 1, row - 1);
@@ -403,6 +376,7 @@ public class SaleExportTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 

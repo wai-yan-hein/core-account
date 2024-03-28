@@ -8,7 +8,6 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.Color;
 import java.awt.Image;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 /**
  *
@@ -20,9 +19,10 @@ public class IconUtil {
     public static final String FILTER_ICON_ALT = "filter_alt.svg";
     public static final String CALENDER_ICON = "calender.svg";
     public static final String LIST_ICON = "list.svg";
+    public static final String CURRENCY = "currency.svg";
 
     public static final Icon getIcon(String name) {
-        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name);
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name ,0.9f);
         icon.setColorFilter(colorFilter);
         return icon;
     }

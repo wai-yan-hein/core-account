@@ -5,28 +5,35 @@
  */
 package com.user.dialog;
 
+import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.IconUtil;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.common.YNOptionPane;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.MessageType;
 import com.user.model.Currency;
 import com.user.common.CurrencyTabelModel;
 import com.repo.UserRepo;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -37,16 +44,11 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private int selectRow = -1;
     private Currency currency = new Currency();
-    private final CurrencyTabelModel currencyTabelModel = new CurrencyTabelModel();
+    private final CurrencyTabelModel tableModel = new CurrencyTabelModel();
+    @Setter
     private UserRepo userRepo;
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    private TableRowSorter<TableModel> sorter;
+    private StartWithRowFilter tblFilter;
 
     /**
      * Creates new form CurrencySetup
@@ -58,41 +60,38 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         initComponents();
         initKeyListener();
         initFocusAdapter();
+        initClientProperty();
     }
 
     public void initMain() {
         initTable();
     }
 
-    private void initFocusAdapter() {
-        txtCurrCode.addFocusListener(fa);
-        txtCurrName.addFocusListener(fa);
-        txtCurrSymbol.addFocusListener(fa);
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
-    private FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            Object obj = e.getSource();
-            if (obj instanceof JTextField txt) {
-                txt.selectAll();
-            } else if (obj instanceof JFormattedTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
+
+    private void initFocusAdapter() {
+        ComponentUtil.addFocusListener(this);
+    }
 
     public void searchCurrency() {
-        userRepo.getCurrency().subscribe((t) -> {
-            currencyTabelModel.setListCurrency(t);
+        progress.setIndeterminate(true);
+        userRepo.getCurrency().doOnSuccess((t) -> {
+            tableModel.setListCurrency(t);
+        }).doOnTerminate(() -> {
+            calRecord();
+            progress.setIndeterminate(false);
             txtCurrCode.requestFocus();
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
+        setVisible(true);
     }
 
     private void initTable() {
-        tblCurrency.setModel(currencyTabelModel);
-        tblCurrency.getTableHeader().setFont(Global.textFont);
+        tblCurrency.setModel(tableModel);
+        tblCurrency.getTableHeader().setFont(Global.tblHeaderFont);
         tblCurrency.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCurrency.getColumnModel().getColumn(0).setPreferredWidth(20);// Code
         tblCurrency.getColumnModel().getColumn(1).setPreferredWidth(100);// Name
@@ -105,7 +104,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                 if (tblCurrency.getSelectedRow() >= 0) {
                     selectRow = tblCurrency.convertRowIndexToModel(tblCurrency.getSelectedRow());
                     if (selectRow >= 0) {
-                        Currency c = currencyTabelModel.getCurrency(selectRow);
+                        Currency c = tableModel.getCurrency(selectRow);
                         setCurrency(c);
                     }
                 }
@@ -114,25 +113,39 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         });
         tblCurrency.setRowHeight(Global.tblRowHeight);
         tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
+        sorter = new TableRowSorter<>(tblCurrency.getModel());
+        tblFilter = new StartWithRowFilter(txtSearch);
+        tblCurrency.setRowSorter(sorter);
+    }
+
+    private void calRecord() {
+        lblRecord.setText(String.valueOf(tableModel.getListCurrency().size()));
     }
 
     private void saveCurrency() {
         if (isValidCurrency()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            userRepo.saveCurrency(currency).subscribe((t) -> {
+            userRepo.saveCurrency(currency).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("NEW")) {
-                    currencyTabelModel.addCurrency(t);
+                    tableModel.addCurrency(t);
                 } else {
-                    currencyTabelModel.setCurrency(selectRow, currency);
+                    tableModel.setCurrency(selectRow, t);
                 }
                 clear();
                 sendMessage(t.getCurrencyName());
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveCurrency();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }).subscribe();
         }
     }
 
@@ -144,6 +157,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void setCurrency(Currency currency) {
+        txtCurrCode.setEditable(false);
         txtCurrCode.setText(currency.getCurCode());
         txtCurrName.setText(currency.getCurrencyName());
         txtCurrSymbol.setText(currency.getCurrencySymbol());
@@ -152,15 +166,16 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void clear() {
+        calRecord();
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
+        txtCurrCode.setEditable(true);
         txtCurrCode.setText(null);
         txtCurrName.setText(null);
         txtCurrSymbol.setText(null);
         chkActive.setSelected(Boolean.TRUE);
         lblStatus.setText("NEW");
         txtCurrCode.requestFocus();
-        currencyTabelModel.fireTableDataChanged();
     }
 
     private void initKeyListener() {
@@ -191,6 +206,21 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         return true;
     }
 
+    private void importCurrency() {
+        YNOptionPane pane = new YNOptionPane("Are you sure to import currency?", JOptionPane.ERROR_MESSAGE);
+        JDialog dialog = pane.createDialog("Edit");
+        dialog.setVisible(true);
+        int yn = (int) pane.getValue();
+        if (yn == JOptionPane.YES_OPTION) {
+            userRepo.importCurrency().doOnSuccess((t) -> {
+                if (t) {
+                    JOptionPane.showMessageDialog(this, "Import Success.");
+                    searchCurrency();
+                }
+            }).subscribe();
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -214,9 +244,12 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         btnSave = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
+        jButton1 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        lblRecord = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
+        txtSearch = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Currency Setup");
 
         tblCurrency.setFont(Global.textFont);
@@ -284,6 +317,19 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         lblStatus.setFont(Global.lableFont);
         lblStatus.setText("NEW");
 
+        jButton1.setText("Import");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Records :");
+
+        lblRecord.setFont(Global.lableFont);
+        lblRecord.setText("0");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -291,18 +337,6 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGap(110, 110, 110)
-                                .addComponent(btnSave)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnClear))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(chkActive)
-                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -312,10 +346,27 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCurrName)
                             .addComponent(txtCurrCode)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSave)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnClear))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
+                        .addComponent(jButton1)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtCurrSymbol)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkActive)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtCurrSymbol))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -333,18 +384,30 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtCurrSymbol, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkActive)
                     .addComponent(lblStatus))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnClear)
-                    .addComponent(btnSave))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnClear)
+                        .addComponent(btnSave)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 176, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
+
+        txtSearch.setFont(Global.textFont);
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSearchKeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -355,7 +418,9 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
+                            .addComponent(txtSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -366,9 +431,12 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                 .addContainerGap()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 354, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -385,6 +453,20 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         saveCurrency();
     }//GEN-LAST:event_btnSaveActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        importCurrency();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
+        // TODO add your handling code here:
+        if (txtSearch.getText().isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(tblFilter);
+        }
+    }//GEN-LAST:event_txtSearchKeyReleased
+
     /**
      * @param args the command line arguments
      */
@@ -393,18 +475,22 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblCurrency;
     private javax.swing.JTextField txtCurrCode;
     private javax.swing.JTextField txtCurrName;
     private javax.swing.JTextField txtCurrSymbol;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
  @Override
     public void keyTyped(KeyEvent e) {
@@ -464,7 +550,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
             case "tblCurrency":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP) {
                     selectRow = tblCurrency.convertRowIndexToModel(tblCurrency.getSelectedRow());
-                    Currency curr = currencyTabelModel.getCurrency(selectRow);
+                    Currency curr = tableModel.getCurrency(selectRow);
                     setCurrency(curr);
                 }
                 if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {

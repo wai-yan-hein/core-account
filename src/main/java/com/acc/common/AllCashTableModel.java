@@ -30,10 +30,9 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.RowSorter;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -361,15 +360,22 @@ public class AllCashTableModel extends AbstractTableModel {
             accountRepo.save(gl).doOnSuccess((t) -> {
                 if (t != null) {
                     listVGl.set(row, t);
+                    observer.selected("CAL-TOTAL", "-");
+                    addNewRow();
+                    ComponentUtil.scrollTable(parent, row + 1, 0);
                 }
             }).doOnError((e) -> {
-                JOptionPane.showMessageDialog(parent, e.getMessage());
                 progress.setIndeterminate(false);
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(parent, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        save(gl, row, column);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(parent, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).doOnTerminate(() -> {
-                addNewRow();
-                ComponentUtil.scrollTable(parent, row + 1, 0);
                 progress.setIndeterminate(false);
-                observer.selected("CAL-TOTAL", "-");
             }).subscribe();
         }
     }

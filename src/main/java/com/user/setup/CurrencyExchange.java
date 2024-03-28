@@ -20,6 +20,7 @@ import com.user.model.ExchangeRate;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,24 +34,15 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private CurrencySetupDialog currencySetupDialog;
     private final CurExchangeRateTableModel exchangeTableModel = new CurExchangeRateTableModel();
     private int selectRow = -1;
+    @Setter
     private SelectionObserver observer;
+    @Setter
+    private UserRepo userRepo;
+    @Setter
     private JProgressBar progress;
     private DateAutoCompleter dateAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
-    private UserRepo userRepo;
     private FindDialog findDialog;
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
 
     /**
      * Creates new form CurrencyExchange
@@ -138,12 +130,12 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private void currencySetup() {
         if (currencySetupDialog == null) {
             currencySetupDialog = new CurrencySetupDialog(Global.parentForm);
+            currencySetupDialog.setSize(Global.width - 200, Global.height - 200);
             currencySetupDialog.setLocationRelativeTo(null);
             currencySetupDialog.setUserRepo(userRepo);
             currencySetupDialog.initMain();
         }
         currencySetupDialog.searchCurrency();
-        currencySetupDialog.setVisible(true);
     }
 
     private void deleteEx() {
@@ -460,5 +452,6 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
 
     @Override
     public void filter() {
+        findDialog.setVisible(!findDialog.isVisible());
     }
 }

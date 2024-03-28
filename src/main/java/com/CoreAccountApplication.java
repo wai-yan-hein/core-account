@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,9 @@ public class CoreAccountApplication {
     private static void loadSplash() {
         splash = new Splash(appIcon);
         splash.setLocationRelativeTo(null);
-        splash.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            splash.setVisible(true);
+        });
     }
 
     private static void endSplash() {

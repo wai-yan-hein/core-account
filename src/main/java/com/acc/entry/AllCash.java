@@ -169,7 +169,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void initProperty() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
-        txtDr.setForeground(Color.GREEN);
+        txtDr.setForeground(Global.GREEN);
         txtCr.setForeground(Color.RED);
         txtDr.setFont(Global.menuFont);
         txtCr.setFont(Global.menuFont);
@@ -466,9 +466,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
-    private boolean isEditable(int row) {
-        return single ? dayBookTableModel.isCellEditable(row, 0) : allCashTableModel.isCellEditable(row, 0);
-    }
 
     private Gl getGl(int row) {
         if (single) {
@@ -568,12 +565,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getReportName() {
-        String reportName = "IndividualLedgerSummary.jasper";
+        String reportName = "IndividualLedger.jasper";
         if (reportModeDialog != null) {
             String name = reportModeDialog.getSelectName();
             switch (name) {
                 case "Detail" ->
-                    reportName = "IndividualLedgerDetail.jasper";
+                    reportName = "IndividualLedger.jasper";
                 case "Summary" ->
                     reportName = "IndividualLedgerSummary.jasper";
             }
@@ -721,8 +718,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         double crAmt = Util1.getDouble(txtCr.getValue());
         double closing = opening + drAmt - crAmt;
         closing = closing == -0 ? 0 : closing;
-        txtOpening.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
-        txtClosing.setForeground(closing >= 0 ? Color.GREEN : Color.RED);
+        txtOpening.setForeground(opening >= 0 ? Global.GREEN : Color.RED);
+        txtClosing.setForeground(closing >= 0 ? Global.GREEN : Color.RED);
         txtClosing.setValue(closing);
         txtDr.setValue(drAmt);
         txtCr.setValue(crAmt);

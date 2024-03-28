@@ -33,7 +33,7 @@ public class FindDialog extends javax.swing.JDialog {
      * Creates new form FindDialog
      *
      * @param frame
-     * @param table
+     * @param tables
      */
     public FindDialog(JFrame frame, JTable... tables) {
         super(frame, Dialog.ModalityType.MODELESS);

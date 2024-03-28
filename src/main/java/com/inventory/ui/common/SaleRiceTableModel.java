@@ -34,7 +34,6 @@ public class SaleRiceTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<SaleDetailKey> deleteList = new ArrayList();
     private JLabel lblRecord;
     private SaleDynamic sale;
     private StockBalanceFrame dialog;
@@ -268,9 +267,6 @@ public class SaleRiceTableModel extends AbstractTableModel {
         lblRecord.setText("Records : " + size);
     }
 
-    public void removeListDetail() {
-        this.listDetail.clear();
-    }
 
     private void calculateAmount(SaleHisDetail s) {
         double orgPrice = Util1.getDouble(s.getOrgPrice());
@@ -308,23 +304,8 @@ public class SaleRiceTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<SaleDetailKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
     public void delete(int row) {
-        SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
         listDetail.remove(row);
-        addNewRow();
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {
             parent.setRowSelectionInterval(row - 1, row - 1);
@@ -348,6 +329,7 @@ public class SaleRiceTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 }
