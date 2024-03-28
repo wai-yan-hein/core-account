@@ -18,6 +18,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
+import com.repo.InventoryRepo;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.ui.SecurityDialog;
@@ -29,6 +30,7 @@ import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
+import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -51,6 +53,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     @Setter
     private UserRepo userRepo;
+    @Setter
+    private InventoryRepo inventoryRepo;
     @Setter
     private AccountRepo accountRepo;
     @Setter
@@ -128,6 +132,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
         panelAdv.setVisible(chkSync.isSelected());
+        btnReset.setEnabled(false);
     }
 
     private void setCompanyInfo(CompanyInfo cInfo) {
@@ -153,6 +158,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtReportUrl.setText(company.getReportUrl());
         lblStatus.setText("EDIT");
         txtBusType.setEditable(company.getBusId() == null);
+        btnReset.setEnabled(true);
     }
 
     private void saveCompany() {
@@ -371,6 +377,28 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         machineInfoDialog.search();
     }
 
+    private void showSecurityDialog() {
+        SecurityDialog dialog = new SecurityDialog(Global.parentForm);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+        if (dialog.isCorrect()) {
+            confirmToReset();
+        }
+    }
+
+    private void confirmToReset() {
+        int yn = JOptionPane.showConfirmDialog(Global.parentForm, "Do you want to reset program?", "Reset Program.", JOptionPane.WARNING_MESSAGE);
+        if (yn == JOptionPane.YES_OPTION) {
+            Message message = new Message();
+            message.setHeader("RESET_PROGRAM");
+            userRepo.cleanData(company).doOnSuccess((t) -> {
+                JOptionPane.showMessageDialog(this, "Reset Success.");
+            }).doOnError((e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }).subscribe();
+        }
+    }
+
     private void openSync() {
         SecurityDialog d = new SecurityDialog(Global.parentForm);
         d.setLocationRelativeTo(null);
@@ -430,6 +458,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
+        btnReset = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -569,7 +598,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelAdvLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtReportUrl)
-                    .addComponent(txtReportCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
+                    .addComponent(txtReportCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 303, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelAdvLayout.setVerticalGroup(
@@ -619,10 +648,10 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
+                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
                             .addComponent(txtSecurity)))
                     .addGroup(panelEntryLayout.createSequentialGroup()
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -775,6 +804,15 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        btnReset.setFont(Global.lableFont);
+        btnReset.setText("Reset");
+        btnReset.setEnabled(false);
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -790,9 +828,13 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jButton3)
                     .addComponent(jButton4)
                     .addComponent(jButton5)
-                    .addComponent(jButton6))
+                    .addComponent(jButton6)
+                    .addComponent(btnReset))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnReset, jButton1, jButton2, jButton3, jButton4, jButton5, jButton6, jButton7});
+
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -809,9 +851,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton6))
+                        .addComponent(jButton6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnReset))
                     .addComponent(jButton7))
-                .addContainerGap(293, Short.MAX_VALUE))
+                .addContainerGap(264, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -820,7 +864,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 451, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -891,8 +935,13 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         openSync();
     }//GEN-LAST:event_chkSyncActionPerformed
 
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        showSecurityDialog();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnResetActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnReset;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkMenuUpdate;
     private javax.swing.JCheckBox chkSync;

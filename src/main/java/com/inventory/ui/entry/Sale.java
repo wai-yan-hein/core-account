@@ -529,6 +529,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void clear(boolean foucs) {
         disableForm(true);
         saleTableModel.clear();
+        saleTableModel.addNewRow();
         saleTableModel.setChange(false);
         saleExpenseFrame.clear();
         stockBalanceDialog.clear();

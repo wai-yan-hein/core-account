@@ -207,11 +207,11 @@ public class WebFlexConfig {
     @Bean
     public ConnectionProvider connectionProvider() {
         return ConnectionProvider.builder("custom-provider")
-                .maxConnections(20) // maximum number of connections
-                .maxIdleTime(Duration.ofSeconds(5)) // maximum idle time
-                .maxLifeTime(Duration.ofSeconds(10)) // maximum life time
-                .pendingAcquireTimeout(Duration.ofSeconds(5)) // pending acquire timeout
-                .evictInBackground(Duration.ofSeconds(5)) // eviction interval
+                .maxConnections(100) // maximum number of connections
+                .maxIdleTime(Duration.ofSeconds(10)) // maximum idle time
+                .maxLifeTime(Duration.ofSeconds(20)) // maximum life time
+                .pendingAcquireTimeout(Duration.ofSeconds(10)) // pending acquire timeout
+                .evictInBackground(Duration.ofSeconds(10)) // eviction interval
                 .build();
     }
 

@@ -213,6 +213,14 @@ public class UserRepo {
                 });
     }
 
+    public Mono<Boolean> cleanData(CompanyInfo app) {
+        return userApi.post()
+                .uri("/user/cleanData")
+                .body(Mono.just(app), CompanyInfo.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
     public Mono<Currency> saveCurrency(Currency app) {
         return userApi.post()
                 .uri("/user/saveCurrency")
