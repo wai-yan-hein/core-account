@@ -30,7 +30,6 @@ import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
-import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -137,6 +136,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void setCompanyInfo(CompanyInfo cInfo) {
         company = cInfo;
+        company.setToken(token);
         userRepo.findCurrency(company.getCurCode()).doOnSuccess((t) -> {
             currencyAutoCompleter.setCurrency(t);
         }).subscribe();
