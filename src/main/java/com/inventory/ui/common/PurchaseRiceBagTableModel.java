@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.common;
 
-import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -16,13 +15,13 @@ import com.inventory.entity.PurDetailKey;
 import com.inventory.entity.PurHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.ui.entry.PurchaseDynamic;
-import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,68 +31,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PurchaseRiceBagTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight", "Bag", "Price", "Amount"};
-    private JTable parent;
+    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Std-Weight", "Avg-Weight", "Bag", "Price", "Amount"};
     private List<PurHisDetail> listDetail = new ArrayList();
-    private SelectionObserver observer;
     private final List<PurDetailKey> deleteList = new ArrayList();
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
+    @Setter
+    private JTable parent;
+    @Setter
+    private SelectionObserver observer;
+    @Setter
     private JLabel lblRec;
+    @Setter
     private PurchaseDynamic purchase;
-    private boolean edit;
-
-    public boolean isEdit() {
-        return edit;
-    }
-
-    public void setEdit(boolean edit) {
-        this.edit = edit;
-    }
-
-    public PurchaseDynamic getPurchase() {
-        return purchase;
-    }
-
-    public void setPurchase(PurchaseDynamic purchase) {
-        this.purchase = purchase;
-    }
-
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -134,7 +82,7 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 7 ->
+            case 8 ->
                 false;
             default ->
                 true;
@@ -149,7 +97,7 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //code
-                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
+                        return record.getUserCode();
                     }
                     case 1 -> {
                         return record.getStockName();
@@ -164,12 +112,15 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                         return Util1.toNull(record.getWeight());
                     }
                     case 5 -> {
-                        return Util1.toNull(record.getBag());
+                        return Util1.toNull(record.getStdWeight());
                     }
                     case 6 -> {
-                        return Util1.toNull(record.getPrice());
+                        return Util1.toNull(record.getBag());
                     }
                     case 7 -> {
+                        return Util1.toNull(record.getPrice());
+                    }
+                    case 8 -> {
                         return Util1.toNull(record.getAmount());
                     }
                     default -> {
@@ -190,19 +141,17 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                 PurHisDetail pd = listDetail.get(row);
                 switch (column) {
                     case 0, 1 -> {
-                        //Code
-                        if (value != null) {
-                            if (value instanceof Stock s) {
-                                pd.setStockCode(s.getKey().getStockCode());
-                                pd.setStockName(s.getStockName());
-                                pd.setUserCode(s.getUserCode());
-                                pd.setWeight(s.getWeight());
-                                pd.setBag(1);
-                                pd.setUnitCode("-");
-                                addNewRow();
-                            }
+                        if (value instanceof Stock s) {
+                            pd.setStockCode(s.getKey().getStockCode());
+                            pd.setStockName(s.getStockName());
+                            pd.setUserCode(s.getUserCode());
+                            pd.setWeight(s.getWeight());
+                            pd.setCalculate(s.isCalculate());
+                            pd.setBag(1);
+                            pd.setUnitCode("-");
+                            addNewRow();
+                            parent.setColumnSelectionInterval(2, 2);
                         }
-                        parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
                         double wet = Util1.getDouble(value);
@@ -223,15 +172,22 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                         }
                     }
                     case 5 -> {
+                        double wt = Util1.getDouble(value);
+                        if (wt > 0) {
+                            pd.setStdWeight(wt);
+                        }
+                    }
+                    case 6 -> {
                         double bag = Util1.getDouble(value);
                         if (bag > 0) {
                             pd.setBag(bag);
                         }
                     }
-                    case 6 -> {
+                    case 7 -> {
                         double price = Util1.getDouble(value);
                         if (price > 0) {
                             pd.setPrice(price);
+                            pd.setOrgPrice(Util1.getDouble(value));
                         }
                     }
 
@@ -294,26 +250,35 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
 
     public void setListDetail(List<PurHisDetail> listDetail) {
         this.listDetail = listDetail;
-        //setRecord(listDetail.size());
         fireTableDataChanged();
     }
 
-    private void calculateAmount(PurHisDetail pur) {
-        double price = Util1.getDouble(pur.getPrice());
-        double bag = Util1.roundDown2D(pur.getBag());
-        if (pur.getStockCode() != null) {
-            double amount = bag * price;
-            int roundAmt = (int) amount;
-            pur.setPrice(price);
-            if (ProUtil.isPurRDDis()) {
-                int netAmt = Util1.roundDownToNearest100(roundAmt);
-                double discount = roundAmt - netAmt;
-                observer.selected("DISCOUNT", discount);
+    private void calculateAmount(PurHisDetail s) {
+        double orgPrice = Util1.getDouble(s.getOrgPrice());
+        double bag = Util1.getDouble(s.getBag());
+        double weight = s.getWeight();
+        double stdWt = s.getStdWeight();
+        if (s.isCalculate()) {
+            if (s.getStockCode() != null && weight > 0 && orgPrice > 0) {
+                stdWt = stdWt == 0 ? weight : stdWt;
+                double price = stdWt / weight * orgPrice;
+                double amount = bag * price;
+                int roundAmt = (int) amount;
+                s.setPrice(price);
+                if (ProUtil.isPurRDDis()) {
+                    int netAmt = Util1.roundDownToNearest100(roundAmt);
+                    double discount = roundAmt - netAmt;
+                    observer.selected("DISCOUNT", discount);
+                }
+                s.setAmount(amount);
+                s.setTotalWeight(bag * weight);
             }
-            pur.setAmount(roundAmt);
+        } else {
+            double amount = bag * s.getPrice();
+            s.setAmount(amount);
         }
-    }
 
+    }
 
     public boolean isValidEntry() {
         for (PurHisDetail sdh : listDetail) {
@@ -374,7 +339,6 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
-            setEdit(true);
             fireTableDataChanged();
         }
     }

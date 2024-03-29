@@ -61,6 +61,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -71,9 +72,9 @@ import org.apache.commons.csv.CSVPrinter;
  */
 @Slf4j
 public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl, SelectionObserver {
-    
+
     private boolean noUnit = false;
-    private int selectRow = -1;
+    private int selectRow = 0;
     private CategorySetupDialog categorySetupDailog;
     private StockTypeSetupDialog typeSetupDialog;
     private StockBrandSetupDialog itemBrandDailog;
@@ -92,23 +93,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private UnitRelationAutoCompleter relationAutoCompleter;
     private StockFormulaCompleter stockFormulaCompleter;
     private Stock stock = new Stock();
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
+    @Setter
     private InventoryRepo inventoryRepo;
-    private DepartmentUserAutoCompleter departmentUserAutoCompleter;
-    private final DepartmentComboBoxModel departmentComboBoxModel1 = new DepartmentComboBoxModel();
+    @Setter
     private UserRepo userRepo;
+    private DepartmentUserAutoCompleter departmentUserAutoCompleter;
+    private DepartmentUserAutoCompleter departmentUserAutoCompleter1;
+
     private RelationSetupDialog relationSetupDialog;
     private FindDialog findDialog;
-    
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-    
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
+
     public enum StockHeader {
         UserCode,
         StockName,
@@ -119,22 +117,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         PurchaseUnit,
         SaleUnit,
         SalePrice
-    }
-    
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
-    public JProgressBar getProgress() {
-        return progress;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
     }
 
     /**
@@ -148,8 +130,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initKeyListener();
         panelUnit.setVisible(!noUnit);
     }
-    
-    
+
     public void initMain() {
         ComponentUtil.addFocusListener(this);
         initData();
@@ -158,21 +139,21 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initRowHeader();
         initFind();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblStock);
     }
-    
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblStock, 30);
         s1.setRowHeaderView(list);
     }
-    
+
     private void initData() {
         searchStock();
     }
-    
+
     private void initTable() {
         stockTableModel.setInventoryRepo(inventoryRepo);
         tblStock.setModel(stockTableModel);
@@ -182,13 +163,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.getColumnModel().getColumn(2).setPreferredWidth(150);//group
         tblStock.getColumnModel().getColumn(3).setPreferredWidth(150);//cat
         tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
-        tblStock.getColumnModel().getColumn(5).setPreferredWidth(1);//active
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
         tblStock.setDefaultRenderer(Double.class, new TableCellRender());
     }
-    
+
     private void setStock(int row) {
         stock = stockTableModel.getStock(row);
         txtStockCode.setText(stock.getKey().getStockCode());
@@ -239,29 +219,26 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         lblStatus.setText("EDIT");
         ComponentUtil.enableForm(panelStock, !stock.isDeleted());
     }
-    
+
     private String getBrand() {
         return brandAutoCompleterF == null ? "-" : brandAutoCompleterF.getBrand().getKey().getBrandCode();
     }
-    
+
     private String getType() {
         return typeAutoCompleterF == null ? "-" : typeAutoCompleterF.getStockType().getKey().getStockTypeCode();
     }
-    
+
     private String getStock() {
         return stockAutoCompleterF == null ? "-" : stockAutoCompleterF.getStock().getKey().getStockCode();
     }
-    
+
     private String getCategory() {
         return categoryAutoCompleterF == null ? "-" : categoryAutoCompleterF.getCategory().getKey().getCatCode();
     }
-    
+
     private void searchStock() {
         progress.setIndeterminate(true);
-        Integer deptId = 0;
-        if (cboDept1.getSelectedItem() instanceof DepartmentUser dep) {
-            deptId = dep.getKey().getDeptId();
-        }
+        int deptId = departmentUserAutoCompleter1.getDepartment().getKey().getDeptId();
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, deptId);
         filter.setBrandCode(getBrand());
         filter.setCatCode(getCategory());
@@ -269,16 +246,19 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         filter.setStockCode(getStock());
         filter.setDeleted(rdoDel.isSelected());
         filter.setActive(rdoActive.isSelected());
-        inventoryRepo.searchStock(filter).subscribe((t) -> {
-            stockTableModel.setListStock(t);
-            lblRecord.setText(t.size() + "");
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        });
+        stockTableModel.clear();
+        inventoryRepo.searchStock(filter).doOnNext(stockTableModel::addStock)
+                .doOnNext((t) -> calTotal())
+                .doOnComplete(() -> {
+                    progress.setIndeterminate(false);
+                    ComponentUtil.scrollTable(tblStock, selectRow, 0);
+                }).subscribe();
     }
-    
+
+    private void calTotal() {
+        lblRecord.setText(String.valueOf(stockTableModel.getSize()));
+    }
+
     private void initCombo() {
         typeAutoCompleter = new StockTypeAutoCompleter(txtType, null, false);
         typeAutoCompleter.setStockType(null);
@@ -324,14 +304,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             relationAutoCompleter.setListRelation(t);
         });
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
+        departmentUserAutoCompleter1 = new DepartmentUserAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setListDepartment(t);
             DepartmentUser dep = new DepartmentUser(0, "All");
             List<DepartmentUser> list = new ArrayList<>(t);
             list.add(0, dep);
-            departmentComboBoxModel1.setData(list);
-            cboDept1.setModel(departmentComboBoxModel1);
-            cboDept1.setSelectedIndex(0);
+            departmentUserAutoCompleter1.setListDepartment(list);
         }).subscribe();
         stockFormulaCompleter = new StockFormulaCompleter(txtFormula, inventoryRepo, null);
         stockFormulaCompleter.setObserver(this);
@@ -339,14 +318,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         stockAutoCompleterF.setObserver(this);
         assignDefault();
     }
-    
+
     private void assignDefault() {
         userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setDepartment(t);
         }).subscribe();
         ComponentUtil.enableForm(panelStock, true);
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         StockUnit purUnit = purUnitCompleter.getStockUnit();
@@ -437,10 +416,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 stock.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
-        
+
         return status;
     }
-    
+
     private void saveStock() {
         if (isValidEntry()) {
             observer.selected("save", false);
@@ -465,14 +444,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }).subscribe();
         }
     }
-    
+
     private void sendMessage(String mes) {
         inventoryRepo.sendDownloadMessage(MessageType.STOCK, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-    
+
     public void clear() {
         observer.selected("save", true);
         progress.setIndeterminate(false);
@@ -507,7 +486,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         lblRecord.setText(stockTableModel.getListStock().size() + "");
         assignDefault();
     }
-    
+
     private void initKeyListener() {
         txtBarCode.addKeyListener(this);
         txtSalePriceE.addKeyListener(this);
@@ -533,7 +512,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSaleUnit.addKeyListener(this);
         txtRelation.addKeyListener(this);
     }
-    
+
     private void relationSetup() {
         if (relationSetupDialog == null) {
             relationSetupDialog = new RelationSetupDialog(Global.parentForm);
@@ -545,7 +524,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         relationSetupDialog.setListUnitRelation(relationAutoCompleter.getListRelation());
         relationSetupDialog.setVisible(true);
     }
-    
+
     private void printFile() {
         try {
             progress.setIndeterminate(true);
@@ -563,7 +542,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-    
+
     private void categoryDialog() {
         if (categoryAutoCompleter != null) {
             if (categorySetupDailog == null) {
@@ -577,7 +556,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             categorySetupDailog.setVisible(true);
         }
     }
-    
+
     private void stockTypeDialog() {
         if (typeAutoCompleter != null) {
             if (typeSetupDialog == null) {
@@ -591,7 +570,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             typeSetupDialog.setVisible(true);
         }
     }
-    
+
     private void stockUnitDialog() {
         if (purUnitCompleter != null) {
             if (itemUnitSetupDailog == null) {
@@ -608,7 +587,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             itemUnitSetupDailog.setVisible(true);
         }
     }
-    
+
     private void brandDialog() {
         if (brandAutoCompleter != null) {
             if (itemBrandDailog == null) {
@@ -622,20 +601,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             itemBrandDailog.setVisible(true);
         }
     }
-    
+
     private void setSelectStock() {
         selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         if (selectRow >= 0) {
             setStock(selectRow);
         }
     }
-    
+
     private void calPurAmt() {
         double qty = Util1.getDoubleOne(txtPurQty.getText());
         double price = Util1.getDoubleOne(txtPurPrice.getText());
         txtPurAmt.setText(Util1.getString(price * qty));
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -731,7 +710,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtStock1 = new javax.swing.JTextField();
         jLabel28 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
-        cboDept1 = new javax.swing.JComboBox<>();
+        txtDep1 = new javax.swing.JTextField();
         jPanel6 = new javax.swing.JPanel();
         lblRecord = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
@@ -1533,7 +1512,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addComponent(panelUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(115, Short.MAX_VALUE))
+                .addContainerGap(105, Short.MAX_VALUE))
         );
 
         jScrollPane2.setViewportView(panelStock);
@@ -1563,12 +1542,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel29.setFont(Global.lableFont);
         jLabel29.setText("Department");
 
-        cboDept1.setFont(Global.textFont);
-        cboDept1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboDept1ActionPerformed(evt);
-            }
-        });
+        txtDep1.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -1594,7 +1568,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel29)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cboDept1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtDep1, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -1611,8 +1585,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel28, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel29, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cboDept1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel29)
+                        .addComponent(txtDep1)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1712,7 +1686,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 515, Short.MAX_VALUE)
+                        .addComponent(s1, javax.swing.GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1860,10 +1834,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtUserCode.requestFocus();
     }//GEN-LAST:event_txtUserCodeFocusGained
 
-    private void cboDept1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboDept1ActionPerformed
-        searchStock();
-    }//GEN-LAST:event_cboDept1ActionPerformed
-
     private void txtFormulaFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtFormulaFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFormulaFocusGained
@@ -1924,7 +1894,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JButton btnAddRelation;
     private javax.swing.JButton btnDownload;
     private javax.swing.JButton btnUnit;
-    private javax.swing.JComboBox<DepartmentUser> cboDept1;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCal;
     private javax.swing.JCheckBox chkEx;
@@ -1979,6 +1948,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtCat1;
     private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtDep1;
     private javax.swing.JTextField txtFormula;
     private javax.swing.JTextField txtGroup1;
     private javax.swing.JTextField txtPurAmt;
@@ -2006,16 +1976,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-        
+
         if (sourceObj instanceof JTable jTable) {
             ctrlName = jTable.getName();
         } else if (sourceObj instanceof JTextField jTextField) {
@@ -2036,14 +2006,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtStockName.requestFocus();
-                    
+
                 }
             }
             case "txtType" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtCat.requestFocus();
-                    
+
                 }
             }
             case "btnAddItemType" -> {
@@ -2056,7 +2026,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtBrand.requestFocus();
-                    
+
                 }
             }
             case "txtCat" -> {
@@ -2125,7 +2095,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         txtSalePrice.requestFocus();
                 }
             }
-            
+
             case "txtSaleWt" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
@@ -2138,51 +2108,51 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         txtWt.requestFocus();
                 }
             }
-            
+
             case "txtSalePrice" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceA.requestFocus();
                 }
             }
-            
+
             case "txtSalePriceA" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceB.requestFocus();
                 }
             }
-            
+
             case "txtSalePriceB" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceC.requestFocus();
                 }
             }
-            
+
             case "txtSalePriceC" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceD.requestFocus();
                 }
             }
-            
+
             case "txtSalePriceD" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSalePriceE.requestFocus();
-                    
+
                 }
             }
-            
+
             case "txtSalePriceStd" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> {
                     }
-                    
+
                 }
             }
-            
+
             case "tblStock" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_DOWN -> {
@@ -2198,18 +2168,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             txtUserCode.requestFocus();
                         }
                     }
-                    
+
                 }
             }
-            
+
         }
     }
-    
+
     @Override
     public void save() {
         saveStock();
     }
-    
+
     @Override
     public void delete() {
         StockKey key = stock.getKey();
@@ -2238,35 +2208,35 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         }
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
     }
-    
+
     @Override
     public void refresh() {
         searchStock();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         searchStock();

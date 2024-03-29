@@ -92,8 +92,8 @@
         <Component class="javax.swing.JLabel" name="lblImage">
           <Properties>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/images/checked_20px.png"/>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="IconUtil.getIcon(IconUtil.COMPANY)" type="code"/>
             </Property>
           </Properties>
         </Component>

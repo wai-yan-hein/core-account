@@ -9,6 +9,7 @@ import com.repo.AccountRepo;
 import com.acc.common.JournalEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.DepartmentCellEditor;
+import com.acc.editor.DespEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
@@ -42,6 +43,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 
 /**
  *
@@ -51,26 +53,14 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     private final JournalEntryTableModel journalTablModel = new JournalEntryTableModel();
     private ProjectAutoCompleter projectAutoCompleter;
+    @Setter
     private String status;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private SelectionObserver observer;
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     /**
      * Creates new form JournalEntryDialog
@@ -139,6 +129,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         initRowHeader();
         initCombo();
     }
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblJournal, 30);
@@ -159,7 +150,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         accountRepo.getDepartment().doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
         }).subscribe();
-        tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblJournal.getColumnModel().getColumn(1).setCellEditor(new DespEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         userRepo.getCurrency().doOnSuccess((t) -> {

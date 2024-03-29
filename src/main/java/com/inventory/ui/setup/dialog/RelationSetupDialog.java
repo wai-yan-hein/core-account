@@ -31,28 +31,25 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class RelationSetupDialog extends javax.swing.JDialog implements KeyListener {
-
-    private static final Logger log = LoggerFactory.getLogger(RelationSetupDialog.class);
 
     private int selectRow = - 1;
     private final RelationTableModel relationTableModel = new RelationTableModel();
     private final RelationDetailTableModel relationDetailTableModel = new RelationDetailTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private List<UnitRelation> listUnitRelation;
 
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     public void setListUnitRelation(List<UnitRelation> listUnitRelation) {
         relationTableModel.setListRelation(listUnitRelation);

@@ -663,7 +663,6 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
             dialog = new PurOrderHisDialog(Global.parentForm);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);            
-            dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);

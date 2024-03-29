@@ -48,7 +48,6 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     private UserRepo userRepo;
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
     private WeightLossHistoryDialog dialog;
-    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private SelectionObserver observer;
     private JProgressBar progress;
     private WeightLossHis his = new WeightLossHis();
@@ -282,7 +281,6 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             dialog = new WeightLossHistoryDialog(Global.parentForm);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
-            dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);

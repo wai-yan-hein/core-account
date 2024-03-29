@@ -498,7 +498,6 @@ public class LandingHistoryDialog extends javax.swing.JDialog implements KeyList
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         btnSelect.setFont(Global.lableFont);
-        btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
         btnSelect.setText("Select");
         btnSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -507,7 +506,6 @@ public class LandingHistoryDialog extends javax.swing.JDialog implements KeyList
         });
 
         btnSearch.setFont(Global.lableFont);
-        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

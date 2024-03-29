@@ -10,6 +10,8 @@ import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,18 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 public class StockTableModel extends AbstractTableModel {
 
     private List<Stock> listStock = new ArrayList();
-    private String[] columnNames = {"Code", "Description", "Group Name", "Cat Name", "Weight", "Active"};
+    private String[] columnNames = {"Code", "Description", "Group Name", "Cat Name", "Weight"};
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Getter
+    private int size;
 
     public StockTableModel() {
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
     }
 
     public StockTableModel(List<Stock> listStock) {
@@ -45,21 +42,12 @@ public class StockTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        switch (column) {
-            case 5 -> {
-                return true;
-            }
-
-        }
         return false;
     }
 
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 5 -> {
-                return Boolean.class;
-            }
             case 4 -> {
                 return Double.class;
             }
@@ -94,8 +82,6 @@ public class StockTableModel extends AbstractTableModel {
                     med.getCatName();
                 case 4 ->
                     med.getWeight();
-                case 5 ->
-                    med.isActive();
                 default ->
                     null;
             }; //Code
@@ -163,6 +149,7 @@ public class StockTableModel extends AbstractTableModel {
 
     public void addStock(Stock stock) {
         if (listStock != null) {
+            size += 1;
             listStock.add(stock);
             fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
 
@@ -185,7 +172,9 @@ public class StockTableModel extends AbstractTableModel {
         }
     }
 
-    public void refresh() {
+    public void clear() {
+        listStock.clear();
+        size = 0;
         fireTableDataChanged();
     }
 }

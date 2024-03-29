@@ -50,10 +50,25 @@ public class Menu {
     private int menuVersion;
     @Transient
     private List<Menu> child;
+    @Transient
+    private String roleCode;
+    @Transient
+    private boolean allow;
 
     @Override
     public String toString() {
         return menuName;
+    }
+
+    public Menu() {
+    }
+    
+
+    public Menu(String menuType, String menuName, boolean allow, List<Menu> child) {
+        this.allow = allow;
+        this.menuName = menuName;
+        this.menuType = menuType;
+        this.child = child;
     }
 
 }

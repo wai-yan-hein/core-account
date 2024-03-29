@@ -25,6 +25,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.SaleManTableModel;
 import java.awt.Color;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
@@ -61,8 +62,8 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         this.listSaleMan = listSaleMan;
     }
 
-    public SaleManSetupDialog() {
-        super(Global.parentForm, true);
+    public SaleManSetupDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.green);

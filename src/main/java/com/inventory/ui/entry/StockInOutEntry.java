@@ -723,7 +723,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             d.initMain();
             d.setSize(Global.width - 200, Global.height - 200);
             d.setLocationRelativeTo(null);
-            d.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             d.setVisible(true);
         } catch (Exception e) {
             log.error(String.format("historyOPhistoryOP: %s", e.getMessage()));

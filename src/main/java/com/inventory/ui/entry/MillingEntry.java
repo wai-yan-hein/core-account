@@ -54,7 +54,6 @@ import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -66,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.DropMode;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -89,8 +87,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MillingEntry extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
-    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
-    private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private List<MillingRawDetail> listDetail = new ArrayList();
     private List<MillingOutDetail> listOutDetail = new ArrayList();
     private List<MillingExpense> listExpense = new ArrayList<>();
@@ -724,7 +720,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             dialog.setTitle("Milling Voucher Search");
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
-            dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
@@ -2049,8 +2044,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void vouStatusSetup() {
-        VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
-        vsDialog.setIconImage(icon);
+        VouStatusSetupDialog vsDialog = new VouStatusSetupDialog(Global.parentForm);
         vsDialog.setInventoryRepo(inventoryRepo);
         vsDialog.setListVou(vouStatusAutoCompleter.getListData());
         vsDialog.initMain();

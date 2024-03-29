@@ -39,7 +39,6 @@ import com.dms.CoreDrive;
 import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
-import com.inventory.entity.VRoleMenu;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.LabourPaymentEntry;
 import com.repo.InventoryRepo;
@@ -106,6 +105,7 @@ import com.ui.management.StockPayable;
 import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
 import com.user.dialog.ProgramDownloadDialog;
+import com.user.model.Menu;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
@@ -1372,7 +1372,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void departmentAssign() {
         Integer deptId = Global.loginUser.getDeptId();
         if (Util1.isNullOrEmpty(deptId)) {
-            userRepo.getDeparment(true).subscribe((t) -> {
+            userRepo.getDeparment(true).doOnSuccess((t) -> {
                 if (!t.isEmpty()) {
                     DepartmentUser dep;
                     if (t.size() > 1) {
@@ -1390,12 +1390,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     JOptionPane.showMessageDialog(this, "No Active Department.");
                     menuBar.setEnabled(false);
                 }
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
+            }).subscribe();
         } else {
             Global.deptId = deptId;
-            userRepo.findDepartment(deptId).subscribe((dep) -> {
+            userRepo.findDepartment(deptId).doOnSuccess((dep) -> {
                 if (dep != null) {
                     String address = dep.getAddress();
                     String phoneNo = dep.getPhoneNo();
@@ -1410,7 +1408,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     JOptionPane.showMessageDialog(this, "Department not found.");
                     System.exit(0);
                 }
-            });
+            }).subscribe();
         }
 
     }
@@ -1426,8 +1424,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }).subscribe();
     }
 
-    private void createMenu(List<VRoleMenu> list) {
+    private void createMenu(List<Menu> list) {
         if (list != null && !list.isEmpty()) {
+            log.info("createMenu : " + list.size());
             list.forEach((menu) -> {
                 if (menu.getChild() != null) {
                     if (!menu.getChild().isEmpty()) {
@@ -1463,14 +1462,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         repaint();
     }
 
-    private String getMenuName(VRoleMenu menu) {
+    private String getMenuName(Menu menu) {
         return menu.getMenuClass() + ","
                 + Util1.isNull(menu.getAccount(), "-") + ","
                 + menu.getMenuName() + ","
                 + menu.getMenuVersion();
     }
 
-    private void addChildMenu(JMenu parent, List<VRoleMenu> listVRM) {
+    private void addChildMenu(JMenu parent, List<Menu> listVRM) {
         listVRM.forEach((vrMenu) -> {
             if (vrMenu.isAllow()) {
                 if (vrMenu.getChild() != null) {
@@ -1593,17 +1592,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void setNetwork(long time) {
 //        log.info(time + "ms");
         if (time < 0) {
-            lblNetwork.setText("Offline");
-            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_no_internet.png")));
+            btnWifi.setText("Offline");
+            btnWifi.setIcon(IconUtil.getIcon(IconUtil.WIFI_OFF));
         } else if (time < 100) {
-            lblNetwork.setText(time + " ms");
-            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wi-fi_green.png")));
+            btnWifi.setText(time + " ms");
+            btnWifi.setIcon(IconUtil.getIcon(IconUtil.WIFI, Color.GREEN));
         } else if (time >= 100 && time < 150) {
-            lblNetwork.setText(time + " ms");
-            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_yellow.png")));
+            btnWifi.setText(time + " ms");
+            btnWifi.setIcon(IconUtil.getIcon(IconUtil.WIFI, Color.YELLOW));
         } else {
-            lblNetwork.setText(time + " ms");
-            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wi-fi_red.png")));
+            btnWifi.setText(time + " ms");
+            btnWifi.setIcon(IconUtil.getIcon(IconUtil.WIFI, Color.RED));
         }
     }
 
@@ -1724,17 +1723,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jSeparator11 = new javax.swing.JToolBar.Separator();
         btnExit = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
+        btnWifi = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
         progress = new javax.swing.JProgressBar();
         jPanel1 = new javax.swing.JPanel();
         lblUserName = new javax.swing.JLabel();
         lblDep = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        lblCompName = new javax.swing.JLabel();
         lblPanelName = new javax.swing.JLabel();
         lblLock = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        lblNetwork = new javax.swing.JLabel();
+        lblCompName = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
 
         jMenu1.setText("jMenu1");
@@ -1878,15 +1876,28 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         toolBar.add(btnExit);
         toolBar.add(jSeparator9);
 
+        btnWifi.setFont(Global.lableFont);
+        btnWifi.setText("Offline");
+        btnWifi.setToolTipText("Filter Bar");
+        btnWifi.setFocusable(false);
+        btnWifi.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnWifi.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnWifi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnWifiActionPerformed(evt);
+            }
+        });
+        toolBar.add(btnWifi);
+
         lblUserName.setFont(Global.lableFont);
         lblUserName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblUserName.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/male_user_16px.png"))); // NOI18N
+        lblUserName.setIcon(IconUtil.getIconSmall(IconUtil.USER));
         lblUserName.setText("-");
         lblUserName.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
 
         lblDep.setFont(Global.lableFont);
         lblDep.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblDep.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/shop_16px.png"))); // NOI18N
+        lblDep.setIcon(IconUtil.getIconSmall(IconUtil.LOCATION));
         lblDep.setText("-");
         lblDep.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
 
@@ -1911,16 +1922,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addContainerGap())
         );
 
-        lblCompName.setFont(Global.companyFont);
-        lblCompName.setForeground(Global.selectionColor);
-        lblCompName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblCompName.setText("-");
-        lblCompName.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lblCompNameMouseClicked(evt);
-            }
-        });
-
         lblPanelName.setFont(Global.companyFont);
         lblPanelName.setForeground(Global.selectionColor);
         lblPanelName.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1937,11 +1938,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
+                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 11, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE))
+                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 13, Short.MAX_VALUE)
+                .addGap(76, 76, 76))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1949,33 +1949,19 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        lblNetwork.setFont(Global.lableFont);
-        lblNetwork.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_no_internet.png"))); // NOI18N
-        lblNetwork.setText("Offline ");
-        lblNetwork.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+        lblCompName.setFont(Global.companyFont);
+        lblCompName.setForeground(Global.selectionColor);
+        lblCompName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblCompName.setText("-");
+        lblCompName.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblCompNameMouseClicked(evt);
+            }
+        });
 
         menuBar.setFont(Global.menuFont);
         menuBar.setMargin(new java.awt.Insets(5, 5, 5, 5));
@@ -1994,7 +1980,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -2005,13 +1991,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCompName, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
@@ -2101,6 +2088,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }//GEN-LAST:event_lblCompNameMouseClicked
 
+    private void btnWifiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWifiActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnWifiActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -2114,10 +2105,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnWifi;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator2;
@@ -2131,7 +2122,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JLabel lblCompName;
     private javax.swing.JLabel lblDep;
     private javax.swing.JLabel lblLock;
-    private javax.swing.JLabel lblNetwork;
     private javax.swing.JLabel lblPanelName;
     private javax.swing.JLabel lblUserName;
     private javax.swing.JMenuBar menuBar;

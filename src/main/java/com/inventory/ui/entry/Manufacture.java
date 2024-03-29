@@ -57,7 +57,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Manufacture extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
     
-    private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private CloudIntegration integration;
@@ -70,7 +69,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private UnitAutoCompleter unitAutoCompleter;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private ProcessHis ph = new ProcessHis();
-    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private FindDialog findDialog;
     
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -320,8 +318,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     
     private void vouStatusSetup() {
         inventoryRepo.getVoucherStatus().subscribe((t) -> {
-            VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
-            vsDialog.setIconImage(icon);
+            VouStatusSetupDialog vsDialog = new VouStatusSetupDialog(Global.parentForm);
             vsDialog.setInventoryRepo(inventoryRepo);
             vsDialog.setListVou(t);
             vsDialog.initMain();
@@ -471,7 +468,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private void historyDialog() {
         if (dialog == null) {
             dialog = new ManufactureHistoryDialog(Global.parentForm);
-            dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIntegration(integration);

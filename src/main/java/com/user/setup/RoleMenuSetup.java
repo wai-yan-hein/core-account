@@ -7,11 +7,11 @@ package com.user.setup;
 
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.inventory.entity.VRoleMenu;
 import com.inventory.tree.MyAbstractTreeTableModel;
 import com.inventory.tree.MyDataModel;
 import com.inventory.tree.MyTreeTable;
 import com.repo.UserRepo;
+import com.user.model.Menu;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
@@ -53,7 +53,7 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
         progress.setIndeterminate(true);
         userRepo.getRoleMenuTree(roleCode)
                 .subscribe((t) -> {
-                    VRoleMenu vRoleMenu = new VRoleMenu("Best-System", "System", true, t);
+                    Menu vRoleMenu = new Menu("Best-System", "System", true, t);
                     MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userRepo, this);
                     MyTreeTable treeTable = new MyTreeTable(treeTableModel);
                     scrollPane.getViewport().add(treeTable);

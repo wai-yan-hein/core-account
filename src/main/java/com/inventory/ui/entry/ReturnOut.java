@@ -39,7 +39,6 @@ import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -53,7 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -76,7 +74,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
     
-    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private final ReturnOutTableModel roTableModel = new ReturnOutTableModel();
     private RetOutHistoryDialog dialog;
@@ -524,7 +521,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             dialog = new RetOutHistoryDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
-            dialog.setIconImage(searchIcon);
             dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();

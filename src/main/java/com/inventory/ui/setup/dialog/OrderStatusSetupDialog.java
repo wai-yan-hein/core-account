@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -60,11 +61,8 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         this.inventoryRepo = inventoryRepo;
     }
 
-    /**
-     * Creates new form ItemTypeSetupDialog
-     */
-    public OrderStatusSetupDialog() {
-        super(Global.parentForm, false);
+    public OrderStatusSetupDialog(JFrame frame) {
+        super(frame, false);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.green);

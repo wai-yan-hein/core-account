@@ -5,6 +5,7 @@
 package com.user.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.user.model.CompanyInfo;
@@ -75,7 +76,7 @@ public class CompanyPanel extends javax.swing.JPanel {
         });
 
         lblImage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
+        lblImage.setIcon(IconUtil.getIcon(IconUtil.COMPANY));
 
         lblCompanyName.setFont(Global.companyFont);
         lblCompanyName.setText("Name");

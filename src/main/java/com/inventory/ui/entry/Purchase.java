@@ -57,7 +57,6 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -74,7 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -97,7 +95,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class Purchase extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
     
-    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private final PurchaseTableModel purTableModel = new PurchaseTableModel();
     private PurchaseHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
@@ -721,7 +718,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             dialog = new PurchaseHistoryDialog(Global.parentForm);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
-            dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
@@ -742,7 +738,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     
     private void searchVoucherDetail(PurHis ph) {
         String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.getPurDetail(vouNo, ph.getDeptId()).doOnSuccess((t) -> {
+        inventoryRepo.getPurDetail(vouNo).doOnSuccess((t) -> {
             purTableModel.setListDetail(t);
             purTableModel.addNewRow();
         }).doOnError((e) -> {
@@ -781,7 +777,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             disableForm(true);
             btnBatch.setText("View");
         }
-        txtVouNo.setText(ph.getKey().getVouNo());
+        txtVouNo.setText(vouNo);
         txtDueDate.setDate(ph.getDueDate());
         txtRemark.setText(ph.getRemark());
         txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));

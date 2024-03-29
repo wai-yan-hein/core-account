@@ -22,10 +22,10 @@ import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.entity.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
 import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
+import com.user.model.Menu;
 import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -145,7 +145,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private void report() {
         if (row >= 0) {
             int selectRow = tblReport.convertRowIndexToModel(row);
-            VRoleMenu report = tableModel.getReport(selectRow);
+            Menu report = tableModel.getReport(selectRow);
             String reportName = report.getMenuName();
             String reportUrl = report.getMenuUrl();
             if (isValidReport(reportUrl)) {

@@ -19,7 +19,6 @@ import com.user.model.DepartmentUser;
 import com.user.model.MachineInfo;
 import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
-import com.inventory.entity.VRoleMenu;
 import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
 import com.user.model.Currency;
@@ -509,7 +508,7 @@ public class UserRepo {
                 });
     }
 
-    public Mono<List<VRoleMenu>> getReport(String menuClass) {
+    public Mono<List<Menu>> getReport(String menuClass) {
         if (localdatabase) {
             return h2Repo.getReport(Global.roleCode, menuClass, Global.compCode);
         }
@@ -519,7 +518,7 @@ public class UserRepo {
                 .queryParam("menuClass", menuClass)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(VRoleMenu.class).collectList();
+                .retrieve().bodyToFlux(Menu.class).collectList();
     }
 
     public Mono<List<BusinessType>> getBusinessType() {
@@ -1074,7 +1073,7 @@ public class UserRepo {
                 .collectList();
     }
 
-    public Mono<List<VRoleMenu>> getPrivilegeRoleMenuTree(String roleCode) {
+    public Mono<List<Menu>> getPrivilegeRoleMenuTree(String roleCode) {
         if (localdatabase) {
             return h2Repo.getPrivilegeMenu(roleCode, Global.compCode);
         }
@@ -1084,7 +1083,7 @@ public class UserRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(VRoleMenu.class)
+                .bodyToFlux(Menu.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("getRoleMenu : " + e.getMessage());
@@ -1092,7 +1091,7 @@ public class UserRepo {
                 });
     }
 
-    public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode) {
+    public Mono<List<Menu>> getRoleMenuTree(String roleCode) {
         if (localdatabase) {
             return h2Repo.getRoleMenu(roleCode, Global.compCode);
         }
@@ -1102,7 +1101,7 @@ public class UserRepo {
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(VRoleMenu.class)
+                .bodyToFlux(Menu.class)
                 .collectList();
     }
 

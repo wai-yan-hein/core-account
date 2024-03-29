@@ -23,7 +23,7 @@ import javax.swing.JFrame;
 public class Global {
 
     public static final Color BG_COLOR = new Color(240, 242, 250);
-    public static final Color GREEN = new Color(94, 194, 87);
+    public static final Color GREEN = new Color(37, 196, 26);
     public static Font lableFont = new java.awt.Font("Arial", 1, 13);
     public static Font amtFont = new java.awt.Font("Arial Nova Light", 1, 14);
     public static Font textFont = new java.awt.Font("Zawgyi-One", 0, 13);

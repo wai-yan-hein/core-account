@@ -43,8 +43,6 @@ public class OptionDialog extends javax.swing.JDialog {
         initComponents();
         initTable();
         this.lblTitle.setText(title);
-        ImageIcon ii = new ImageIcon(this.getClass().getResource("/images/checked_20px.png"));
-        super.setIconImage(ii.getImage());
     }
 
     private void initTable() {

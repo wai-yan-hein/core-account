@@ -10,6 +10,7 @@ import com.acc.common.CrDrVoucherEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
+import com.acc.editor.DespEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.Gl;
@@ -42,6 +43,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,24 +57,14 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     private TableRowSorter<TableModel> sorter;
     private String vouType;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
     private COAAutoCompleter completer;
     private CurrencyAutoCompleter currencyAutoCompleter;
-    private String status;
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
 
     public void setVouType(String vouType) {
         this.vouType = vouType;
@@ -82,7 +74,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     private void setStatus(String status) {
-        this.status = status;
         lblStatus.setText(status);
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
         txtVouNo.setEditable(status.equals("NEW"));
@@ -171,7 +162,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         accountRepo.getDepartment().doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
         }).subscribe();
-        tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblJournal.getColumnModel().getColumn(1).setCellEditor(new DespEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());

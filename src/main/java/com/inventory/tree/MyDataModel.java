@@ -9,8 +9,8 @@ import com.common.SelectionObserver;
 import com.inventory.entity.MessageType;
 import com.user.model.PrivilegeMenu;
 import com.user.model.PMKey;
-import com.inventory.entity.VRoleMenu;
 import com.repo.UserRepo;
+import com.user.model.Menu;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
     // Spalten Typen.
     static protected Class<?>[] columnTypes = {MyTreeTableModel.class, String.class, Boolean.class};
 
-    public MyDataModel(VRoleMenu rootNode, UserRepo userRepo, SelectionObserver observer) {
+    public MyDataModel(Menu rootNode, UserRepo userRepo, SelectionObserver observer) {
         super(rootNode);
         root = rootNode;
         this.userRepo = userRepo;
@@ -37,12 +37,12 @@ public class MyDataModel extends MyAbstractTreeTableModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        return ((VRoleMenu) parent).getChild().get(index);
+        return ((Menu) parent).getChild().get(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        List<VRoleMenu> child = ((VRoleMenu) parent).getChild();
+        List<Menu> child = ((Menu) parent).getChild();
         return (child == null) ? 0 : child.size();
     }
 
@@ -65,13 +65,13 @@ public class MyDataModel extends MyAbstractTreeTableModel {
     public Object getValueAt(Object node, int column) {
         switch (column) {
             case 0 -> {
-                return ((VRoleMenu) node).getMenuName();
+                return ((Menu) node).getMenuName();
             }
             case 1 -> {
-                return ((VRoleMenu) node).getMenuType();
+                return ((Menu) node).getMenuType();
             }
             case 2 -> {
-                return ((VRoleMenu) node).isAllow();
+                return ((Menu) node).isAllow();
             }
             default -> {
             }
@@ -89,7 +89,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
         switch (column) {
             case 2 -> {
                 if (aValue != null) {
-                    if (node instanceof VRoleMenu roleMenu) {
+                    if (node instanceof Menu roleMenu) {
                         roleMenu.setAllow((Boolean) aValue);
                         savePrivilege(roleMenu, (Boolean) aValue);
 
@@ -100,7 +100,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
         }
     }
 
-    private void setAllow(List<VRoleMenu> parent, boolean allow) {
+    private void setAllow(List<Menu> parent, boolean allow) {
         parent.forEach(child -> {
             if (child.getChild() != null) {
                 child.setAllow(allow);
@@ -112,12 +112,14 @@ public class MyDataModel extends MyAbstractTreeTableModel {
         });
     }
 
-    private void savePrivilege(VRoleMenu roleMenu, boolean allow) {
-        if (roleMenu.getMenuCode() != null) {
+    private void savePrivilege(Menu m, boolean allow) {
+        String menuCode = m.getKey().getMenuCode();
+        String compCode = m.getKey().getCompCode();
+        if (menuCode != null) {
             PMKey key = new PMKey();
-            key.setMenuCode(roleMenu.getMenuCode());
-            key.setRoleCode(roleMenu.getRoleCode());
-            key.setCompCode(roleMenu.getCompCode());
+            key.setMenuCode(menuCode);
+            key.setRoleCode(m.getRoleCode());
+            key.setCompCode(compCode);
             PrivilegeMenu privilege = new PrivilegeMenu();
             privilege.setKey(key);
             privilege.setAllow(allow);
@@ -130,6 +132,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
         }
 
     }
+
     private void sendMessage(String mes) {
         userRepo.sendDownloadMessage(MessageType.PRIVILEGE_MENU, mes)
                 .doOnSuccess((t) -> {

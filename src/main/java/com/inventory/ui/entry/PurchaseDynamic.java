@@ -98,7 +98,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-    
+
     public static final int WEIGHT = 1;
     public static final int RICE = 2;
     public static final int EXPORT = 3;
@@ -134,31 +134,31 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private int type;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private FindDialog findDialog;
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
+
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -178,14 +178,14 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         initDateListner();
         actionMapping();
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblPur.getActionMap().put(solve, new DeleteAction());
     }
-    
+
     private PurHisDetail getObject(int row) {
         return switch (type) {
             case WEIGHT ->
@@ -204,15 +204,15 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 null;
         };
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     public void initMain() {
         initExternal();
         initCombo();
@@ -225,11 +225,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         assignDefaultValue();
         txtCus.requestFocus();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblPur);
     }
-    
+
     private void initExternal() {
         btnBatch.setVisible(false);
         btnLanding.setVisible(false);
@@ -243,13 +243,13 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPur, 30);
         scroll.setRowHeaderView(list);
     }
-    
+
     private void initModel() {
         switch (type) {
             case WEIGHT ->
@@ -266,7 +266,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 initOtherTable();
         }
     }
-    
+
     private void initPanelExpesne() {
         if (Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_EXPENSE))) {
             expenseTableModel.setObserver(this);
@@ -295,9 +295,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         } else {
             panelExpense.setVisible(false);
         }
-        
+
     }
-    
+
     private void getExpense() {
         expenseTableModel.clear();
         inventoryRepo.getExpense().subscribe((t) -> {
@@ -318,22 +318,24 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }, () -> {
             expProgress.setIndeterminate(false);
         });
-        
+
     }
-    
+
     private void initDateListner() {
         ComponentUtil.addFocusListener(this);
-        
+
     }
-    
+
     private void initTable() {
         tblPur.setDefaultRenderer(String.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
+        tblPur.setCellSelectionEnabled(true);
     }
-    
+
     private void initWeightTable() {
         tblPur.setModel(purWeightTableModel);
         purWeightTableModel.setLblRec(lblRec);
@@ -343,8 +345,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purWeightTableModel.setPurchase(this);
         purWeightTableModel.setObserver(this);
         purWeightTableModel.addNewRow();
-        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
-        tblPur.setCellSelectionEnabled(true);
         tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblPur.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
         tblPur.getColumnModel().getColumn(2).setPreferredWidth(80);//rel
@@ -373,7 +373,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
     }
-    
+
     private void initPaddyTable() {
         tblPur.setModel(purchasePaddyTableModel);
         purchasePaddyTableModel.setEdit(true);
@@ -384,8 +384,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purchasePaddyTableModel.setPurchase(this);
         purchasePaddyTableModel.setObserver(this);
         purchasePaddyTableModel.addNewRow();
-        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
-        tblPur.setCellSelectionEnabled(true);
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
@@ -396,7 +394,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
     }
-    
+
     private void initOtherTable() {
         tblPur.setModel(purchaseOtherTableModel);
         purchaseOtherTableModel.setEdit(true);
@@ -407,36 +405,42 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purchaseOtherTableModel.setPurchase(this);
         purchaseOtherTableModel.setObserver(this);
         purchaseOtherTableModel.addNewRow();
-        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
-        tblPur.setCellSelectionEnabled(true);
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
     }
-    
+
     private void initRiceBag() {
         tblPur.setModel(purchaseRiceBagTableModel);
         purchaseRiceBagTableModel.setLblRec(lblRec);
-        purchaseRiceBagTableModel.setInventoryRepo(inventoryRepo);
-        purchaseRiceBagTableModel.setVouDate(txtPurDate);
-        purchaseRiceBagTableModel.setParent(tblPur);
         purchaseRiceBagTableModel.setPurchase(this);
         purchaseRiceBagTableModel.setObserver(this);
+        purchaseRiceBagTableModel.setParent(tblPur);
         purchaseRiceBagTableModel.addNewRow();
-        tblPur.getTableHeader().setFont(Global.tblHeaderFont);
-        tblPur.setCellSelectionEnabled(true);
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));//code
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));//name
+        tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//wet
+        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
+        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//avg-wight
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
+        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//price
+        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//amt
+        //size
+        tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        tblPur.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
+        tblPur.getColumnModel().getColumn(2).setPreferredWidth(50);//wet
+        tblPur.getColumnModel().getColumn(3).setPreferredWidth(50);//rice
+        tblPur.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(50);//avg
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(50);//qty
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(70);//price
+        tblPur.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
+
     }
-    
+
     private void initRiceTable() {
         tblPur.setModel(purchaseRiceTableModel);
         purchaseRiceTableModel.setLblRec(lblRec);
@@ -476,7 +480,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//
         tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
     }
-    
+
     private void initExportTable() {
         tblPur.setModel(purExportTableModel);
         purExportTableModel.setLblRec(lblRec);
@@ -518,7 +522,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());// total wt
         tblPur.getColumnModel().getColumn(11).setCellEditor(new AutoClearEditor());// price
     }
-    
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);
@@ -531,7 +535,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false, "Purchase");
         carNoAutoCompleter.setObserver(this);
     }
-    
+
     private void initData() {
         monoLoc = inventoryRepo.getLocation();
         userRepo.getCurrency().doOnSuccess((t) -> {
@@ -548,7 +552,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             labourGroupAutoCompleter.setListObject(t);
         }).subscribe();
     }
-    
+
     private void initKeyListener() {
         txtPurDate.getDateEditor().getUiComponent().setName("txtPurDate");
         txtPurDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -568,7 +572,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtComAmt.addKeyListener(this);
         txtComPercent.addKeyListener(this);
     }
-    
+
     private void initTextBoxValue() {
         txtVouTotal.setValue(0.00);
         txtVouDiscount.setValue(0.00);
@@ -582,12 +586,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtComAmt.setValue(0.00);
         txtExpense.setValue(0);
     }
-    
+
     private void initTextBoxFormat() {
         ComponentUtil.setTextProperty(this);
         txtOut.setForeground(Color.green);
     }
-    
+
     private void assignDefaultValue() {
         userRepo.getDefaultCurrency().doOnSuccess((t) -> {
             currAutoCompleter.setCurrency(t);
@@ -612,7 +616,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         btnBatch.setText("Batch");
         rdoRec.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.DEFAULT_STOCK_REC)));
     }
-    
+
     private void clearDetail() {
         switch (type) {
             case WEIGHT -> {
@@ -641,7 +645,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     private void clear(boolean focus) {
         disableForm(true);
         clearDetail();
@@ -659,7 +663,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             txtCus.requestFocus();
         }
     }
-    
+
     private boolean isValidDetail() {
         return switch (type) {
             case WEIGHT ->
@@ -678,7 +682,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 false;
         };
     }
-    
+
     private List<PurHisDetail> getListDetail() {
         return switch (type) {
             case WEIGHT ->
@@ -697,7 +701,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 null;
         };
     }
-    
+
     private List<PurDetailKey> getListDel() {
         return switch (type) {
             case WEIGHT ->
@@ -716,7 +720,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 null;
         };
     }
-    
+
     public void savePur(boolean print) {
         if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtPurDate.getDate())) {
@@ -747,12 +751,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 }
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
-                observer.selected("save", false);
+                observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }).subscribe();
         }
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -829,7 +833,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         return status;
     }
-    
+
     private void deletePur() {
         String status = lblStatus.getText();
         switch (status) {
@@ -852,15 +856,15 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-                    
+
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
-        
+
     }
-    
+
     private void deleteTran() {
         int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
         if (row >= 0) {
@@ -875,7 +879,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     private void deleteDetail(int row) {
         switch (type) {
             case WEIGHT ->
@@ -892,7 +896,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchaseOtherTableModel.delete(row);
         }
     }
-    
+
     private void calExpense() {
         double ttlExp = 0.0f;
         List<PurExpense> list = expenseTableModel.getListDetail();
@@ -901,7 +905,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         txtExpense.setValue(ttlExp);
     }
-    
+
     private void calculateTotalAmount(boolean partial) {
         calExpense();
         double totalVouBalance;
@@ -954,12 +958,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 }
             }
         }
-        
+
         paid = Util1.getDouble(txtVouPaid.getText());
         totalVouBalance = grandTotal - paid;
         txtVouBalance.setValue(Util1.round(totalVouBalance));
     }
-    
+
     public void historyPur() {
         if (dialog == null) {
             dialog = new PurchaseHistoryDialog(Global.parentForm);
@@ -972,7 +976,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         dialog.search();
     }
-    
+
     public void historyLanding() {
         if (landingDialog == null) {
             landingDialog = new LandingHistoryDialog(Global.parentForm);
@@ -986,7 +990,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         landingDialog.search();
     }
-    
+
     private void setListDetail(List<PurHisDetail> list) {
         switch (type) {
             case WEIGHT -> {
@@ -1015,21 +1019,20 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     public void setVoucher(PurHis pur) {
         if (pur != null) {
             progress.setIndeterminate(true);
             ph = pur;
             String vouNo = ph.getKey().getVouNo();
-            int deptId = ph.getDeptId();
             setPurchase(ph);
-            searchPurchaseDetail(vouNo, deptId);
+            searchPurchaseDetail(vouNo);
             searchExpense(vouNo);
         }
     }
-    
-    private void searchPurchaseDetail(String vouNo, int deptId) {
-        inventoryRepo.getPurDetail(vouNo, deptId).doOnSuccess((t) -> {
+
+    private void searchPurchaseDetail(String vouNo) {
+        inventoryRepo.getPurDetail(vouNo).doOnSuccess((t) -> {
             setListDetail(t);
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -1039,7 +1042,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             focusTable();
         }).subscribe();
     }
-    
+
     private void setPurchase(PurHis ph) {
         userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {
             currAutoCompleter.setCurrency(t);
@@ -1099,7 +1102,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtCarNo.setText(ph.getCarNo());
         rdoRec.setSelected(ph.isSRec());
     }
-    
+
     private void searchExpense(String vouNo) {
         if (panelExpense.isVisible()) {
             expProgress.setIndeterminate(true);
@@ -1117,14 +1120,14 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             });
         }
     }
-    
+
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-    
+
     private void setAllLocation() {
         List<PurHisDetail> listPurDetail = getListDetail();
         Location l = locationAutoCompleter.getLocation();
@@ -1132,12 +1135,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             listPurDetail.forEach(sd -> {
                 sd.setLocCode(l.getKey().getLocCode());
                 sd.setLocName(l.getLocName());
-                
+
             });
         }
         setListDetail(listPurDetail);
     }
-    
+
     private void printLandingVoucher(PurHis ph) {
         String vouNo = ph.getKey().getVouNo();
         inventoryRepo.getPurchaseReport(vouNo).doOnSuccess((t) -> {
@@ -1171,7 +1174,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             clear(false);
         }).subscribe();
     }
-    
+
     private void printFixVoucher(PurHis ph) {
         try {
             String reportName = "PurchaseVoucherA5Bag";
@@ -1187,7 +1190,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             JOptionPane.showMessageDialog(this, e.getMessage());
         }
     }
-    
+
     private void printWeightVoucher(PurHis ph) {
         String vouNo = ph.getWeightVouNo();
         inventoryRepo.getWeightColumn(vouNo).doOnSuccess((t) -> {
@@ -1221,7 +1224,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             clear(false);
         }).subscribe();
     }
-    
+
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
         String batchNo = p.getBatchNo();
@@ -1261,7 +1264,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                             JOptionPane.showMessageDialog(this, e.getMessage());
                         }
                     });
-                    
+
                 } else {
                     JOptionPane.showMessageDialog(this, "define report in " + key);
                 }
@@ -1272,7 +1275,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             clear(false);
         });
     }
-    
+
     private Map<String, Object> getDefaultParam(PurHis p) {
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -1303,7 +1306,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         return param;
     }
-    
+
     private String getPaymentType(PurHis p) {
         double paid = p.getPaid();
         double grandTotal = p.getGrandTotal();
@@ -1314,7 +1317,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         return "Credit";
     }
-    
+
     private void focusTable() {
         int rc = tblPur.getRowCount();
         if (rc > 1) {
@@ -1325,15 +1328,15 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             txtPurDate.requestFocusInWindow();
         }
     }
-    
+
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-    
+
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-    
+
     private void setVoucherDetail(GRN g) {
         clearDetail();
         Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
@@ -1370,7 +1373,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             txtBatchNo.setEnabled(false);
         });
     }
-    
+
     private void addNewRow() {
         switch (type) {
             case WEIGHT ->
@@ -1387,7 +1390,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchaseOtherTableModel.addNewRow();
         }
     }
-    
+
     private void expenseDialog() {
         ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm, true);
         d.setInventoryRepo(inventoryRepo);
@@ -1396,7 +1399,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         d.setLocationRelativeTo(null);
         d.setVisible(true);
     }
-    
+
     private void batchDialog() {
         String text = btnBatch.getText();
         if (text.equals("Batch")) {
@@ -1419,7 +1422,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             grnDialog.searchGRNDetail(txtBatchNo.getText());
         }
     }
-    
+
     private void setLandingVoucher(LandingHis his) {
         if (!his.isDeleted()) {
             List<PurHisDetail> list = getListDetail();
@@ -1464,7 +1467,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             JOptionPane.showMessageDialog(this, "Landing Voucher was deleted.", "Voucher Deleted", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void setWeightVoucher(WeightHis s) {
         clearDetail();
         ph.setWeightVouNo(s.getKey().getVouNo());
@@ -1487,7 +1490,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.setColumnSelectionInterval(2, 2);
         tblPur.requestFocus();
     }
-    
+
     private void addPurchase(PurHisDetail p) {
         switch (type) {
             case WEIGHT ->
@@ -1504,7 +1507,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchaseOtherTableModel.addPurchase(p);
         }
     }
-    
+
     private void optionDialog() {
         Trader trader = traderAutoCompleter.getTrader();
         if (trader != null) {
@@ -1520,7 +1523,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             JOptionPane.showMessageDialog(this, "Select Trader.");
         }
     }
-    
+
     private void weightDialog() {
         if (weightHistoryDialog == null) {
             weightHistoryDialog = new WeightHistoryDialog(Global.parentForm);
@@ -1534,7 +1537,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
         weightHistoryDialog.search();
     }
-    
+
     private void calTraderBalance() {
         Trader trader = traderAutoCompleter.getTrader();
         if (trader != null) {
@@ -1547,7 +1550,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -2497,12 +2500,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     @Override
     public void keyEvent(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -2554,17 +2557,17 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         }
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -2772,17 +2775,17 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     public void delete() {
         deletePur();
     }
-    
+
     @Override
     public void print() {
         savePur(true);
     }
-    
+
     @Override
     public void save() {
         savePur(false);
     }
-    
+
     @Override
     public void newForm() {
         boolean yes = ComponentUtil.checkClear(lblStatus.getText());
@@ -2790,25 +2793,25 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             clear(true);
         }
     }
-    
+
     @Override
     public void history() {
         historyPur();
     }
-    
+
     @Override
     public void refresh() {
         initData();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
 }

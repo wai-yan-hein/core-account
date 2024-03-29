@@ -20,12 +20,41 @@ public class IconUtil {
     public static final String CALENDER_ICON = "calender.svg";
     public static final String LIST_ICON = "list.svg";
     public static final String CURRENCY = "currency.svg";
+    public static final String USER = "user.svg";
+    public static final String LOCATION = "location.svg";
+    public static final String WIFI = "wifi.svg";
+    public static final String WIFI_OFF = "wifi_off.svg";
+    public static final String COMPANY = "company.svg";
 
     public static final Icon getIcon(String name) {
-        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name ,0.9f);
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.8f);
         icon.setColorFilter(colorFilter);
         return icon;
     }
+
+    public static final Icon getIconSmall(String name) {
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.8f);
+        icon.setColorFilter(colorFilter);
+        return icon;
+    }
+
+    public static final Icon getIcon(String name, Color iconColor) {
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.8f);
+        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> iconColor));
+        return icon;
+    }
+
+    public static final Icon getIconSmall(String name, Color iconColor) {
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.6f);
+        icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> iconColor));
+        return icon;
+    }
+    private static final FlatSVGIcon.ColorFilter colorFilter = new FlatSVGIcon.ColorFilter(color -> {
+        if (Util1.DARK_MODE) {
+            return Color.WHITE;
+        }
+        return Color.black;
+    });
 
     public static final Icon getIcon(String name, float size) {
         FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, size);
@@ -38,10 +67,5 @@ public class IconUtil {
         icon.setColorFilter(colorFilter);
         return icon.getImage();
     }
-    private static final FlatSVGIcon.ColorFilter colorFilter = new FlatSVGIcon.ColorFilter(color -> {
-        if (Util1.DARK_MODE) {
-            return Color.WHITE;
-        }
-        return Color.black;
-    });
+
 }

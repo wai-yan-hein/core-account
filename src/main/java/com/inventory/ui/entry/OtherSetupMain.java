@@ -75,7 +75,6 @@ public class OtherSetupMain extends javax.swing.JPanel {
             setup = new OtherSetup();
             setup.setInventoryRepo(inventoryRepo);
             setup.setAccountRepo(accountRepo);
-            setup.setUserRepo(userRepo);
         }
         return setup;
 

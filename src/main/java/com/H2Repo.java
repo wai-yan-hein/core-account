@@ -77,7 +77,6 @@ import com.inventory.entity.StockUnit;
 import com.inventory.entity.StockUnitKey;
 import com.inventory.entity.Trader;
 import com.inventory.entity.TraderKey;
-import com.inventory.entity.VRoleMenu;
 import com.inventory.entity.VouStatus;
 import com.inventory.entity.VouStatusKey;
 import com.user.model.Currency;
@@ -605,52 +604,56 @@ public class H2Repo {
         return Mono.justOrEmpty(vRoleCompanyService.getPrivilegeCompany(roleCode));
     }
 
-    public Mono<List<VRoleMenu>> getPrivilegeMenu(String roleCode, String compCode) {
-        List<VRoleMenu> menus = getRoleMenuTree(roleCode, compCode, true);
+    public Mono<List<Menu>> getPrivilegeMenu(String roleCode, String compCode) {
+        List<Menu> menus = getRoleMenuTree(roleCode, compCode, true);
         return Mono.justOrEmpty(menus);
     }
 
-    private List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode, boolean privilege) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "#", compCode, privilege);
+    private List<Menu> getRoleMenuTree(String roleCode, String compCode, boolean privilege) {
+        List<Menu> roles = vRoleMenuService.getMenu(roleCode, "#", compCode, privilege);
         if (!roles.isEmpty()) {
-            for (VRoleMenu role : roles) {
+            for (Menu role : roles) {
                 getRoleMenuChild(role, false);
             }
         }
         return roles;
     }
 
-    private void getRoleMenuChild(VRoleMenu parent, boolean privilege) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode(), privilege);
+    private void getRoleMenuChild(Menu parent, boolean privilege) {
+        String menuCode = parent.getKey().getMenuCode();
+        String compCode = parent.getKey().getCompCode();
+        List<Menu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), menuCode, compCode, privilege);
         parent.setChild(roles);
         if (!roles.isEmpty()) {
-            for (VRoleMenu role : roles) {
+            for (Menu role : roles) {
                 getRoleMenuChild(role, privilege);
             }
         }
     }
 
-    public Mono<List<VRoleMenu>> getRoleMenu(String roleCode, String compCode) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "#", compCode, false);
+    public Mono<List<Menu>> getRoleMenu(String roleCode, String compCode) {
+        List<Menu> roles = vRoleMenuService.getMenu(roleCode, "#", compCode, false);
         if (!roles.isEmpty()) {
-            for (VRoleMenu role : roles) {
+            for (Menu role : roles) {
                 getMenuChild(role, false);
             }
         }
         return Mono.justOrEmpty(roles);
     }
 
-    private void getMenuChild(VRoleMenu parent, boolean privilege) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode(), privilege);
+    private void getMenuChild(Menu parent, boolean privilege) {
+        String menuCode = parent.getKey().getMenuCode();
+        String compCode = parent.getKey().getCompCode();
+        List<Menu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), menuCode, compCode, privilege);
         parent.setChild(roles);
         if (!roles.isEmpty()) {
-            for (VRoleMenu role : roles) {
+            for (Menu role : roles) {
                 getMenuChild(role, privilege);
             }
         }
     }
 
-    public Mono<List<VRoleMenu>> getReport(String roleCode, String menuClass, String compCode) {
+    public Mono<List<Menu>> getReport(String roleCode, String menuClass, String compCode) {
         return Mono.justOrEmpty(vRoleMenuService.getReport(roleCode, menuClass, compCode));
     }
 
@@ -697,6 +700,7 @@ public class H2Repo {
     public Mono<Currency> findCurrency(String curCode) {
         return Mono.justOrEmpty(currencyService.findById(curCode));
     }
+
     public Mono<MachineInfo> findMachine(Integer macId) {
         return Mono.justOrEmpty(machineInfoService.find(macId));
     }
@@ -991,7 +995,7 @@ public class H2Repo {
         return saleHisService.getSaleReport(vouNo, Global.compCode, Global.deptId);
     }
 
-    public Mono<List<Stock>> searchStock(ReportFilter filter) {
+    public Flux<Stock> searchStock(ReportFilter filter) {
         String stockCode = Util1.isAll(filter.getStockCode());
         String typCode = Util1.isAll(filter.getStockTypeCode());
         String catCode = Util1.isAll(filter.getCatCode());
@@ -1000,7 +1004,7 @@ public class H2Repo {
         String compCode = filter.getCompCode();
         boolean active = filter.isActive();
         boolean deleted = filter.isDeleted();
-        return Mono.justOrEmpty(stockService.search(stockCode, typCode, catCode, brandCode, compCode, deptId, active, deleted));
+        return Flux.fromIterable(stockService.search(stockCode, typCode, catCode, brandCode, compCode, deptId, active, deleted));
     }
 
     public Mono<Region> find(RegionKey key) {

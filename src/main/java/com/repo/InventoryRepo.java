@@ -1263,7 +1263,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Stock>> searchStock(ReportFilter filter) {
+    public Flux<Stock> searchStock(ReportFilter filter) {
         if (localDatabase) {
             return h2Repo.searchStock(filter);
         }
@@ -1272,8 +1272,7 @@ public class InventoryRepo {
                 .uri("/setup/searchStock")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(Stock.class)
-                .collectList();
+                .bodyToFlux(Stock.class);
     }
 
     public Mono<List<Stock>> getUpdateStock(String updatedDate) {
@@ -3070,12 +3069,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId) {
+    public Mono<List<PurHisDetail>> getPurDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/pur/getPurDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(PurHisDetail.class)

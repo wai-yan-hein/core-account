@@ -17,9 +17,7 @@ import com.inventory.ui.setup.dialog.SaleManSetupDialog;
 import com.inventory.ui.setup.dialog.StockColorSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.WareHouseSetupDialog;
-import com.repo.UserRepo;
-import java.awt.Image;
-import javax.swing.ImageIcon;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,10 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OtherSetup extends javax.swing.JPanel {
 
-    private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private AccountRepo accountRepo;
-    private UserRepo userRepo;
     private RegionSetup regionSetup;
     private LocationSetupDialog locationSetup;
     private RelationSetupDialog relationSetupDialog;
@@ -42,18 +40,6 @@ public class OtherSetup extends javax.swing.JPanel {
     private LabourGroupSetupDialog lgDialog;
     private WareHouseSetupDialog wareHouseSetupDialog;
     private StockColorSetupDialog stockColorSetupDialog;
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
 
     /**
      * Creates new form OtherSetup
@@ -88,8 +74,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void saleManSetup() {
         if (smDialog == null) {
-            smDialog = new SaleManSetupDialog();
-            smDialog.setIconImage(icon);
+            smDialog = new SaleManSetupDialog(Global.parentForm);
             smDialog.setInventoryRepo(inventoryRepo);
             smDialog.initMain();
             smDialog.setSize(Global.width / 2, Global.height / 2);
@@ -104,8 +89,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void vouStatusSetup() {
         if (vsDialog == null) {
-            vsDialog = new VouStatusSetupDialog();
-            vsDialog.setIconImage(icon);
+            vsDialog = new VouStatusSetupDialog(Global.parentForm);
             vsDialog.setInventoryRepo(inventoryRepo);
             vsDialog.initMain();
             vsDialog.setSize(Global.width / 2, Global.height / 2);
@@ -121,8 +105,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void orderStatusSetup() {
         if (osDialog == null) {
-            osDialog = new OrderStatusSetupDialog();
-            osDialog.setIconImage(icon);
+            osDialog = new OrderStatusSetupDialog(Global.parentForm);
             osDialog.setInventoryRepo(inventoryRepo);
             osDialog.initMain();
             osDialog.setSize(Global.width / 2, Global.height / 2);
@@ -138,8 +121,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void labourGroupSetup() {
         if (lgDialog == null) {
-            lgDialog = new LabourGroupSetupDialog();
-            lgDialog.setIconImage(icon);
+            lgDialog = new LabourGroupSetupDialog(Global.parentForm);
             lgDialog.setInventoryRepo(inventoryRepo);
             lgDialog.initMain();
             lgDialog.setSize(Global.width / 2, Global.height / 2);
@@ -172,8 +154,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void wareHouseDialog() {
         if (wareHouseSetupDialog == null) {
-            wareHouseSetupDialog = new WareHouseSetupDialog();
-            wareHouseSetupDialog.setIconImage(icon);
+            wareHouseSetupDialog = new WareHouseSetupDialog(Global.parentForm);
             wareHouseSetupDialog.setInventoryRepo(inventoryRepo);
             wareHouseSetupDialog.initMain();
             wareHouseSetupDialog.setSize(Global.width / 2, Global.height / 2);
@@ -192,7 +173,6 @@ public class OtherSetup extends javax.swing.JPanel {
     private void stockColorDialog() {
         if (stockColorSetupDialog == null) {
             stockColorSetupDialog = new StockColorSetupDialog(Global.parentForm);
-            stockColorSetupDialog.setIconImage(icon);
             stockColorSetupDialog.setInventoryRepo(inventoryRepo);
             stockColorSetupDialog.initMain();
             stockColorSetupDialog.setSize(Global.width / 2, Global.height / 2);

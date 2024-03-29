@@ -105,8 +105,7 @@ public class CoreAccountApplication {
     private static void startLogin() {
         LoginDialog lg = context.getBean(LoginDialog.class);
         tray.setLoginDialog(lg);
-        URL imgUrl = CoreAccountApplication.class.getResource("/images/male_user_16px.png");
-        lg.setIconImage(new ImageIcon(imgUrl).getImage());
+        lg.setIconImage(IconUtil.getImage(IconUtil.USER));
         lg.setAppIcon(appIcon);
         lg.checkMachineRegister();
     }

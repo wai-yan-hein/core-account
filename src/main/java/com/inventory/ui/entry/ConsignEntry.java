@@ -768,7 +768,6 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setTitle(String.format("%s Voucher History Dialog", tranSource.equals("I") ? "Consign Issue" : "Consign Receive"));
-            dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);

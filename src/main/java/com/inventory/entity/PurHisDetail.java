@@ -82,5 +82,7 @@ public class PurHisDetail implements Serializable {
     private String relName;
     @Transient
     private String locName;
+    @Transient
+    private boolean calculate;
     
 }

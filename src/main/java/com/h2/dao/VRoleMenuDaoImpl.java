@@ -1,6 +1,7 @@
 package com.h2.dao;
 
-import com.inventory.entity.VRoleMenu;
+import com.user.model.Menu;
+import com.user.model.MenuKey;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -11,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
-public class VRoleMenuDaoImpl extends AbstractDao<String, VRoleMenu> implements VRoleMenuDao {
+public class VRoleMenuDaoImpl extends AbstractDao<String, Menu> implements VRoleMenuDao {
 
     @Override
-    public List<VRoleMenu> getMenu(String roleCode, String parentCode, String compCode, boolean privilege) {
+    public List<Menu> getMenu(String roleCode, String parentCode, String compCode, boolean privilege) {
         String sql = """
                 select o.menu_code,o.role_code,o.comp_code,o.allow,
                 o.menu_name,o.menu_name_mm,o.menu_url,o.menu_type,o.menu_class,
@@ -33,27 +34,28 @@ public class VRoleMenuDaoImpl extends AbstractDao<String, VRoleMenu> implements 
                 and o.menu_type='Menu'
                 and (allow = ? or false = ?)
                 order by o.order_by""";
-        List<VRoleMenu> vList = new ArrayList<>();
-        VRoleMenu vMenu;
+        List<Menu> vList = new ArrayList<>();
         ResultSet rs = getResult(sql, roleCode, compCode, parentCode, privilege, privilege);
         if (rs != null) {
             try {
                 while (rs.next()) {
-                    vMenu = new VRoleMenu();
-                    vMenu.setMenuCode(rs.getString("menu_code"));
-                    vMenu.setRoleCode(rs.getString("role_code"));
-                    vMenu.setCompCode(rs.getString("comp_code"));
-                    vMenu.setAllow(rs.getBoolean("allow"));
-                    vMenu.setMenuName(rs.getString("menu_name"));
-                    vMenu.setMenuNameMM(rs.getString("menu_name_mm"));
-                    vMenu.setMenuUrl(rs.getString("menu_url"));
-                    vMenu.setMenuType(rs.getString("menu_type"));
-                    vMenu.setMenuClass(rs.getString("menu_class"));
-                    vMenu.setAccount(rs.getString("account"));
-                    vMenu.setParentMenuCode(rs.getString("parent_menu_code"));
-                    vMenu.setOrderBy(rs.getInt("order_by"));
-                    vMenu.setMenuVersion(rs.getInt("menu_version"));
-                    vList.add(vMenu);
+                    Menu m = new Menu();
+                    MenuKey key = new MenuKey();
+                    key.setMenuCode(rs.getString("menu_code"));
+                    key.setCompCode(rs.getString("comp_code"));
+                    m.setKey(key);
+                    m.setRoleCode(rs.getString("role_code"));
+                    m.setAllow(rs.getBoolean("allow"));
+                    m.setMenuName(rs.getString("menu_name"));
+                    m.setMenuNameMM(rs.getString("menu_name_mm"));
+                    m.setMenuUrl(rs.getString("menu_url"));
+                    m.setMenuType(rs.getString("menu_type"));
+                    m.setMenuClass(rs.getString("menu_class"));
+                    m.setAccount(rs.getString("account"));
+                    m.setParentMenuCode(rs.getString("parent_menu_code"));
+                    m.setOrderBy(rs.getInt("order_by"));
+                    m.setMenuVersion(rs.getInt("menu_version"));
+                    vList.add(m);
                 }
             } catch (SQLException e) {
                 log.error("getMenu: " + e.getMessage());
@@ -63,7 +65,7 @@ public class VRoleMenuDaoImpl extends AbstractDao<String, VRoleMenu> implements 
     }
 
     @Override
-    public List<VRoleMenu> getReport(String roleCode, String menuClass, String compCode) {
+    public List<Menu> getReport(String roleCode, String menuClass, String compCode) {
         String sql = """
                 select o.menu_code,o.role_code,o.comp_code,o.allow,
                 o.menu_name,o.menu_url,o.menu_type,o.menu_class,
@@ -80,25 +82,26 @@ public class VRoleMenuDaoImpl extends AbstractDao<String, VRoleMenu> implements 
                 and o.comp_code=? and(o.menu_class=? or'-'=?)
                 and allow = true
                 order by o.order_by""";
-        List<VRoleMenu> vList = new ArrayList<>();
-        VRoleMenu vMenu;
+        List<Menu> vList = new ArrayList<>();
         ResultSet rs = getResult(sql, roleCode, compCode, menuClass, menuClass);
         if (rs != null) {
             try {
                 while (rs.next()) {
-                    vMenu = new VRoleMenu();
-                    vMenu.setMenuCode(rs.getString("menu_code"));
-                    vMenu.setRoleCode(rs.getString("role_code"));
-                    vMenu.setCompCode(rs.getString("comp_code"));
-                    vMenu.setAllow(rs.getBoolean("allow"));
-                    vMenu.setMenuName(rs.getString("menu_name"));
-                    vMenu.setMenuUrl(rs.getString("menu_url"));
-                    vMenu.setMenuType(rs.getString("menu_type"));
-                    vMenu.setMenuClass(rs.getString("menu_class"));
-                    vMenu.setAccount(rs.getString("account"));
-                    vMenu.setParentMenuCode(rs.getString("parent_menu_code"));
-                    vMenu.setOrderBy(rs.getInt("order_by"));
-                    vList.add(vMenu);
+                    Menu menu = new Menu();
+                    MenuKey key = new MenuKey();
+                    key.setMenuCode(rs.getString("menu_code"));
+                    key.setCompCode(rs.getString("comp_code"));
+                    menu.setKey(key);
+                    menu.setRoleCode(rs.getString("role_code"));
+                    menu.setAllow(rs.getBoolean("allow"));
+                    menu.setMenuName(rs.getString("menu_name"));
+                    menu.setMenuUrl(rs.getString("menu_url"));
+                    menu.setMenuType(rs.getString("menu_type"));
+                    menu.setMenuClass(rs.getString("menu_class"));
+                    menu.setAccount(rs.getString("account"));
+                    menu.setParentMenuCode(rs.getString("parent_menu_code"));
+                    menu.setOrderBy(rs.getInt("order_by"));
+                    vList.add(menu);
                 }
             } catch (SQLException e) {
                 log.error("getReport : " + e.getMessage());

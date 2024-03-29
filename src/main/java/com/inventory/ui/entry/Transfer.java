@@ -914,7 +914,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             dialog = new TransferHistoryDialog(Global.parentForm);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
-            dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);

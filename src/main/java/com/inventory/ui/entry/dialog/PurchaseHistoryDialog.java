@@ -29,6 +29,7 @@ import com.inventory.ui.entry.dialog.common.PurVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -77,7 +78,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public PurchaseHistoryDialog(JFrame frame) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         initComponents();
         initKeyListener();
         initProperty();

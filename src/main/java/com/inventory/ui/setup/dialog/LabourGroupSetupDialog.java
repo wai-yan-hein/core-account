@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -60,11 +61,8 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         this.inventoryRepo = inventoryRepo;
     }
 
-    /**
-     * Creates new form ItemTypeSetupDialog
-     */
-    public LabourGroupSetupDialog() {
-        super(Global.parentForm, false);
+    public LabourGroupSetupDialog(JFrame frame) {
+        super(frame, false);
         initComponents();
         initKeyListener();
         initFormat();

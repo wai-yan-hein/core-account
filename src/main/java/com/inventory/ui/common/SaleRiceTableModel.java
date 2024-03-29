@@ -10,7 +10,6 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.entity.Location;
-import com.inventory.entity.SaleDetailKey;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.ui.entry.SaleDynamic;
@@ -161,7 +160,7 @@ public class SaleRiceTableModel extends AbstractTableModel {
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
-                            sd.setRelName(s.getRelName());
+                            sd.setCalculate(s.isCalculate());
                             sd.setBag(1.0);
                             sd.setWeight(Util1.getDouble(s.getWeight()));
                             sd.setWeightUnit(s.getWeightUnit());
@@ -170,7 +169,6 @@ public class SaleRiceTableModel extends AbstractTableModel {
                             sd.setPrice(Util1.getDouble(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             setSelection(row, 2);
                             addNewRow();
-                            observer.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
                     case 2 -> {
@@ -267,20 +265,24 @@ public class SaleRiceTableModel extends AbstractTableModel {
         lblRecord.setText("Records : " + size);
     }
 
-
     private void calculateAmount(SaleHisDetail s) {
         double orgPrice = Util1.getDouble(s.getOrgPrice());
         double bag = Util1.getDouble(s.getBag());
         double weight = s.getWeight();
         double stdWt = s.getStdWeight();
-        if (s.getStockCode() != null && weight > 0 && orgPrice > 0) {
-            stdWt = stdWt == 0 ? weight : stdWt;
-            double price = stdWt / weight * orgPrice;
-            double amount = bag * price;
-            s.setPrice(price);
+        if (s.isCalculate()) {
+            if (s.getStockCode() != null && weight > 0 && orgPrice > 0) {
+                stdWt = stdWt == 0 ? weight : stdWt;
+                double price = stdWt / weight * orgPrice;
+                double amount = bag * price;
+                s.setPrice(price);
+                s.setAmount(amount);
+                s.setTotalWeight(bag * weight);
+            }
+        } else {
+            double amount = bag * s.getPrice();
             s.setAmount(amount);
         }
-        s.setTotalWeight(bag * weight);
     }
 
     public boolean isValidEntry() {

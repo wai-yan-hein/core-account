@@ -32,7 +32,6 @@ import com.inventory.editor.WareHouseAutoCompleter;
 import com.inventory.entity.General;
 import com.inventory.entity.VOpening;
 import com.inventory.entity.VPurchase;
-import com.inventory.entity.VRoleMenu;
 import com.inventory.entity.VSale;
 import com.inventory.entity.VStockIO;
 import com.repo.InventoryRepo;
@@ -44,6 +43,7 @@ import com.user.editor.DepartmentUserAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.inventory.entity.StockValue;
+import com.user.model.Menu;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -282,7 +282,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private void report(boolean excel) {
         if (row >= 0) {
             int selectRow = tblReport.convertRowIndexToModel(row);
-            VRoleMenu report = tableModel.getReport(selectRow);
+            Menu report = tableModel.getReport(selectRow);
             String reportName = report.getMenuName();
             String reportUrl = report.getMenuUrl();
             if (isValidReport(reportUrl)) {
@@ -437,7 +437,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private void excel(byte[] file) {
         if (row >= 0) {
             btnExcel.setEnabled(false);
-            VRoleMenu report = tableModel.getReport(row);
+            Menu report = tableModel.getReport(row);
             String reportName = report.getMenuName();
             String reportUrl = report.getMenuUrl();
             InputStream input = new ByteArrayInputStream(file);

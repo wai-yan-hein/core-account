@@ -85,7 +85,7 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
         this.editor = editor;
         this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.LOCATION));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
