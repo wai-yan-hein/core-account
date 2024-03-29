@@ -157,7 +157,7 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
             progress.setIndeterminate(false);
             ComponentUtil.scrollTable(tblVoucher, row, 0);
         }).subscribe();
-
+        setVisible(true);
     }
 
     private void select() {
