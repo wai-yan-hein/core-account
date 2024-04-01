@@ -66,8 +66,7 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
 
     public void setListDepartment(List<DepartmentUser> list) {
         if (filter) {
-            DepartmentUser sb = new DepartmentUser(0, "All");
-            list = new ArrayList<>(list);
+            DepartmentUser sb = allDepartment();
             list.add(0, sb);
             setDepartment(sb);
         }
@@ -77,6 +76,10 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
         }
     }
 
+    private DepartmentUser allDepartment() {
+        return new DepartmentUser(0, "All");
+    }
+
     public DepartmentUserAutoCompleter() {
     }
 
@@ -84,6 +87,7 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
+        setDepartment(allDepartment());
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.LOCATION));
         textComp.setFont(Global.textFont);

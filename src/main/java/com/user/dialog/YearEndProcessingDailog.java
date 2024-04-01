@@ -86,26 +86,20 @@ public class YearEndProcessingDailog extends javax.swing.JDialog {
                 end.setBatchLock(chkLock.isSelected());
                 end.setCreatedDate(LocalDateTime.now());
                 end.setCreateBy(Global.loginUser.getUserCode());
-                userRepo.yearEnd(end).subscribe((t) -> {
+                userRepo.yearEnd(end).doOnSuccess((t) -> {
                     lblLog.setText(t.getMessage());
                     String compCode = t.getCompCode();
                     if (compCode != null) {
-                        accountRepo.yearEnd(t).subscribe((ye) -> {
-                            lblLog.setText(ye.getMessage());
-                            setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-                            btnConfirm.setEnabled(true);
-                            btnExit.setEnabled(true);
-                            progress.setIndeterminate(false);
-                            dispose();
-                            CoreAccountApplication.restart();
-                        }, (e) -> {
-                            error(e);
-                        });
+                        lblLog.setText(t.getMessage());
+                        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                        btnConfirm.setEnabled(true);
+                        btnExit.setEnabled(true);
+                        progress.setIndeterminate(false);
+                        dispose();
                     }
-
-                }, (e) -> {
+                }).doOnError((e) -> {
                     error(e);
-                });
+                }).subscribe();
             }
         }
     }

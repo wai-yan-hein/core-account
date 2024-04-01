@@ -6,9 +6,11 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.StockUnit;
 import com.inventory.entity.StockUnitKey;
@@ -28,16 +30,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(StockUnitSetupDailog.class);
 
     private int selectRow = - 1;
     private StockUnit stockUnit = new StockUnit();
@@ -71,8 +72,15 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         super(frame, true);
         initComponents();
         initKeyListener();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     public void initMain() {
@@ -91,7 +99,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         tblUnit.setModel(stockUnitTableModel);
         sorter = new TableRowSorter<>(tblUnit.getModel());
         tblUnit.setRowSorter(sorter);
-        tblUnit.getTableHeader().setFont(Global.lableFont);
+        tblUnit.getTableHeader().setFont(Global.tblHeaderFont);
         tblUnit.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblUnit.setRowHeight(Global.tblRowHeight);
         tblUnit.setDefaultRenderer(Object.class, new TableCellRender());
@@ -146,7 +154,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     private void clear() {
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtUnitShort.setText(null);
         txtUnitDesp.setText(null);
         lblStatus.setText("NEW");
@@ -202,7 +210,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblUnit = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtUnitShort = new javax.swing.JTextField();
@@ -231,10 +239,10 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         tblUnit.setName("tblUnit"); // NOI18N
         jScrollPane1.setViewportView(tblUnit);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -346,7 +354,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -361,7 +369,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -389,14 +397,14 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtUnitDespActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUnitDespActionPerformed
         // TODO add your handling code here:
@@ -426,7 +434,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblUnit;
-    private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUnitDesp;
     private javax.swing.JTextField txtUnitShort;
     // End of variables declaration//GEN-END:variables

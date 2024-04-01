@@ -303,7 +303,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getCategory")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(Category.class)

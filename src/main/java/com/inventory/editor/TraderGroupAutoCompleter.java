@@ -77,7 +77,7 @@ public class TraderGroupAutoCompleter implements KeyListener, SelectionObserver 
             setGroup(loc);
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.GROUP));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);

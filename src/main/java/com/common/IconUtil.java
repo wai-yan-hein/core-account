@@ -29,6 +29,7 @@ public class IconUtil {
     public static final String PRINTER = "print.svg";
     public static final String WARE_HOUSE = "warehouse.svg";
     public static final String STOCK = "stock.svg";
+    public static final String GROUP = "group.svg";
     public static final Icon getIcon(String name) {
         FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.8f);
         icon.setColorFilter(colorFilter);
