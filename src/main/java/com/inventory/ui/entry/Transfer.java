@@ -31,7 +31,7 @@ import com.inventory.entity.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.TransferTableModel;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.THDetailKey;

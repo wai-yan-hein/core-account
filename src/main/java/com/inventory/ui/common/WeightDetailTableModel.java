@@ -10,6 +10,7 @@ import com.common.Util1;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import lombok.Setter;
 
 /**
  *
@@ -17,16 +18,10 @@ import javax.swing.table.DefaultTableModel;
  */
 public class WeightDetailTableModel extends DefaultTableModel {
 
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JTable table;
-
-    public void setTable(JTable table) {
-        this.table = table;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     @Override
     public boolean isCellEditable(int row, int column) {
@@ -70,7 +65,7 @@ public class WeightDetailTableModel extends DefaultTableModel {
             ttlWt += Util1.getDouble(table.getValueAt(row, col));
         }
         super.setValueAt(ttlWt, row, colCount - 1);
-        fireTableCellUpdated(row, colCount);
+        fireTableCellUpdated(row, colCount - 1);
     }
 
     public void addNewRow(boolean foucs) {

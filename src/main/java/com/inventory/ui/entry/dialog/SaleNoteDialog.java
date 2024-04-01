@@ -15,7 +15,7 @@ import com.inventory.entity.SaleHis;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.Trader;
 import com.inventory.ui.entry.dialog.common.SaleNoteTableModel;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.event.ActionEvent;

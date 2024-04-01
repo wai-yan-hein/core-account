@@ -93,7 +93,7 @@ public final class WareHouseAutoCompleter implements KeyListener {
         this.editor = editor;
         this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.WARE_HOUSE));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         table.setModel(tableModel);

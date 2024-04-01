@@ -26,7 +26,7 @@ import com.inventory.entity.Trader;
 import com.inventory.ui.common.GRNTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.GRNHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import java.awt.Color;

@@ -17,7 +17,7 @@ import com.common.PanelControl;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

@@ -25,7 +25,7 @@ import com.inventory.entity.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.RFIDTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import java.awt.Color;

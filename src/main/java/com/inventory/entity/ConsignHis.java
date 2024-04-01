@@ -65,9 +65,7 @@ public class ConsignHis {
     @Transient
     private String status = "STATUS";
     @Transient
-    private List<ConsignHisDetail> listIRDetail;
-    @Transient
-    private List<ConsignHisDetailKey> listDel;
+    private List<ConsignHisDetail> listDetail;
     @Transient
     private List<LocationKey> keys;
     @Transient

@@ -100,6 +100,14 @@ public class ComponentUtil {
             }
         }
     }
+    public static void enableFocus(Container container, boolean status) {
+        for (Component component : container.getComponents()) {
+            component.setFocusable(status);
+            if (component instanceof Container c) {
+                enableFocus(c, status);
+            }
+        }
+    }
 
     public static final FocusAdapter fa = new FocusAdapter() {
         @Override

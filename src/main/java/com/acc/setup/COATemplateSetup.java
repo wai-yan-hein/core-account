@@ -19,7 +19,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.user.dialog.FileOptionDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

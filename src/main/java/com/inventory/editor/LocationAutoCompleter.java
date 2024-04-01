@@ -6,8 +6,10 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.Location;
 import com.inventory.entity.OptionModel;
 import com.inventory.ui.setup.dialog.OptionDialog;
@@ -126,6 +128,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     private void initTable() {
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.WARE_HOUSE));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);

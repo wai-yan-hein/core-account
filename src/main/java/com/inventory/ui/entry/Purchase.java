@@ -46,7 +46,7 @@ import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.GRNDetailDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.ui.entry.dialog.PurchaseWeightLossPriceDialog;
 import com.toedter.calendar.JTextFieldDateEditor;

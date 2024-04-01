@@ -28,7 +28,7 @@ import com.inventory.ui.common.LandingPriceTableModel;
 import com.inventory.ui.common.LandingGradeTableModel;
 import com.inventory.ui.common.LandingQtyTableModel;
 import com.inventory.ui.entry.dialog.LandingHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.toedter.calendar.JTextFieldDateEditor;

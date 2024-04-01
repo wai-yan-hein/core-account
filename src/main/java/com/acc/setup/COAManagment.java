@@ -25,7 +25,7 @@ import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.entity.CFont;
 import com.inventory.entity.MessageType;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.model.MenuKey;
 import java.awt.HeadlessException;

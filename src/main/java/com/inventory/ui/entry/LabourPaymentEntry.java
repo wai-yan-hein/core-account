@@ -28,7 +28,7 @@ import com.inventory.entity.LabourPaymentDetail;
 import com.inventory.entity.LabourPaymentDto;
 import com.inventory.ui.common.LabourPaymentTableModel;
 import com.inventory.ui.entry.dialog.LabourPaymentHistory;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;

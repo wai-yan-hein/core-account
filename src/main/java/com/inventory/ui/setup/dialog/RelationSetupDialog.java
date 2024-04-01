@@ -15,7 +15,7 @@ import com.inventory.entity.RelationKey;
 import com.inventory.entity.UnitRelationDetail;
 import com.inventory.entity.UnitRelation;
 import com.repo.InventoryRepo;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.RelationDetailTableModel;
 import com.inventory.ui.setup.dialog.common.RelationTableModel;
 import java.awt.Color;

@@ -44,4 +44,13 @@ public class MachineInfo {
     @Column(name = "os_arch")
     private String osArch;
 
+    public MachineInfo(Integer macId, String machineName) {
+        this.macId = macId;
+        this.machineName = machineName;
+    }
+
+    public MachineInfo() {
+    }
+    
+
 }

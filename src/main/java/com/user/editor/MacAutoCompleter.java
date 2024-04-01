@@ -36,6 +36,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 
 /**
  *
@@ -47,32 +48,30 @@ public final class MacAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private final JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final MacInfoTableModel tableModel;
+    private final MacInfoTableModel tableModel = new MacInfoTableModel();
     private MachineInfo info;
     public AbstractCellEditor editor;
     private final TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    @Setter
     private SelectionObserver observer;
 
-    public SelectionObserver getObserver() {
-        return observer;
+    public void setListMachine(List<MachineInfo> list) {
+        tableModel.setListCompany(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public MacAutoCompleter(JTextComponent comp, List<MachineInfo> list,
+    public MacAutoCompleter(JTextComponent comp,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.COMPUTER));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        tableModel = new MacInfoTableModel();
-        tableModel.setListCompany(list);
         table.setModel(tableModel);
         table.setSize(50, 50);
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -144,9 +143,6 @@ public final class MacAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {
@@ -168,19 +164,7 @@ public final class MacAutoCompleter implements KeyListener {
     private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            JComponent tf = (JComponent) e.getSource();
-            MacAutoCompleter completer = (MacAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
-
-            if (completer.table.getSelectedRow() != -1) {
-                info = tableModel.getCompany(completer.table.convertRowIndexToModel(
-                        completer.table.getSelectedRow()));
-                completer.textComp.setText(info.getMachineName());
-            }
-
-            completer.popup.setVisible(false);
-            if (editor != null) {
-                editor.stopCellEditing();
-            }
+            mouseSelect();
         }
     };
 

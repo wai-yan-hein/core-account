@@ -19,7 +19,7 @@ import com.inventory.entity.WeightLossHisKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.WeightLossTableModel;
 import com.inventory.ui.entry.dialog.WeightLossHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.repo.UserRepo;
 import java.awt.Color;

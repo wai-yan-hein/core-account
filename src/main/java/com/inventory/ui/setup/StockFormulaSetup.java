@@ -22,7 +22,7 @@ import com.inventory.ui.common.StockFormulaPriceTableModel;
 import com.inventory.ui.common.StockFormulaQtyTableModel;
 import com.inventory.ui.common.StockFormulaTableModel;
 import com.inventory.ui.setup.dialog.StockCriteriaSetupDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.InventoryRepo;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

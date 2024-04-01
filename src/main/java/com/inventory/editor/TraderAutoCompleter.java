@@ -95,7 +95,7 @@ public class TraderAutoCompleter implements KeyListener {
         this.traderType = traderType;
         this.inventoryRepo = inventoryRepo;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.USER));
         if (filter) {
             Trader t = new Trader("-", "All");
             setTrader(t);

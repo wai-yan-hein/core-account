@@ -23,7 +23,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.entity.PurOrderHis;
 import com.inventory.entity.PurOrderHisKey;
 import com.inventory.entity.VPurOrder;

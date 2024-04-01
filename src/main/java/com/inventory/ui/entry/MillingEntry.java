@@ -39,7 +39,7 @@ import com.inventory.ui.common.MillingOutTableModel;
 import com.inventory.ui.entry.dialog.MillingHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.entity.Job;
 import com.inventory.entity.MessageType;

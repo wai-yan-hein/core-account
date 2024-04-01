@@ -9,6 +9,7 @@ import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DepartmentA;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -16,8 +17,6 @@ import com.user.model.RoleProperty;
 import com.user.model.RolePropertyKey;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -34,7 +33,7 @@ import com.user.dialog.ReportNameDialog;
 import com.user.dialog.StockSettingDialog;
 import com.user.dialog.ValidationDialog;
 import com.user.editor.MacAutoCompleter;
-import com.user.editor.TextAutoCompleter;
+import com.user.editor.PrinterAutoCompleter;
 import com.user.model.MachineProperty;
 import com.user.model.MachinePropertyKey;
 import com.user.model.PropertyKey;
@@ -53,9 +52,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -65,13 +62,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SystemProperty extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private SelectionObserver observer;
+    @Setter
+    private String roleCode;
+    @Setter
+    private String properyType = "System";
+    @Setter
     private JProgressBar progress;
-    private TextAutoCompleter printerAutoCompleter;
-    private TextAutoCompleter printerPOSCompleter;
+
+    private PrinterAutoCompleter printerAutoCompleter;
+    private PrinterAutoCompleter printerPOSCompleter;
     private TraderAutoCompleter cusCompleter;
     private TraderAutoCompleter supCompleter;
     private StockAutoCompleter stockAutoCompleter;
@@ -100,8 +107,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     private MacAutoCompleter macAutoCompleter;
     private HashMap<String, String> hmProperty;
-    private String properyType = "System";
-    private String roleCode;
     private Integer macId;
     private ReportNameDialog reportNameDialog;
     private PrintCountDialog printCountDialog;
@@ -109,38 +114,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private OtherDialog otherDialog;
     private StockSettingDialog stockDialog;
     private HashMap<JTextField, COA3AutoCompleter> hmCOA3 = new HashMap<>();
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setRoleCode(String roleCode) {
-        this.roleCode = roleCode;
-    }
-
-    public void setMacId(Integer macId) {
-        this.macId = macId;
-    }
-
-    public void setProperyType(String properyType) {
-        this.properyType = properyType;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
 
     private final ActionListener action = (ActionEvent e) -> {
         if (e.getSource() instanceof JCheckBox chk) {
@@ -162,7 +135,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         initKey();
 
     }
-
 
     private void initKey() {
         txtDep.setName("default.department");
@@ -209,6 +181,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableCrVoucher.setName(ProUtil.DISABLE_CR_VOUCHER);
         chkNoUnit.setName(ProUtil.STOCK_NO_UNIT);
         chkTraderBalAcc.setName(ProUtil.TRADER_BAL_ACC);
+        chkBarCode.setName(ProUtil.BARCODE);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -248,24 +221,33 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     private void initMac() {
         if (properyType.equals("Machine")) {
+            macId = Global.macId;
             panelMac.setVisible(true);
+            macAutoCompleter = new MacAutoCompleter(txtMac, null, false);
+            macAutoCompleter.setObserver(this);
             userRepo.getMacList().doOnSuccess((t) -> {
-                macAutoCompleter = new MacAutoCompleter(txtMac, t, null, false);
-                macAutoCompleter.setObserver(this);
+                macAutoCompleter.setListMachine(t);
             }).subscribe();
-
+            userRepo.findMachine(macId).doOnSuccess((t) -> {
+                macAutoCompleter.setInfo(t);
+            }).subscribe();
         } else {
             panelMac.setVisible(false);
         }
     }
 
     public void initMain() {
-        progress.setIndeterminate(true);
+        ComponentUtil.addFocusListener(this);
+        initCombo();
         initMac();
+        initData();
+
+    }
+
+    private void initData() {
         initProperty();
         initCheckBox();
         initTextBox();
-        initCombo();
         initHashCOA();
     }
 
@@ -324,6 +306,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableCrVoucher.setSelected(Util1.getBoolean(hmProperty.get(chkDisableCrVoucher.getName())));
         chkNoUnit.setSelected(Util1.getBoolean(hmProperty.get(chkNoUnit.getName())));
         chkTraderBalAcc.setSelected(Util1.getBoolean(hmProperty.get(chkTraderBalAcc.getName())));
+        chkBarCode.setSelected(Util1.getBoolean(hmProperty.get(chkBarCode.getName())));
     }
 
     private void initTextBox() {
@@ -335,149 +318,149 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtComP.setText(hmProperty.get(txtComP.getName()));
         txtComAmt.setText(hmProperty.get(txtComAmt.getName()));
         txtDivider.setText(hmProperty.get(txtDivider.getName()));
-    }
-
-    private void initCombo() {
-        List<String> listPrinter = getPrinter();
-        printerAutoCompleter = new TextAutoCompleter(txtPrinter, listPrinter, null);
-        printerAutoCompleter.setObserver(this);
         printerAutoCompleter.setText(hmProperty.get(txtPrinter.getName()));
-        printerPOSCompleter = new TextAutoCompleter(txtPosPrinter, listPrinter, null);
-        printerPOSCompleter.setObserver(this);
         printerPOSCompleter.setText(hmProperty.get(txtPosPrinter.getName()));
-        cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
-        cusCompleter.setObserver(this);
         inventoryRepo.findTrader(hmProperty.get(txtCustomer.getName())).doOnSuccess((t) -> {
             cusCompleter.setTrader(t);
         }).subscribe();
-        supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
-        supCompleter.setObserver(this);
         inventoryRepo.findTrader(hmProperty.get(txtSupplier.getName())).doOnSuccess((t) -> {
             supCompleter.setTrader(t);
         }).subscribe();
-        locCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
-        locCompleter.setObserver(this);
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locCompleter.setListLocation(t);
         }).subscribe();
         inventoryRepo.findLocation(hmProperty.get(txtLocation.getName())).doOnSuccess((t) -> {
             locCompleter.setLocation(t);
         }).subscribe();
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
-        stockAutoCompleter.setObserver(this);
         inventoryRepo.findStock(hmProperty.get(txtStock.getName())).doOnSuccess((t) -> {
             stockAutoCompleter.setStock(t);
         }).subscribe();
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
-        departmentAutoCompleter.setObserver(this);
         accountRepo.findDepartment(hmProperty.get(txtDep.getName())).doOnSuccess((t) -> {
             departmentAutoCompleter.setDepartment(t);
         }).subscribe();
         accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
-        cashAutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
-        cashAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtCash.getName())).doOnSuccess((t) -> {
             cashAutoCompleter.setCoa(t);
         }).subscribe();
-        plAutoCompleter = new COA3AutoCompleter(txtPlAcc, accountRepo, null, false, 3);
-        plAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtPlAcc.getName())).doOnSuccess((t) -> {
             plAutoCompleter.setCoa(t);
         }).subscribe();
-        reAutoCompleter = new COA3AutoCompleter(txtREAcc, accountRepo, null, false, 3);
-        reAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtREAcc.getName())).doOnSuccess((t) -> {
             reAutoCompleter.setCoa(t);
         }).subscribe();
-
-        inventoryAutoCompleter = new COA3AutoCompleter(txtInvGroup, accountRepo, null, false, 2);
-        inventoryAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtInvGroup.getName())).doOnSuccess((t) -> {
             inventoryAutoCompleter.setCoa(t);
         }).subscribe();
-        cashGroupAutoCompleter = new COA3AutoCompleter(txtCashGroup, accountRepo, null, false, 2);
-        cashGroupAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtCashGroup.getName())).doOnSuccess((t) -> {
             cashGroupAutoCompleter.setCoa(t);
         }).subscribe();
-        bankGroupAutoCompleter = new COA3AutoCompleter(txtBankGroup, accountRepo, null, false, 2);
-        bankGroupAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtBankGroup.getName())).doOnSuccess((t) -> {
             bankGroupAutoCompleter.setCoa(t);
         }).subscribe();
-        fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountRepo, null, false, 1);
-        fixedAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtFixed.getName())).doOnSuccess((t) -> {
             fixedAutoCompleter.setCoa(t);
         }).subscribe();
-        currentAutoCompleter = new COA3AutoCompleter(txtCurrent, accountRepo, null, false, 1);
-        currentAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtCurrent.getName())).doOnSuccess((t) -> {
             currentAutoCompleter.setCoa(t);
         }).subscribe();
-        liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountRepo, null, false, 1);
-        liaAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtLiability.getName())).doOnSuccess((t) -> {
             liaAutoCompleter.setCoa(t);
         }).subscribe();
-        capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountRepo, null, false, 1);
-        capitalAutoCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtCapital.getName())).doOnSuccess((t) -> {
-            capitalAutoCompleter.setCoa(t);
-        }).subscribe();
-        incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountRepo, null, false, 1);
-        incomeAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtIncome.getName())).doOnSuccess((t) -> {
             incomeAutoCompleter.setCoa(t);
         }).subscribe();
-        otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountRepo, null, false, 1);
-        otherIncomeAutoCompleter.setObserver(this);
+        accountRepo.findCOA(hmProperty.get(txtCapital.getName())).doOnSuccess((t) -> {
+            capitalAutoCompleter.setCoa(t);
+        }).subscribe();
         accountRepo.findCOA(hmProperty.get(txtOtherIncome.getName())).doOnSuccess((t) -> {
             otherIncomeAutoCompleter.setCoa(t);
         }).subscribe();
-        purchaseAutoCompleter = new COA3AutoCompleter(txtPurchase, accountRepo, null, false, 1);
-        purchaseAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtPurchase.getName())).doOnSuccess((t) -> {
             purchaseAutoCompleter.setCoa(t);
         }).subscribe();
-        expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountRepo, null, false, 1);
-        expenseAutoCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtExpense.getName())).doOnSuccess((t) -> {
-            expenseAutoCompleter.setCoa(t);
+        accountRepo.findCOA(hmProperty.get(txtEmp.getName())).doOnSuccess((t) -> {
+            empCompleter.setCoa(t);
         }).subscribe();
-        debtorGroupAutoCompleter = new COA3AutoCompleter(txtDebtor, accountRepo, null, false, 2);
-        debtorGroupAutoCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtDebtor.getName())).doOnSuccess((t) -> {
-            debtorGroupAutoCompleter.setCoa(t);
-        }).subscribe();
-        debtorAccAutoCompleter = new COA3AutoCompleter(txtCus, accountRepo, null, false, 3);
-        debtorAccAutoCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtCus.getName())).doOnSuccess((t) -> {
-            debtorAccAutoCompleter.setCoa(t);
-        }).subscribe();
-        creditorGroupAutoCompleter = new COA3AutoCompleter(txtCreditor, accountRepo, null, false, 2);
-        creditorGroupAutoCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtCreditor.getName())).doOnSuccess((t) -> {
-            creditorGroupAutoCompleter.setCoa(t);
-        }).subscribe();
-        creditorAccAutoCompleter = new COA3AutoCompleter(txtSup, accountRepo, null, false, 3);
-        creditorAccAutoCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtSup.getName())).doOnSuccess((t) -> {
-            creditorAccAutoCompleter.setCoa(t);
-        }).subscribe();
-        conversionAccAutoCompleter = new COA3AutoCompleter(txtConversionAcc, accountRepo, null, false, 3);
-        conversionAccAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtConversionAcc.getName())).doOnSuccess((t) -> {
             conversionAccAutoCompleter.setCoa(t);
         }).subscribe();
+        accountRepo.findCOA(hmProperty.get(txtSup.getName())).doOnSuccess((t) -> {
+            creditorAccAutoCompleter.setCoa(t);
+        }).subscribe();
+        accountRepo.findCOA(hmProperty.get(txtCreditor.getName())).doOnSuccess((t) -> {
+            creditorGroupAutoCompleter.setCoa(t);
+        }).subscribe();
+        accountRepo.findCOA(hmProperty.get(txtCus.getName())).doOnSuccess((t) -> {
+            debtorAccAutoCompleter.setCoa(t);
+        }).subscribe();
+        accountRepo.findCOA(hmProperty.get(txtDebtor.getName())).doOnSuccess((t) -> {
+            debtorGroupAutoCompleter.setCoa(t);
+        }).subscribe();
+        accountRepo.findCOA(hmProperty.get(txtExpense.getName())).doOnSuccess((t) -> {
+            expenseAutoCompleter.setCoa(t);
+        }).subscribe();
+        List<String> listPrinter = getPrinter();
+        printerAutoCompleter.setListPrinter(listPrinter);
+        printerPOSCompleter.setListPrinter(listPrinter);
+    }
+
+    private void initCombo() {
+        printerAutoCompleter = new PrinterAutoCompleter(txtPrinter, null);
+        printerAutoCompleter.setObserver(this);
+        printerPOSCompleter = new PrinterAutoCompleter(txtPosPrinter, null);
+        printerPOSCompleter.setObserver(this);
+        cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
+        cusCompleter.setObserver(this);
+        supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
+        supCompleter.setObserver(this);
+        locCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locCompleter.setObserver(this);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
+        stockAutoCompleter.setObserver(this);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
+        departmentAutoCompleter.setObserver(this);
+        cashAutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
+        cashAutoCompleter.setObserver(this);
+        plAutoCompleter = new COA3AutoCompleter(txtPlAcc, accountRepo, null, false, 3);
+        plAutoCompleter.setObserver(this);
+        reAutoCompleter = new COA3AutoCompleter(txtREAcc, accountRepo, null, false, 3);
+        reAutoCompleter.setObserver(this);
+        inventoryAutoCompleter = new COA3AutoCompleter(txtInvGroup, accountRepo, null, false, 2);
+        inventoryAutoCompleter.setObserver(this);
+        cashGroupAutoCompleter = new COA3AutoCompleter(txtCashGroup, accountRepo, null, false, 2);
+        cashGroupAutoCompleter.setObserver(this);
+        bankGroupAutoCompleter = new COA3AutoCompleter(txtBankGroup, accountRepo, null, false, 2);
+        bankGroupAutoCompleter.setObserver(this);
+        fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountRepo, null, false, 1);
+        fixedAutoCompleter.setObserver(this);
+        currentAutoCompleter = new COA3AutoCompleter(txtCurrent, accountRepo, null, false, 1);
+        currentAutoCompleter.setObserver(this);
+        liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountRepo, null, false, 1);
+        liaAutoCompleter.setObserver(this);
+        capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountRepo, null, false, 1);
+        capitalAutoCompleter.setObserver(this);
+        incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountRepo, null, false, 1);
+        incomeAutoCompleter.setObserver(this);
+        otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountRepo, null, false, 1);
+        otherIncomeAutoCompleter.setObserver(this);
+        purchaseAutoCompleter = new COA3AutoCompleter(txtPurchase, accountRepo, null, false, 1);
+        purchaseAutoCompleter.setObserver(this);
+        expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountRepo, null, false, 1);
+        expenseAutoCompleter.setObserver(this);
+        debtorGroupAutoCompleter = new COA3AutoCompleter(txtDebtor, accountRepo, null, false, 2);
+        debtorGroupAutoCompleter.setObserver(this);
+        debtorAccAutoCompleter = new COA3AutoCompleter(txtCus, accountRepo, null, false, 3);
+        debtorAccAutoCompleter.setObserver(this);
+        creditorGroupAutoCompleter = new COA3AutoCompleter(txtCreditor, accountRepo, null, false, 2);
+        creditorGroupAutoCompleter.setObserver(this);
+        creditorAccAutoCompleter = new COA3AutoCompleter(txtSup, accountRepo, null, false, 3);
+        creditorAccAutoCompleter.setObserver(this);
+        conversionAccAutoCompleter = new COA3AutoCompleter(txtConversionAcc, accountRepo, null, false, 3);
+        conversionAccAutoCompleter.setObserver(this);
         empCompleter = new COA3AutoCompleter(txtEmp, accountRepo, null, false, 3);
         empCompleter.setObserver(this);
-        accountRepo.findCOA(hmProperty.get(txtEmp.getName())).doOnSuccess((t) -> {
-            empCompleter.setCoa(t);
-            progress.setIndeterminate(false);
-        }).subscribe();
 
     }
 
@@ -702,6 +685,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTraderBalAcc = new javax.swing.JCheckBox();
         jLabel5 = new javax.swing.JLabel();
         txtPosPrinter = new javax.swing.JTextField();
+        chkBarCode = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -993,6 +977,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtPosPrinter.setFont(Global.textFont);
 
+        chkBarCode.setText("Barcode");
+        chkBarCode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkBarCodeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1028,7 +1019,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(chkNoUnit)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(chkTraderBalAcc)))
+                                .addComponent(chkTraderBalAcc))
+                            .addComponent(chkBarCode))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -1043,6 +1035,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(chkNoUnit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkBarCode)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkTraderBalAcc))
@@ -1832,10 +1826,15 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         // TODO add your handling code here:
     }//GEN-LAST:event_chkTraderBalAccActionPerformed
 
+    private void chkBarCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkBarCodeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkBarCodeActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAutoUpdate;
     private javax.swing.JCheckBox chkBalance;
+    private javax.swing.JCheckBox chkBarCode;
     private javax.swing.JCheckBox chkBatchGRN;
     private javax.swing.JCheckBox chkBatchSale;
     private javax.swing.JCheckBox chkCalStock;
@@ -2003,7 +2002,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             }
         } else if (source.equals("Mac")) {
             macId = macAutoCompleter.getInfo().getMacId();
-            initMain();
+            initData();
         } else if (source.equals("Department")) {
             DepartmentA d = departmentAutoCompleter.getDepartment();
             if (d != null) {
@@ -2046,7 +2045,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     @Override
     public void refresh() {
-        initMain();
+        initData();
     }
 
     @Override

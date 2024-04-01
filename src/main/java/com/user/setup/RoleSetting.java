@@ -14,7 +14,7 @@ import com.repo.UserRepo;
 import com.inventory.entity.AppRole;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.UserRoleTableModel;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.user.dialog.RoleSetupDialog;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;

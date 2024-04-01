@@ -12,7 +12,7 @@ import com.inventory.entity.SaleExpense;
 import com.inventory.entity.SaleExpenseKey;
 import com.inventory.ui.common.SaleExpenseTableModel;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.AccountRepo;
 import com.repo.InventoryRepo;
 import java.awt.event.ActionEvent;

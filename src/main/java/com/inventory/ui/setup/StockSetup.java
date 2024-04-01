@@ -133,11 +133,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     public void initMain() {
         ComponentUtil.addFocusListener(this);
-        initData();
         initCombo();
         initTable();
         initRowHeader();
         initFind();
+        searchStock();
     }
 
     private void initFind() {
@@ -148,10 +148,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblStock, 30);
         s1.setRowHeaderView(list);
-    }
-
-    private void initData() {
-        searchStock();
     }
 
     private void initTable() {
@@ -304,13 +300,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             relationAutoCompleter.setListRelation(t);
         });
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
-        departmentUserAutoCompleter1 = new DepartmentUserAutoCompleter(txtDep, null, true);
+        departmentUserAutoCompleter1 = new DepartmentUserAutoCompleter(txtDep1, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setListDepartment(t);
-            DepartmentUser dep = new DepartmentUser(0, "All");
-            List<DepartmentUser> list = new ArrayList<>(t);
-            list.add(0, dep);
-            departmentUserAutoCompleter1.setListDepartment(list);
+            departmentUserAutoCompleter1.setListDepartment(t);
         }).subscribe();
         stockFormulaCompleter = new StockFormulaCompleter(txtFormula, inventoryRepo, null);
         stockFormulaCompleter.setObserver(this);

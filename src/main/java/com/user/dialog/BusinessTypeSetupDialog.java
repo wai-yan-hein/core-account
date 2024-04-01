@@ -7,7 +7,7 @@ package com.user.dialog;
 import com.repo.AccountRepo;
 import com.acc.model.BusinessType;
 import com.common.Global;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.user.common.BusinessTypeTableModel;
 import com.repo.UserRepo;
 import java.awt.event.ActionEvent;

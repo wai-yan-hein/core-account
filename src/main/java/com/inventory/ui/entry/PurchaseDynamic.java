@@ -46,7 +46,7 @@ import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.GRNDetailDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LandingHis;
@@ -589,7 +589,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void initTextBoxFormat() {
         ComponentUtil.setTextProperty(this);
-        txtOut.setForeground(Color.green);
     }
 
     private void assignDefaultValue() {
@@ -796,7 +795,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             ph.setTaxAmt(Util1.getDouble(txtTax.getValue()));
             ph.setPaid(Util1.getDouble(txtVouPaid.getValue()));
             ph.setBalance(Util1.getDouble(txtVouBalance.getValue()));
-            ph.setOutstanding(Util1.getDouble(txtOut.getValue()));
             ph.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             ph.setDeleted(ph.isDeleted());
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
@@ -1092,7 +1090,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtVouPaid.setValue(Util1.getDouble(ph.getPaid()));
         txtVouBalance.setValue(Util1.getDouble(ph.getBalance()));
         txtGrandTotal.setValue(Util1.getDouble(ph.getGrandTotal()));
-        txtOut.setValue(Util1.getDouble(ph.getOutstanding()));
         chkPaid.setSelected(Util1.getDouble(ph.getPaid()) > 0);
         txtReference.setText(ph.getReference());
         txtBatchNo.setText(ph.getBatchNo());
@@ -1538,19 +1535,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         weightHistoryDialog.search();
     }
 
-    private void calTraderBalance() {
-        Trader trader = traderAutoCompleter.getTrader();
-        if (trader != null) {
-            if (ProUtil.isTraderBalAcc()) {
-                //future
-            } else {
-                inventoryRepo.getTraderBalanceSummary(trader.getKey().getCode(), "S").doOnSuccess((t) -> {
-                    txtOut.setValue(t == null ? 0 : t.getAmount());
-                }).subscribe();
-            }
-        }
-    }
-
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1635,8 +1619,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         txtComPercent = new javax.swing.JFormattedTextField();
         jLabel23 = new javax.swing.JLabel();
         txtComAmt = new javax.swing.JFormattedTextField();
-        jLabel25 = new javax.swing.JLabel();
-        txtOut = new javax.swing.JFormattedTextField();
         scroll = new javax.swing.JScrollPane();
         tblPur = new javax.swing.JTable();
 
@@ -2188,20 +2170,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         });
 
-        jLabel25.setFont(Global.lableFont);
-        jLabel25.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel25.setText("Outstanding :");
-
-        txtOut.setEditable(false);
-        txtOut.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtOut.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtOut.setFont(Global.amtFont);
-        txtOut.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtOutActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -2227,8 +2195,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                                         .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(chkPaid)))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jLabel25, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtVouTotal)
@@ -2249,8 +2216,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                                     .addComponent(txtComAmt)))
                             .addComponent(txtGrandTotal)
                             .addComponent(txtVouPaid, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtVouBalance)
-                            .addComponent(txtOut))))
+                            .addComponent(txtVouBalance))))
                 .addContainerGap())
         );
 
@@ -2298,10 +2264,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel25)
-                    .addComponent(txtOut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2488,10 +2450,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtVouNoActionPerformed
-
-    private void txtOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOutActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtOutActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -2520,7 +2478,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 }
             }
             case "TRADER" -> {
-                calTraderBalance();
             }
             case "CAL-TOTAL" ->
                 calculateTotalAmount(false);
@@ -2723,7 +2680,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -2755,7 +2711,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JFormattedTextField txtGrandTotal;
     private javax.swing.JTextField txtLG;
     private javax.swing.JTextField txtLocation;
-    private javax.swing.JFormattedTextField txtOut;
     private com.toedter.calendar.JDateChooser txtPurDate;
     private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JTextField txtReference;

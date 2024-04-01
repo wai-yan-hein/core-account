@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup.common;
 
+import com.common.Util1;
 import com.inventory.entity.Stock;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class StockTableModel extends AbstractTableModel {
                 case 3 ->
                     med.getCatName();
                 case 4 ->
-                    med.getWeight();
+                    Util1.toNull(med.getWeight());
                 default ->
                     null;
             }; //Code

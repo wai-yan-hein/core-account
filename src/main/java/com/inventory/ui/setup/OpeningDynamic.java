@@ -26,7 +26,7 @@ import com.inventory.entity.OPHisKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.OPHisDetailKey;

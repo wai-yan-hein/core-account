@@ -33,7 +33,7 @@ import com.inventory.entity.VReturnIn;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReturnInTableModel;
 import com.inventory.ui.entry.dialog.ReturnInHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.SaleHis;
 import com.inventory.entity.VSale;

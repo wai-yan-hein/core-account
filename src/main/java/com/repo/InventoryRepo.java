@@ -4289,9 +4289,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<ConsignHis> saveStockIssRec(ConsignHis his) {
+    public Mono<ConsignHis> saveConsign(ConsignHis his) {
         return inventoryApi.post()
-                .uri("stockIssRec/saveStockIssRec")
+                .uri("consign")
                 .body(Mono.just(his), ConsignHis.class)
                 .retrieve()
                 .bodyToMono(ConsignHis.class);
@@ -4299,7 +4299,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(ConsignHisKey key) {
         return inventoryApi.post()
-                .uri("/stockIssRec/deleteStockIssRec")
+                .uri("/consign/deleteConsign")
                 .body(Mono.just(key), ConsignHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -4311,7 +4311,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(ConsignHisKey key) {
         return inventoryApi.post()
-                .uri("/stockIssRec/restoreStockIssRec")
+                .uri("/consign/restoreConsign")
                 .body(Mono.just(key), ConsignHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -4324,7 +4324,7 @@ public class InventoryRepo {
     public Flux<VConsign> getStockIssRecHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
-                .uri("/stockIssRec/getStockIssRecHistory")
+                .uri("/consign/getConsignHistory")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VConsign.class)
@@ -4336,7 +4336,7 @@ public class InventoryRepo {
 
     public Mono<List<ConsignHisDetail>> getStockIssRecDetail(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/stockIssRec/getStockIssRecDetail")
+                .uri(builder -> builder.path("/consign/getConsignDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -4353,7 +4353,7 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);
         return inventoryApi.post()
-                .uri("/stockIssRec/findStockIR")
+                .uri("/consign/findConsign")
                 .body(Mono.just(key), ConsignHisKey.class)
                 .retrieve()
                 .bodyToMono(ConsignHis.class)

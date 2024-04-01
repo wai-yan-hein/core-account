@@ -21,7 +21,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;

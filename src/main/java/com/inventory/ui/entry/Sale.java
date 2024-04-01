@@ -55,7 +55,7 @@ import com.inventory.ui.entry.dialog.OrderDetailDialog;
 import com.inventory.ui.entry.dialog.OrderHistoryDialog;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.ui.entry.dialog.AccountOptionDialog;
 import com.inventory.ui.entry.dialog.SaleExpenseFrame;

@@ -26,7 +26,7 @@ import com.inventory.ui.common.OrderStatusComboBoxModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.OrderHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.ui.common.SaleOrderTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;

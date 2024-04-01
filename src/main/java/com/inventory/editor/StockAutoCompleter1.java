@@ -23,8 +23,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -87,7 +90,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         this.editor = editor;
         this.inventoryRepo = inventoryRepo;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.STOCK));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
@@ -337,7 +340,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 inventoryRepo.getStock(str).subscribe((t) -> {
-                    if (this.filter) {
+                    if (filter) {
                         Stock s = new Stock("-", "All");
                         t.add(s);
                     }
@@ -349,7 +352,6 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
                     log.error(er.getMessage());
                 });
             }
-
         }
     }
 

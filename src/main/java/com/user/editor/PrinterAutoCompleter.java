@@ -35,44 +35,43 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 
 /**
  *
  * @author Lenovo
  */
-public final class TextAutoCompleter implements KeyListener {
+public final class PrinterAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private final JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final TextTableModel textTableModel;
+    private final TextTableModel tableModel = new TextTableModel();
     private String text;
     public AbstractCellEditor editor;
     private final TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    @Setter
     private SelectionObserver observer;
 
-    public SelectionObserver getObserver() {
-        return observer;
+    public void setListPrinter(List<String> list) {
+        tableModel.setList(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public TextAutoCompleter(JTextComponent comp, List<String> list,
+    public PrinterAutoCompleter(JTextComponent comp,
             AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.PRINTER));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        textTableModel = new TextTableModel();
-        textTableModel.setList(list);
-        table.setModel(textTableModel);
+        table.setModel(tableModel);
         table.setSize(50, 50);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -143,14 +142,11 @@ public final class TextAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            text = textTableModel.getText(table.convertRowIndexToModel(
+            text = tableModel.getText(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(text);
         }
@@ -168,10 +164,10 @@ public final class TextAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TextAutoCompleter completer = (TextAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PrinterAutoCompleter completer = (PrinterAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
 
             if (completer.table.getSelectedRow() != -1) {
-                text = textTableModel.getText(completer.table.convertRowIndexToModel(
+                text = tableModel.getText(completer.table.convertRowIndexToModel(
                         completer.table.getSelectedRow()));
                 completer.textComp.setText(text);
             }
@@ -208,7 +204,7 @@ public final class TextAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TextAutoCompleter completer = (TextAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PrinterAutoCompleter completer = (PrinterAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -222,7 +218,7 @@ public final class TextAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TextAutoCompleter completer = (TextAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PrinterAutoCompleter completer = (PrinterAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -234,7 +230,7 @@ public final class TextAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TextAutoCompleter completer = (TextAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PrinterAutoCompleter completer = (PrinterAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
             }

@@ -38,7 +38,7 @@ import com.inventory.ui.common.StockInOutTableModel;
 import com.inventory.ui.common.StockInOutWeightTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.entry.dialog.StockIOHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.Job;
 import com.inventory.entity.LabourGroup;

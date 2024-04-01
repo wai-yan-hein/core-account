@@ -12,7 +12,7 @@ import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.VouDiscount;
 import com.inventory.entity.VouDiscountKey;
 import com.inventory.ui.common.VoucherDiscountTableModel;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.InventoryRepo;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

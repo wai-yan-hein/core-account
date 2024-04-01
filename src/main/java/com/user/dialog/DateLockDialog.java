@@ -8,7 +8,7 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.MessageType;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.common.DateLockTableModel;
 import com.user.model.DateLock;

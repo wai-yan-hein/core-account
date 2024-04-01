@@ -10,6 +10,7 @@ import com.user.model.MachineInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,11 +23,10 @@ public class MacDetailTableModel extends AbstractTableModel {
     private List<MachineInfo> listDetail = new ArrayList();
     private final String[] columnNames = {"Mac Id", "Machine Name", "Mac Ip", "Mac Address",
         "Serial No", "Os Name", "Os Version", "Os arch", "Need Update"};
+    @Setter
     private UserRepo userRepo;
 
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+
 
     @Override
     public String getColumnName(int column) {

@@ -27,9 +27,9 @@ import com.inventory.entity.Trader;
 import com.inventory.entity.ConsignHis;
 import com.inventory.entity.ConsignHisDetail;
 import com.repo.InventoryRepo;
-import com.inventory.ui.common.StockIssueRecTableModel;
+import com.inventory.ui.common.ConsignTableModel;
 import com.inventory.ui.entry.dialog.ConsignHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.Location;
 import com.inventory.entity.ConsignHisKey;
@@ -44,7 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -62,7 +61,7 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
  */
 public class ConsignEntry extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
-    private final StockIssueRecTableModel tableModel = new StockIssueRecTableModel();
+    private final ConsignTableModel tableModel = new ConsignTableModel();
     private ConsignHistoryDialog dialog;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -173,8 +172,6 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initTable() {
-        tableModel.setVouDate(txtDate);
-        tableModel.setInventoryRepo(inventoryRepo);
         tableModel.addNewRow();
         tableModel.setParent(tblStockIR);
         tableModel.setObserver(this);
@@ -258,10 +255,9 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
             }
             observer.selected("save", false);
             progress.setIndeterminate(true);
-            io.setListIRDetail(tableModel.getListDetail());
-            io.setListDel(tableModel.getDelList());
+            io.setListDetail(tableModel.getListDetail());
             io.setTranSource(tranSource.equals("I") ? 1 : 2);
-            inventoryRepo.saveStockIssRec(io).doOnSuccess((t) -> {
+            inventoryRepo.saveConsign(io).doOnSuccess((t) -> {
                 if (print) {
                     printVoucher(t);
                 }
@@ -446,7 +442,7 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
     private void printVoucher(ConsignHis spd) {
         try {
             enableToolBar(false);
-            List<ConsignHisDetail> detail = spd.getListIRDetail();
+            List<ConsignHisDetail> detail = spd.getListDetail();
             byte[] data = Util1.listToByteArray(detail);
             String reportName = spd.getTranSource() == 1 ? "StockConsignIssue" : "StockConsignReceive";
             Map<String, Object> param = getDefaultParam(spd);

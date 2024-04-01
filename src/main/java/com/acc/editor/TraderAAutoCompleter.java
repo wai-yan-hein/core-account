@@ -80,7 +80,7 @@ public final class TraderAAutoCompleter implements KeyListener {
             setTrader(new TraderA(new TraderAKey("-", Global.compCode), "All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.USER));
         textComp.setFont(Global.textFont);
         traderTableModel = new TraderATableModel();
         table.setModel(traderTableModel);

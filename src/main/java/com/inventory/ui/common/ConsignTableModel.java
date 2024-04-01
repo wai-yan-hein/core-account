@@ -11,13 +11,13 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.entity.Stock;
 import com.inventory.entity.ConsignHisDetail;
-import com.inventory.entity.ConsignHisDetailKey;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,43 +25,14 @@ import lombok.extern.slf4j.Slf4j;
  * @author pann
  */
 @Slf4j
-public class StockIssueRecTableModel extends AbstractTableModel {
+public class ConsignTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight", "Bag", "Total Weight"};
-    private JTable parent;
     private List<ConsignHisDetail> listDetail = new ArrayList();
+    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Weight", "Bag", "Total Weight"};
+    @Setter
+    private JTable parent;
+    @Setter
     private SelectionObserver observer;
-    private final List<ConsignHisDetailKey> deleteList = new ArrayList();
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -200,6 +171,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
+
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
@@ -249,21 +221,7 @@ public class StockIssueRecTableModel extends AbstractTableModel {
         return true;
     }
 
-    public List<ConsignHisDetailKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
     public void delete(int row) {
-        ConsignHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
         listDetail.remove(row);
         addNewRow();
         fireTableRowsDeleted(row, row);

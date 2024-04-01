@@ -29,7 +29,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.ProcessHisDetailTableModel;
 import com.inventory.ui.entry.dialog.ManufactureHistoryDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import java.awt.Color;

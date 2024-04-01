@@ -26,7 +26,7 @@ import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.PaymentTableModel;
 import com.inventory.ui.entry.dialog.PaymentHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;

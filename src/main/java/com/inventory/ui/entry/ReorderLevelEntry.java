@@ -23,7 +23,7 @@ import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.entity.StockUnit;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

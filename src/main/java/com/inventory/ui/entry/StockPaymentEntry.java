@@ -27,7 +27,7 @@ import com.inventory.ui.common.StockPaymentBagTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.StockPaymentQtyTableModel;
 import com.inventory.ui.entry.dialog.StockPaymentHistoryDialog;
-import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.editor.AutoClearEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
