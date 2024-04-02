@@ -966,17 +966,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return userSetup;
             }
             case "Company" -> {
-                CompanySetup companySetup = new CompanySetup();
-                companySetup.setName(menuName);
-                companySetup.setObserver(this);
-                companySetup.setProgress(progress);
-                companySetup.setUserRepo(userRepo);
-                companySetup.setInventoryRepo(inventoryRepo);
-                companySetup.setAccountRepo(accounRepo);
-                companySetup.setEnvironment(environment);
-                companySetup.setToken(getToken);
-                companySetup.initMain();
-                return companySetup;
+                CompanySetup c = new CompanySetup();
+                c.setName(menuName);
+                c.setObserver(this);
+                c.setProgress(progress);
+                c.setUserRepo(userRepo);
+                c.setAccountRepo(accounRepo);
+                c.setEnvironment(environment);
+                c.setToken(getToken);
+                c.initMain();
+                return c;
             }
             case "HMS Integration" -> {
                 HMSIntegration hmsIntegration = new HMSIntegration();

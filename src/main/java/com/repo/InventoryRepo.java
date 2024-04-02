@@ -595,7 +595,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUnit")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(StockUnit.class)
@@ -620,21 +619,20 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockUnit>> getUnit(String relCode, Integer deptId) {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getRelation")
-                .queryParam("relCode", relCode)
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
-                .build())
-                .retrieve()
-                .bodyToFlux(StockUnit.class)
-                .collectList()
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
+//    public Mono<List<StockUnit>> getUnit(String relCode) {
+//        return inventoryApi.get()
+//                .uri(builder -> builder.path("/setup/getRelation")
+//                .queryParam("relCode", relCode)
+//                .queryParam("compCode", Global.compCode)
+//                .build())
+//                .retrieve()
+//                .bodyToFlux(StockUnit.class)
+//                .collectList()
+//                .onErrorResume((e) -> {
+//                    log.error("error :" + e.getMessage());
+//                    return Mono.empty();
+//                });
+//    }
 
     public Mono<Trader> findTrader(String code) {
         TraderKey key = new TraderKey();
@@ -760,7 +758,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getSupplier")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(Trader.class)
@@ -2255,12 +2252,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<UnitRelationDetail>> getRelationDetail(String code, Integer deptId) {
+    public Mono<List<UnitRelationDetail>> getRelationDetail(String relCode) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUnitRelationDetail")
-                .queryParam("code", code)
+                .queryParam("code", relCode)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(UnitRelationDetail.class)

@@ -145,7 +145,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         journalTablModel.setTtlDrAmt(txtFDrAmt);
         journalTablModel.setTxtRef(txtRefrence);
         journalTablModel.setAccountRepo(accountRepo);
-        tblJournal.getTableHeader().setFont(Global.lableFont);
+        tblJournal.getTableHeader().setFont(Global.tblHeaderFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         accountRepo.getDepartment().doOnSuccess((t) -> {
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
@@ -219,8 +219,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             }
             List<Gl> list = journalTablModel.getListGV();
             if (lblStatus.getText().equals("EDIT")) {
-                list.get(0).setEdit(journalTablModel.isEdit());
-                list.get(0).setDelList(journalTablModel.getDelList());
+                list.getFirst().setDelList(journalTablModel.getDelList());
             }
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
@@ -255,8 +254,11 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             g.setProjectNo(projectNo);
             g.setGlDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             g.setMacId(Global.macId);
+            g.setEdit(journalTablModel.isEdit());
             if (lblStatus.getText().equals("EDIT")) {
                 g.setModifyBy(Global.loginUser.getUserCode());
+            } else {
+                g.setCreatedBy(Global.loginUser.getUserCode());
             }
             if (g.getSrcAccCode() != null) {
                 if (g.getDeptCode() == null) {

@@ -783,18 +783,22 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
         txtWeightTotal.setEditable(false);
         txtWeightTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
+        jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Total Weight");
 
+        jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Total Qty");
 
         txtQty.setEditable(false);
         txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
+        jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Total Bag");
 
         txtBag.setEditable(false);
         txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
+        jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Weight");
 
         txtWeight.setEditable(false);

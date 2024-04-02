@@ -4,8 +4,6 @@
  */
 package com.user.dialog;
 
-import com.CoreAccountApplication;
-import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.Util1;
 import com.user.common.CompanyComboModel;
@@ -18,6 +16,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import lombok.Setter;
 
 /**
  *
@@ -25,24 +24,10 @@ import javax.swing.JOptionPane;
  */
 public class YearEndProcessingDailog extends javax.swing.JDialog {
 
+    @Setter
     private UserRepo userRepo;
-    private AccountRepo accountRepo;
-
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    @Setter
+    private String token;
 
     /**
      * Creates new form YearEndProcessingDailog
@@ -60,11 +45,11 @@ public class YearEndProcessingDailog extends javax.swing.JDialog {
         LocalDate now = LocalDate.now();
         LocalDate endDate = now.plusYears(2);
         txtEndDate.setDate(Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        userRepo.getCompany(true).subscribe((t) -> {
+        userRepo.getCompany(true).doOnSuccess((t) -> {
             CompanyComboModel model = new CompanyComboModel(t);
             cboCompany.setModel(model);
             cboCompany.setSelectedIndex(0);
-        });
+        }).subscribe();
     }
 
     private void confirm() {
@@ -79,13 +64,14 @@ public class YearEndProcessingDailog extends javax.swing.JDialog {
                 CompanyInfo company = (CompanyInfo) cboCompany.getSelectedItem();
                 YearEnd end = new YearEnd();
                 end.setYeCompCode(company.getCompCode());
-                end.setYearEndDate(txtYearEnd.getDate());
-                end.setStartDate(txtStartDate.getDate());
-                end.setEndDate(txtEndDate.getDate());
+                end.setYearEndDate(Util1.toLocalDate(txtYearEnd.getDate()));
+                end.setStartDate(Util1.toLocalDate(txtStartDate.getDate()));
+                end.setEndDate(Util1.toLocalDate(txtEndDate.getDate()));
                 end.setOpening(chkOpening.isSelected());
                 end.setBatchLock(chkLock.isSelected());
                 end.setCreatedDate(LocalDateTime.now());
                 end.setCreateBy(Global.loginUser.getUserCode());
+                end.setToken(token);
                 userRepo.yearEnd(end).doOnSuccess((t) -> {
                     lblLog.setText(t.getMessage());
                     String compCode = t.getCompCode();

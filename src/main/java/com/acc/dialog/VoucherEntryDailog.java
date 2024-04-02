@@ -240,8 +240,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             btnSave.setEnabled(false);
             List<Gl> list = tableModel.getListVGl();
             if (lblStatus.getText().equals("EDIT")) {
-                list.get(0).setEdit(tableModel.isEdit());
-                list.get(0).setDelList(tableModel.getDelList());
+                list.getFirst().setDelList(tableModel.getDelList());
             }
             accountRepo.saveGl(list).doOnSuccess((t) -> {
                 if (print) {
@@ -290,6 +289,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 g.setMacId(Global.macId);
                 g.setTranSource(vouType);
                 g.setGlVouNo(txtVouNo.getText());
+                g.setEdit(tableModel.isEdit());
                 if (lblStatus.getText().equals("EDIT")) {
                     g.setModifyBy(Global.loginUser.getUserCode());
                 }

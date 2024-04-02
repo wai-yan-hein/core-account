@@ -238,7 +238,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
     }
 
     public List<Gl> getListGV() {
-        return listGV;
+        return listGV.stream().filter((t) -> !Util1.isNullOrEmpty(t.getSrcAccCode())).toList();
     }
 
     public void setListGV(List<Gl> listGV) {
