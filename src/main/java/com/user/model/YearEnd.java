@@ -4,9 +4,9 @@
  */
 package com.user.model;
 
-import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,12 +18,13 @@ import java.time.LocalDateTime;
 public class YearEnd {
     private String yeCompCode;
     private String compCode;
-    private Date startDate;
-    private Date endDate;
-    private Date yearEndDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalDate yearEndDate;
     private boolean batchLock;
     private boolean opening;
     private String createBy;
     private LocalDateTime createdDate;
     private String message;
+    private String token;
 }

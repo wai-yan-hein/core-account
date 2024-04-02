@@ -265,7 +265,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     }
 
     public List<Gl> getListVGl() {
-        return listVGl;
+        return listVGl.stream().filter((t) -> !Util1.isNullOrEmpty(t.getAccCode())).toList();
     }
 
     public void setListVGl(List<Gl> listVGl) {

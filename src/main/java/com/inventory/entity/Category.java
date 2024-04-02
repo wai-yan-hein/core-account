@@ -47,6 +47,8 @@ public class Category implements java.io.Serializable {
     private Integer deptId;
     @Column(name = "active")
     private boolean active;
+    @Column(name = "deleted")
+    private boolean deleted;
 
     public Category() {
     }

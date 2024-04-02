@@ -18,7 +18,6 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
-import com.repo.InventoryRepo;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.ui.SecurityDialog;
@@ -52,8 +51,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     @Setter
     private UserRepo userRepo;
-    @Setter
-    private InventoryRepo inventoryRepo;
     @Setter
     private AccountRepo accountRepo;
     @Setter
@@ -298,7 +295,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private void yearEndDialog() {
         YearEndProcessingDailog d = new YearEndProcessingDailog(Global.parentForm);
         d.setUserRepo(userRepo);
-        d.setAccountRepo(accountRepo);
+        d.setToken(token);
         d.initMain();
         d.setLocationRelativeTo(null);
         d.setVisible(true);

@@ -6,8 +6,10 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.StockBrand;
 import com.inventory.entity.StockBrandKey;
@@ -27,16 +29,14 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyListener {
-
-    private static final Logger log = LoggerFactory.getLogger(StockBrandSetupDialog.class);
 
     private int selectRow = - 1;
     private StockBrand brand = new StockBrand();
@@ -66,8 +66,15 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         super(frame, true);
         initComponents();
         initKeyListener();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     public void initMain() {
@@ -86,7 +93,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         tblBrand.setModel(itemBrandTableModel);
         sorter = new TableRowSorter<>(tblBrand.getModel());
         tblBrand.setRowSorter(sorter);
-        tblBrand.getTableHeader().setFont(Global.lableFont);
+        tblBrand.getTableHeader().setFont(Global.tblHeaderFont);
         tblBrand.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblBrand.setDefaultRenderer(Object.class, new TableCellRender());
         tblBrand.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
@@ -143,7 +150,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
         txtCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
@@ -192,7 +199,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblBrand = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -222,10 +229,10 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         tblBrand.setName("tblBrand"); // NOI18N
         jScrollPane1.setViewportView(tblBrand);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -342,7 +349,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -357,7 +364,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -385,14 +392,14 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -423,8 +430,8 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblBrand;
     private javax.swing.JTextField txtCode;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
     @Override

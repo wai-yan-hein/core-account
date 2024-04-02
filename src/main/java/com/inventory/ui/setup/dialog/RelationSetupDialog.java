@@ -93,12 +93,11 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                     selectRow = tblRel.convertRowIndexToModel(tblRel.getSelectedRow());
                     UnitRelation rel = relationTableModel.getRelation(selectRow);
                     String relCode = rel.getKey().getRelCode();
-                    Integer deptId = rel.getDeptId();
                     if (relCode != null) {
                         lblName.setText(rel.getRelName());
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
-                        inventoryRepo.getRelationDetail(relCode, deptId).subscribe((t) -> {
+                        inventoryRepo.getRelationDetail(relCode).subscribe((t) -> {
                             relationDetailTableModel.setListRelation(t);
                             relationDetailTableModel.setRelation(rel);
 

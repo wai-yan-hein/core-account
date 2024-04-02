@@ -6,8 +6,10 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.Category;
 import com.inventory.entity.CategoryKey;
 import com.inventory.entity.MessageType;
@@ -63,8 +65,15 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         super(frame, false);
         initComponents();
         initKeyListener();
-        swrf = new StartWithRowFilter(txtFilter);
+        initClientProperty();
+        swrf = new StartWithRowFilter(txtSearch);
         lblStatus.setForeground(Color.green);
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     public void initMain() {
@@ -83,7 +92,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         tblCategory.setModel(categoryTableModel);
         sorter = new TableRowSorter<>(tblCategory.getModel());
         tblCategory.setRowSorter(sorter);
-        tblCategory.getTableHeader().setFont(Global.lableFont);
+        tblCategory.getTableHeader().setFont(Global.tblHeaderFont);
         tblCategory.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCategory.setDefaultRenderer(Object.class, new TableCellRender());
         tblCategory.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
@@ -139,7 +148,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void clear() {
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
@@ -188,7 +197,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCategory = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -219,10 +228,10 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         tblCategory.setName("tblCategory"); // NOI18N
         jScrollPane1.setViewportView(tblCategory);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -342,7 +351,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
-                            .addComponent(txtFilter))
+                            .addComponent(txtSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -356,7 +365,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -386,14 +395,14 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -423,8 +432,8 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblCategory;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 
