@@ -111,7 +111,7 @@ public class SaleRiceTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //code
-                    return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
+                    return sd.getUserCode();
                 }
                 case 1 -> {
                     return sd.getStockName();
@@ -271,7 +271,7 @@ public class SaleRiceTableModel extends AbstractTableModel {
         double weight = s.getWeight();
         double stdWt = s.getStdWeight();
         if (s.isCalculate()) {
-            if (s.getStockCode() != null && weight > 0 && orgPrice > 0) {
+            if (s.getStockCode() != null && weight > 0) {
                 stdWt = stdWt == 0 ? weight : stdWt;
                 double price = stdWt / weight * orgPrice;
                 double amount = bag * price;

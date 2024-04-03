@@ -11,6 +11,7 @@ import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
+import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.Util1;
@@ -152,7 +153,11 @@ public class JournalEntryTableModel extends AbstractTableModel {
                         }
                     }
                     case 1 -> {
-                        gv.setDescription(Util1.getString(value));
+                        if (value instanceof VDescription d) {
+                            gv.setDescription(d.getDescription());
+                        } else {
+                            gv.setDescription(Util1.getString(value));
+                        }
                         parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {

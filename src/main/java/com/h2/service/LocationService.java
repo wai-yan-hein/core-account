@@ -18,7 +18,7 @@ public interface LocationService {
 
     Location find(LocationKey key);
 
-    List<Location> findAll(String compCode);
+    List<Location> findAll(String whCode,String compCode);
 
     String getMaxDate();
 

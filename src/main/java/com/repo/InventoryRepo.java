@@ -633,7 +633,6 @@ public class InventoryRepo {
 //                    return Mono.empty();
 //                });
 //    }
-
     public Mono<Trader> findTrader(String code) {
         TraderKey key = new TraderKey();
         key.setCode(Util1.isNull(code, "-"));
@@ -971,6 +970,9 @@ public class InventoryRepo {
         WareHouseKey key = new WareHouseKey();
         key.setCompCode(Global.compCode);
         key.setCode(code);
+        if (Util1.isNullOrEmpty(code)) {
+            return Mono.empty();
+        }
         if (localDatabase) {
             return h2Repo.find(key);
         }
@@ -1195,13 +1197,17 @@ public class InventoryRepo {
     }
 
     public Mono<List<Location>> getLocation() {
+        return getLocation("-");
+    }
+
+    public Mono<List<Location>> getLocation(String whCode) {
         if (localDatabase) {
-            return h2Repo.getLocation();
+            return h2Repo.getLocation(whCode);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getLocation")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("whCode", whCode)
                 .build())
                 .retrieve()
                 .bodyToFlux(Location.class)
@@ -3289,20 +3295,8 @@ public class InventoryRepo {
                 .uri("/pur/savePurchase")
                 .body(Mono.just(ph), PurHis.class)
                 .retrieve()
-                .bodyToMono(PurHis.class)
-                .onErrorResume((e) -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(ph);
-                        }
-                        return Mono.error(new RuntimeException(e.getMessage()));
-                    }
-                    return Mono.error(new RuntimeException(e.getMessage()));
-                });
+                .bodyToMono(PurHis.class);
+
     }
 
     public Mono<MillingHis> save(MillingHis ph) {

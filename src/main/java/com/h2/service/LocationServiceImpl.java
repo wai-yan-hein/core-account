@@ -31,8 +31,8 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<Location> findAll(String compCode) {
-        return dao.findAll(compCode);
+    public List<Location> findAll(String whCode,String compCode) {
+        return dao.findAll(whCode,compCode);
     }
 
     @Override

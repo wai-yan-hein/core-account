@@ -6,8 +6,10 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.WareHouse;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.WareHouseKey;
@@ -17,8 +19,6 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -28,6 +28,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,36 +40,29 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
 
     private int selectRow = - 1;
     private WareHouse ord = new WareHouse();
-    private final WareHouseTableModel labourGroupTableModel = new WareHouseTableModel();
+    private final WareHouseTableModel tableModel = new WareHouseTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
-
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<WareHouse> listVou = new ArrayList<>();
 
-    public List<WareHouse> getListVou() {
-        return listVou;
-    }
-
-    public void setListVou(List<WareHouse> listVou) {
-        labourGroupTableModel.setListVou(listVou);
-        this.listVou = listVou;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
     public WareHouseSetupDialog(JFrame frame) {
         super(frame, false);
         initComponents();
         initKeyListener();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
     }
 
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
+    }
+
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
         initTable();
-        searchCategory();
         txtUserCode.requestFocus();
     }
 
@@ -80,12 +74,12 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
         tblVou.addKeyListener(this);
     }
 
-    private void searchCategory() {
-        labourGroupTableModel.setListVou(listVou);
+    private void calSize() {
+        lblRec.setText(String.valueOf(tableModel.getListVou().size()));
     }
 
     private void initTable() {
-        tblVou.setModel(labourGroupTableModel);
+        tblVou.setModel(tableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
         tblVou.setRowSorter(sorter);
         tblVou.getTableHeader().setFont(Global.lableFont);
@@ -96,10 +90,21 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(labourGroupTableModel.getObject(selectRow));
+                    setCategory(tableModel.getObject(selectRow));
                 }
             }
         });
+    }
+
+    public void search() {
+        progress.setIndeterminate(true);
+        inventoryRepo.getWareHouse().doOnSuccess((t) -> {
+            tableModel.setListVou(t);
+        }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+            calSize();
+        }).subscribe();
+        setVisible(true);
     }
 
     private void setCategory(WareHouse cat) {
@@ -120,9 +125,9 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
             btnSave.setEnabled(false);
             inventoryRepo.saveWareHouse(ord).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    listVou.set(selectRow, t);
+                    tableModel.setObject(t, selectRow);
                 } else {
-                    listVou.add(t);
+                    tableModel.addOBject(t);
                 }
                 clear();
                 sendMessage(t.getDescription());
@@ -142,15 +147,16 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void clear() {
+        calSize();
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         ord = new WareHouse();
-        labourGroupTableModel.refresh();
+        tableModel.refresh();
         tblVou.requestFocus();
         txtUserCode.requestFocus();
     }
@@ -190,7 +196,7 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVou = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -201,6 +207,8 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
         chkActive = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -222,10 +230,10 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
         tblVou.setName("tblVou"); // NOI18N
         jScrollPane1.setViewportView(tblVou);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -290,21 +298,27 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
         chkActive.setSelected(true);
         chkActive.setText("Active");
 
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Records :");
+
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("0");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnClear))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -314,7 +328,11 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
                                 .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtName)
-                            .addComponent(txtUserCode))))
+                            .addComponent(txtUserCode)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -340,7 +358,11 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(233, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 211, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblRec))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -354,7 +376,7 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
-                            .addComponent(txtFilter))
+                            .addComponent(txtSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -368,7 +390,7 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -393,14 +415,14 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -423,16 +445,18 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVou;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 
@@ -491,4 +515,5 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
             }
         }
     }
+
 }

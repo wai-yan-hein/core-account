@@ -108,6 +108,7 @@ public final class COA3AutoCompleter implements KeyListener {
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
+        table.setFont(Global.textFont);
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name

@@ -20,6 +20,6 @@ public interface LocationDao {
 
     String getMaxDate();
 
-    List<Location> findAll(String compCode);
+    List<Location> findAll(String whCode,String compCode);
 
 }

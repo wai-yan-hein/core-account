@@ -124,17 +124,10 @@ public class OtherSetup extends javax.swing.JPanel {
             lgDialog = new LabourGroupSetupDialog(Global.parentForm);
             lgDialog.setInventoryRepo(inventoryRepo);
             lgDialog.initMain();
-            lgDialog.setSize(Global.width / 2, Global.height / 2);
+            lgDialog.setSize(Global.width - 200, Global.height - 200);
             lgDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
-            if (t != null) {
-                lgDialog.setListVou(t);
-            }
-        }).doOnTerminate(() -> {
-            lgDialog.setVisible(true);
-        }).subscribe();
-
+        lgDialog.search();
     }
 
     private void relationSetup() {
@@ -157,16 +150,10 @@ public class OtherSetup extends javax.swing.JPanel {
             wareHouseSetupDialog = new WareHouseSetupDialog(Global.parentForm);
             wareHouseSetupDialog.setInventoryRepo(inventoryRepo);
             wareHouseSetupDialog.initMain();
-            wareHouseSetupDialog.setSize(Global.width / 2, Global.height / 2);
+            wareHouseSetupDialog.setSize(Global.width - 200, Global.height - 200);
             wareHouseSetupDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getWareHouse().doOnSuccess((t) -> {
-            if (t != null) {
-                wareHouseSetupDialog.setListVou(t);
-            }
-        }).doOnTerminate(() -> {
-            wareHouseSetupDialog.setVisible(true);
-        }).subscribe();
+        wareHouseSetupDialog.search();
 
     }
 

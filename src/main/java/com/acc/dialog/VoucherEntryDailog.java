@@ -45,6 +45,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -243,19 +244,28 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 list.getFirst().setDelList(tableModel.getDelList());
             }
             accountRepo.saveGl(list).doOnSuccess((t) -> {
+                log.info("save.");
                 if (print) {
                     String tranSource = t.getTranSource();
                     String glVouNo = t.getGlVouNo();
                     Gl gl = new Gl();
                     gl.setTranSource(tranSource);
                     gl.setGlVouNo(glVouNo);
-                    this.dispose();
+                    setVisible(false);
                     observer.selected("print", gl);
                 }
             }).doOnError((e) -> {
+                log.info("error.");
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveVoucher(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).doOnTerminate(() -> {
                 clear();
             }).subscribe();
@@ -318,6 +328,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     public void clear() {
+        log.info("clear.");
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
         txtVouDate.setDate(Util1.getTodayDate());
@@ -331,6 +342,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         lblStatus.setForeground(Color.green);
         txtVouNo.setEditable(false);
         tableModel.clear();
+        tableModel.addEmptyRow();
         txtVouDate.getDateEditor().getUiComponent().requestFocus();
     }
 
@@ -389,7 +401,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
         jLabel3.setText("jLabel3");
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Journal Voucher");
         setFont(Global.textFont);
         setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);

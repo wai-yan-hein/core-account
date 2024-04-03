@@ -11,10 +11,13 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.ProUtil;
+import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.editor.WareHouseAutoCompleter;
 import com.inventory.entity.Location;
 import com.inventory.entity.LocationKey;
@@ -43,12 +46,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class LocationSetupDialog extends javax.swing.JDialog implements KeyListener {
+public class LocationSetupDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
 
     private int selectRow = - 1;
     private Location location = new Location();
     private final LocationTableModel locationTableModel = new LocationTableModel();
     private WareHouseAutoCompleter wareHouseAutoCompleter;
+    private WareHouseAutoCompleter wareHouseAutoCompleterF;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private COAAutoCompleter coaAutoCompleter;
     @Setter
@@ -67,13 +71,20 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         super(frame, true);
         initComponents();
         initKeyListener();
+        initClientProperty();
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
         initTable();
         initModel();
         txtUserCode.requestFocus();
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initKeyListener() {
@@ -87,15 +98,18 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void initModel() {
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
+        wareHouseAutoCompleter = new WareHouseAutoCompleter(txtWH, null, false);
+        wareHouseAutoCompleterF = new WareHouseAutoCompleter(txtWHF, null, true);
+        wareHouseAutoCompleterF.setObserver(this);
+        coaAutoCompleter = new COAAutoCompleter(txtCoa, null, false);
         accountRepo.getDepartment().doOnSuccess((t) -> {
             t.add(new DepartmentA());
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
-        wareHouseAutoCompleter = new WareHouseAutoCompleter(txtWH, null, false);
         inventoryRepo.getWareHouse().doOnSuccess((t) -> {
             wareHouseAutoCompleter.setListObject(t);
+            wareHouseAutoCompleterF.setListObject(t);
         }).subscribe();
-        coaAutoCompleter = new COAAutoCompleter(txtCoa, null, false);
         accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP)).doOnSuccess((t) -> {
             t.add(new ChartOfAccount());
             coaAutoCompleter.setListCOA(t);
@@ -104,12 +118,19 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void search() {
-        inventoryRepo.getLocation().doOnSuccess((t) -> {
+        progress.setIndeterminate(true);
+        String whCode = wareHouseAutoCompleterF.getObject().getKey().getCode();
+        inventoryRepo.getLocation(whCode).doOnSuccess((t) -> {
             locationTableModel.setListLocation(t);
         }).doOnTerminate(() -> {
-            setVisible(true);
+            calSize();
+            progress.setIndeterminate(false);
         }).subscribe();
+        setVisible(true);
+    }
 
+    private void calSize() {
+        lblRec.setText(String.valueOf(locationTableModel.getListLocation().size()));
     }
 
     private void initTable() {
@@ -147,13 +168,9 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void setWareHouse(String whCode) {
-        if (!Util1.isNullOrEmpty(whCode)) {
-            inventoryRepo.findWareHouse(whCode).doOnSuccess((t) -> {
-                wareHouseAutoCompleter.setObject(t);
-            }).subscribe();
-        } else {
-            wareHouseAutoCompleter.setObject(null);
-        }
+        inventoryRepo.findWareHouse(whCode).doOnSuccess((t) -> {
+            wareHouseAutoCompleter.setObject(t);
+        }).subscribe();
     }
 
     private void setCash(String cashAcc) {
@@ -170,6 +187,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void save() {
         if (isValidEntry()) {
+            progress.setIndeterminate(true);
             inventoryRepo.saveLocation(location).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     locationTableModel.setLocation(t, selectRow);
@@ -191,8 +209,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void clear() {
+        calSize();
+        progress.setIndeterminate(false);
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         chkActive.setSelected(true);
         departmentAutoCompleter.setDepartment(null);
@@ -259,9 +279,6 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblLocation = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -279,33 +296,18 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         txtWH = new javax.swing.JTextField();
         txtDep = new javax.swing.JTextField();
         txtCoa = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
+        progress = new javax.swing.JProgressBar();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblLocation = new javax.swing.JTable();
+        txtWHF = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Location Setup");
         setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
-
-        tblLocation.setFont(Global.textFont);
-        tblLocation.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        tblLocation.setName("tblLocation"); // NOI18N
-        jScrollPane1.setViewportView(tblLocation);
-
-        txtFilter.setFont(Global.textFont);
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -427,6 +429,12 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Records :");
+
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("0");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -447,7 +455,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 81, Short.MAX_VALUE)
+                                .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(btnSave1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSave)
@@ -457,7 +465,11 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtWH)
                             .addComponent(txtDep)
-                            .addComponent(txtCoa))))
+                            .addComponent(txtCoa)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -495,7 +507,70 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(btnSave)
                             .addComponent(btnSave1)))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(199, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblRec))
+                .addContainerGap())
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        tblLocation.setFont(Global.textFont);
+        tblLocation.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        tblLocation.setName("tblLocation"); // NOI18N
+        jScrollPane1.setViewportView(tblLocation);
+
+        txtWHF.setFont(Global.textFont);
+        txtWHF.setName("txtSearch"); // NOI18N
+        txtWHF.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtWHFKeyReleased(evt);
+            }
+        });
+
+        txtSearch.setFont(Global.textFont);
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSearchKeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(txtSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtWHF, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtWHF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -505,22 +580,22 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -546,14 +621,14 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -597,6 +672,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCoaActionPerformed
 
+    private void txtWHFKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtWHFKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtWHFKeyReleased
+
     /**
      * @param args the command line arguments
      */
@@ -606,22 +685,27 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSave1;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblLocation;
     private javax.swing.JTextField txtCoa;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     private javax.swing.JTextField txtWH;
+    private javax.swing.JTextField txtWHF;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -668,5 +752,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                 }
             }
         }
+    }
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        search();
     }
 }

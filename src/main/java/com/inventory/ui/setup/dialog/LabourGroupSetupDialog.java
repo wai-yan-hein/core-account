@@ -7,9 +7,11 @@ package com.inventory.ui.setup.dialog;
 
 import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LabourGroupKey;
 import com.inventory.entity.MessageType;
@@ -19,8 +21,6 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -30,6 +30,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -41,44 +42,35 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
 
     private int selectRow = - 1;
     private LabourGroup ord = new LabourGroup();
-    private final LabourGroupTableModel labourGroupTableModel = new LabourGroupTableModel();
+    private final LabourGroupTableModel tableModel = new LabourGroupTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
-
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<LabourGroup> listVou = new ArrayList<>();
-
-    public List<LabourGroup> getListVou() {
-        return listVou;
-    }
-
-    public void setListVou(List<LabourGroup> listVou) {
-        labourGroupTableModel.setListVou(listVou);
-        this.listVou = listVou;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     public LabourGroupSetupDialog(JFrame frame) {
         super(frame, false);
         initComponents();
         initKeyListener();
         initFormat();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     public void initMain() {
         ComponentUtil.addFocusListener(this);
         initTable();
-        searchCategory();
         txtUserCode.requestFocus();
     }
 
     private void initFormat() {
-        txtQty.setFormatterFactory(Util1.getDecimalFormat2());
-        txtPrice.setFormatterFactory(Util1.getDecimalFormat2());
+        ComponentUtil.setTextProperty(this);
     }
 
     private void initKeyListener() {
@@ -89,12 +81,23 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         tblVou.addKeyListener(this);
     }
 
-    private void searchCategory() {
-        labourGroupTableModel.setListVou(listVou);
+    public void search() {
+        progress.setIndeterminate(true);
+        inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
+            tableModel.setListVou(t);
+        }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+            calSize();
+        }).subscribe();
+        setVisible(true);
+    }
+
+    private void calSize() {
+        lblRec.setText(String.valueOf(tableModel.getListVou().size()));
     }
 
     private void initTable() {
-        tblVou.setModel(labourGroupTableModel);
+        tblVou.setModel(tableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
         tblVou.setRowSorter(sorter);
         tblVou.getTableHeader().setFont(Global.lableFont);
@@ -105,11 +108,11 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(labourGroupTableModel.getObject(selectRow));
+                    setCategory(tableModel.getObject(selectRow));
                 }
             }
         });
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
     }
 
     private void setCategory(LabourGroup cat) {
@@ -133,9 +136,9 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
             btnSave.setEnabled(false);
             inventoryRepo.saveLabourGroup(ord).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    listVou.set(selectRow, t);
+                    tableModel.setObject(t, selectRow);
                 } else {
-                    listVou.add(t);
+                    tableModel.addObject(t);
                 }
                 clear();
                 sendMessage(t.getLabourName());
@@ -155,17 +158,18 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     }
 
     private void clear() {
+        calSize();
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         txtQty.setValue(1);
         txtPrice.setValue(1);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         ord = new LabourGroup();
-        labourGroupTableModel.refresh();
+        tableModel.refresh();
         tblVou.requestFocus();
         txtUserCode.requestFocus();
         spinnerOrderBy.setValue(0);
@@ -209,7 +213,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVou = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -227,6 +231,8 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         jSeparator2 = new javax.swing.JSeparator();
         txtQty = new javax.swing.JFormattedTextField();
         txtPrice = new javax.swing.JFormattedTextField();
+        jLabel1 = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -248,10 +254,10 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         tblVou.setName("tblVou"); // NOI18N
         jScrollPane1.setViewportView(tblVou);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -331,6 +337,12 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         txtPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtPrice.setFont(Global.amtFont);
 
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Records :");
+
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("0");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -368,7 +380,11 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                         .addGap(91, 91, 91)
                         .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -408,7 +424,11 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(211, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 189, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblRec))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -422,7 +442,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
-                            .addComponent(txtFilter))
+                            .addComponent(txtSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -436,7 +456,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -461,14 +481,14 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -491,6 +511,7 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -500,14 +521,15 @@ public class LabourGroupSetupDialog extends javax.swing.JDialog implements KeyLi
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JSpinner spinnerOrderBy;
     private javax.swing.JTable tblVou;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
     private javax.swing.JFormattedTextField txtPrice;
     private javax.swing.JFormattedTextField txtQty;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 

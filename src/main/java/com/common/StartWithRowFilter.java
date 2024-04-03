@@ -4,6 +4,7 @@
  */
 package com.common;
 
+import java.util.Objects;
 import javax.swing.RowFilter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,9 @@ public class StartWithRowFilter extends RowFilter<Object, Object> {
             String value = entry.getStringValue(i).toLowerCase();
             String text = jtf.getText().toLowerCase();
             if (!Util1.isNullOrEmpty(value)) {
-                if (value.startsWith(text)) {
+                if (Util1.isNumber(value)) {
+                    return Objects.equals(Util1.getDouble(value), Util1.getDouble(text));
+                } else if (value.startsWith(text)) {
                     return true;
                 } else if (value.contains(text)) {
                     return true;

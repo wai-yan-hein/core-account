@@ -305,11 +305,9 @@ public class H2Repo {
     private AccSettingService accSettingService;
     @Autowired
     private WareHouseService wareHouseService;
-//    @Autowired
-//    private Langua
 
-    public Mono<List<Location>> getLocation() {
-        return Mono.justOrEmpty(locationService.findAll(Global.compCode));
+    public Mono<List<Location>> getLocation(String whCode) {
+        return Mono.justOrEmpty(locationService.findAll(whCode,Global.compCode));
     }
 
     public Mono<Location> find(LocationKey key) {

@@ -239,19 +239,8 @@ public class AccountRepo {
                 .uri("/account/saveGlList")
                 .body(Mono.just(gl), List.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(ReturnObject.class);
+          
     }
 
     public Mono<Boolean> delete(COATemplateKey obj) {

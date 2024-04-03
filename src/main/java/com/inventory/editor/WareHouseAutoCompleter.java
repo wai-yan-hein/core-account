@@ -73,7 +73,6 @@ public final class WareHouseAutoCompleter implements KeyListener {
     public void setListObject(List<WareHouse> list) {
         if (filter) {
             WareHouse st = new WareHouse("-", "All");
-
             list.add(0, st);
             setObject(st);
         }
@@ -92,6 +91,9 @@ public final class WareHouseAutoCompleter implements KeyListener {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
+        if (this.filter) {
+            setObject(new WareHouse("-", "All"));
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.WARE_HOUSE));
         textComp.setFont(Global.textFont);

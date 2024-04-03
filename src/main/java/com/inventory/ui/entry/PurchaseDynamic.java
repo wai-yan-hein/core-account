@@ -90,6 +90,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -750,8 +751,15 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 }
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
-                observer.selected("save", true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        savePur(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).subscribe();
         }
     }

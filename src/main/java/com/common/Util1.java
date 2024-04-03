@@ -106,7 +106,6 @@ public class Util1 {
     }
 
     public static boolean isNumber(Object obj) {
-        boolean status = false;
         try {
             if (!Util1.isNull(obj)) {
                 String str = obj.toString();
@@ -114,12 +113,13 @@ public class Util1 {
                     str = str.replaceAll(",", "");
                 }
                 Float.valueOf(str);
-                status = true;
+                return true;
             }
         } catch (NumberFormatException ex) {
+            return false;
         }
 
-        return status;
+        return false;
     }
 
     public static String getPropValue(String key) {
@@ -899,7 +899,6 @@ public class Util1 {
 
     }
 
-
     public static String toFormatDate(String obj, int length) {
         String[] arr = obj.split("(?<=\\G.{2})");
         if (length == 8) {
@@ -1303,6 +1302,9 @@ public class Util1 {
     }
 
     public static LocalDate toLocalDate(Date date) {
+        if (date == null) {
+            return null;
+        }
         Instant instant = date.toInstant();
         ZoneId zoneId = ZoneId.systemDefault();
         return instant.atZone(zoneId).toLocalDate();
@@ -1442,5 +1444,7 @@ public class Util1 {
         LocalDate minusDays = date.plusDays(day);
         return minusDays.toString();
     }
+
+
 
 }

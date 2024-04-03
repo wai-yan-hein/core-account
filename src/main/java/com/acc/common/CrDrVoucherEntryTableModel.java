@@ -11,6 +11,7 @@ import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
+import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.Util1;
 import java.util.ArrayList;
@@ -154,9 +155,10 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(1, 1);
                     }
                     case 1 -> {
-                        if (value != null) {
-                            gl.setDescription(String.valueOf(value));
-                            parent.setColumnSelectionInterval(1, 2);
+                        if (value instanceof VDescription d) {
+                            gl.setDescription(d.getDescription());
+                        } else {
+                            gl.setDescription(Util1.getString(value));
                         }
                     }
                     case 2 -> {
@@ -346,7 +348,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     public void clear() {
         if (listVGl != null) {
             listVGl.clear();
-            addEmptyRow();
             fireTableDataChanged();
         }
     }
@@ -376,7 +377,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
         if (!listVGl.isEmpty()) {
             Gl gl = listVGl.get(row);
             if (!Util1.isNull(gl.getKey().getGlCode())) {
-                int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                int status = JOptionPane.showConfirmDialog(parent,
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
                     delList.add(gl.getKey());

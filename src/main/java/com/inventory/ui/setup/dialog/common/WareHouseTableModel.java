@@ -77,16 +77,16 @@ public class WareHouseTableModel extends AbstractTableModel {
         return listVou.get(row);
     }
 
-    public void setObject(WareHouse category, int row) {
+    public void setObject(WareHouse obj, int row) {
         if (!listVou.isEmpty()) {
-            listVou.set(row, category);
+            listVou.set(row, obj);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public void addOrderStatus(WareHouse item) {
+    public void addOBject(WareHouse obj) {
         if (!listVou.isEmpty()) {
-            listVou.add(item);
+            listVou.add(obj);
             fireTableRowsInserted(listVou.size() - 1, listVou.size() - 1);
         }
     }
