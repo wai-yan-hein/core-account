@@ -710,7 +710,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getCustomer")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().bodyToFlux(Trader.class)
                 .collectList()

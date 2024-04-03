@@ -1106,7 +1106,10 @@ public class Util1 {
         return str == null ? "" : str.replace(" ", "").toLowerCase();
     }
 
-    public static Double toNull(double value) {
+    public static Double toNull(Double value) {
+        if (value == null) {
+            return null;
+        }
         return value == 0 ? null : value;
     }
 
@@ -1444,7 +1447,5 @@ public class Util1 {
         LocalDate minusDays = date.plusDays(day);
         return minusDays.toString();
     }
-
-
 
 }

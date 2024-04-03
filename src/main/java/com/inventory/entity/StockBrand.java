@@ -25,7 +25,7 @@ public class StockBrand {
 
     @EmbeddedId
     private StockBrandKey key;
-    @Column(name = "brand_name", nullable = false, length = 80, unique = true)
+    @Column(name = "brand_name")
     private String brandName;
     @Column(name = "mig_id")
     private Integer migId;

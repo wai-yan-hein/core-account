@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,62 +36,20 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location",
         "Qty", "Unit", "Price", "Amount"};
+    @Setter
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
+    @Setter
+    private SelectionObserver observer;
     private final List<PurDetailKey> deleteList = new ArrayList();
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private JDateChooser vouDate;
+    @Setter
     private JLabel lblRec;
+    @Setter
     private Purchase purchase;
-
-    public Purchase getPurchase() {
-        return purchase;
-    }
-
-    public void setPurchase(Purchase purchase) {
-        this.purchase = purchase;
-    }
-
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
-    }
-
-    public void setObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -211,7 +170,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
-                            selectionObserver.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
                     parent.setColumnSelectionInterval(4, 4);
@@ -288,7 +246,7 @@ public class PurchaseTableModel extends AbstractTableModel {
             calculateAmount(record);
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
-            selectionObserver.selected("CAL-TOTAL", "CAL-TOTAL");
+            observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -341,7 +299,6 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     public void setListDetail(List<PurHisDetail> listDetail) {
         this.listDetail = listDetail;
-        //setRecord(listDetail.size());
         fireTableDataChanged();
     }
 

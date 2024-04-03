@@ -1087,7 +1087,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             btnBatch.setText(Util1.isNullOrEmpty(ph.getBatchNo()) ? "Batch" : "View");
         }
         txtVouNo.setText(ph.getKey().getVouNo());
-        txtDueDate.setDate(ph.getDueDate());
+        txtDueDate.setDate(Util1.convertToDate(ph.getDueDate()));
         txtRemark.setText(ph.getRemark());
         txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtVouTotal.setValue(Util1.getDouble(ph.getVouTotal()));

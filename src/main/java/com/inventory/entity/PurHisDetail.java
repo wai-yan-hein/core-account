@@ -11,7 +11,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -22,7 +21,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "pur_his_detail")
-public class PurHisDetail implements Serializable {
+public class PurHisDetail {
 
     @EmbeddedId
     private PurDetailKey key;

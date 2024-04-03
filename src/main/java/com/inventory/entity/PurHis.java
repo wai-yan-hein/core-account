@@ -12,8 +12,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -25,7 +25,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "pur_his")
-public class PurHis implements java.io.Serializable, Cloneable {
+public class PurHis implements Cloneable {
 
     @EmbeddedId
     private PurHisKey key;
@@ -38,7 +38,7 @@ public class PurHis implements java.io.Serializable, Cloneable {
     private LocalDateTime vouDate;
     @Temporal(TemporalType.DATE)
     @Column(name = "due_date")
-    private Date dueDate;
+    private LocalDate dueDate;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "deleted")

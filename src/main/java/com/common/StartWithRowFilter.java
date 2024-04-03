@@ -28,9 +28,7 @@ public class StartWithRowFilter extends RowFilter<Object, Object> {
             String value = entry.getStringValue(i).toLowerCase();
             String text = jtf.getText().toLowerCase();
             if (!Util1.isNullOrEmpty(value)) {
-                if (Util1.isNumber(value)) {
-                    return Objects.equals(Util1.getDouble(value), Util1.getDouble(text));
-                } else if (value.startsWith(text)) {
+                if (value.startsWith(text)) {
                     return true;
                 } else if (value.contains(text)) {
                     return true;
