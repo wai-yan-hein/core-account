@@ -50,6 +50,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -62,7 +63,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-    
+
     public static final int OPENING = 1;
     public static final int PAYABLE = 2;
     public static final int PADDY = 3;
@@ -73,37 +74,22 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
     private final OpeningConsignTableModel consignTableModel = new OpeningConsignTableModel();
     private LocationAutoCompleter locationAutoCompleter;
     private CurrencyAutoCompleter currencyAAutoCompleter;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
     private OPHistoryDialog vouSearchDialog;
     private OPHis oPHis = new OPHis();
+    @Setter
     private JProgressBar progress;
+    @Setter
     private SelectionObserver observer;
     private Mono<List<Location>> monoLoc;
     private final ExcelExporter exporter = new ExcelExporter();
+    @Setter
     private TaskExecutor taskExecutor;
     private TraderAutoCompleter traderAutoCompleter;
     private FindDialog findDialog;
-    
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-    
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
 
     /**
      * Creates new form OpeningSetup
@@ -116,7 +102,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         initTextBoxFormat();
         actionMapping();
     }
-    
+
     public void initMain() {
         initCompleter();
         initTable();
@@ -126,32 +112,32 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         txtOPDate.setDate(Util1.getTodayDate());
         txtCurrency.setEnabled(ProUtil.isMultiCur());
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblOpening);
     }
-    
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblOpening, 30);
         scroll.setRowHeaderView(list);
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblOpening.getActionMap().put(solve, new DeleteAction());
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     private void initTextBoxFormat() {
         ComponentUtil.addFocusListener(this);
         ComponentUtil.setTextProperty(this);
@@ -165,22 +151,22 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 txtCus.setVisible(true);
             }
         }
-        
+
     }
-    
+
     private void initCompleter() {
         monoLoc = inventoryRepo.getLocation();
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
-        monoLoc.subscribe((t) -> {
+        monoLoc.doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
+        }).subscribe();
         inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             locationAutoCompleter.setLocation(tt);
         }).subscribe();
         currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAAutoCompleter.setListCurrency(t);
-        });
+        }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
         }).subscribe();
@@ -189,7 +175,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
     }
-    
+
     private void initModel() {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -203,7 +189,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             }
         }
     }
-    
+
     private void initOpeningTable() {
         openingTableModel.setObserver(this);
         openingTableModel.setParent(tblOpening);
@@ -230,7 +216,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
     }
-    
+
     private void initOpeningPaddyTable() {
         openingPaddyTableModel.setObserver(this);
         openingPaddyTableModel.setParent(tblOpening);
@@ -248,7 +234,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
         tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        
+
         tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//moi
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
         tblOpening.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
@@ -256,7 +242,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//bag
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//price
     }
-    
+
     private void initTableConsign() {
         consignTableModel.setObserver(this);
         consignTableModel.setParent(tblOpening);
@@ -271,13 +257,13 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//bag
         tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        
+
         tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//moi
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
         tblOpening.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//bag
     }
-    
+
     private void initTable() {
         tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
         tblOpening.setRowHeight(Global.tblRowHeight);
@@ -288,7 +274,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-    
+
     private void clearModel() {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -304,9 +290,9 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 consignTableModel.addNewRow();
             }
         }
-        
+
     }
-    
+
     private void clear() {
         txtRemark.setText(null);
         lblStatus.setText("NEW");
@@ -320,7 +306,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         calculatAmount();
         observeMain();
     }
-    
+
     private List<OPHisDetail> getListDetail() {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -335,7 +321,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         }
         return null;
     }
-    
+
     private List<OPHisDetailKey> getDeleteList() {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -350,7 +336,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         }
         return null;
     }
-    
+
     private boolean isValidDetail() {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -365,7 +351,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         }
         return false;
     }
-    
+
     private void saveOpening() {
         if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtOPDate.getDate())) {
@@ -387,13 +373,12 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 oPHis.setCreatedBy(Global.loginUser.getUserCode());
             }
             oPHis.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
-            oPHis.setVouDate(txtOPDate.getDate());
+            oPHis.setVouDate(Util1.toLocalDate(txtOPDate.getDate()));
             oPHis.setRemark(txtRemark.getText());
             oPHis.setStatus(lblStatus.getText());
             oPHis.setMacId(Global.macId);
             oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             oPHis.setDetailList(getListDetail());
-            oPHis.setListDel(getDeleteList());
             if (txtCus.isVisible()) {
                 oPHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             } else {
@@ -409,7 +394,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             }).subscribe();
         }
     }
-    
+
     private int getListSize() {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -424,7 +409,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         }
         return 0;
     }
-    
+
     private boolean isValidEntry() {
         if (locationAutoCompleter.getLocation() == null) {
             JOptionPane.showMessageDialog(this, "Invalid Location");
@@ -455,7 +440,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         }
         return true;
     }
-    
+
     public void historyOP() {
         try {
             if (vouSearchDialog == null) {
@@ -472,7 +457,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             log.error(String.format("historyOPhistoryOP: %s", e.getMessage()));
         }
     }
-    
+
     private void focusOnTable() {
         int rc = tblOpening.getRowCount();
         if (rc > 1) {
@@ -483,18 +468,15 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             tblOpening.requestFocus();
         }
     }
-    
+
     private void setVoucher(OPHis op) {
         if (op != null) {
             oPHis = op;
             String vouNo = op.getKey().getVouNo();
             String compCode = op.getKey().getCompCode();
-            Integer deptId = op.getDeptId();
-            if (op.getTraderCode() != null) {
-                inventoryRepo.findTrader(op.getTraderCode()).doOnSuccess((t) -> {
-                    traderAutoCompleter.setTrader(t);
-                }).subscribe();
-            }
+            inventoryRepo.findTrader(op.getTraderCode()).doOnSuccess((t) -> {
+                traderAutoCompleter.setTrader(t);
+            }).subscribe();
             inventoryRepo.findLocation(oPHis.getLocCode()).doOnSuccess((t) -> {
                 locationAutoCompleter.setLocation(t);
             }).subscribe();
@@ -502,9 +484,9 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 currencyAAutoCompleter.setCurrency(t);
             }).subscribe();
             progress.setIndeterminate(true);
-            inventoryRepo.getOpeningDetail(vouNo, compCode, deptId).subscribe((t) -> {
+            inventoryRepo.getOpeningDetail(vouNo, compCode).subscribe((t) -> {
                 txtVouNo.setText(vouNo);
-                txtOPDate.setDate(oPHis.getVouDate());
+                txtOPDate.setDate(Util1.convertToDate(oPHis.getVouDate()));
                 txtRemark.setText(oPHis.getRemark());
                 if (oPHis.isDeleted()) {
                     lblStatus.setText("DELETED");
@@ -529,7 +511,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             });
         }
     }
-    
+
     private void setListDetail(List<OPHisDetail> list) {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -546,7 +528,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             }
         }
     }
-    
+
     private void disableForm(boolean status) {
         txtLocation.setEnabled(status);
         txtOPDate.setEnabled(status);
@@ -554,7 +536,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         txtVouNo.setEnabled(status);
         tblOpening.setEnabled(status);
     }
-    
+
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -585,7 +567,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-    
+
     private void deleteTran() {
         int row = tblOpening.convertRowIndexToModel(tblOpening.getSelectedRow());
         if (row >= 0) {
@@ -600,7 +582,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             }
         }
     }
-    
+
     private void delete(int row) {
         switch (type) {
             case OPENING, PAYABLE -> {
@@ -614,7 +596,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             }
         }
     }
-    
+
     private void calculatAmount() {
         List<OPHisDetail> listDetail = getListDetail();
         double ttlQty = listDetail.stream().mapToDouble((t) -> t.getQty()).sum();
@@ -625,13 +607,13 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         txtBag.setValue(ttlBag);
         lblRecord.setText(String.valueOf(listDetail.size() - 1));
     }
-    
+
     private void exportTemplate() {
         inventoryRepo.getStock(true).subscribe((st) -> {
             exporter.exportOpeningTemplate(st, "Opening Template");
         });
     }
-    
+
     private void chooseFile() {
         FileDialog d = new FileDialog(Global.parentForm, "CSV FIle", FileDialog.LOAD);
         d.setDirectory("D:\\");
@@ -643,7 +625,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             readFile(d.getDirectory() + "\\" + directory);
         }
     }
-    
+
     private void readFile(String path) {
         List<OPHisDetail> listOP = new ArrayList<>();
         try {
@@ -668,7 +650,7 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                 op.setPrice(row.isMapped("Price") ? Double.valueOf(row.get("Price")) : 0.0);
                 op.setAmount(op.getQty() * op.getPrice());
                 listOP.add(op);
-                
+
             });
             openingTableModel.setListDetail(listOP);
             calculatAmount();
@@ -1129,40 +1111,40 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
     public void save() {
         saveOpening();
     }
-    
+
     @Override
     public void delete() {
         deleteVoucher();
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
         historyOP();
     }
-    
+
     @Override
     public void print() {
     }
-    
+
     @Override
     public void refresh() {
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("OP-HISTORY")) {
@@ -1184,5 +1166,5 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
             calculatAmount();
         }
     }
-    
+
 }

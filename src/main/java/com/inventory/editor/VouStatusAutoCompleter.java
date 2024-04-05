@@ -8,6 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.IconUtil;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.VouStatus;
@@ -31,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -39,6 +39,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 
 /**
  *
@@ -56,13 +57,11 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    @Setter
     private SelectionObserver observer;
     private boolean filter = false;
     private List<VouStatus> listData;
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
+    private StartWithRowFilter tblFilter;
 
     public List<VouStatus> getListData() {
         return listData;
@@ -102,10 +101,10 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
         table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
+        tblFilter = new StartWithRowFilter(comp);
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
-
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -119,7 +118,7 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
         scroll.getHorizontalScrollBar().setFocusable(false);
 
         popup.setBorder(BorderFactory.createLineBorder(Color.black));
-        popup.setPopupSize(400, 200);
+        popup.setPopupSize(500, 300);
 
         popup.add(scroll);
 
@@ -333,11 +332,11 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
+        String txt = textComp.getText();
+        if (txt.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(startsWithFilter);
+            sorter.setRowFilter(tblFilter);
             try {
                 if (!containKey(e)) {
                     if (table.getRowCount() >= 0) {
@@ -349,19 +348,6 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

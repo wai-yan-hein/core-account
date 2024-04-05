@@ -18,45 +18,37 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Entity
-@Table(name = "ret_in_his_detail")
 public class RetInHisDetail {
 
-    @EmbeddedId
+    
     private RetInKey key;
-    @Column(name = "dept_id")
     private Integer deptId;
-    @Column(name = "stock_code")
     private String stockCode;
-    @Column(name = "qty", nullable = false)
     private double qty;
-    @Column(name = "unit")
     private String unitCode;
-    @Column(name = "price", nullable = false)
     private double price;
-    @Column(name = "amt", nullable = false)
     private double amount;
-    @Column(name = "loc_code")
     private String locCode;
-    @Column(name = "weight")
     private double weight;
-    @Column(name = "weight_unit")
     private String weightUnit;
-    @Column(name = "total_weight")
     private double totalWeight;
-    @Transient
+    private double wet;
+    private double rice;
+    private double bag;
     private String userCode;
-    @Transient
     private String stockName;
-    @Transient
     private String groupName;
-    @Transient
     private String brandName;
-    @Transient
     private String catName;
-    @Transient
     private String relName;
-    @Transient
     private String locName;
+    private String unit;
+    private String remark;
+    private double vouTotal;
+    private double paid;
+    private String vouDate;
+    private double vouBalance;
+    private String traderName;
+    private String vouNo;
 
 }

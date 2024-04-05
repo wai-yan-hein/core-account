@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.CloudIntegration;
 import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
@@ -21,10 +20,10 @@ import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.entity.RetOutHis;
 import com.user.model.AppUser;
 import com.inventory.entity.Stock;
 import com.inventory.entity.Trader;
-import com.inventory.entity.VReturnOut;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetOutVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
@@ -37,6 +36,7 @@ import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -50,8 +50,9 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
      * Creates new form SaleVouSearchDialog
      */
     private final RetOutVouSearchTableModel tableModel = new RetOutVouSearchTableModel();
-
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -59,44 +60,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private DepartmentUserAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    @Setter
     private SelectionObserver observer;
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
-    private CloudIntegration integration;
     private int row = 0;
-
-    public void setCloudIntegration(CloudIntegration integration) {
-        this.integration = integration;
-    }
-
-    public CloudIntegration getCloudIntegration() {
-        return integration;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public RetOutHistoryDialog(JFrame frame) {
         super(frame, true);
@@ -149,13 +118,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
             currAutoCompleter.setCurrency(c);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
-        if (inventoryRepo.localDatabase) {
-            chkLocal.setVisible(true);
-            btnUpload.setVisible(true);
-        } else {
-            chkLocal.setVisible(false);
-            btnUpload.setVisible(false);
-        }
+
     }
 
     private void initTableVoucher() {
@@ -246,17 +209,16 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void calAmount() {
-        List<VReturnOut> list = tableModel.getListDetail();
-        txtPaid.setValue(list.stream().mapToDouble(VReturnOut::getPaid).sum());
-        txtTotalAmt.setValue(list.stream().mapToDouble(VReturnOut::getVouTotal).sum());
+        List<RetOutHis> list = tableModel.getListDetail();
+        txtPaid.setValue(list.stream().mapToDouble(RetOutHis::getPaid).sum());
+        txtTotalAmt.setValue(list.stream().mapToDouble(RetOutHis::getVouTotal).sum());
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
 
     private void select() {
         if (row >= 0) {
-            VReturnOut his = tableModel.getSelectVou(row);
-            his.setLocal(chkLocal.isSelected());
+            RetOutHis his = tableModel.getSelectVou(row);
             observer.selected("RO-HISTORY", his);
             setVisible(false);
         } else {
@@ -311,7 +273,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         txtProjectNo = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
-        btnUpload = new javax.swing.JButton();
         chkLocal = new javax.swing.JCheckBox();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -460,16 +421,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
-        btnUpload.setFont(Global.lableFont);
-        btnUpload.setText("Upload");
-        btnUpload.setIconTextGap(2);
-        btnUpload.setInheritsPopupMenu(true);
-        btnUpload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUploadActionPerformed(evt);
-            }
-        });
-
         chkLocal.setFont(Global.lableFont);
         chkLocal.setText("Deleted");
 
@@ -512,10 +463,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(jLabel3)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -569,11 +517,10 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(chkDel)
-                            .addComponent(btnUpload)
                             .addComponent(jButton1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkLocal)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(206, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -776,19 +723,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
-    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        if (inventoryRepo.localDatabase) {
-            integration.uploadReturnOut();
-        }
-    }//GEN-LAST:event_btnUploadActionPerformed
-
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
-    private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;

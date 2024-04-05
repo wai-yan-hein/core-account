@@ -47,6 +47,8 @@ public class VouStatus {
     private String reportName;
     @Column(name = "mill_report_name")
     private String millReportName;
+    @Column(name = "deleted")
+    private boolean deleted;
 
     public VouStatus() {
     }

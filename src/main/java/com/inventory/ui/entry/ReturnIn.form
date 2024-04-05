@@ -492,7 +492,7 @@
               <Connection code="Global.lableFont" type="code"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="2"/>
-            <Property name="text" type="java.lang.String" value="Gross Total :"/>
+            <Property name="text" type="java.lang.String" value="Vou Total :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel14">

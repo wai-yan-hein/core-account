@@ -20,10 +20,10 @@ import com.user.editor.DepartmentUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.entity.RetInHis;
 import com.user.model.AppUser;
 import com.inventory.entity.Stock;
 import com.inventory.entity.Trader;
-import com.inventory.entity.VReturnIn;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,7 +49,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
      * Creates new form SaleVouSearchDialog
      */
     private final RetInVouSearchTableModel tableModel = new RetInVouSearchTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -56,23 +59,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private DepartmentUserAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    @Setter
     private SelectionObserver observer;
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
     private int row = 0;
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public ReturnInHistoryDialog(JFrame frame) {
         super(frame, true);
@@ -231,8 +223,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
 
     private void select() {
         if (row >= 0) {
-            VReturnIn his = tableModel.getSelectVou(row);
-            his.setLocal(chkLocal.isSelected());
+            RetInHis his = tableModel.getSelectVou(row);
             observer.selected("RI-HISTORY", his);
             setVisible(false);
         } else {

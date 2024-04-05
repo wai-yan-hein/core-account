@@ -5,12 +5,8 @@
 package com.inventory.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -20,62 +16,44 @@ import lombok.Data;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Entity
-@Table(name = "ret_out_his")
+
 public class RetOutHis {
 
-    @EmbeddedId
     private RetOutHisKey key;
-    @Column(name = "dept_id")
     private Integer deptId;
-    @Column(name = "trader_code")
     private String traderCode;
-    @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime vouDate;
-    @Column(name = "loc_code")
     private String locCode;
-    @Column(name = "deleted")
-    private Boolean deleted;
-    @Column(name = "vou_total")
-    private Float vouTotal;
-    @Column(name = "paid")
-    private Float paid;
-    @Column(name = "discount")
-    private Float discount;
-    @Column(name = "balance")
-    private Float balance;
-    @Column(name = "created_by")
+    private boolean deleted;
+    private double vouTotal;
+    private double paid;
+    private double discount;
+    private double balance;
     private String createdBy;
-    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdDate;
-    @Column(name = "updated_by")
     private String updatedBy;
-    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
-    @Column(name = "remark")
     private String remark;
-    @Column(name = "session_id")
-    private Integer session;
-    @Column(name = "cur_code")
+    private Integer sessionId;
+    private String refNo;
     private String curCode;
-    @Column(name = "disc_p")
-    private Float discP;
-    @Column(name = "intg_upd_status")
+    private double discP;
     private String intgUpdStatus;
-    @Column(name = "mac_id")
     private Integer macId;
-    @Transient
-    private String status = "STATUS";
-    @Column(name = "vou_lock")
+    private String status;
     private boolean vouLock;
-    @Column(name = "project_no")
     private String projectNo;
-    @Column(name = "print_count")
     private Integer printCount;
-    @Transient
+    private double grandTotal;
+    private String deptCode;
+    private String srcAcc;
+    private String cashAcc;
+    private String payableAcc;
+    private String disAcc;
+    private String taxAcc;
+    private double taxAmt;
+    private double taxP;
     private List<RetOutHisDetail> listRD;
-    @Transient
-    private List<RetOutKey> listDel;
-    @Transient
-    private List<String> location;
+    private ZonedDateTime vouDateTime;
+    private String traderName;
 }

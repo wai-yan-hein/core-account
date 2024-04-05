@@ -32,13 +32,9 @@ import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
-import com.h2.service.OPHisService;
 import com.h2.service.OrderDetailService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
-import com.h2.service.PurHisService;
-import com.h2.service.RetInService;
-import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
 import com.h2.service.SaleHisService;
@@ -61,9 +57,6 @@ import com.inventory.entity.Location;
 import com.inventory.entity.LocationKey;
 import com.user.model.MachineInfo;
 import com.inventory.entity.OrderHis;
-import com.inventory.entity.PurHis;
-import com.inventory.entity.RetInHis;
-import com.inventory.entity.RetOutHis;
 import com.inventory.entity.SaleHis;
 import com.inventory.entity.SaleMan;
 import com.inventory.entity.SaleManKey;
@@ -97,12 +90,8 @@ import com.h2.service.PatternService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
-import com.h2.service.PurHisDetailService;
 import com.h2.service.RegionService;
 import com.h2.service.RelationService;
-import com.h2.service.ReportService;
-import com.h2.service.RetInDetailService;
-import com.h2.service.RetOutDetailService;
 import com.h2.service.SaleHisDetailService;
 import com.h2.service.StockCriteriaService;
 import com.h2.service.StockFormulaService;
@@ -120,8 +109,6 @@ import com.inventory.entity.Job;
 import com.inventory.entity.JobKey;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LabourGroupKey;
-import com.inventory.entity.OPHis;
-import com.inventory.entity.OPHisKey;
 import com.inventory.entity.OrderHisDetail;
 import com.inventory.entity.OrderHisKey;
 import com.inventory.entity.OrderStatus;
@@ -134,15 +121,9 @@ import com.inventory.entity.ProcessHisDetail;
 import com.inventory.entity.ProcessHisKey;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.SaleHisKey;
-import com.inventory.entity.PurHisDetail;
-import com.inventory.entity.PurHisKey;
 import com.inventory.entity.Region;
 import com.inventory.entity.RegionKey;
 import com.inventory.entity.RelationKey;
-import com.inventory.entity.RetInHisDetail;
-import com.inventory.entity.RetInHisKey;
-import com.inventory.entity.RetOutHisDetail;
-import com.inventory.entity.RetOutHisKey;
 import com.inventory.entity.StockCriteria;
 import com.inventory.entity.StockFormula;
 import com.inventory.entity.StockFormulaKey;
@@ -159,8 +140,6 @@ import com.inventory.entity.UnitRelation;
 import com.inventory.entity.VOrder;
 import com.inventory.entity.VSale;
 import com.inventory.entity.VPurchase;
-import com.inventory.entity.VReturnIn;
-import com.inventory.entity.VReturnOut;
 import com.inventory.entity.VTransfer;
 import com.inventory.entity.WareHouse;
 import com.inventory.entity.WareHouseKey;
@@ -212,25 +191,11 @@ public class H2Repo {
     @Autowired
     private OrderHisService orderHisService;
     @Autowired
-    private PurHisService purHisService;
-    @Autowired
-    private PurHisDetailService purDetailService;
-    @Autowired
-    private RetInService retInService;
-    @Autowired
-    private RetInDetailService retInDetailService;
-    @Autowired
-    private RetOutService retOutService;
-    @Autowired
-    private RetOutDetailService retOutDetailService;
-    @Autowired
     private StockInOutService stockInOutService;
     @Autowired
     private StockInOutDetailService stkIODetailService;
     @Autowired
     private TransferHisService transferHisService;
-    @Autowired
-    private OPHisService opHisService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -276,8 +241,6 @@ public class H2Repo {
     @Autowired
     private WeightLossService weightLossService;
     @Autowired
-    private ReportService reportService;
-    @Autowired
     private SaleHisDetailService saleHisDetailService;
     @Autowired
     private TransferHisDetailService transferHisDetailService;
@@ -307,7 +270,7 @@ public class H2Repo {
     private WareHouseService wareHouseService;
 
     public Mono<List<Location>> getLocation(String whCode) {
-        return Mono.justOrEmpty(locationService.findAll(whCode,Global.compCode));
+        return Mono.justOrEmpty(locationService.findAll(whCode, Global.compCode));
     }
 
     public Mono<Location> find(LocationKey key) {
@@ -411,10 +374,6 @@ public class H2Repo {
         return Mono.justOrEmpty(stockInOutService.findById(key));
     }
 
-    public Mono<OPHis> findOpening(OPHisKey key) {
-        return Mono.justOrEmpty(opHisService.findByCode(key));
-    }
-
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
@@ -432,18 +391,6 @@ public class H2Repo {
 
     public Mono<OrderHis> save(OrderHis oh) {
         return Mono.justOrEmpty(orderHisService.save(oh));
-    }
-
-    public Mono<PurHis> save(PurHis purHis) {
-        return Mono.justOrEmpty(purHisService.save(purHis));
-    }
-
-    public Mono<RetInHis> save(RetInHis rh) {
-        return Mono.justOrEmpty(retInService.save(rh));
-    }
-
-    public Mono<RetOutHis> save(RetOutHis rh) {
-        return Mono.justOrEmpty(retOutService.save(rh));
     }
 
     public Mono<StockInOut> save(StockInOut sio) {
@@ -576,14 +523,6 @@ public class H2Repo {
 
     public StockCriteria save(StockCriteria obj) {
         return stockCriteriaService.save(obj);
-    }
-
-    public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit, String compCode, Integer deptId) {
-        return Mono.justOrEmpty(reportService.getPurchaseRecentPrice(stockCode, vouDate, unit, compCode, deptId));
-    }
-
-    public Mono<General> getSmallQty(String stockCode, String unit, String compCode, Integer deptId) {
-        return Mono.justOrEmpty(reportService.getSmallestQty(stockCode, unit, compCode, deptId));
     }
 
     public Mono<AppUser> login(String userName, String password) {
@@ -841,78 +780,6 @@ public class H2Repo {
 
     public DateLock save(DateLock obj) {
         return dateLockService.save(obj);
-    }
-
-    public Mono<List<VPurchase>> searchPurchaseVoucher(ReportFilter filter) {
-        String fromDate = Util1.isNull(filter.getFromDate(), "-");
-        String toDate = Util1.isNull(filter.getToDate(), "-");
-        String vouNo = Util1.isNull(filter.getVouNo(), "-");
-        String userCode = Util1.isNull(filter.getUserCode(), "-");
-        String cusCode = Util1.isNull(filter.getTraderCode(), "-");
-        String remark = Util1.isNull(filter.getRemark(), "-");
-        String locCode = Util1.isNull(filter.getLocCode(), "-");
-        String compCode = filter.getCompCode();
-        Integer deptId = filter.getDeptId();
-        String deleted = String.valueOf(filter.isDeleted());
-        String projectNo = Util1.isAll(filter.getProjectNo());
-        String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
-    }
-
-    public Mono<PurHis> findPurchase(PurHisKey key) {
-        return Mono.justOrEmpty(purHisService.findById(key));
-    }
-
-    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo, Integer depId) {
-        return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, depId));
-    }
-
-    public Mono<List<VReturnIn>> searchReturnInVoucher(ReportFilter filter) {
-        String fromDate = Util1.isNull(filter.getFromDate(), "-");
-        String toDate = Util1.isNull(filter.getToDate(), "-");
-        String vouNo = Util1.isNull(filter.getVouNo(), "-");
-        String userCode = Util1.isNull(filter.getUserCode(), "-");
-        String cusCode = Util1.isNull(filter.getTraderCode(), "-");
-        String remark = Util1.isNull(filter.getRemark(), "-");
-        String locCode = Util1.isNull(filter.getLocCode(), "-");
-        String compCode = filter.getCompCode();
-        Integer deptId = filter.getDeptId();
-        String deleted = String.valueOf(filter.isDeleted());
-        String projectNo = Util1.isAll(filter.getProjectNo());
-        String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
-    }
-
-    public Mono<RetInHis> findRetInHis(RetInHisKey key) {
-        return Mono.justOrEmpty(retInService.findById(key));
-    }
-
-    public Mono<List<RetInHisDetail>> searchReturnInDetail(String vouNo, Integer depId) {
-        return Mono.justOrEmpty(retInDetailService.search(vouNo, Global.compCode, depId));
-    }
-
-    public Mono<List<VReturnOut>> searchReturnOutVoucher(ReportFilter filter) {
-        String fromDate = Util1.isNull(filter.getFromDate(), "-");
-        String toDate = Util1.isNull(filter.getToDate(), "-");
-        String vouNo = Util1.isNull(filter.getVouNo(), "-");
-        String userCode = Util1.isNull(filter.getUserCode(), "-");
-        String cusCode = Util1.isNull(filter.getTraderCode(), "-");
-        String remark = Util1.isNull(filter.getRemark(), "-");
-        String locCode = Util1.isNull(filter.getLocCode(), "-");
-        String compCode = filter.getCompCode();
-        Integer deptId = filter.getDeptId();
-        String deleted = String.valueOf(filter.isDeleted());
-        String projectNo = Util1.isAll(filter.getProjectNo());
-        String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
-    }
-
-    public Mono<RetOutHis> findRetOutHis(RetOutHisKey key) {
-        return Mono.justOrEmpty(retOutService.findById(key));
-    }
-
-    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo, Integer depId) {
-        return Mono.justOrEmpty(retOutDetailService.search(vouNo, Global.compCode, depId));
     }
 
     public Mono<List<VSale>> getSaleHistory(ReportFilter filter) {

@@ -121,7 +121,7 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
 
                 case 5 -> {
                     //qty
-                    return record.getQty();
+                    return Util1.toNull(record.getQty());
                 }
 
                 case 6 -> {

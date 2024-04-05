@@ -25,7 +25,6 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
-import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -178,7 +177,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         if (status.equals("EDIT")) {
             progress.setIndeterminate(true);
             accountRepo.getJournal(vouNo).doOnSuccess((t) -> {
-                LocalDateTime glDate = t.get(0).getGlDate();
+                LocalDateTime glDate = t.getFirst().getGlDate();
                 if (DateLockUtil.isLockDate(glDate)) {
                     enableForm(false);
                     lblMessage.setText(DateLockUtil.MESSAGE);
@@ -186,9 +185,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                     enableForm(true);
                     lblMessage.setText("");
                 }
-                String ref = t.get(0).getReference();
-                String projectNo = t.get(0).getProjectNo();
-                userRepo.find(new ProjectKey(projectNo, Global.compCode)).doOnSuccess((p) -> {
+                String ref = t.getFirst().getReference();
+                String projectNo = t.getFirst().getProjectNo();
+                userRepo.find(projectNo).doOnSuccess((p) -> {
                     projectAutoCompleter.setProject(p);
                 }).subscribe();
                 txtVouDate.setDate(Util1.convertToDate(glDate));

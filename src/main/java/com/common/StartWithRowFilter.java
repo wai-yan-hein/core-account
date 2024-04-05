@@ -25,8 +25,8 @@ public class StartWithRowFilter extends RowFilter<Object, Object> {
     @Override
     public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
         for (int i = 0; i < entry.getValueCount(); i++) {
-            String value = entry.getStringValue(i).toLowerCase();
-            String text = jtf.getText().toLowerCase();
+            String value = replaceAll(entry.getStringValue(i).toLowerCase());
+            String text = replaceAll(jtf.getText().toLowerCase());
             if (!Util1.isNullOrEmpty(value)) {
                 if (value.startsWith(text)) {
                     return true;
@@ -36,5 +36,12 @@ public class StartWithRowFilter extends RowFilter<Object, Object> {
             }
         }
         return false;
+    }
+
+    private String replaceAll(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replaceAll("\\s", "");
     }
 }

@@ -7,7 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.entity.VReturnIn;
+import com.inventory.entity.RetInHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RetInVouSearchTableModel extends AbstractTableModel {
 
-    private List<VReturnIn> listDetail = new ArrayList();
+    private List<RetInHis> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
     private double vouTotal;
     private double paidTotal;
@@ -72,7 +72,7 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                VReturnIn his = listDetail.get(row);
+                RetInHis his = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //date
@@ -80,10 +80,11 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
                     }
                     case 1 -> {
                         //vou-no
+                        String vouNo = his.getKey().getVouNo();
                         if (his.isDeleted()) {
-                            return his.getVouNo() + "***";
+                            return Util1.getStar(vouNo);
                         } else {
-                            return his.getVouNo();
+                            return vouNo;
                         }
                     }
                     case 2 -> {
@@ -112,20 +113,20 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VReturnIn> getListDetail() {
+    public List<RetInHis> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<VReturnIn> listDetail) {
+    public void setListDetail(List<RetInHis> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public VReturnIn getSelectVou(int row) {
+    public RetInHis getSelectVou(int row) {
         return listDetail.get(row);
     }
 
-    public void addObject(VReturnIn t) {
+    public void addObject(RetInHis t) {
         listDetail.add(t);
         vouTotal += t.getVouTotal();
         paidTotal += t.getPaid();

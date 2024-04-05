@@ -11,6 +11,7 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.common.ComponentUtil;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.Util1;
 import com.inventory.entity.PurHis;
 import com.inventory.entity.SaleHis;
@@ -31,8 +32,8 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     private AccountRepo accountRepo;
     private DepartmentAutoCompleter departmentCompleter;
     private COAAutoCompleter cashCompleter;
-    private COA3AutoCompleter purhcaseCompleter;
-    private COA3AutoCompleter paybleCompleter;
+    private COAAutoCompleter srcCompleter;
+    private COAAutoCompleter paybleCompleter;
     private Object object;
     private Trader trader;
     private final String sale = "SALE";
@@ -53,23 +54,13 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     private void initModel() {
         departmentCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
         cashCompleter = new COAAutoCompleter(txtCash, null, false);
-        purhcaseCompleter = new COA3AutoCompleter(txtPur, accountRepo, null, false, 3);
-        paybleCompleter = new COA3AutoCompleter(txtPayble, accountRepo, null, false, 3);
+        srcCompleter = new COAAutoCompleter(txtSrc, null, false);
+        paybleCompleter = new COAAutoCompleter(txtPayble, null, false);
     }
 
     public void initMain() {
         ComponentUtil.addFocusListener(this);
         initModel();
-        initCompleter();
-    }
-
-    private void initCompleter() {
-        accountRepo.getDepartment().doOnSuccess((t) -> {
-            departmentCompleter.setListDepartment(t);
-        }).subscribe();
-        accountRepo.getCashBank().doOnSuccess((t) -> {
-            cashCompleter.setListCOA(t);
-        }).subscribe();
     }
 
     public void setObject(Object obj, Trader trader) {
@@ -84,6 +75,12 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                 setCash(p.getCashAcc());
                 setSrcAcc(p.getPurchaseAcc());
                 setPayable(p.getPayableAcc());
+                accountRepo.getPurchaseAcc().doOnSuccess((t) -> {
+                    srcCompleter.setListCOA(t);
+                }).subscribe();
+                accountRepo.getPayableAcc().doOnSuccess((t) -> {
+                    paybleCompleter.setListCOA(t);
+                }).subscribe();
             }
             case SaleHis s -> {
                 setTitle("Sale Account Dialog");
@@ -93,10 +90,22 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                 setCash(s.getCashAcc());
                 setSrcAcc(s.getSaleAcc());
                 setPayable(s.getDebtorAcc());
+                accountRepo.getIncomeAcc().doOnSuccess((t) -> {
+                    srcCompleter.setListCOA(t);
+                }).subscribe();
+                accountRepo.getDebtorAcc().doOnSuccess((t) -> {
+                    paybleCompleter.setListCOA(t);
+                }).subscribe();
             }
             default -> {
             }
         }
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentCompleter.setListDepartment(t);
+        }).subscribe();
+        accountRepo.getCashBank().doOnSuccess((t) -> {
+            cashCompleter.setListCOA(t);
+        }).subscribe();
     }
 
     private void setPayable(String payableAcc) {
@@ -117,12 +126,12 @@ public class AccountOptionDialog extends javax.swing.JDialog {
 
     private void setSrcAcc(String purAcc) {
         accountRepo.findCOA(Util1.isNull(purAcc, sourceAcc())).doOnSuccess((t) -> {
-            purhcaseCompleter.setCoa(t);
+            srcCompleter.setCoa(t);
         }).subscribe();
     }
 
     private String getSrcAcc() {
-        ChartOfAccount coa = purhcaseCompleter.getCOA();
+        ChartOfAccount coa = srcCompleter.getCOA();
         if (coa != null) {
             if (coa.getKey() != null) {
                 return coa.getKey().getCoaCode();
@@ -236,7 +245,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
         txtCash = new javax.swing.JTextField();
-        txtPur = new javax.swing.JTextField();
+        txtSrc = new javax.swing.JTextField();
         txtPayble = new javax.swing.JTextField();
 
         setTitle("-");
@@ -281,7 +290,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
                             .addComponent(txtCash, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtPur, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtSrc, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPayble))))
                 .addContainerGap())
         );
@@ -299,7 +308,7 @@ public class AccountOptionDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSource, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtSrc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblAcc, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -348,6 +357,6 @@ public class AccountOptionDialog extends javax.swing.JDialog {
     private javax.swing.JTextField txtCash;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtPayble;
-    private javax.swing.JTextField txtPur;
+    private javax.swing.JTextField txtSrc;
     // End of variables declaration//GEN-END:variables
 }

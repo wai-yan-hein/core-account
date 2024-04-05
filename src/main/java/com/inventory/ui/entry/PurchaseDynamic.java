@@ -732,7 +732,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             observer.selected("save", false);
             ph.setListPD(getListDetail());
             ph.setListExpense(expenseTableModel.getExpenseList());
-            ph.setListDel(getListDel());
             inventoryRepo.save(ph).doOnSuccess((t) -> {
                 if (print) {
                     String landVouNo = t.getLandVouNo();
@@ -810,7 +809,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             ph.setTraderCode(traderCode);
             ph.setGrandTotal(Util1.getDouble(txtGrandTotal.getValue()));
             ph.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
-            ph.setStatus(lblStatus.getText());
             ph.setReference(txtReference.getText());
             ph.setBatchNo(txtBatchNo.getText());
             ph.setCommP(Util1.getDouble(txtComPercent.getValue()));

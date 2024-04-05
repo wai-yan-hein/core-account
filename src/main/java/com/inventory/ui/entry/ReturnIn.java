@@ -29,7 +29,6 @@ import com.inventory.entity.RetInHis;
 import com.inventory.entity.RetInHisDetail;
 import com.inventory.entity.RetInHisKey;
 import com.inventory.entity.Trader;
-import com.inventory.entity.VReturnIn;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReturnInTableModel;
 import com.inventory.ui.entry.dialog.ReturnInHistoryDialog;
@@ -43,7 +42,6 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
-import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -300,7 +298,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ri.setListRD(retInTableModel.getListDetail());
-            ri.setListDel(retInTableModel.getDelList());
             inventoryRepo.save(ri).doOnSuccess((t) -> {
                 if (print) {
                     printVoucher(ri);
@@ -361,8 +358,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             ri.setBalance(Util1.getDouble(txtVouBalance.getValue()));
             ri.setTaxAmt(Util1.getDouble(txtTax.getValue()));
             ri.setTaxP(Util1.getDouble(txtVouTaxP.getValue()));
+            ri.setGrandTotal(Util1.getDouble(txtGrandTotal.getValue()));
             ri.setCurCode(currAutoCompleter.getCurrency().getCurCode());
-            ri.setDeleted(Util1.getNullTo(ri.getDeleted()));
             ri.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             Project p = projectAutoCompleter.getProject();
             ri.setProjectNo(p == null ? null : p.getKey().getProjectNo());
@@ -537,7 +534,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         userRepo.findCurrency(ri.getCurCode()).doOnSuccess((t) -> {
             currAutoCompleter.setCurrency(t);
         }).subscribe();
-        userRepo.find(new ProjectKey(ri.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+        userRepo.find(ri.getProjectNo()).doOnSuccess(t -> {
             projectAutoCompleter.setProject(t);
         }).subscribe();
         Integer deptId = ri.getDeptId();
@@ -546,7 +543,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             lblStatus.setText("Voucher is locked.");
             lblStatus.setForeground(Color.RED);
             disableForm(false);
-        } else if (Util1.getBoolean(ri.getDeleted())) {
+        } else if (ri.isDeleted()) {
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.RED);
             disableForm(false);
@@ -947,7 +944,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
         jLabel13.setFont(Global.lableFont);
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel13.setText("Gross Total :");
+        jLabel13.setText("Vou Total :");
 
         jLabel14.setFont(Global.lableFont);
         jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1338,8 +1335,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             case "Location" ->
                 setAllLocation();
             case "RI-HISTORY" -> {
-                if (selectObj instanceof VReturnIn v) {
-                    inventoryRepo.findReturnIn(v.getVouNo()).doOnSuccess((t) -> {
+                if (selectObj instanceof RetInHis v) {
+                    inventoryRepo.findReturnIn(v.getKey().getVouNo()).doOnSuccess((t) -> {
                         setVoucher(t);
                     }).subscribe();
                 }

@@ -4,9 +4,6 @@
  */
 package com.inventory.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import java.io.Serializable;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -16,12 +13,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Embeddable
-public class PurHisKey implements Serializable {
+public class PurHisKey {
 
-    @Column(name = "vou_no")
     private String vouNo;
-    @Column(name = "comp_code")
     private String compCode;
 
 }

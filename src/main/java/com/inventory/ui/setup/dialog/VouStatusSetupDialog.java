@@ -6,8 +6,10 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.VouStatus;
 import com.inventory.entity.VouStatusKey;
 import com.repo.InventoryRepo;
@@ -16,7 +18,6 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -27,6 +28,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,41 +40,30 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     private int selectRow = - 1;
     private VouStatus vou = new VouStatus();
-    private final VouStatusTableModel vouTableModel = new VouStatusTableModel();
+    private final VouStatusTableModel tableModel = new VouStatusTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
-
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<VouStatus> listVou = new ArrayList<>();
-
-    public List<VouStatus> getListVou() {
-        return listVou;
-    }
-
-    public void setListVou(List<VouStatus> listVou) {
-        vouTableModel.setListVou(listVou);
-        this.listVou = listVou;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     public VouStatusSetupDialog(JFrame frame) {
         super(frame, false);
         initComponents();
         initKeyListener();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
         initTable();
         txtUserCode.requestFocus();
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initKeyListener() {
@@ -84,7 +75,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void initTable() {
-        tblVou.setModel(vouTableModel);
+        tblVou.setModel(tableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
         tblVou.setRowSorter(sorter);
         tblVou.getTableHeader().setFont(Global.lableFont);
@@ -95,13 +86,13 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(vouTableModel.getVouStatus(selectRow));
+                    setObject(tableModel.getVouStatus(selectRow));
                 }
             }
         });
     }
 
-    private void setCategory(VouStatus cat) {
+    private void setObject(VouStatus cat) {
         vou = cat;
         vou.setKey(cat.getKey());
         txtName.setText(vou.getDescription());
@@ -114,15 +105,34 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     }
 
+    public void search() {
+        progress.setIndeterminate(true);
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            tableModel.setListVou(t);
+        }).doOnTerminate(() -> {
+            calSize();
+            progress.setIndeterminate(false);
+        }).subscribe();
+        setVisible(true);
+    }
+
+    public List<VouStatus> getVouStatusList() {
+        return tableModel.getListVou();
+    }
+
+    private void calSize() {
+        lblRec.setText(String.valueOf(tableModel.getListVou().size()));
+    }
+
     private void save() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
             inventoryRepo.saveVouStatus(vou).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    listVou.set(selectRow, t);
+                    tableModel.setVouStatus(t, selectRow);
                 } else {
-                    listVou.add(t);
+                    tableModel.addVouStatus(t);
                 }
                 clear();
             }).doOnError((e) -> {
@@ -138,14 +148,14 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         txtReport.setText(null);
         txtMillReport.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         vou = new VouStatus();
-        vouTableModel.refresh();
+        tableModel.refresh();
         tblVou.requestFocus();
         txtUserCode.requestFocus();
     }
@@ -188,7 +198,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVou = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -203,9 +213,10 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         txtReport = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         txtMillReport = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Voucher Status Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
@@ -224,10 +235,10 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         tblVou.setName("tblVou"); // NOI18N
         jScrollPane1.setViewportView(tblVou);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -324,6 +335,12 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Records :");
+
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("0");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -354,6 +371,13 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtReport)
                             .addComponent(txtMillReport))))
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(5, 5, 5)
+                    .addComponent(jLabel1)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnClear, btnSave});
@@ -387,6 +411,13 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
                 .addContainerGap(183, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(171, 171, 171)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(lblRec))
+                    .addContainerGap(172, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -400,7 +431,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                            .addComponent(txtFilter))
+                            .addComponent(txtSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -414,7 +445,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -444,14 +475,14 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -490,6 +521,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -497,13 +529,14 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVou;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtMillReport;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtReport;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 

@@ -13,7 +13,6 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.entity.Location;
 import com.inventory.entity.RetOutHisDetail;
-import com.inventory.entity.RetOutKey;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
 import com.inventory.ui.entry.ReturnOut;
@@ -24,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,38 +35,19 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location",
         "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
+    @Setter
     private JTable parent;
     private List<RetOutHisDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
-    private final List<RetOutKey> deleteList = new ArrayList();
+    @Setter
+    private SelectionObserver observer;
+    @Setter
     private ReturnOut returnOut;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private JDateChooser vouDate;
+    @Setter
     private JLabel lblRec;
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public void setReturnOut(ReturnOut returnOut) {
-        this.returnOut = returnOut;
-    }
-
-    public void setObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -152,7 +133,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 }
                 case 6 -> {
                     //qty
-                    return record.getQty();
+                    return Util1.toNull(record.getQty());
                 }
 
                 case 7 -> {
@@ -162,11 +143,11 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
                 case 8 -> {
                     //price
-                    return record.getPrice();
+                    return Util1.toNull(record.getPrice());
                 }
                 case 9 -> {
                     //amount
-                    return record.getAmount();
+                    return Util1.toNull(record.getAmount());
                 }
                 default -> {
                     return new Object();
@@ -291,7 +272,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
             calculateAmount(record);
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
-            selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+            observer.selected("SALE-TOTAL", "SALE-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -386,21 +367,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<RetOutKey> getDelList() {
-        return deleteList;
-    }
-
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-
     public void delete(int row) {
         RetOutHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
-        }
         listDetail.remove(row);
         addNewRow();
         fireTableRowsDeleted(row, row);

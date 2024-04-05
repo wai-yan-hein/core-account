@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -108,7 +109,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         }).subscribe();
         inventoryRepo.getWareHouse().doOnSuccess((t) -> {
             wareHouseAutoCompleter.setListObject(t);
-            wareHouseAutoCompleterF.setListObject(t);
+            wareHouseAutoCompleterF.setListObject(new ArrayList<>(t));
         }).subscribe();
         accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP)).doOnSuccess((t) -> {
             t.add(new ChartOfAccount());

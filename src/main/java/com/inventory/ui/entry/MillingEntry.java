@@ -52,7 +52,6 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
-import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -108,6 +107,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private MillingUsageDialog usageDialog;
     private JobSearchDialog jobSearchDialog;
     private FindDialog findDialog;
+    private VouStatusSetupDialog vsDialog;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -815,7 +815,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             txtQtyLoss.setValue(milling.getDiffQty());
             txtEffQty.setValue(milling.getPercentQty());
             txtEffWt.setValue(milling.getPercentWeight());
-            userRepo.find(new ProjectKey(milling.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
+            userRepo.find(milling.getProjectNo()).doOnSuccess(t1 -> {
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
             inventoryRepo.findVouStatus(milling.getVouStatusId()).doOnSuccess(t1 -> {
@@ -2044,13 +2044,14 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void vouStatusSetup() {
-        VouStatusSetupDialog vsDialog = new VouStatusSetupDialog(Global.parentForm);
-        vsDialog.setInventoryRepo(inventoryRepo);
-        vsDialog.setListVou(vouStatusAutoCompleter.getListData());
-        vsDialog.initMain();
-        vsDialog.setSize(Global.width / 2, Global.height / 2);
-        vsDialog.setLocationRelativeTo(null);
-        vsDialog.setVisible(true);
-
+        if (vsDialog == null) {
+            vsDialog = new VouStatusSetupDialog(Global.parentForm);
+            vsDialog.setInventoryRepo(inventoryRepo);
+            vsDialog.initMain();
+            vsDialog.setSize(Global.width - 200, Global.height - 200);
+            vsDialog.setLocationRelativeTo(null);
+        }
+        vsDialog.search();
+        vouStatusAutoCompleter.setListData(vsDialog.getVouStatusList());
     }
 }

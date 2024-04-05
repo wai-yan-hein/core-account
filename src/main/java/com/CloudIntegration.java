@@ -33,10 +33,7 @@ import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisService;
 import com.h2.service.ProjectService;
-import com.h2.service.PurHisService;
 import com.h2.service.RegionService;
-import com.h2.service.RetInService;
-import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
 import com.h2.service.StockCriteriaService;
@@ -54,9 +51,6 @@ import com.h2.service.WareHouseService;
 import com.h2.service.WeightLossService;
 import com.inventory.entity.OrderHis;
 import com.inventory.entity.ProcessHis;
-import com.inventory.entity.PurHis;
-import com.inventory.entity.RetInHis;
-import com.inventory.entity.RetOutHis;
 import com.inventory.entity.SaleHis;
 import com.inventory.entity.TransferHis;
 import com.inventory.entity.WeightLossHis;
@@ -151,12 +145,6 @@ public class CloudIntegration {
     private DepartmentAccService departmentAService;
     @Autowired
     OrderHisService orderHisService;
-    @Autowired
-    PurHisService purHisService;
-    @Autowired
-    RetInService retInService;
-    @Autowired
-    RetOutService retOutService;
     private TransferHisService transferHisService;
     @Autowired
     private WeightLossService weightLossService;
@@ -207,9 +195,6 @@ public class CloudIntegration {
         uploadTransfer();
         uploadWeightLoss();
         uploadManufacture();
-        uploadPurchase();
-        uploadReturnIn();
-        uploadReturnOut();
     }
 
     public int uploadSaleCount() {
@@ -239,41 +224,6 @@ public class CloudIntegration {
         }
     }
 
-    public void uploadPurchase() {
-        List<PurHis> list = purHisService.unUploadVoucher(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((pur) -> {
-                inventoryRepo.uploadPurchase(pur).subscribe((p) -> {
-                    p.setIntgUpdStatus("ACK");
-                    purHisService.updateACK(p.getKey());
-                });
-            });
-        }
-    }
-
-    public void uploadReturnIn() {
-        List<RetInHis> list = retInService.unUploadVoucher(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((in) -> {
-                inventoryRepo.uploadRetIn(in).subscribe((n) -> {
-                    n.setIntgUpdStatus("ACK");
-                    retInService.updateACK(n.getKey());
-                });
-            });
-        }
-    }
-
-    public void uploadReturnOut() {
-        List<RetOutHis> list = retOutService.unUploadVoucher(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((out) -> {
-                inventoryRepo.uploadRetOut(out).subscribe((o) -> {
-                    o.setIntgUpdStatus("ACK");
-                    retOutService.updateACK(o.getKey());
-                });
-            });
-        }
-    }
 
     public void uploadTransfer() {
         List<TransferHis> list = transferHisService.unUpload(Global.compCode);

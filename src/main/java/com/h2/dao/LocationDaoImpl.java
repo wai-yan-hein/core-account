@@ -62,6 +62,7 @@ public class LocationDaoImpl extends AbstractDao<LocationKey, Location> implemen
                 l.setMacId(rs.getInt("mac_id"));
                 l.setLocName(rs.getString("loc_name"));
                 l.setCalcStock(rs.getBoolean("calc_stock"));
+                l.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
                 l.setCreatedBy(rs.getString("created_by"));
                 l.setUpdatedBy(rs.getString("updated_by"));
                 l.setUserCode(rs.getString("user_code"));

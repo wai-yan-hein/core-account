@@ -464,7 +464,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ph.setListPD(purTableModel.getListDetail());
-            ph.setListDel(purTableModel.getDelList());
             ph.setListExpense(expenseTableModel.getExpenseList());
             inventoryRepo.save(ph).subscribe((t) -> {
                 clear();
@@ -527,7 +526,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             ph.setVouDate(Util1.convertToLocalDateTime(txtPurDate.getDate()));
             ph.setTraderCode(traderCode);
             ph.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
-            ph.setStatus(lblStatus.getText());
             ph.setReference(txtReference.getText());
             ph.setBatchNo(txtBatchNo.getText());
             ph.setCommP(Util1.getDouble(txtComPercent.getValue()));
@@ -773,7 +771,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
-        userRepo.find(new ProjectKey(ph.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+        userRepo.find(ph.getProjectNo()).doOnSuccess(t -> {
             projectAutoCompleter.setProject(t);
         }).subscribe();
     }
