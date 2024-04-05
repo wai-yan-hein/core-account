@@ -1180,7 +1180,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void printFixVoucher(PurHis ph) {
         try {
-            String reportName = "PurchaseVoucherA5Bag";
+            String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.PURCHASE_VOUCHER), "PurchaseVoucherA5Bag");
             List<PurHisDetail> detail = ph.getListPD().stream().filter((t) -> t.getStockCode() != null).toList();
             Map<String, Object> param = getDefaultParam(ph);
             String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
@@ -1214,6 +1214,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     param.put("p_grand_total", ph.getGrandTotal());
                     param.put("p_paid", ph.getPaid());
                     param.put("p_balance", ph.getBalance());
+                    param.put("p_carno", ph.getCarNo());
                 }
                 String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                 ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(t));
@@ -1301,6 +1302,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         param.put("p_created_name", Global.hmUser.get(p.getCreatedBy()));
         param.put("p_paid_text", NumberConverter.convertToWords((int) p.getPaid()));
         param.put("p_payment_type", getPaymentType(p));
+        param.put("p_carno", p.getCarNo());
+        param.put("p_ref", p.getReference());
+        param.put("p_warehouse", locationAutoCompleter.getLocation().getLocName());
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(ph.getReference(), t.getTraderName()));

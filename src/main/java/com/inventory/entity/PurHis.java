@@ -5,6 +5,7 @@
 package com.inventory.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -67,6 +68,11 @@ public class PurHis implements Cloneable {
     private double outstanding;
     private String grnVouNo;
     private String refNo;
+    @Transient
+    private String locName;
+    @Transient
+    private String status = "STATUS";
+    @Transient
     private List<PurHisDetail> listPD;
     private List<PurExpense> listExpense;
     private ZonedDateTime vouDateTime;
