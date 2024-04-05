@@ -115,6 +115,8 @@ public class PurHis implements Cloneable {
     private int tranSource;
     private double outstanding;
     @Transient
+    private String locName;
+    @Transient
     private String status = "STATUS";
     @Transient
     private List<PurHisDetail> listPD;
