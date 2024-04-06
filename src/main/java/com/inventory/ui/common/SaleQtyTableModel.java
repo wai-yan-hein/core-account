@@ -311,7 +311,6 @@ public class SaleQtyTableModel extends AbstractTableModel {
     public void setListDetail(List<SaleHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
-        addNewRow();
         fireTableDataChanged();
     }
 

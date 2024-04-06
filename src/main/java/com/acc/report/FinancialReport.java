@@ -115,8 +115,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         userRepo.getReport("Account").doOnSuccess((t) -> {
             tableModel.setListReport(t);
             lblRecord.setText(String.valueOf(tableModel.getListReport().size()));
-            progress.setIndeterminate(true);
         }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
             ComponentUtil.scrollTable(tblReport, row, 0);
         }).subscribe();
 

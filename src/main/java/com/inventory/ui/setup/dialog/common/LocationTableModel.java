@@ -9,11 +9,13 @@ import com.inventory.entity.Location;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class LocationTableModel extends AbstractTableModel {
 
     private final String[] columnNames = {"Code", "Location", "Ware House"};
@@ -39,17 +41,22 @@ public class LocationTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Location location = listLocation.get(rowIndex);
-        return switch (columnIndex) {
-            case 0 ->
-                location.getUserCode();
-            case 1 ->
-                location.getLocName();
-            case 2->
-                location.getWareHouseName();
-            default ->
-                null;
-        };
+        try {
+            Location location = listLocation.get(rowIndex);
+            return switch (columnIndex) {
+                case 0 ->
+                    location.getUserCode();
+                case 1 ->
+                    location.getLocName();
+                case 2 ->
+                    location.getWareHouseName();
+                default ->
+                    null;
+            };
+        } catch (Exception e) {
+            log.error("getValueAt : " + e.getMessage());
+        }
+        return null;
     }
 
     @Override

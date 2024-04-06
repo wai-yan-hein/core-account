@@ -519,7 +519,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 r.setProgress(progress);
                 r.setUserRepo(userRepo);
                 r.setInventoryRepo(inventoryRepo);
-                r.setIntegration(integration);
                 r.initMain();
                 return r;
             }

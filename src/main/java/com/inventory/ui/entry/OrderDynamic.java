@@ -552,7 +552,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             inventoryRepo.findSaleMan(orderHis.getSaleManCode()).doOnSuccess((t) -> {
                 saleManCompleter.setSaleMan(t);
             }).subscribe();
-            userRepo.find(new ProjectKey(orderHis.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
+            userRepo.find(orderHis.getProjectNo()).doOnSuccess(t1 -> {
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
             inventoryRepo.findOrderStatus(orderHis.getOrderStatus()).doOnSuccess((o) -> {

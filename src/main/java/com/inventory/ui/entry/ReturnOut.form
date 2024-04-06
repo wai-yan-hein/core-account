@@ -40,7 +40,7 @@
               <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
               <Component id="panelSale" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="scroll" pref="291" max="32767" attributes="0"/>
+              <Component id="scroll" pref="281" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="jPanel3" max="32767" attributes="0"/>
@@ -74,8 +74,8 @@
                           </Group>
                           <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtVouNo" max="32767" attributes="0"/>
                               <Component id="txtVouDate" pref="82" max="32767" attributes="0"/>
+                              <Component id="txtVouNo" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <Group type="102" attributes="0">
@@ -111,10 +111,10 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="jLabel17" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtVouNo" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtLocation" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtProjectNo" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtVouNo" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Component id="jLabel22" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -134,7 +134,7 @@
                           <Component id="txtRemark" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="16" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -170,18 +170,6 @@
             <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtCusFocusGained"/>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCusActionPerformed"/>
           </Events>
-        </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtVouNo">
-          <Properties>
-            <Property name="editable" type="boolean" value="false"/>
-            <Property name="disabledTextColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="0" green="0" red="0" type="rgb"/>
-            </Property>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="txtVouNo" noResource="true"/>
-          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel4">
           <Properties>
@@ -280,6 +268,22 @@
           </Properties>
           <Events>
             <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtProjectNoFocusGained"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtVouNo">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="txtCus" noResource="true"/>
+            <Property name="nextFocusableComponent" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+              <ComponentRef name="txtLocation"/>
+            </Property>
+          </Properties>
+          <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtVouNoFocusGained"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtVouNoActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>
@@ -453,7 +457,7 @@
               <Connection code="Global.lableFont" type="code"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="2"/>
-            <Property name="text" type="java.lang.String" value="Gross Total :"/>
+            <Property name="text" type="java.lang.String" value="Vou Total :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel14">

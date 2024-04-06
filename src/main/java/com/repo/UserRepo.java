@@ -731,7 +731,8 @@ public class UserRepo {
                 .collectList();
     }
 
-    public Mono<Project> find(ProjectKey key) {
+    public Mono<Project> find(String projectNo) {
+        ProjectKey key = new ProjectKey(projectNo, Global.compCode);
         if (Util1.isNullOrEmpty(key.getProjectNo())) {
             return Mono.empty();
         }

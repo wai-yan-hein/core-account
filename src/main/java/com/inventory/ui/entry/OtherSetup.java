@@ -95,11 +95,7 @@ public class OtherSetup extends javax.swing.JPanel {
             vsDialog.setSize(Global.width / 2, Global.height / 2);
             vsDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
-            vsDialog.setListVou(t);
-        }).doOnTerminate(() -> {
-            vsDialog.setVisible(true);
-        }).subscribe();
+        vsDialog.search();
 
     }
 

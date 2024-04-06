@@ -274,7 +274,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             inventoryRepo.findSaleMan(oh.getSaleManCode()).doOnSuccess((t) -> {
                 saleManCompleter.setSaleMan(t);
             }).subscribe();
-            userRepo.find(new ProjectKey(oh.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
+            userRepo.find(oh.getProjectNo()).doOnSuccess(t1 -> {
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
             txtDueDate.setDate(Util1.convertToDate(oh.getCreditTerm()));
@@ -828,7 +828,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 batchAutoCompeter.setBatch(t);
                 btnBatch.setText(t == null ? "Batch" : "Batch:View");
             }).subscribe();
-            userRepo.find(new ProjectKey(saleHis.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+            userRepo.find(sh.getProjectNo()).doOnSuccess(t -> {
                 projectAutoCompleter.setProject(t);
             }).subscribe();
             if (saleHis.isVouLock()) {

@@ -5,8 +5,8 @@
  */
 package com.inventory.ui.entry;
 
-import com.CloudIntegration;
 import com.acc.dialog.FindDialog;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -16,6 +16,9 @@ import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
@@ -26,7 +29,6 @@ import com.inventory.entity.RetOutHis;
 import com.inventory.entity.RetOutHisDetail;
 import com.inventory.entity.RetOutHisKey;
 import com.inventory.entity.Trader;
-import com.inventory.entity.VReturnOut;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReturnOutTableModel;
 import com.inventory.ui.entry.dialog.RetOutHistoryDialog;
@@ -37,14 +39,12 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
-import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,12 +59,15 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -73,58 +76,26 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-    
+
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private final ReturnOutTableModel roTableModel = new ReturnOutTableModel();
     private RetOutHistoryDialog dialog;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
-    private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
+    @Getter
     private LocationAutoCompleter locationAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private RetOutHis ri = new RetOutHis();
     private FindDialog findDialog;
-    
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-    
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
-    public void setIntegration(CloudIntegration integration) {
-        this.integration = integration;
-    }
-    
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-    
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
-    }
-    
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
-    public JProgressBar getProgress() {
-        return progress;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
 
     /**
      * Creates new form RetInchase
@@ -136,43 +107,43 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         initTextBoxFormat();
         initTextBoxValue();
         initDateListner();
-        initFind();
         actionMapping();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblRet);
     }
-    
+
     public void initMain() {
         initCombo();
         initRetInTable();
         initRowHeader();
+        initFind();
         assignDefaultValue();
     }
-    
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblRet, 30);
         scroll.setRowHeaderView(list);
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblRet.getActionMap().put(solve, new DeleteAction());
-        
+
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     private void initDateListner() {
         txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
         txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -183,9 +154,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         public void focusGained(FocusEvent e) {
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
-        
+
     };
-    
+
     private void initRetInTable() {
         tblRet.setModel(roTableModel);
         roTableModel.setParent(tblRet);
@@ -224,30 +195,30 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        
+
         tblRet.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-    
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
-        monoLoc.subscribe((t) -> {
+        monoLoc.doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
+        }).subscribe();
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
     }
-    
+
     private void initKeyListener() {
         txtVouDate.getDateEditor().getUiComponent().setName("vouDate");
         txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -258,7 +229,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtCurrency.addKeyListener(this);
         tblRet.addKeyListener(this);
     }
-    
+
     private void initTextBoxValue() {
         txtVouTotal.setValue(0.00);
         txtVouDiscount.setValue(0.00);
@@ -270,45 +241,31 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtGrandTotal.setValue(0.00);
         txtProjectNo.setText("");
     }
-    
+
     private void initTextBoxFormat() {
-        txtVouBalance.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouPaid.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouDiscP.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouTaxP.setFormatterFactory(Util1.getDecimalFormat());
-        txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtTax.setFormatterFactory(Util1.getDecimalFormat());
+        ComponentUtil.setTextProperty(this);
     }
-    
+
     private void assignDefaultValue() {
-        inventoryRepo.getDefaultSupplier().subscribe((t) -> {
+        inventoryRepo.getDefaultSupplier().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
-        if (currAutoCompleter != null) {
-            userRepo.getDefaultCurrency().subscribe((t) -> {
-                currAutoCompleter.setCurrency(t);
-            });
-        }
-        if (locationAutoCompleter != null) {
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }).subscribe();
+        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        }).subscribe();
         txtVouDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
     }
-    
+
     private void clear() {
         disableForm(true);
         roTableModel.clear();
         roTableModel.addNewRow();
-        roTableModel.clearDelList();
         initTextBoxValue();
         assignDefaultValue();
         ri = new RetOutHis();
@@ -318,7 +275,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         projectAutoCompleter.setProject(null);
         focusTable();
     }
-    
+
     public void saveRetIn(boolean print) {
         if (isValidEntry() && roTableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
@@ -329,48 +286,57 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ri.setListRD(roTableModel.getListDetail());
-            ri.setListDel(roTableModel.getDelList());
-            inventoryRepo.save(ri)
-                    .subscribe((t) -> {
-                        progress.setIndeterminate(false);
-                        clear();
-                        if (print) {
-                            printVoucher(t.getKey().getVouNo());
-                        }
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        progress.setIndeterminate(false);
-                        observer.selected("save", false);
-                    });
+            inventoryRepo.save(ri).doOnSuccess((t) -> {
+                if (print) {
+                    printVoucher(ri);
+                }
+                clear();
+            }).doOnError((e) -> {
+                progress.setIndeterminate(false);
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveRetIn(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }).subscribe();
         }
     }
-    
-    private void printVoucher(String vouNo) {
-        inventoryRepo.getReturnOutReport(vouNo).doOnSuccess((t) -> {
-            try {
-                if (t != null) {
-                    String reportName = "ReturnOutVoucher";
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("p_print_date", Util1.getTodayDateTime());
-                    param.put("p_comp_name", Global.companyName);
-                    param.put("p_comp_address", Global.companyAddress);
-                    param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", ProUtil.logoPath());
-                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
-                    ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(t);
-                    JsonDataSource ds = new JsonDataSource(jsonDataStream);
-                    JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
-                    JasperViewer.viewReport(js, false);
-                }
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        }).doOnError((e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }).subscribe();
+
+    private void printVoucher(RetOutHis ri) {
+        try {
+            List<RetOutHisDetail> list = ri.getListRD().stream().filter((t) -> t.getStockCode() != null).toList();
+            String reportName = "ReturnOutVoucher";
+            Map<String, Object> param = new HashMap<>();
+            param.put("p_print_date", Util1.getTodayDateTime());
+            param.put("p_comp_name", Global.companyName);
+            param.put("p_comp_address", Global.companyAddress);
+            param.put("p_comp_phone", Global.companyPhone);
+            param.put("p_logo_path", ProUtil.logoPath());
+            param.put("p_vou_no", ri.getKey().getVouNo());
+            param.put("p_trader_name", ri.getTraderName());
+            param.put("p_remark", ri.getRemark());
+            param.put("p_vou_total", ri.getVouTotal());
+            param.put("p_vou_paid", ri.getPaid());
+            param.put("p_vou_balance", ri.getBalance());
+            param.put("p_vou_date", Util1.toDateStr(ri.getVouDate(), Global.dateFormat));
+            param.put("p_sub_report_dir", "report/");
+            String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode n = mapper.readTree(Util1.gson.toJson(list));
+            JsonDataSource d = new JsonDataSource(n, null) {
+            };
+            JasperPrint js = JasperFillManager.fillReport(reportPath, param, d);
+            JasperViewer.viewReport(js, false);
+        } catch (JRException | JsonProcessingException ex) {
+            log.error("printVoucher : " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -391,7 +357,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     "No Location.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtLocation.requestFocus();
-        } else if (Util1.getFloat(txtVouTotal.getValue()) <= 0) {
+        } else if (Util1.getDouble(txtVouTotal.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Amount.",
                     "No RetIn Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
@@ -403,18 +369,18 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             txtVouDate.requestFocus();
         } else {
             ri.setRemark(txtRemark.getText());
-            ri.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
-            ri.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
-            ri.setPaid(Util1.getFloat(txtVouPaid.getValue()));
-            ri.setBalance(Util1.getFloat(txtVouBalance.getValue()));
+            ri.setDiscP(Util1.getDouble(txtVouDiscP.getValue()));
+            ri.setDiscount(Util1.getDouble(txtVouDiscount.getValue()));
+            ri.setPaid(Util1.getDouble(txtVouPaid.getValue()));
+            ri.setBalance(Util1.getDouble(txtVouBalance.getValue()));
+            ri.setGrandTotal(Util1.getDouble(txtGrandTotal.getValue()));
             ri.setCurCode(currAutoCompleter.getCurrency().getCurCode());
-            ri.setDeleted(Util1.getNullTo(ri.getDeleted()));
             ri.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             Project p = projectAutoCompleter.getProject();
             ri.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             ri.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-            ri.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
+            ri.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
             if (lblStatus.getText().equals("NEW")) {
                 RetOutHisKey key = new RetOutHisKey();
@@ -424,7 +390,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 ri.setDeptId(Global.deptId);
                 ri.setCreatedDate(LocalDateTime.now());
                 ri.setCreatedBy(Global.loginUser.getUserCode());
-                ri.setSession(Global.sessionId);
+                ri.setSessionId(Global.sessionId);
                 ri.setMacId(Global.macId);
             } else {
                 ri.setUpdatedBy(Global.loginUser.getUserCode());
@@ -432,7 +398,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         }
         return status;
     }
-    
+
     private void deleteRetIn() {
         String status = lblStatus.getText();
         switch (status) {
@@ -455,14 +421,14 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-                    
+
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
-    
+
     private void deleteTran() {
         int row = tblRet.convertRowIndexToModel(tblRet.getSelectedRow());
         if (row >= 0) {
@@ -477,12 +443,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-    
+
     private void calculateTotalAmount() {
-        float totalVouBalance;
-        float totalAmount = 0.0f;
         listDetail = roTableModel.getListDetail();
-        totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
+        double totalAmount = listDetail.stream().mapToDouble((t) -> t.getAmount()).sum();
         txtVouTotal.setValue(totalAmount);
 
         //cal discAmt
@@ -509,19 +473,18 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         }
         //
         txtGrandTotal.setValue(totalAmount
-                + Util1.getFloat(txtTax.getValue())
-                - Util1.getFloat(txtVouDiscount.getValue()));
-        
-        totalVouBalance = Util1.getFloat(txtGrandTotal.getValue()) - Util1.getFloat(txtVouPaid.getValue());
-        txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
+                + Util1.getDouble(txtTax.getValue())
+                - Util1.getDouble(txtVouDiscount.getValue()));
+
+        double totalVouBalance = Util1.getDouble(txtGrandTotal.getValue()) - Util1.getDouble(txtVouPaid.getValue());
+        txtVouBalance.setValue(Util1.getDouble(totalVouBalance));
     }
-    
+
     public void historyRetIn() {
         if (dialog == null) {
             dialog = new RetOutHistoryDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
-            dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 20, Global.height - 20);
@@ -529,92 +492,75 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         }
         dialog.search();
     }
-    
-    public void setVoucher(RetOutHis ro, boolean local) {
+
+    public void setVoucher(RetOutHis ro) {
         if (ro != null) {
             progress.setIndeterminate(true);
             ri = ro;
-            inventoryRepo.findLocation(ri.getLocCode()).subscribe((t) -> {
-                locationAutoCompleter.setLocation(t);
-            });
-            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode());
-            trader.subscribe((t) -> {
-                traderAutoCompleter.setTrader(t);
-            });
-            userRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
-                currAutoCompleter.setCurrency(t);
-            });
-            if (ro.getProjectNo() != null) {
-                userRepo.find(new ProjectKey(ro.getProjectNo(), Global.compCode)).subscribe(t -> {
-                    projectAutoCompleter.setProject(t);
-                }, (err) -> {
-                    JOptionPane.showMessageDialog(this, err.getMessage());
-                });
-            } else {
-                projectAutoCompleter.setProject(null);
-            }
+            setHeader(ri);
             String vouNo = ri.getKey().getVouNo();
             Integer deptId = ri.getDeptId();
             ri.setVouLock(!deptId.equals(Global.deptId));
-            inventoryRepo.getReturnOutDetail(vouNo, deptId, local)
-                    .subscribe((t) -> {
+            inventoryRepo.getReturnOutDetail(vouNo)
+                    .doOnSuccess((t) -> {
                         roTableModel.setListDetail(t);
                         roTableModel.addNewRow();
-                        if (ri.isVouLock()) {
-                            lblStatus.setText("Voucher is locked.");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                        } else if (Util1.getBoolean(ri.getDeleted())) {
-                            lblStatus.setText("DELETED");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                        } else if (DateLockUtil.isLockDate(ri.getVouDate())) {
-                            lblStatus.setText(DateLockUtil.MESSAGE);
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                        } else {
-                            lblStatus.setText("EDIT");
-                            lblStatus.setForeground(Color.blue);
-                            disableForm(true);
-                        }
-                        txtVouNo.setText(ri.getKey().getVouNo());
-                        txtRemark.setText(ri.getRemark());
-                        txtVouDate.setDate(Util1.convertToDate(ri.getVouDate()));
-                        txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
-                        txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
-                        txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
-                        txtVouPaid.setValue(Util1.getFloat(ri.getPaid()));
-                        txtVouBalance.setValue(Util1.getFloat(ri.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                        chkPaid.setSelected(Util1.getFloat(ri.getPaid()) > 0);
                         progress.setIndeterminate(false);
                         focusTable();
-                    }, (e) -> {
-                        progress.setIndeterminate(false);
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
-            
+                    }).subscribe();
+
         }
     }
-    
+
+    private void setHeader(RetOutHis ri) {
+        inventoryRepo.findLocation(ri.getLocCode()).doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
+        }).subscribe();
+        inventoryRepo.findTrader(ri.getTraderCode()).doOnSuccess((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }).subscribe();
+        userRepo.findCurrency(ri.getCurCode()).doOnSuccess((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }).subscribe();
+        userRepo.find(ri.getProjectNo()).doOnSuccess(t -> {
+            projectAutoCompleter.setProject(t);
+        }).subscribe();
+        if (ri.isVouLock()) {
+            lblStatus.setText("Voucher is locked.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (ri.isDeleted()) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (DateLockUtil.isLockDate(ri.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else {
+            lblStatus.setText("EDIT");
+            lblStatus.setForeground(Color.blue);
+            disableForm(true);
+        }
+        txtVouNo.setText(ri.getKey().getVouNo());
+        txtRemark.setText(ri.getRemark());
+        txtVouDate.setDate(Util1.convertToDate(ri.getVouDate()));
+        txtVouTotal.setValue(Util1.getDouble(ri.getVouTotal()));
+        txtVouDiscP.setValue(Util1.getDouble(ri.getDiscP()));
+        txtVouDiscount.setValue(Util1.getDouble(ri.getDiscount()));
+        txtVouPaid.setValue(Util1.getDouble(ri.getPaid()));
+        txtVouBalance.setValue(Util1.getDouble(ri.getBalance()));
+        txtGrandTotal.setValue(Util1.getDouble(ri.getGrandTotal()));
+        chkPaid.setSelected(Util1.getDouble(ri.getPaid()) > 0);
+    }
+
     private void disableForm(boolean status) {
-        tblRet.setEnabled(status);
-        txtVouDate.setEnabled(status);
-        txtCus.setEnabled(status);
-        txtLocation.setEnabled(status);
-        txtRemark.setEnabled(status);
-        txtCurrency.setEnabled(status);
-        txtVouPaid.setEnabled(status);
-        txtTax.setEnabled(status);
-        txtVouTaxP.setEnabled(status);
-        txtVouDiscP.setEnabled(status);
-        txtVouDiscount.setEnabled(status);
-        txtGrandTotal.setEnabled(status);
+        ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-    
+
     private void setAllLocation() {
         List<RetOutHisDetail> listRetInDetail = roTableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -626,7 +572,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         }
         roTableModel.setListDetail(listRetInDetail);
     }
-    
+
     private void focusTable() {
         int rc = tblRet.getRowCount();
         if (rc > 1) {
@@ -637,15 +583,15 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             txtCus.requestFocus();
         }
     }
-    
+
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-    
+
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -668,7 +614,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         jLabel17 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtCus = new javax.swing.JTextField();
-        txtVouNo = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtVouDate = new com.toedter.calendar.JDateChooser();
@@ -679,6 +624,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtLocation = new javax.swing.JTextField();
         jLabel23 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        txtVouNo = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
@@ -732,11 +678,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 txtCusActionPerformed(evt);
             }
         });
-
-        txtVouNo.setEditable(false);
-        txtVouNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtVouNo.setFont(Global.textFont);
-        txtVouNo.setName("txtVouNo"); // NOI18N
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Vou Date");
@@ -795,6 +736,21 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
+        txtVouNo.setEditable(false);
+        txtVouNo.setFont(Global.textFont);
+        txtVouNo.setName("txtCus"); // NOI18N
+        txtVouNo.setNextFocusableComponent(txtLocation);
+        txtVouNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtVouNoFocusGained(evt);
+            }
+        });
+        txtVouNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtVouNoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -808,8 +764,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtVouNo)
-                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)))
+                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                            .addComponent(txtVouNo)))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
@@ -842,10 +798,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel17)
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel23)
-                        .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel22))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -860,7 +816,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel21)
                         .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
@@ -894,7 +850,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
         jLabel13.setFont(Global.lableFont);
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel13.setText("Gross Total :");
+        jLabel13.setText("Vou Total :");
 
         jLabel14.setFont(Global.lableFont);
         jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1129,7 +1085,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 .addGap(4, 4, 4)
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1238,6 +1194,14 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoFocusGained
+
+    private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoFocusGained
+
+    private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVouNoActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblRet.requestFocus();
@@ -1246,12 +1210,12 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         }
     }
-    
+
     @Override
     public void keyEvent(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -1273,27 +1237,26 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 Order od = (Order) selectObj;
             }
             case "RO-HISTORY" -> {
-                if (selectObj instanceof VReturnOut v) {
-                    boolean local = v.isLocal();
-                    inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
-                        setVoucher(t, local);
-                    });
+                if (selectObj instanceof RetOutHis v) {
+                    inventoryRepo.findReturnOut(v.getKey().getVouNo()).doOnSuccess((t) -> {
+                        setVoucher(t);
+                    }).subscribe();
                 }
-                
+
             }
         }
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1355,7 +1318,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     txtRemark.requestFocus();
                 }
-                
+
                 tabToTable(e);
             }
             case "txtDiscP" -> {
@@ -1421,7 +1384,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private com.toedter.calendar.JDateChooser txtVouDate;
     private javax.swing.JFormattedTextField txtVouDiscP;
     private javax.swing.JFormattedTextField txtVouDiscount;
-    private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JTextField txtVouNo;
     private javax.swing.JFormattedTextField txtVouPaid;
     private javax.swing.JFormattedTextField txtVouTaxP;
     private javax.swing.JFormattedTextField txtVouTotal;
@@ -1431,39 +1394,39 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     public void delete() {
         deleteRetIn();
     }
-    
+
     @Override
     public void print() {
         saveRetIn(true);
     }
-    
+
     @Override
     public void save() {
         saveRetIn(false);
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
         historyRetIn();
     }
-    
+
     @Override
     public void refresh() {
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
 }

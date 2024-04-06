@@ -157,7 +157,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
         popup.setBorder(BorderFactory.createLineBorder(Color.black));
-        popup.setPopupSize(400, 200);
+        popup.setPopupSize(500, 300);
 
         popup.add(scroll);
 

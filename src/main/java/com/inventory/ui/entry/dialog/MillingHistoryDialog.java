@@ -868,9 +868,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     }//GEN-LAST:event_chkLocalActionPerformed
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        if (inventoryRepo.localDatabase) {
-            integration.uploadPurchase();
-        }
+
     }//GEN-LAST:event_btnUploadActionPerformed
 
     private void chkDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkDelActionPerformed

@@ -124,8 +124,6 @@ import com.inventory.entity.VLanding;
 import com.inventory.entity.VPurchase;
 import com.inventory.entity.VOrder;
 import com.inventory.entity.VPurOrder;
-import com.inventory.entity.VReturnIn;
-import com.inventory.entity.VReturnOut;
 import com.inventory.entity.VSale;
 import com.inventory.entity.VStockIO;
 import com.inventory.entity.VConsign;
@@ -634,6 +632,9 @@ public class InventoryRepo {
 //                });
 //    }
     public Mono<Trader> findTrader(String code) {
+        if (Util1.isNullOrEmpty(code)) {
+            return Mono.empty();
+        }
         TraderKey key = new TraderKey();
         key.setCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
@@ -2436,13 +2437,13 @@ public class InventoryRepo {
                 });
     }
 
-    public Flux<VReturnIn> getReturnInVoucher(ReportFilter filter) {
+    public Flux<RetInHis> getReturnInVoucher(ReportFilter filter) {
         return inventoryApi
                 .post()
                 .uri("/returnIn/getReturnIn")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VReturnIn.class)
+                .bodyToFlux(RetInHis.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Flux.empty();
@@ -2464,15 +2465,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId, boolean local) {
+    public Mono<RetOutHis> findReturnOut(String vouNo) {
         RetOutHisKey key = new RetOutHisKey();
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);
-        if (local) {
-            return h2Repo.findRetOutHis(key);
-        }
         return inventoryApi.post()
-                .uri("/retout/findReturnOut")
+                .uri("/retOut/findReturnOut")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class)
@@ -2482,15 +2480,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VReturnOut>> getReturnOutVoucher(ReportFilter filter) {
-        if (filter.isLocal()) {
-            return h2Repo.searchReturnOutVoucher(filter);
-        }
+    public Mono<List<RetOutHis>> getReturnOutVoucher(ReportFilter filter) {
         return inventoryApi.post()
-                .uri("/retout/getReturnOut")
+                .uri("/retOut/getReturnOut")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VReturnOut.class)
+                .bodyToFlux(RetOutHis.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -2498,15 +2493,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId, boolean local) {
-        if (local) {
-            return h2Repo.searchReturnOutDetail(vouNo, depId);
-        }
+    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/retout/getReturnOutDetail")
+                .uri(builder -> builder.path("/retOut/getReturnOutDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", depId)
                 .build())
                 .retrieve()
                 .bodyToFlux(RetOutHisDetail.class)
@@ -2763,7 +2754,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(RetOutHisKey key) {
         return inventoryApi.post()
-                .uri("/retout/restoreReturnOut")
+                .uri("/retOut/restoreReturnOut")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2811,7 +2802,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(RetOutHisKey key) {
         return inventoryApi.post()
-                .uri("/retout/deleteReturnOut")
+                .uri("/retOut/deleteReturnOut")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -3363,28 +3354,15 @@ public class InventoryRepo {
 
     public Mono<RetOutHis> save(RetOutHis ro) {
         return inventoryApi.post()
-                .uri("/retout/saveReturnOut")
+                .uri("/retOut/saveReturnOut")
                 .body(Mono.just(ro), RetInHis.class)
                 .retrieve()
-                .bodyToMono(RetOutHis.class)
-                .onErrorResume((e) -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(ro);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(RetOutHis.class);
     }
 
     public Mono<RetOutHis> uploadRetOut(RetOutHis ro) {
         return inventoryApi.post()
-                .uri("/retout/saveReturnOut")
+                .uri("/retOut/saveReturnOut")
                 .body(Mono.just(ro), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class)
@@ -3777,19 +3755,17 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<byte[]> getReturnInReport(String vouNo) {
+    public Flux<RetInHisDetail> getReturnInReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/getReturnInReport")
+                .uri(builder -> builder.path("/returnIn/getReturnInReport")
                 .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
+                .bodyToFlux(RetInHisDetail.class);
     }
 
-    public Mono<byte[]> getReturnOutReport(String vouNo) {
+    public Flux<RetOutHisDetail> getReturnOutReport(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/getReturnOutReport")
                 .queryParam("vouNo", vouNo)
@@ -3797,8 +3773,8 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
+                .bodyToFlux(RetOutHisDetail.class);
+
     }
 
     public Mono<List<VSale>> getSaleByBatchReport(String vouNo, String grnVouNo) {
@@ -3889,12 +3865,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<OPHisDetail>> getOpeningDetail(String vouNo, String compCode, Integer deptId) {
+    public Mono<List<OPHisDetail>> getOpeningDetail(String vouNo, String compCode) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getOpeningDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(OPHisDetail.class)

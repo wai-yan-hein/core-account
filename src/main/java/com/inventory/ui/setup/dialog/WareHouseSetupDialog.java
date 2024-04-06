@@ -211,7 +211,6 @@ public class WareHouseSetupDialog extends javax.swing.JDialog implements KeyList
         lblRec = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Ware House Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 

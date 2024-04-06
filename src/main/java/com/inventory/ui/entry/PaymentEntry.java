@@ -409,7 +409,6 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     
     private void setVoucherDetail(PaymentHis ph) {
         this.ph = ph;
-        String compCode = ph.getCompCode();
         String vouNo = ph.getVouNo();
         inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
@@ -417,7 +416,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         accountRepo.findCOA(ph.getAccount()).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
         }).subscribe();
-        userRepo.find(new ProjectKey(ph.getProjectNo(), compCode)).doOnSuccess((t) -> {
+        userRepo.find(ph.getProjectNo()).doOnSuccess((t) -> {
             projectAutoCompleter.setProject(t);
         }).subscribe();
         userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {

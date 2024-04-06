@@ -223,11 +223,12 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
             txtEndDate.requestFocus();
             return false;
         } else {
+            String pNo =txtProjectNo.getText();
             ProjectKey key = new ProjectKey();
             key.setCompCode(Global.compCode);
-            key.setProjectNo(txtProjectNo.getText());
+            key.setProjectNo(pNo);
             if (lblStatus.getText().equals("NEW")) {
-                if (userRepo.find(key).block() != null) {
+                if (userRepo.find(pNo).block() != null) {
                     JOptionPane.showMessageDialog(this, "Duplicate Project No.");
                     return false;
                 }

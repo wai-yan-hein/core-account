@@ -16,12 +16,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Embeddable
-public class OPHisKey implements Serializable {
+public class OPHisKey {
 
-    @Column(name = "vou_no")
     private String vouNo;
-    @Column(name = "comp_code")
     private String compCode;
 
 }

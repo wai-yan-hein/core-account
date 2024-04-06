@@ -1108,7 +1108,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         inventoryRepo.findSaleMan(sh.getSaleManCode()).doOnSuccess((t) -> {
             saleManCompleter.setSaleMan(t);
         }).subscribe();
-        userRepo.find(new ProjectKey(sh.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+        userRepo.find(sh.getProjectNo()).doOnSuccess(t -> {
             projectAutoCompleter.setProject(t);
         }).subscribe();
     }

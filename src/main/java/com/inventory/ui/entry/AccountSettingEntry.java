@@ -10,7 +10,6 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.common.ComponentUtil;
 import com.common.Global;
-import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.AccKey;
@@ -22,8 +21,7 @@ import java.awt.Color;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 
 /**
  *
@@ -31,11 +29,11 @@ import javax.swing.table.TableRowSorter;
  */
 public class AccountSettingEntry extends javax.swing.JPanel {
 
-    private TableRowSorter<TableModel> sorter;
-    private StartWithRowFilter swrf;
     private AccSetting setting = new AccSetting();
     private final AccountSettingTableModel settingTableModel = new AccountSettingTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private AccountRepo accountRepo;
     private COA3AutoCompleter sourceCompleter;
     private COA3AutoCompleter cashCompleter;
@@ -44,21 +42,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     private COA3AutoCompleter balCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     /**
      * Creates new form AccountSetting
@@ -91,10 +74,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     }
 
     private void initAccTable() {
-        swrf = new StartWithRowFilter(txtFilter);
         tblSetting.setModel(settingTableModel);
-        sorter = new TableRowSorter<>(tblSetting.getModel());
-        tblSetting.setRowSorter(sorter);
         tblSetting.getTableHeader().setFont(Global.lableFont);
         tblSetting.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblSetting.setDefaultRenderer(Object.class, new TableCellRender());
@@ -163,10 +143,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     }
 
     private void clearSetting() {
-//        txtType.setText(null);
-//        txtType.setEnabled(true);
         cboType.setEnabled(true);
-        txtFilter.setText(null);
         sourceCompleter.setCoa(null);
         cashCompleter.setCoa(null);
         disCompleter.setCoa(null);
@@ -177,7 +154,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         lblStatus.setForeground(Color.green);
         setting = new AccSetting();
         tblSetting.requestFocus();
-//        txtType.requestFocus();
     }
 
     private boolean isValidEntry() {
@@ -235,7 +211,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSetting = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtSrc = new javax.swing.JTextField();
@@ -271,13 +246,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         ));
         tblSetting.setName("tblSetting"); // NOI18N
         jScrollPane1.setViewportView(tblSetting);
-
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -493,11 +461,9 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 318, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -506,10 +472,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -517,7 +480,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 558, Short.MAX_VALUE)
+            .addGap(0, 654, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
@@ -534,15 +497,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                     .addGap(0, 0, Short.MAX_VALUE)))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
-        // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(swrf);
-        }
-    }//GEN-LAST:event_txtFilterKeyReleased
 
     private void txtSrcFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSrcFocusGained
         // TODO add your handling code here:
@@ -629,7 +583,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     private javax.swing.JTextField txtCash;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtDiscount;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtSrc;
     private javax.swing.JTextField txtTax;
     // End of variables declaration//GEN-END:variables

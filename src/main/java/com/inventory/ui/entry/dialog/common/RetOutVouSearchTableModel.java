@@ -7,7 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.entity.VReturnOut;
+import com.inventory.entity.RetOutHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RetOutVouSearchTableModel extends AbstractTableModel {
 
-    private List<VReturnOut> listDetail = new ArrayList();
+    private List<RetOutHis> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
 
     @Override
@@ -47,7 +47,7 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         switch (column) {
             case 6,5 -> {
-                return Float.class;
+                return Double.class;
             }
         }
         return String.class;
@@ -56,7 +56,7 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            VReturnOut his = listDetail.get(row);
+            RetOutHis his = listDetail.get(row);
 
             switch (column) {
                 case 0 -> {
@@ -65,10 +65,11 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
                 }
                 case 1 -> {
                     //vou-no
+                    String vouNo = his.getKey().getVouNo();
                     if (his.isDeleted()) {
-                        return his.getVouNo() + "***";
+                        return Util1.getStar(vouNo);
                     } else {
-                        return his.getVouNo();
+                        return vouNo;
                     }
                 }
                 case 2 -> {
@@ -97,16 +98,16 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VReturnOut> getListDetail() {
+    public List<RetOutHis> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<VReturnOut> listDetail) {
+    public void setListDetail(List<RetOutHis> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public VReturnOut getSelectVou(int row) {
+    public RetOutHis getSelectVou(int row) {
         return listDetail.get(row);
     }
 }

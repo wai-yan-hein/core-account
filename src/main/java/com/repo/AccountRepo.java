@@ -240,7 +240,7 @@ public class AccountRepo {
                 .body(Mono.just(gl), List.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-          
+
     }
 
     public Mono<Boolean> delete(COATemplateKey obj) {
@@ -435,8 +435,16 @@ public class AccountRepo {
                 });
     }
 
+    public Mono<List<ChartOfAccount>> getIncomeAcc() {
+        return getCOAByHead(ProUtil.getProperty(ProUtil.INCOME));
+    }
+
     public Mono<List<ChartOfAccount>> getPurchaseAcc() {
         return getCOAByHead(ProUtil.getProperty(ProUtil.PURCHASE));
+    }
+
+    public Mono<List<ChartOfAccount>> getDebtorAcc() {
+        return getCOAByHead(ProUtil.getProperty(ProUtil.CURRENT));
     }
 
     public Mono<List<ChartOfAccount>> getPayableAcc() {
@@ -444,6 +452,9 @@ public class AccountRepo {
     }
 
     public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {
+        if (localDatabase) {
+            return h2Repo.getCOAByHead(headCode);
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCOAByHead")
                 .queryParam("headCode", headCode)
@@ -830,8 +841,8 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToFlux(Message.class)
                 .retryWhen(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(1))
-                .maxBackoff(Duration.ofDays(1))
-                .doAfterRetry(retrySignal -> log.error("Account Retrying...")))
+                        .maxBackoff(Duration.ofDays(1))
+                        .doAfterRetry(retrySignal -> log.error("Account Retrying...")))
                 .onErrorResume(throwable -> {
                     // Log the error or handle it as needed
                     log.error("Error receiving messages: " + throwable.getMessage());
