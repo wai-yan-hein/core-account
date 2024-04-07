@@ -136,7 +136,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initTable();
         initRowHeader();
         initFind();
+        batchLock();
         searchStock();
+    }
+
+    private void batchLock() {
+        ComponentUtil.enableForm(this, !Global.batchLock);
     }
 
     private void initFind() {
@@ -2182,6 +2187,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             if (stock.isDeleted()) {
                 int yn = JOptionPane.showConfirmDialog(this, "Are you sure to restore?", "Stock Restore", JOptionPane.YES_OPTION);
                 if (yn == JOptionPane.YES_OPTION) {
+                    progress.setIndeterminate(true);
                     inventoryRepo.restoreStock(key).doOnSuccess((t) -> {
                         stockTableModel.deleteStock(selectRow);
                     }).doOnTerminate(() -> {
@@ -2190,16 +2196,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     }).subscribe();
                 }
             } else {
-                inventoryRepo.deleteStock(stock.getKey()).doOnSuccess((t) -> {
-                    if (!t.isEmpty()) {
-                        JOptionPane.showMessageDialog(this, t.get(0).getMessage());
-                    } else {
-                        stockTableModel.deleteStock(selectRow);
-                        sendMessage(stock.getStockName() + " : deleted");
-                        clear();
-                        JOptionPane.showMessageDialog(this, "Deleted.");
-                    }
-                }).subscribe();
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure to deleted?", "Stock Delete", JOptionPane.YES_OPTION);
+                if (yn == JOptionPane.YES_OPTION) {
+                    progress.setIndeterminate(true);
+                    inventoryRepo.deleteStock(stock.getKey()).doOnSuccess((t) -> {
+                        if (!t.isEmpty()) {
+                            JOptionPane.showMessageDialog(this, t.get(0).getMessage());
+                        } else {
+                            stockTableModel.deleteStock(selectRow);
+                            sendMessage(stock.getStockName() + " : deleted");
+                            clear();
+                            JOptionPane.showMessageDialog(this, "Deleted.");
+                        }
+                    }).subscribe();
+                }
             }
         }
     }

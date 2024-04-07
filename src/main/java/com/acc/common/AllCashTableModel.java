@@ -285,7 +285,10 @@ public class AllCashTableModel extends AbstractTableModel {
                 case 8 -> {
                     if (value != null) {
                         if (value instanceof ChartOfAccount coa) {
-//                            if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
+                            if (!ProUtil.isTraderCOA()) {
+                                gl.setTraderCode(null);
+                                gl.setTraderName(null);
+                            }
                             gl.setAccCode(coa.getKey().getCoaCode());
                             gl.setAccName(coa.getCoaNameEng());
                             if (Util1.isNull(gl.getCurCode())) {
@@ -293,7 +296,6 @@ public class AllCashTableModel extends AbstractTableModel {
                             } else {
                                 parent.setColumnSelectionInterval(8, 8);
                             }
-//                            }
                         }
 
                     }

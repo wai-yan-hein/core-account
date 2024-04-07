@@ -595,6 +595,14 @@ public class UserRepo {
                 .bodyToMono(YearEnd.class);
     }
 
+    public Mono<YearEnd> yearEndFix(YearEnd end) {
+        return userApi.post()
+                .uri("/user/yearEndFix")
+                .body(Mono.just(end), YearEnd.class)
+                .retrieve()
+                .bodyToMono(YearEnd.class);
+    }
+
     public Mono<Menu> save(Menu menu) {
         return userApi.post()
                 .uri("/user/saveMenu")

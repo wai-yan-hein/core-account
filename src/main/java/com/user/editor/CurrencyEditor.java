@@ -7,8 +7,6 @@ package com.user.editor;
 
 import com.common.Global;
 import com.user.model.Currency;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;

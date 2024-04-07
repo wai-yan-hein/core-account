@@ -281,8 +281,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void report(boolean excel) {
         if (row >= 0) {
-            int selectRow = tblReport.convertRowIndexToModel(row);
-            Menu report = tableModel.getReport(selectRow);
+            Menu report = tableModel.getReport(row);
             String reportName = report.getMenuName();
             String reportUrl = report.getMenuUrl();
             if (isValidReport(reportUrl)) {

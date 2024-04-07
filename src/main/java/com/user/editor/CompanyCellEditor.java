@@ -58,7 +58,7 @@ public class CompanyCellEditor extends AbstractCellEditor implements TableCellEd
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new CompanyAutoCompleter(jtf, listCompany, this, false);
+        completer = new CompanyAutoCompleter(jtf, this);
         return component;
     }
 

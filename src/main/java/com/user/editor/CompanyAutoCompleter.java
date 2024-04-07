@@ -46,23 +46,28 @@ public final class CompanyAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private final JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final CompanyTableModel companyTableModel;
+    private final CompanyTableModel companyTableModel = new CompanyTableModel();
     private CompanyInfo company;
     public AbstractCellEditor editor;
     private final TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
 
-    public CompanyAutoCompleter(JTextComponent comp, List<CompanyInfo> list,
-            AbstractCellEditor editor, boolean filter) {
+    public void setListCompany(List<CompanyInfo> list) {
+        companyTableModel.setListCompany(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+    }
+
+    public CompanyAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.COMPANY));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        companyTableModel = new CompanyTableModel();
-        companyTableModel.setListCompany(list);
         table.setModel(companyTableModel);
         table.setSize(50, 50);
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -90,7 +95,7 @@ public final class CompanyAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(400, 200);
+        popup.setPopupSize(500, 300);
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -133,10 +138,6 @@ public final class CompanyAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {

@@ -113,6 +113,7 @@ public class ProUtil {
     public static final String PRINTER_PAGE = "printer.pages";
     public static final String BARCODE = "use.barcode";
     public static final String DARK_MODE = "dark.mode";
+    public static final String ENABLE_TRADER_COA = "enable.trader.coa";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
@@ -244,6 +245,9 @@ public class ProUtil {
 
     public static boolean isPrint() {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
+    }
+     public static boolean isTraderCOA() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(ENABLE_TRADER_COA));
     }
 
     public static boolean isStockIREdit() {

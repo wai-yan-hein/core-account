@@ -67,7 +67,6 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
     public void initMain() {
         initTable();
         initCompleter();
-        searchDepartment();
     }
 
     private void initCompleter() {
@@ -87,7 +86,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         ComponentUtil.addFocusListener(this);
     }
 
-    private void searchDepartment() {
+    public void searchDepartment() {
         progress.setIndeterminate(true);
         userRepo.getDeparment(false).doOnSuccess((t) -> {
             departmentTableModel.setListDepartment(t);
@@ -95,6 +94,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
             progress.setIndeterminate(false);
             txtCode.requestFocus();
         }).subscribe();
+        setVisible(true);
     }
 
     private void initTable() {
@@ -271,7 +271,6 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         txtCoa = new javax.swing.JTextField();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Department Setup");
 
         tblDep.setFont(Global.textFont);

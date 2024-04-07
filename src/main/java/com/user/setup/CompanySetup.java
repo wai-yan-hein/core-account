@@ -25,6 +25,7 @@ import com.user.dialog.DateLockDialog;
 import com.user.dialog.DepartmentSetupDialog;
 import com.user.dialog.MachineInfoDialog;
 import com.user.dialog.QRDialog;
+import com.user.dialog.YearEndFixDialog;
 import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
@@ -69,6 +70,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private final CompanyTableModel tableModel = new CompanyTableModel();
     private DateLockDialog dateLockDialog;
     private MachineInfoDialog machineInfoDialog;
+    private YearEndFixDialog yeFixDialog;
+    private DepartmentSetupDialog depDialog;
 
     /**
      * Creates new form Company
@@ -301,13 +304,27 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         d.setVisible(true);
     }
 
+    private void yearEndFixDialog() {
+        if (yeFixDialog == null) {
+            yeFixDialog = new YearEndFixDialog(Global.parentForm);
+            yeFixDialog.setUserRepo(userRepo);
+            yeFixDialog.setToken(token);
+            yeFixDialog.initMain();
+            yeFixDialog.setLocationRelativeTo(null);
+        }
+        yeFixDialog.searchCompany();
+    }
+
     private void departmentDialog() {
-        DepartmentSetupDialog d = new DepartmentSetupDialog(Global.parentForm);
-        d.setUserRepo(userRepo);
-        d.setAccountRepo(accountRepo);
-        d.initMain();
-        d.setLocationRelativeTo(null);
-        d.setVisible(true);
+        if (depDialog == null) {
+            depDialog = new DepartmentSetupDialog(Global.parentForm);
+            depDialog.setLocationRelativeTo(null);
+            depDialog.setSize(Global.width - 200, Global.height - 200);
+            depDialog.setUserRepo(userRepo);
+            depDialog.setAccountRepo(accountRepo);
+            depDialog.initMain();
+        }
+        depDialog.searchDepartment();
     }
 
     private void qrDialog() {
@@ -456,6 +473,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         btnReset = new javax.swing.JButton();
+        jButton8 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -738,7 +756,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addComponent(lblMessage)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelAdv, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addComponent(chkMenuUpdate)
                 .addContainerGap())
         );
@@ -810,6 +828,14 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        jButton8.setFont(Global.lableFont);
+        jButton8.setText("Year End Fix");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -826,7 +852,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jButton4)
                     .addComponent(jButton5)
                     .addComponent(jButton6)
-                    .addComponent(btnReset))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jButton8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnReset, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -852,7 +880,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnReset))
                     .addComponent(jButton7))
-                .addContainerGap(264, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton8)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -936,6 +966,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         showSecurityDialog();        // TODO add your handling code here:
     }//GEN-LAST:event_btnResetActionPerformed
 
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        // TODO add your handling code here:
+        yearEndFixDialog();
+    }//GEN-LAST:event_jButton8ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnReset;
@@ -949,6 +984,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
+    private javax.swing.JButton jButton8;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

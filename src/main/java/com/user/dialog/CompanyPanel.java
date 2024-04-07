@@ -9,6 +9,7 @@ import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.user.model.CompanyInfo;
+import java.awt.Color;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,10 +18,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CompanyPanel extends javax.swing.JPanel {
-
+    
     private CompanyInfo info;
     private SelectionObserver observer;
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -28,17 +29,17 @@ public class CompanyPanel extends javax.swing.JPanel {
     public CompanyInfo getInfo() {
         return info;
     }
-
+    
     public void setInfo(CompanyInfo info) {
         this.info = info;
     }
-
+    
     public CompanyPanel(CompanyInfo info) {
         this.info = info;
         initComponents();
         setData(info);
     }
-
+    
     private void setData(CompanyInfo info) {
         if (info != null) {
             panel.setName(info.getCompCode());
@@ -46,9 +47,14 @@ public class CompanyPanel extends javax.swing.JPanel {
             lblFinDate.setText(String.format("%s to %s",
                     Util1.toDateStr(info.getStartDate(), Global.dateFormat),
                     Util1.toDateStr(info.getEndDate(), Global.dateFormat)));
+            if (info.isBatchLock()) {
+                lblStatus.setText("Locked");
+                lblStatus.setForeground(Color.YELLOW);
+            }
         }
     }
-    private void select(){
+    
+    private void select() {
         observer.selected("select", info);
     }
 
@@ -67,6 +73,7 @@ public class CompanyPanel extends javax.swing.JPanel {
         lblFinDate = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jButton1 = new javax.swing.JButton();
+        lblStatus = new javax.swing.JLabel();
 
         panel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -96,6 +103,9 @@ public class CompanyPanel extends javax.swing.JPanel {
             }
         });
 
+        lblStatus.setFont(Global.companyFont);
+        lblStatus.setText("-");
+
         javax.swing.GroupLayout panelLayout = new javax.swing.GroupLayout(panel);
         panel.setLayout(panelLayout);
         panelLayout.setHorizontalGroup(
@@ -106,12 +116,15 @@ public class CompanyPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblCompanyName, javax.swing.GroupLayout.DEFAULT_SIZE, 385, Short.MAX_VALUE)
+                    .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelLayout.createSequentialGroup()
-                        .addComponent(lblCompanyName, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                        .addGap(0, 3, Short.MAX_VALUE)
                         .addComponent(jButton1))
-                    .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelLayout.setVerticalGroup(
@@ -125,7 +138,9 @@ public class CompanyPanel extends javax.swing.JPanel {
                             .addComponent(lblCompanyName, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE))
+                        .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
+                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jSeparator1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -164,6 +179,7 @@ public class CompanyPanel extends javax.swing.JPanel {
     private javax.swing.JLabel lblCompanyName;
     private javax.swing.JLabel lblFinDate;
     private javax.swing.JLabel lblImage;
+    private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panel;
     // End of variables declaration//GEN-END:variables
 }

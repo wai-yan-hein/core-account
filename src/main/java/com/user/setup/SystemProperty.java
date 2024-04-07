@@ -182,6 +182,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkNoUnit.setName(ProUtil.STOCK_NO_UNIT);
         chkTraderBalAcc.setName(ProUtil.TRADER_BAL_ACC);
         chkBarCode.setName(ProUtil.BARCODE);
+        chkETCOA.setName(ProUtil.ENABLE_TRADER_COA);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -307,6 +308,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkNoUnit.setSelected(Util1.getBoolean(hmProperty.get(chkNoUnit.getName())));
         chkTraderBalAcc.setSelected(Util1.getBoolean(hmProperty.get(chkTraderBalAcc.getName())));
         chkBarCode.setSelected(Util1.getBoolean(hmProperty.get(chkBarCode.getName())));
+        chkETCOA.setSelected(Util1.getBoolean(hmProperty.get(chkETCOA.getName())));
     }
 
     private void initTextBox() {
@@ -750,6 +752,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableCrVoucher = new javax.swing.JCheckBox();
         jLabel35 = new javax.swing.JLabel();
         txtEmp = new javax.swing.JTextField();
+        chkETCOA = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jLabel27 = new javax.swing.JLabel();
         txtDivider = new javax.swing.JTextField();
@@ -1387,6 +1390,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtEmp.setFont(Global.textFont);
 
+        chkETCOA.setText("Enable Trader COA");
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -1437,7 +1442,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkDisableDrVoucher, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(chkDisableCrVoucher, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(chkDisableCrVoucher, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(chkETCOA, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -1506,6 +1512,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(15, 15, 15)
                         .addComponent(chkDisableDrVoucher)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkETCOA)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1845,6 +1853,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkDisableCrVoucher;
     private javax.swing.JCheckBox chkDisableDep;
     private javax.swing.JCheckBox chkDisableDrVoucher;
+    private javax.swing.JCheckBox chkETCOA;
     private javax.swing.JCheckBox chkMulti;
     private javax.swing.JCheckBox chkNoUnit;
     private javax.swing.JCheckBox chkPaymentEdit;
