@@ -24,6 +24,7 @@ import com.inventory.entity.OPHis;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
@@ -63,7 +64,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     private StartWithRowFilter tblFilter;
 
     public OPHistoryDialog(JFrame frame, int type) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         this.type = type;
         initComponents();
         initKeyListener();
