@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,72 +36,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PatternTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Amount", "Price Method"};
+    private final String[] columnNames = {"Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Amount", "Price Method"};
     private List<Pattern> listPattern = new ArrayList<>();
-    private JLabel lblRecord;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private String stockCode;
+    @Setter
     private JPanel panel;
+    @Setter
     private JTable table;
+    @Setter
     private Location location;
+    @Setter
     private SelectionObserver observer;
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public JLabel getLblRecord() {
-        return lblRecord;
-    }
-
-    public void setLblRecord(JLabel lblRecord) {
-        this.lblRecord = lblRecord;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public JTable getTable() {
-        return table;
-    }
-
-    public void setTable(JTable table) {
-        this.table = table;
-    }
-
-    public JPanel getPanel() {
-        return panel;
-    }
-
-    public void setPanel(JPanel panel) {
-        this.panel = panel;
-    }
-
-    public String getStockCode() {
-        return stockCode;
-    }
-
-    public void setStockCode(String stockCode) {
-        this.stockCode = stockCode;
-        addNewRow();
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     @Override
     public int getRowCount() {

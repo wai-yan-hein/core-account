@@ -9,7 +9,6 @@ import com.inventory.entity.Stock;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**

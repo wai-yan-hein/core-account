@@ -63,8 +63,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     @Setter
     private InventoryRepo inventoryRepo;
     private FindDialog findDialog;
-    private int row =0;
-
+    private int row = 0;
 
     /**
      * Creates new form PatternSetup
@@ -84,7 +83,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initFind() {
-        findDialog = new FindDialog(Global.parentForm, tblPD);
+        findDialog = new FindDialog(Global.parentForm, tblStock, tblPD);
     }
 
     private void initRowHeader() {
@@ -184,6 +183,8 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         filter.setCatCode(getCategory());
         filter.setStockTypeCode(getType());
         filter.setStockCode(getStock());
+        filter.setDeleted(false);
+        filter.setActive(true);
         stockTableModel.clear();
         inventoryRepo.searchStock(filter).doOnNext(stockTableModel::addStock)
                 .doOnComplete(() -> {
@@ -193,13 +194,12 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initTablePD() {
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+        inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
             patternTableModel.setLocation(t);
-        });
+        }).subscribe();
         patternTableModel.setTable(tblPD);
         patternTableModel.setPanel(this);
         patternTableModel.setInventoryRepo(inventoryRepo);
-        patternTableModel.setLblRecord(lblRec);
         patternTableModel.setObserver(this);
         tblPD.setCellSelectionEnabled(true);
         tblPD.setModel(patternTableModel);
@@ -209,17 +209,17 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblPD.setFont(Global.textFont);
         tblPD.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPD.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        inventoryRepo.getLocation().subscribe((t) -> {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             tblPD.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
-        });
+        }).subscribe();
         tblPD.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        inventoryRepo.getStockUnit().subscribe((t) -> {
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
-        });
+        }).subscribe();
         tblPD.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        inventoryRepo.getPriceOption("Purchase").subscribe((t) -> {
+        inventoryRepo.getPriceOption("Purchase").doOnSuccess((t) -> {
             tblPD.getColumnModel().getColumn(7).setCellEditor(new PriceEditor(t));
-        });
+        }).subscribe();
         tblPD.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblPD.getColumnModel().getColumn(1).setPreferredWidth(150);
         tblPD.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -235,17 +235,21 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private void select() {
         row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         if (row >= 0) {
+            progress.setIndeterminate(true);
             Stock s = stockTableModel.getStock(row);
             String stockCode = s.getKey().getStockCode();
             lblStockName.setText(s.getStockName());
             chkEx.setSelected(s.isExplode());
-            inventoryRepo.getPattern(stockCode, null).subscribe((t) -> {
+            inventoryRepo.getPattern(stockCode, null).doOnSuccess((t) -> {
                 lblRec.setText("Records : " + t.size());
                 patternTableModel.setListPattern(t);
+                patternTableModel.addNewRow();
                 patternTableModel.setStockCode(stockCode);
-                calPrice();
+            }).doOnTerminate(() -> {
+                calPrice(); 
                 focusOnPD();
-            });
+                progress.setIndeterminate(false);
+            }).subscribe();
 
         }
     }
@@ -449,6 +453,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         txtPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtPrice.setFont(Global.amtFont);
 
+        jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Cost Price");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);

@@ -15,9 +15,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class General {
 
-    private Double amount;
-    private Double qty;
-    private Double smallQty;
+    private double amount;
+    private double qty;
+    private double smallQty;
     private String stockCode;
     private String stockName;
     private String sysCode;
@@ -26,7 +26,7 @@ public class General {
     private String categoryName;
     private String traderCode;
     private String traderName;
-    private Double totalQty;
+    private double totalQty;
     private String saleManName;
     private String saleManCode;
     private String qtyRel;
