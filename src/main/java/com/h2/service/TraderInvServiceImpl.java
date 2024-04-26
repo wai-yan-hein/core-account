@@ -55,4 +55,9 @@ public class TraderInvServiceImpl implements TraderInvService {
         return dao.getTrader(compCode, type);
     }
 
+    @Override
+    public Boolean delete(TraderKey key) {
+        return dao.delete(key);
+    }
+
 }

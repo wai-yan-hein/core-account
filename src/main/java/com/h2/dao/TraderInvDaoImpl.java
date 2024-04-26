@@ -112,4 +112,15 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
         return query.getResultList();
     }
 
+    @Override
+    public Boolean delete(TraderKey key) {
+        Trader t = find(key);
+        if (t != null) {
+            t.setDeleted(true);
+            t.setUpdatedDate(LocalDateTime.now());
+            update(t);
+        }
+        return true;
+    }
+
 }

@@ -16,7 +16,7 @@ import com.inventory.entity.PurDetailKey;
 import com.inventory.entity.PurHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
-import com.inventory.ui.entry.Purchase;
+import com.inventory.ui.entry.PurchaseDynamic;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Setter
     private JLabel lblRec;
     @Setter
-    private Purchase purchase;
+    private PurchaseDynamic purchase;
 
     @Override
     public String getColumnName(int column) {
@@ -235,9 +235,11 @@ public class PurchaseTableModel extends AbstractTableModel {
                     if (stockCode != null && record.getUnitCode() != null) {
                         inventoryRepo.getPurRecentPrice(stockCode,
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).doOnSuccess((t) -> {
-                            record.setPrice(Util1.getDouble(t.getAmount()));
-                            calculateAmount(record);
-                            fireTableRowsUpdated(row, row);
+                            if (t != null) {
+                                record.setPrice(Util1.getDouble(t.getAmount()));
+                                calculateAmount(record);
+                                fireTableRowsUpdated(row, row);
+                            }
                         }).subscribe();
                     }
                 }
@@ -246,7 +248,6 @@ public class PurchaseTableModel extends AbstractTableModel {
             calculateAmount(record);
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
-            observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -310,6 +311,7 @@ public class PurchaseTableModel extends AbstractTableModel {
             pur.setPrice(price);
             pur.setAmount(Util1.getDouble(Math.round(amount)));
         }
+        observer.selected("CAL-TOTAL", "CAL-TOTAL");
     }
 
     private void showMessageBox(String text) {

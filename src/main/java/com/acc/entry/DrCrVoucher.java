@@ -10,6 +10,7 @@ import com.acc.common.VoucherTableModel;
 import com.acc.dialog.FindDialog;
 import com.acc.dialog.VoucherEntryDailog;
 import com.acc.editor.COA3AutoCompleter;
+import com.acc.editor.COAAutoCompleter;
 import com.acc.model.Gl;
 import com.common.Global;
 import com.common.PanelControl;
@@ -43,6 +44,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -63,38 +65,18 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private DepartmentAutoCompleter departmentAutoCompleter;
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
-    private COA3AutoCompleter cOA3AutoCompleter;
+    private COAAutoCompleter cOAAutoCompleter;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
     private final VoucherTableModel voucherTableModel = new VoucherTableModel();
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
     private VoucherEntryDailog dialog;
     private FindDialog findDialog;
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
 
     /**
      * Creates new form CrDrVoucher1
@@ -170,12 +152,14 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRef, accountRepo, null, true);
         refAutoCompleter.setObserver(this);
-        cOA3AutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, true, 3);
-        cOA3AutoCompleter.setObserver(this);
-        accountRepo.getDefaultCash().doOnSuccess((t) -> {
-            if (t != null) {
-                cOA3AutoCompleter.setCoa(t);
-            }
+        cOAAutoCompleter = new COAAutoCompleter(txtCash, null, true);
+        cOAAutoCompleter.setObserver(this);
+        accountRepo.getCashBank().doOnSuccess((t) -> {
+            cOAAutoCompleter.setListCOA(t);
+        }).doOnTerminate(() -> {
+            accountRepo.getDefaultCash().doOnSuccess((t) -> {
+                cOAAutoCompleter.setCoa(t);
+            }).subscribe();
         }).subscribe();
     }
 
@@ -188,7 +172,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         initFindDialog();
         search();
     }
-    
+
     private void initFindDialog() {
         findDialog = new FindDialog(Global.parentForm, tblVoucher);
     }
@@ -222,7 +206,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             filter.setDesp(txtDesp.getText());
             filter.setGlVouNo(txtVouNo.getText());
             filter.setReference(txtRef.getText());
-            filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
+            filter.setSrcAcc(cOAAutoCompleter.getCOA().getKey().getCoaCode());
             voucherTableModel.clear();
             txtDr.setValue(0);
             txtCr.setValue(0);
@@ -268,7 +252,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void calOpening() {
-        ChartOfAccount coa = cOA3AutoCompleter.getCOA();
+        ChartOfAccount coa = cOAAutoCompleter.getCOA();
         if (coa != null) {
             if (!coa.getKey().getCoaCode().equals("-")) {
                 String startDate = dateAutoCompleter.getDateModel().getStartDate();

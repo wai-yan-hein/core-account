@@ -29,6 +29,7 @@ import com.inventory.entity.VouStatus;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIOVouSearchTableModel;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -85,12 +86,13 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     public StockIOHistoryDialog(JFrame frame) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         initComponents();
         initKeyListener();
         initClientProperty();
     }
-      private void initClientProperty() {
+
+    private void initClientProperty() {
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));

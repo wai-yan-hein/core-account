@@ -92,6 +92,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkWeightPoint.setName(ProUtil.WEIGHT_POINT);
         chkRec.setName(ProUtil.DEFAULT_STOCK_REC);
         chkPay.setName(ProUtil.DEFAULT_STOCK_PAY);
+        chkRIR.setName(ProUtil.DEFAULT_STOCK_RI_REC);
+        chkROP.setName(ProUtil.DEFAULT_STOCK_RO_PAY);
     }
 
     public void setData(HashMap<String, String> hmProperty) {
@@ -106,6 +108,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkWeightPoint.setSelected(Util1.getBoolean(hmProperty.get(chkWeightPoint.getName())));
         chkRec.setSelected(Util1.getBoolean(hmProperty.get(chkRec.getName())));
         chkPay.setSelected(Util1.getBoolean(hmProperty.get(chkPay.getName())));
+        chkRIR.setSelected(Util1.getBoolean(hmProperty.get(chkRIR.getName())));
+        chkROP.setSelected(Util1.getBoolean(hmProperty.get(chkROP.getName())));
     }
 
     private void save(SysProperty p) {
@@ -150,6 +154,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
         panel3 = new javax.swing.JPanel();
         chkRec = new javax.swing.JCheckBox();
         chkPay = new javax.swing.JCheckBox();
+        chkRIR = new javax.swing.JCheckBox();
+        chkROP = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -235,7 +241,16 @@ public class StockSettingDialog extends javax.swing.JDialog {
 
         chkRec.setText("S - Receivable");
 
-        chkPay.setText("S - Payable");
+        chkPay.setText("P - Payable");
+
+        chkRIR.setText("RI - Receivable");
+        chkRIR.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkRIRActionPerformed(evt);
+            }
+        });
+
+        chkROP.setText("RO - Payable");
 
         javax.swing.GroupLayout panel3Layout = new javax.swing.GroupLayout(panel3);
         panel3.setLayout(panel3Layout);
@@ -243,9 +258,11 @@ public class StockSettingDialog extends javax.swing.JDialog {
             panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkRec)
-                    .addComponent(chkPay))
+                .addGroup(panel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(chkRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkPay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkRIR, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkROP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panel3Layout.setVerticalGroup(
@@ -254,6 +271,10 @@ public class StockSettingDialog extends javax.swing.JDialog {
                 .addComponent(chkRec)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkPay)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkRIR)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkROP)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -284,6 +305,10 @@ public class StockSettingDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void chkRIRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRIRActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkRIRActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -296,6 +321,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox chkDisableSale;
     private javax.swing.JCheckBox chkDisableStockIO;
     private javax.swing.JCheckBox chkPay;
+    private javax.swing.JCheckBox chkRIR;
+    private javax.swing.JCheckBox chkROP;
     private javax.swing.JCheckBox chkRec;
     private javax.swing.JCheckBox chkSWB;
     private javax.swing.JCheckBox chkWeight;

@@ -44,6 +44,7 @@ public class Global {
     public static Integer macId;
     public static String machineName;
     public static Integer deptId;
+    public static String deptName;
     public static boolean mqConStatus = false;
     public static int x;
     public static int y;

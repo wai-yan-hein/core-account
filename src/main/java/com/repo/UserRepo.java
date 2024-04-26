@@ -211,6 +211,13 @@ public class UserRepo {
                     }
                 });
     }
+    public Mono<Boolean> generateTemplate(CompanyInfo app) {
+        return userApi.post()
+                .uri("/user/generateTemplate")
+                .body(Mono.just(app), CompanyInfo.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
 
     public Mono<Boolean> cleanData(CompanyInfo app) {
         return userApi.post()

@@ -178,4 +178,5 @@ public class StockTableModel extends AbstractTableModel {
         size = 0;
         fireTableDataChanged();
     }
+    
 }

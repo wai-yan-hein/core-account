@@ -137,5 +137,6 @@ public class StockCompleterTableModel extends AbstractTableModel {
         listStock.clear();
         fireTableDataChanged();
     }
+    
 
 }

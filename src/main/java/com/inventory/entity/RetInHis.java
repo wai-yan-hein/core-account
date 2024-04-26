@@ -53,8 +53,10 @@ public class RetInHis {
     private String debtorAcc;
     private String disAcc;
     private String taxAcc;
+    private boolean sRec;
     private List<RetInHisDetail> listRD;
     private List<String> location;
     private ZonedDateTime vouDateTime;
     private String traderName;
+
 }

@@ -677,8 +677,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         });
         s1.setViewportView(tblCustomer);
 
+        jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Record :");
 
+        lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -982,7 +984,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 inventoryRepo.deleteTrader(t.getKey()).doOnSuccess((list) -> {
                     if (list.isEmpty()) {
                         supplierTabelModel.deleteCustomer(selectRow);
-                        clear();
                         JOptionPane.showMessageDialog(this, "Deleted.");
                     } else {
                         String str = list.stream()
@@ -990,6 +991,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                                 .collect(Collectors.joining()); // Concatenate the messages
                         JOptionPane.showMessageDialog(this, str);
                     }
+                }).doOnTerminate(() -> {
+                    sendMessage(t.getTraderName() + " : Deleted.");
+                    clear();
                 }).subscribe();
             }
 

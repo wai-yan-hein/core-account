@@ -32,7 +32,6 @@ import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
-import com.h2.service.OrderDetailService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
 import com.h2.service.RolePropertyService;
@@ -56,7 +55,6 @@ import com.inventory.entity.CategoryKey;
 import com.inventory.entity.Location;
 import com.inventory.entity.LocationKey;
 import com.user.model.MachineInfo;
-import com.inventory.entity.OrderHis;
 import com.inventory.entity.SaleHis;
 import com.inventory.entity.SaleMan;
 import com.inventory.entity.SaleManKey;
@@ -83,42 +81,28 @@ import com.user.model.ProjectKey;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
-import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
 import com.h2.service.OutputCostService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeMenuService;
-import com.h2.service.ProcessHisDetailService;
-import com.h2.service.ProcessHisService;
 import com.h2.service.RegionService;
 import com.h2.service.RelationService;
 import com.h2.service.SaleHisDetailService;
 import com.h2.service.StockCriteriaService;
 import com.h2.service.StockFormulaService;
-import com.h2.service.StockInOutDetailService;
-import com.h2.service.StockInOutService;
-import com.h2.service.TransferHisDetailService;
-import com.h2.service.TransferHisService;
 import com.h2.service.WareHouseService;
-import com.h2.service.WeightLossService;
 import com.inventory.entity.AccSetting;
-import com.inventory.entity.General;
 import com.inventory.entity.GradeDetail;
 import com.inventory.entity.GradeDetailKey;
 import com.inventory.entity.Job;
 import com.inventory.entity.JobKey;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LabourGroupKey;
-import com.inventory.entity.OrderHisDetail;
-import com.inventory.entity.OrderHisKey;
 import com.inventory.entity.OrderStatus;
 import com.inventory.entity.OrderStatusKey;
 import com.inventory.entity.OutputCost;
 import com.inventory.entity.OutputCostKey;
 import com.inventory.entity.Pattern;
-import com.inventory.entity.ProcessHis;
-import com.inventory.entity.ProcessHisDetail;
-import com.inventory.entity.ProcessHisKey;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.SaleHisKey;
 import com.inventory.entity.Region;
@@ -130,20 +114,10 @@ import com.inventory.entity.StockFormulaKey;
 import com.inventory.entity.StockFormulaPrice;
 import com.inventory.entity.StockFormulaPriceKey;
 import com.inventory.entity.StockFormulaQty;
-import com.inventory.entity.StockIOKey;
-import com.inventory.entity.StockInOut;
-import com.inventory.entity.StockInOutDetail;
-import com.inventory.entity.TransferHis;
-import com.inventory.entity.TransferHisDetail;
-import com.inventory.entity.TransferHisKey;
 import com.inventory.entity.UnitRelation;
-import com.inventory.entity.VOrder;
 import com.inventory.entity.VSale;
-import com.inventory.entity.VPurchase;
-import com.inventory.entity.VTransfer;
 import com.inventory.entity.WareHouse;
 import com.inventory.entity.WareHouseKey;
-import com.inventory.entity.WeightLossHis;
 import com.user.model.DateLock;
 import com.user.model.DepartmentKey;
 import com.user.model.MenuKey;
@@ -189,14 +163,6 @@ public class H2Repo {
     @Autowired
     private SaleHisService saleHisService;
     @Autowired
-    private OrderHisService orderHisService;
-    @Autowired
-    private StockInOutService stockInOutService;
-    @Autowired
-    private StockInOutDetailService stkIODetailService;
-    @Autowired
-    private TransferHisService transferHisService;
-    @Autowired
     private UserService userService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -237,17 +203,7 @@ public class H2Repo {
     @Autowired
     private DepartmentUserService deptUserService;
     @Autowired
-    private ProcessHisService processHisService;
-    @Autowired
-    private WeightLossService weightLossService;
-    @Autowired
     private SaleHisDetailService saleHisDetailService;
-    @Autowired
-    private TransferHisDetailService transferHisDetailService;
-    @Autowired
-    private ProcessHisDetailService processHIsDetailService;
-    @Autowired
-    private OrderDetailService orderDetailService;
     @Autowired
     private DateFilterRepo dateFilterRepo;
     @Autowired
@@ -297,6 +253,10 @@ public class H2Repo {
         return Mono.justOrEmpty(stockService.find(key));
     }
 
+    public Mono<Stock> findStockByBarcode(StockKey key) {
+        return Mono.justOrEmpty(stockService.find(key));
+    }
+
     public Mono<List<Stock>> getStock(String str) {
         return Mono.justOrEmpty(stockService.getStock(str, Global.compCode, 0));
     }
@@ -334,6 +294,10 @@ public class H2Repo {
         return Mono.justOrEmpty(traderInvService.findAll(Global.compCode));
     }
 
+    public boolean delete(TraderKey key) {
+        return traderInvService.delete(key);
+    }
+
     public Mono<Trader> find(TraderKey key) {
         return Mono.justOrEmpty(traderInvService.find(key));
     }
@@ -366,13 +330,6 @@ public class H2Repo {
         return Mono.justOrEmpty(orderStatusService.find(key));
     }
 
-    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, String compCode, Integer deptId) {
-        return Mono.justOrEmpty(stkIODetailService.search(vouNo, compCode, deptId));
-    }
-
-    public Mono<StockInOut> findStkIO(StockIOKey key) {
-        return Mono.justOrEmpty(stockInOutService.findById(key));
-    }
 
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
@@ -389,25 +346,7 @@ public class H2Repo {
         return Mono.justOrEmpty(patternService.save(sh));
     }
 
-    public Mono<OrderHis> save(OrderHis oh) {
-        return Mono.justOrEmpty(orderHisService.save(oh));
-    }
 
-    public Mono<StockInOut> save(StockInOut sio) {
-        return Mono.justOrEmpty(stockInOutService.save(sio));
-    }
-
-    public Mono<TransferHis> save(TransferHis th) {
-        return Mono.justOrEmpty(transferHisService.save(th));
-    }
-
-    public Mono<ProcessHis> save(ProcessHis ph) {
-        return Mono.justOrEmpty(processHisService.save(ph));
-    }
-
-    public Mono<WeightLossHis> save(WeightLossHis wh) {
-        return Mono.justOrEmpty(weightLossService.save(wh));
-    }
 
     public AppUser save(AppUser user) {
         return userService.save(user);
@@ -471,6 +410,10 @@ public class H2Repo {
 
     public Stock save(Stock obj) {
         return stockService.save(obj);
+    }
+
+    public boolean updateDeleted(StockKey key, boolean status) {
+        return stockService.updateDeleted(key, status);
     }
 
     public Location save(Location obj) {
@@ -786,32 +729,8 @@ public class H2Repo {
         return Mono.justOrEmpty(saleHisService.getSale(filter));
     }
 
-    public Mono<List<VOrder>> getOrderHistory(ReportFilter filter) {
-        return Mono.justOrEmpty(orderHisService.getOrder(filter));
-    }
-
-    public Mono<List<VTransfer>> getTransferHistory(ReportFilter filter) {
-        return Mono.justOrEmpty(transferHisService.getTransfer(filter));
-    }
-
-    public Mono<List<ProcessHis>> getProcessHistory(ReportFilter filter) {
-        return Mono.justOrEmpty(processHisService.getProcess(filter));
-    }
-
     public Mono<SaleHis> findSale(SaleHisKey key) {
         return Mono.justOrEmpty(saleHisService.find(key));
-    }
-
-    public Mono<OrderHis> findOrder(OrderHisKey key) {
-        return Mono.justOrEmpty(orderHisService.findById(key));
-    }
-
-    public Mono<TransferHis> findTransfer(TransferHisKey key) {
-        return Mono.justOrEmpty(transferHisService.findById(key));
-    }
-
-    public Mono<ProcessHis> findProcess(ProcessHisKey key) {
-        return Mono.justOrEmpty(processHisService.findById(key));
     }
 
     public Mono<StockUnit> findUnit(StockUnitKey key) {
@@ -820,18 +739,6 @@ public class H2Repo {
 
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
         return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
-    }
-
-    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
-        return Mono.justOrEmpty(orderDetailService.searchDetail(vouNo, Global.compCode, deptId));
-    }
-
-    public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, int deptId) {
-        return Mono.justOrEmpty(transferHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
-    }
-
-    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, int deptId) {
-        return Mono.justOrEmpty(processHIsDetailService.searchDeatil(vouNo, Global.compCode, deptId));
     }
 
     public Mono<Boolean> deleteSale(SaleHisKey key) {

@@ -1182,7 +1182,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void newForm() {
-        clear();
+        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
+        if (yes) {
+            clear();
+        }
     }
 
     @Override

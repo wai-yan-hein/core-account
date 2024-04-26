@@ -14,21 +14,20 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.Location;
 import com.inventory.entity.OrderHisDetail;
-import com.inventory.entity.SaleDetailKey;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
 import com.inventory.entity.Trader;
-import com.inventory.ui.entry.Sale;
+import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,93 +38,21 @@ import lombok.extern.slf4j.Slf4j;
 public class SaleTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location", "Qty", "Unit", "Price", "Amount"};
+    @Setter
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
-    private Sale sale;
+    @Setter
+    private SelectionObserver observer;
+    @Setter
+    private SaleDynamic sale;
+    @Setter
     private InventoryRepo inventoryRepo;
-    private JLabel lblStockName;
-    private JButton btnProgress;
+    @Setter
     private JDateChooser vouDate;
-    private boolean change = false;
+    @Setter
     private JLabel lblRecord;
+    @Setter
     private StockBalanceFrame dialog;
-
-    public void setDialog(StockBalanceFrame dialog) {
-        this.dialog = dialog;
-    }
-
-    public Sale getSale() {
-        return sale;
-    }
-
-    public void setSale(Sale sale) {
-        this.sale = sale;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JLabel getLblRecord() {
-        return lblRecord;
-    }
-
-    public void setLblRecord(JLabel lblRecord) {
-        this.lblRecord = lblRecord;
-    }
-
-    public boolean isChange() {
-        return change;
-    }
-
-    public void setChange(boolean change) {
-        this.change = change;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public JLabel getLblStockName() {
-        return lblStockName;
-    }
-
-    public void setLblStockName(JLabel lblStockName) {
-        this.lblStockName = lblStockName;
-    }
-
-    public JButton getBtnProgress() {
-        return btnProgress;
-    }
-
-    public void setBtnProgress(JButton btnProgress) {
-        this.btnProgress = btnProgress;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
-    }
-
-    public void setObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -250,7 +177,6 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setWeightUnit(s.getWeightUnit());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
-                            selectionObserver.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
                     case 3 -> {
@@ -264,7 +190,7 @@ public class SaleTableModel extends AbstractTableModel {
                     case 4 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
+                            if (Util1.isPositive(Util1.getDouble(value))) {
                                 sd.setQty(Util1.getDouble(value));
                                 if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(5, 5);
@@ -291,7 +217,7 @@ public class SaleTableModel extends AbstractTableModel {
                     case 6 -> {
                         //price
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
+                            if (Util1.isPositive(Util1.getDouble(value))) {
                                 sd.setPrice(Util1.getDouble(value));
                                 sd.setOrgPrice(sd.getPrice());
                                 parent.setColumnSelectionInterval(0, 0);
@@ -313,7 +239,7 @@ public class SaleTableModel extends AbstractTableModel {
 
                 }
                 if (column != 6) {
-                    if (Util1.getFloat(sd.getPrice()) == 0) {
+                    if (Util1.getDouble(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             String stockCode = sd.getStockCode();
                             if (stockCode != null && sd.getUnitCode() != null) {
@@ -328,12 +254,11 @@ public class SaleTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                change = true;
                 assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+                observer.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
@@ -428,7 +353,7 @@ public class SaleTableModel extends AbstractTableModel {
         boolean status = true;
         for (SaleHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     status = false;

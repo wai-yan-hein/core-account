@@ -253,7 +253,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtPrice.addKeyListener(this);
     }
 
-    private void setProcess(ProcessHis p, boolean local) {
+    private void setProcess(ProcessHis p) {
         ph = p;
         txtVouNo.setText(ph.getKey().getVouNo());
         txtStartDate.setDate(Util1.convertToDate(ph.getVouDate()));
@@ -293,7 +293,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
         }
-        inventoryRepo.getProcessDetail(ph.getKey().getVouNo(), ph.getKey().getDeptId(), local)
+        inventoryRepo.getProcessDetail(ph.getKey().getVouNo())
                 .subscribe((t) -> {
                     processHisDetailTableModel.setListDetail(t);
                     processHisDetailTableModel.addNewRow();
@@ -1001,7 +1001,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         } else if (str.equals("Selected")) {
             if (selectObj instanceof ProcessHis his) {
                 inventoryRepo.findProcess(his.getKey(), his.isLocal()).subscribe((t) -> {
-                    setProcess(t, his.isLocal());
+                    setProcess(t);
                 });
             }
         }

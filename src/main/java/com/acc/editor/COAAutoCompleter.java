@@ -63,7 +63,7 @@ public final class COAAutoCompleter implements KeyListener {
 
     public void setListCOA(List<ChartOfAccount> listCOA) {
         if (filter) {
-            ChartOfAccount c = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+            ChartOfAccount c = getAll();
             listCOA.add(0, c);
             setCoa(c);
         }
@@ -78,6 +78,10 @@ public final class COAAutoCompleter implements KeyListener {
         this.observer = observer;
     }
 
+    private ChartOfAccount getAll() {
+        return new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+    }
+
     public COAAutoCompleter() {
     }
 
@@ -85,6 +89,9 @@ public final class COAAutoCompleter implements KeyListener {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
+        if (this.filter) {
+            setCoa(getAll());
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);

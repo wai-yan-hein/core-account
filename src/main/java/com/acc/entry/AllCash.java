@@ -229,9 +229,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 allCashTableModel.setObserver(this);
                 allCashTableModel.setSourceAccId(sourceAccId);
                 allCashTableModel.setProgress(progress);
-                accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
-                    allCashTableModel.setDepartment(t);
-                }).subscribe();
                 userRepo.findCurrency(Util1.isNull(coa.getCurCode(), Global.currency)).doOnSuccess((c) -> {
                     currencyAutoCompleter.setCurrency(c);
                 }).subscribe();
@@ -466,7 +463,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
-
     private Gl getGl(int row) {
         if (single) {
             return dayBookTableModel.getVGl(row);
@@ -502,7 +498,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 if (yes_no == 0) {
                     accountRepo.delete(obj).doOnSuccess((t) -> {
                         deleteTable(row);
-                    }).doOnTerminate(() -> {
                         calculateClosing();
                     }).subscribe();
 

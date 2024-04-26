@@ -132,6 +132,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtToDate.setDate(Util1.getTodayDate());
         panelAdv.setVisible(chkSync.isSelected());
         btnReset.setEnabled(false);
+        btnTemplate.setEnabled(false);
     }
 
     private void setCompanyInfo(CompanyInfo cInfo) {
@@ -159,6 +160,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         lblStatus.setText("EDIT");
         txtBusType.setEditable(company.getBusId() == null);
         btnReset.setEnabled(true);
+        btnTemplate.setEnabled(true);
     }
 
     private void saveCompany() {
@@ -400,6 +402,17 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         }
     }
 
+    private void generateTemplate(CompanyInfo info) {
+        info.setToken(token);
+        userRepo.generateTemplate(info).doOnSuccess((t) -> {
+            if (t) {
+                JOptionPane.showMessageDialog(this, "Success.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Something went wrong.");
+            }
+        }).subscribe();
+    }
+
     private void confirmToReset() {
         int yn = JOptionPane.showConfirmDialog(Global.parentForm, "Do you want to reset program?", "Reset Program.", JOptionPane.WARNING_MESSAGE);
         if (yn == JOptionPane.YES_OPTION) {
@@ -474,6 +487,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jButton7 = new javax.swing.JButton();
         btnReset = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
+        btnTemplate = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -836,6 +850,15 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        btnTemplate.setFont(Global.lableFont);
+        btnTemplate.setText("Template");
+        btnTemplate.setEnabled(false);
+        btnTemplate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTemplateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -854,7 +877,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jButton6)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jButton8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnReset, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(btnReset, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnTemplate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -878,7 +902,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnReset))
+                        .addComponent(btnReset)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnTemplate))
                     .addComponent(jButton7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton8)
@@ -971,9 +997,15 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         yearEndFixDialog();
     }//GEN-LAST:event_jButton8ActionPerformed
 
+    private void btnTemplateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTemplateActionPerformed
+        // TODO add your handling code here:
+        generateTemplate(company);
+    }//GEN-LAST:event_btnTemplateActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnReset;
+    private javax.swing.JButton btnTemplate;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkMenuUpdate;
     private javax.swing.JCheckBox chkSync;

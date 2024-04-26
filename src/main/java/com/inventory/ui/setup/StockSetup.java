@@ -73,7 +73,7 @@ import org.apache.commons.csv.CSVPrinter;
 public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl, SelectionObserver {
 
     private boolean noUnit = false;
-    private int selectRow = 0;
+    private int row = 0;
     private CategorySetupDialog categorySetupDailog;
     private StockTypeSetupDialog typeSetupDialog;
     private StockBrandSetupDialog itemBrandDailog;
@@ -167,6 +167,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
         tblStock.setDefaultRenderer(Double.class, new TableCellRender());
+        tblStock.getSelectionModel().addListSelectionListener((e) -> {
+            int selectRow = tblStock.getSelectedRow();
+            if (selectRow >= 0) {
+                row = tblStock.convertRowIndexToModel(selectRow);
+            }
+        });
     }
 
     private void setStock(int row) {
@@ -254,7 +260,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .doOnNext((t) -> calTotal())
                 .doOnComplete(() -> {
                     progress.setIndeterminate(false);
-                    ComponentUtil.scrollTable(tblStock, selectRow, 0);
+                    ComponentUtil.scrollTable(tblStock, row, 0);
                 }).subscribe();
     }
 
@@ -431,7 +437,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     if (lblStatus.getText().equals("NEW")) {
                         stockTableModel.addStock(t);
                     } else {
-                        stockTableModel.setStock(selectRow, t);
+                        stockTableModel.setStock(row, t);
                     }
                 }
             }).doOnError((e) -> {
@@ -603,9 +609,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     private void setSelectStock() {
-        selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
-        if (selectRow >= 0) {
-            setStock(selectRow);
+        if (row >= 0) {
+            setStock(row);
         }
     }
 
@@ -2156,12 +2161,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             case "tblStock" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_DOWN -> {
-                        selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
-                        setStock(selectRow);
+                        row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+                        setStock(row);
                     }
                     case KeyEvent.VK_UP -> {
-                        selectRow = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
-                        setStock(selectRow);
+                        row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+                        setStock(row);
                     }
                     case KeyEvent.VK_RIGHT -> {
                         if (e.isControlDown()) {
@@ -2189,7 +2194,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 if (yn == JOptionPane.YES_OPTION) {
                     progress.setIndeterminate(true);
                     inventoryRepo.restoreStock(key).doOnSuccess((t) -> {
-                        stockTableModel.deleteStock(selectRow);
+                        stockTableModel.deleteStock(row);
                     }).doOnTerminate(() -> {
                         sendMessage(stock.getStockName() + " : restored.");
                         clear();
@@ -2203,7 +2208,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         if (!t.isEmpty()) {
                             JOptionPane.showMessageDialog(this, t.get(0).getMessage());
                         } else {
-                            stockTableModel.deleteStock(selectRow);
+                            stockTableModel.deleteStock(row);
                             sendMessage(stock.getStockName() + " : deleted");
                             clear();
                             JOptionPane.showMessageDialog(this, "Deleted.");

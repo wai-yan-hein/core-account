@@ -68,9 +68,11 @@
                       <Component id="jLabel6" alignment="0" min="-2" pref="93" max="-2" attributes="0"/>
                       <Component id="jLabel7" alignment="0" min="-2" pref="93" max="-2" attributes="0"/>
                       <Component id="jLabel8" alignment="0" min="-2" pref="93" max="-2" attributes="0"/>
+                      <Component id="jLabel9" alignment="0" min="-2" pref="93" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="txtOrderReport" max="32767" attributes="0"/>
                       <Component id="txtSaleA4" max="32767" attributes="0"/>
                       <Component id="txtSaleA5" max="32767" attributes="0"/>
                       <Component id="txtSaleVou" max="32767" attributes="0"/>
@@ -121,7 +123,12 @@
                       <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtSaleNote" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="87" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtOrderReport" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace pref="59" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -226,6 +233,21 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtSaleNote">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel9">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Order Report"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtOrderReport">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>

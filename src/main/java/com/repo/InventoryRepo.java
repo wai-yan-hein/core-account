@@ -122,7 +122,6 @@ import com.inventory.entity.UnitRelation;
 import com.inventory.entity.UnitRelationDetail;
 import com.inventory.entity.VLanding;
 import com.inventory.entity.VPurchase;
-import com.inventory.entity.VOrder;
 import com.inventory.entity.VPurOrder;
 import com.inventory.entity.VSale;
 import com.inventory.entity.VStockIO;
@@ -1138,6 +1137,24 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Stock> findStockByBarcode(String stockCode) {
+        StockKey key = new StockKey();
+        key.setCompCode(Global.compCode);
+        key.setStockCode(stockCode);
+        if (localDatabase) {
+            return h2Repo.find(key);
+        }
+        return inventoryApi.post()
+                .uri("/setup/findStockByBarcode")
+                .body(Mono.just(key), StockKey.class)
+                .retrieve()
+                .bodyToMono(Stock.class)
+                .onErrorResume((e) -> {
+                    log.error("findStockByBarcode : " + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<StockType> findGroup(String typeCode) {
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
@@ -1181,9 +1198,6 @@ public class InventoryRepo {
     }
 
     public Mono<ProcessHis> findProcess(ProcessHisKey key, boolean local) {
-        if (local) {
-            return h2Repo.findProcess(key);
-        }
         return inventoryApi.post()
                 .uri("/process/findProcess")
                 .body(Mono.just(key), ProcessHisKey.class)
@@ -1437,6 +1451,11 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToFlux(General.class)
                 .collectList()
+                .doOnNext(list -> {
+                    if (list.isEmpty() && localDatabase) {
+                        h2Repo.updateDeleted(key, true);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1449,6 +1468,9 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
+                .doOnNext(t -> {
+                    h2Repo.updateDeleted(key, true);
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1654,10 +1676,6 @@ public class InventoryRepo {
                     if (localDatabase) {
                         h2Repo.save(t);
                     }
-                })
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
                 });
     }
 
@@ -2000,20 +2018,7 @@ public class InventoryRepo {
                 .uri("/weight/saveWeightLoss")
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
-                .bodyToMono(WeightLossHis.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(loss);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(WeightLossHis.class);
     }
 
     public Mono<WeightLossHis> uploadWeightLoss(WeightLossHis loss) {
@@ -2301,13 +2306,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<TransferHis> findTransfer(String vouNo, Integer deptId, boolean local) {
+    public Mono<TransferHis> findTransfer(String vouNo) {
         TransferHisKey key = new TransferHisKey();
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);
-        if (local) {
-            return h2Repo.findTransfer(key);
-        }
         return inventoryApi.post()
                 .uri("/transfer/findTransfer")
                 .body(Mono.just(key), TransferHisKey.class)
@@ -2541,6 +2543,11 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToFlux(General.class)
                 .collectList()
+                .doOnNext(list -> {
+                    if (list.isEmpty() && localDatabase) {
+                        h2Repo.delete(key);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -2956,20 +2963,7 @@ public class InventoryRepo {
                 .uri("/process/saveProcess")
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
-                .bodyToMono(ProcessHis.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(his);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(ProcessHis.class);
     }
 
     public Mono<ProcessHis> uploadProcess(ProcessHis his) {
@@ -2995,15 +2989,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, Integer deptId, boolean local) {
-        if (local) {
-            return h2Repo.getProcessDetail(vouNo, deptId);
-        }
+    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/process/getProcessDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(ProcessHisDetail.class)
@@ -3015,9 +3005,6 @@ public class InventoryRepo {
     }
 
     public Mono<List<ProcessHis>> getProcess(ReportFilter f) {
-        if (f.isLocal()) {
-            return h2Repo.getProcessHistory(f);
-        }
         return inventoryApi
                 .post()
                 .uri("/process/getProcess")
@@ -3420,15 +3407,11 @@ public class InventoryRepo {
                 .bodyToMono(TransferHis.class);
     }
 
-    public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, Integer deptId, boolean local) {
-        if (local) {
-            return h2Repo.getTransferDetail(vouNo, deptId);
-        }
+    public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/transfer/getTransferDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(TransferHisDetail.class)
@@ -3491,20 +3474,8 @@ public class InventoryRepo {
                 .uri("/order/saveOrder")
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
-                .bodyToMono(OrderHis.class)
-                .onErrorResume(e -> {
-                    if (localDatabase) {
-                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
-                                "Can't save voucher to cloud. Do you want save local?",
-                                "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                        if (status == JOptionPane.YES_OPTION) {
-                            return h2Repo.save(sh);
-                        }
-                        return Mono.error(e);
-                    }
-                    return Mono.error(e);
-                });
+                .bodyToMono(OrderHis.class);
+
     }
 
     public Mono<OrderHis> uploadOrder(OrderHis sh) {
@@ -3556,11 +3527,7 @@ public class InventoryRepo {
                 .uri("/labourPayment")
                 .body(Mono.just(dto), LabourPaymentDto.class)
                 .retrieve()
-                .bodyToMono(LabourPaymentDto.class)
-                .onErrorResume((e) -> {
-                    log.error("saveLabourPayment :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(LabourPaymentDto.class);
     }
 
     public Mono<List<VSale>> paymentReport(String vouNo) {
@@ -3792,36 +3759,24 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<byte[]> getOrderReport(String vouNo) {
+    public Mono<List<OrderHisDetail>> getOrderReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/getOrderReport")
+                .uri(builder -> builder.path("/order/getOrderReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("macId", Global.macId)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToFlux(OrderHisDetail.class)
+                .collectList();
     }
 
-    public Mono<List<VOrder>> getOrder(ReportFilter filter) {
-        if (filter.isLocal()) {
-            return h2Repo.getOrderHistory(filter);
-        }
+    public Flux<OrderHis> getOrder(ReportFilter filter) {
         return inventoryApi.post()
                 .uri("/order/getOrder")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VOrder.class)
-                .collectList()
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToFlux(OrderHis.class);
     }
 
     public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {

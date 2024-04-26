@@ -158,6 +158,12 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblStock.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
+        tblStock.getSelectionModel().addListSelectionListener((e) -> {
+            int selectRow = tblStock.getSelectedRow();
+            if (selectRow >= 0) {
+                row = tblStock.convertRowIndexToModel(selectRow);
+            }
+        });
         searchStock();
     }
 
@@ -233,7 +239,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void select() {
-        row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         if (row >= 0) {
             progress.setIndeterminate(true);
             Stock s = stockTableModel.getStock(row);
@@ -246,7 +251,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 patternTableModel.addNewRow();
                 patternTableModel.setStockCode(stockCode);
             }).doOnTerminate(() -> {
-                calPrice(); 
+                calPrice();
                 focusOnPD();
                 progress.setIndeterminate(false);
             }).subscribe();

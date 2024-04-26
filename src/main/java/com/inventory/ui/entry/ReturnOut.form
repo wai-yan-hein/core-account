@@ -25,10 +25,10 @@
                   <Component id="scroll" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="jPanel2" max="32767" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="panelSale" alignment="0" max="32767" attributes="0"/>
+                  <Component id="panelSale" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
@@ -46,7 +46,7 @@
                   <Component id="jPanel3" max="32767" attributes="0"/>
                   <Component id="jPanel2" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -74,7 +74,7 @@
                           </Group>
                           <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtVouDate" pref="82" max="32767" attributes="0"/>
+                              <Component id="txtVouDate" pref="183" max="32767" attributes="0"/>
                               <Component id="txtVouNo" max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -90,17 +90,21 @@
                       <Component id="jLabel21" linkSize="17" alignment="0" pref="57" max="32767" attributes="0"/>
                       <Component id="jLabel6" linkSize="17" alignment="0" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="txtCurrency" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtRemark" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtLocation" max="32767" attributes="0"/>
+                      <Component id="txtRemark" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Component id="txtLocation" pref="159" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="rdoPay" min="-2" pref="77" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="txtCurrency" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel23" min="-2" pref="57" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="txtProjectNo" max="32767" attributes="0"/>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Component id="txtProjectNo" pref="159" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -115,6 +119,7 @@
                           <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtProjectNo" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtVouNo" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="rdoPay" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Component id="jLabel22" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -122,8 +127,10 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="txtVouDate" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtCurrency" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtCurrency" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -134,7 +141,7 @@
                           <Component id="txtRemark" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <EmptySpace pref="16" max="32767" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -286,9 +293,28 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtVouNoActionPerformed"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JRadioButton" name="rdoPay">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="S - Pay"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdoPayActionPerformed"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="jPanel2">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+            <TitledBorder/>
+          </Border>
+        </Property>
+      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">

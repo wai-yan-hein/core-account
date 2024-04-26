@@ -23,11 +23,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -104,7 +101,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Code
+        table.getColumnModel().getColumn(1).setPreferredWidth(250);//Code
         table.getColumnModel().getColumn(2).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(3).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(4).setPreferredWidth(50);//Code
