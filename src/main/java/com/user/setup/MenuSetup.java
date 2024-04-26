@@ -702,7 +702,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.toString().equals("COA")) {
+        if (source.toString().equals("COA_TF")) {
             txtMenuName.setText(cOA3AutoCompleter.getCOA().getCoaNameEng());
 
         }

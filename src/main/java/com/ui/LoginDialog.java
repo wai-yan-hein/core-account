@@ -229,28 +229,21 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         }
 
         switch (ctrlName) {
-            case "txtLoginName" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            case "txtUserName" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtPassword.requestFocus();
-                } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
             }
             case "txtPassword" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> //Login
                         login();
-                    case KeyEvent.VK_DOWN ->
-                        btnLogin.requestFocus();
-                    case KeyEvent.VK_UP ->
-                        txtUserName.requestFocus();
                 }
             }
             case "butLogin" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         login();
-                    case KeyEvent.VK_DOWN -> {
-                    }
                 }
             }
             case "butClear" -> {
