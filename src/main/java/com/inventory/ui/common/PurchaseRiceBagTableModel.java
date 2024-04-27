@@ -155,6 +155,7 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                             double price = pd.getPrice();
                             if (price == 0) {
                                 pd.setPrice(s.getPurPrice());
+                                pd.setOrgPrice(s.getPurPrice());
                             }
                             addNewRow();
                             parent.setColumnSelectionInterval(2, 2);
@@ -201,7 +202,7 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                         double price = Util1.getDouble(value);
                         if (price > 0) {
                             pd.setPrice(price);
-                            pd.setOrgPrice(Util1.getDouble(value));
+                            pd.setOrgPrice(price);
                         }
                     }
                     case 9 -> {

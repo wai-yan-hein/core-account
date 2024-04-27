@@ -50,7 +50,6 @@ import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LandingHis;
-import com.inventory.entity.PurDetailKey;
 import com.inventory.entity.WeightHis;
 import com.inventory.ui.common.PurchaseExportTableModel;
 import com.inventory.ui.common.PurchaseOtherTableModel;
@@ -310,9 +309,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
             tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
-            inventoryRepo.getExpense().subscribe((t) -> {
+            inventoryRepo.getExpense().doOnSuccess((t) -> {
                 tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
-            });
+            }).subscribe();
             tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
             tblExpense.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
             txtExpense.setFormatterFactory(Util1.getDecimalFormat());
@@ -1237,7 +1236,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         try {
             String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.PURCHASE_VOUCHER), "PurchaseVoucherA5Bag");
             List<PurHisDetail> detail = ph.getListPD().stream().filter((t) -> t.getStockCode() != null).toList();
+            double totalBag =detail.stream().filter((f)->f.isCalculate()).mapToDouble((t)->t.getBag()).sum();
             Map<String, Object> param = getDefaultParam(ph);
+            param.put("p_total_bag", totalBag);
             String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
             ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(detail));
             JsonDataSource ds = new JsonDataSource(stream);
