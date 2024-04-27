@@ -18,6 +18,10 @@ public interface StockService {
 
     Stock find(StockKey key);
 
+    Boolean updateDeleted(StockKey key, boolean status);
+
+    Stock findStockByBarcode(StockKey key);
+
     List<Stock> findAll(String compCode);
 
     List<Stock> getStock(String str, String compCode, Integer deptId);
@@ -30,6 +34,6 @@ public interface StockService {
 
     List<Stock> search(String stockCode, String stockType, String cat,
             String brand, String compCode,
-            Integer deptId, boolean active,boolean deleted);
+            Integer deptId, boolean active, boolean deleted);
 
 }

@@ -23,6 +23,7 @@ import com.user.model.AppUser;
 import com.inventory.ui.entry.dialog.common.LabourPaymentSearchTableModel;
 import com.repo.InventoryRepo;
 import com.user.editor.CurrencyAutoCompleter;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JDialog;
@@ -68,7 +69,7 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
     }
 
     public LabourPaymentHistory(JFrame frame) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         initComponents();
         initKeyListener();
         initFocus();
@@ -84,7 +85,8 @@ public class LabourPaymentHistory extends javax.swing.JDialog implements KeyList
     private void initFocus() {
         ComponentUtil.addFocusListener(this);
     }
-     private void initClientProperty() {
+
+    private void initClientProperty() {
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));

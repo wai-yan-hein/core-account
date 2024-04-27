@@ -57,8 +57,10 @@ import com.inventory.ui.common.PurchaseOtherTableModel;
 import com.inventory.ui.common.PurchasePaddyTableModel;
 import com.inventory.ui.common.PurchaseRiceBagTableModel;
 import com.inventory.ui.common.PurchaseRiceTableModel;
+import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.entry.dialog.LandingHistoryDialog;
 import com.inventory.ui.entry.dialog.AccountOptionDialog;
+import com.inventory.ui.entry.dialog.PurchaseWeightLossPriceDialog;
 import com.inventory.ui.entry.dialog.WeightHistoryDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
@@ -66,6 +68,8 @@ import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -84,6 +88,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -100,6 +106,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
+    public static final int PURCHASE = 0;
     public static final int WEIGHT = 1;
     public static final int RICE = 2;
     public static final int EXPORT = 3;
@@ -113,18 +120,25 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private final PurchasePaddyTableModel purchasePaddyTableModel = new PurchasePaddyTableModel();
     private final PurchaseRiceBagTableModel purchaseRiceBagTableModel = new PurchaseRiceBagTableModel();
     private final PurchaseOtherTableModel purchaseOtherTableModel = new PurchaseOtherTableModel();
+    private final PurchaseTableModel purTableModel = new PurchaseTableModel();
     private PurchaseHistoryDialog dialog;
     private LandingHistoryDialog landingDialog;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
+    private SelectionObserver observer;
+    @Setter
+    private JProgressBar progress;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
+    @Getter
     private LocationAutoCompleter locationAutoCompleter;
     private BatchAutoCompeter batchAutoCompeter;
     private CarNoAutoCompleter carNoAutoCompleter;
-    private SelectionObserver observer;
-    private JProgressBar progress;
     private PurHis ph = new PurHis();
     private Mono<List<Location>> monoLoc;
     private PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
@@ -135,34 +149,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private int type;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private FindDialog findDialog;
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
+    private PurchaseWeightLossPriceDialog purchaseWLDialog;
 
     /**
      * Creates new form Purchase
@@ -185,10 +172,44 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblPur.getActionMap().put(solve, new DeleteAction());
+        tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK), "avg-price");
+        tblPur.getActionMap().put("avg-price", new AvgPriceAction());
+    }
+
+    private class AvgPriceAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
+            PurHisDetail pd = purTableModel.getObject(row);
+            if (pd.getStockCode() != null) {
+                if (purchaseWLDialog == null) {
+                    purchaseWLDialog = new PurchaseWeightLossPriceDialog(Global.parentForm);
+                    purchaseWLDialog.setLocationRelativeTo(null);
+                    purchaseWLDialog.setInventoryRepo(inventoryRepo);
+                    purchaseWLDialog.addKeyListener(new KeyAdapter() {
+                        @Override
+                        public void keyPressed(KeyEvent e) {
+                            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                                purchaseWLDialog.dispose();
+                            }
+                        }
+                    });
+                }
+                purchaseWLDialog.setPurDetail(pd);
+                purchaseWLDialog.setVisible(true);
+                if (purchaseWLDialog.isConfirm()) {
+                    purTableModel.setValueAt(pd, row, 0);
+                }
+            }
+        }
     }
 
     private PurHisDetail getObject(int row) {
         return switch (type) {
+            case PURCHASE ->
+                purTableModel.getObject(row);
             case WEIGHT ->
                 purWeightTableModel.getObject(row);
             case RICE ->
@@ -242,6 +263,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             case RICE -> {
                 btnLanding.setVisible(true);
             }
+            case PURCHASE -> {
+                btnBatch.setVisible(true);
+            }
         }
     }
 
@@ -253,6 +277,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void initModel() {
         switch (type) {
+            case PURCHASE ->
+                initPurTable();
             case WEIGHT ->
                 initWeightTable();
             case RICE ->
@@ -335,6 +361,36 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblPur.getTableHeader().setFont(Global.tblHeaderFont);
         tblPur.setCellSelectionEnabled(true);
+    }
+
+    private void initPurTable() {
+        tblPur.setModel(purTableModel);
+        purTableModel.setLblRec(lblRec);
+        purTableModel.setInventoryRepo(inventoryRepo);
+        purTableModel.setVouDate(txtPurDate);
+        purTableModel.setParent(tblPur);
+        purTableModel.setPurchase(this);
+        purTableModel.addNewRow();
+        purTableModel.setObserver(this);
+        tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        tblPur.getColumnModel().getColumn(1).setPreferredWidth(350);//Name
+        tblPur.getColumnModel().getColumn(2).setPreferredWidth(100);//amt
+        tblPur.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
+        tblPur.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(1);//price
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.doOnSuccess((t) -> {
+            tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        }).subscribe();
+        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        }).subscribe();
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
     }
 
     private void initWeightTable() {
@@ -623,6 +679,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void clearDetail() {
         switch (type) {
+            case PURCHASE -> {
+                purTableModel.clear();
+                purTableModel.clearDelList();
+            }
             case WEIGHT -> {
                 purWeightTableModel.clear();
                 purWeightTableModel.clearDelList();
@@ -670,6 +730,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private boolean isValidDetail() {
         return switch (type) {
+            case PURCHASE ->
+                purTableModel.isValidEntry();
             case WEIGHT ->
                 purWeightTableModel.isValidEntry();
             case RICE ->
@@ -689,6 +751,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private List<PurHisDetail> getListDetail() {
         return switch (type) {
+            case PURCHASE ->
+                purTableModel.getListDetail();
             case WEIGHT ->
                 purWeightTableModel.getListDetail();
             case RICE ->
@@ -701,25 +765,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 purchaseRiceBagTableModel.getListDetail();
             case OTHER ->
                 purchaseOtherTableModel.getListDetail();
-            default ->
-                null;
-        };
-    }
-
-    private List<PurDetailKey> getListDel() {
-        return switch (type) {
-            case WEIGHT ->
-                purWeightTableModel.getDelList();
-            case RICE ->
-                purchaseRiceTableModel.getDelList();
-            case EXPORT ->
-                purExportTableModel.getDelList();
-            case PADDY ->
-                purchasePaddyTableModel.getDelList();
-            case RICE_BAG ->
-                purchaseRiceBagTableModel.getDelList();
-            case OTHER ->
-                purchaseOtherTableModel.getDelList();
             default ->
                 null;
         };
@@ -890,6 +935,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void deleteDetail(int row) {
         switch (type) {
+            case PURCHASE ->
+                purTableModel.delete(row);
             case WEIGHT ->
                 purWeightTableModel.delete(row);
             case RICE ->
@@ -1001,6 +1048,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void setListDetail(List<PurHisDetail> list) {
         switch (type) {
+            case PURCHASE -> {
+                purTableModel.setListDetail(list);
+                purTableModel.addNewRow();
+            }
             case WEIGHT -> {
                 purWeightTableModel.setListDetail(list);
                 purWeightTableModel.addNewRow();
@@ -1387,6 +1438,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void addNewRow() {
         switch (type) {
+            case PURCHASE ->
+                purTableModel.addNewRow();
             case WEIGHT ->
                 purWeightTableModel.addNewRow();
             case RICE ->
@@ -1504,6 +1557,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private void addPurchase(PurHisDetail p) {
         switch (type) {
+            case PURCHASE ->
+                purTableModel.addPurchase(p);
             case WEIGHT ->
                 purWeightTableModel.addPurchase(p);
             case RICE ->

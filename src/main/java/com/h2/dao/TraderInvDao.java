@@ -18,6 +18,8 @@ public interface TraderInvDao {
 
     Trader find(TraderKey key);
 
+    Boolean delete(TraderKey key);
+
     String getMaxDate();
 
     List<Trader> findAll(String compCode);

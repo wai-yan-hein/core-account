@@ -25,13 +25,11 @@ import com.h2.service.LabourGroupService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
-import com.h2.service.OrderHisService;
 import com.h2.service.OrderStatusService;
 import com.h2.service.OutputCostService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
-import com.h2.service.ProcessHisService;
 import com.h2.service.ProjectService;
 import com.h2.service.RegionService;
 import com.h2.service.RolePropertyService;
@@ -44,16 +42,10 @@ import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
 import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
-import com.h2.service.TransferHisService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.h2.service.WareHouseService;
-import com.h2.service.WeightLossService;
-import com.inventory.entity.OrderHis;
-import com.inventory.entity.ProcessHis;
 import com.inventory.entity.SaleHis;
-import com.inventory.entity.TransferHis;
-import com.inventory.entity.WeightLossHis;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import java.util.List;
@@ -144,13 +136,6 @@ public class CloudIntegration {
     @Autowired
     private DepartmentAccService departmentAService;
     @Autowired
-    OrderHisService orderHisService;
-    private TransferHisService transferHisService;
-    @Autowired
-    private WeightLossService weightLossService;
-    @Autowired
-    private ProcessHisService processHisService;
-    @Autowired
     private DateLockUtil dateLockUtil;
     @Autowired
     private StockFormulaService stockFormulaService;
@@ -191,10 +176,7 @@ public class CloudIntegration {
     }
 
     public void uploadInvData() {
-        uploadOrder();
-        uploadTransfer();
-        uploadWeightLoss();
-        uploadManufacture();
+
     }
 
     public int uploadSaleCount() {
@@ -212,54 +194,7 @@ public class CloudIntegration {
         return "Upload Success.";
     }
 
-    public void uploadOrder() {
-        List<OrderHis> list = orderHisService.unUploadVoucher(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((l) -> {
-                inventoryRepo.uploadOrder(l).subscribe((r) -> {
-                    r.setIntgUpdStatus("ACK");
-                    orderHisService.updateACK(r.getKey());
-                });
-            });
-        }
-    }
 
-
-    public void uploadTransfer() {
-        List<TransferHis> list = transferHisService.unUpload(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((l) -> {
-                inventoryRepo.uploadTransfer(l).subscribe((r) -> {
-                    r.setIntgUpdStatus("ACK");
-                    transferHisService.updateACK(r.getKey());
-                });
-            });
-        }
-    }
-
-    public void uploadWeightLoss() {
-        List<WeightLossHis> list = weightLossService.unUpload(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((l) -> {
-                inventoryRepo.uploadWeightLoss(l).subscribe((r) -> {
-                    r.setIntgUpdStatus("ACK");
-                    weightLossService.updateACK(r.getKey());
-                });
-            });
-        }
-    }
-
-    public void uploadManufacture() {
-        List<ProcessHis> list = processHisService.unUpload(Global.compCode);
-        if (!list.isEmpty()) {
-            list.forEach((l) -> {
-                inventoryRepo.uploadProcess(l).subscribe((r) -> {
-                    r.setIntgUpdStatus("ACK");
-                    processHisService.updateACK(r.getKey());
-                });
-            });
-        }
-    }
 
     private void downloadUser() {
         downloadAppUser();

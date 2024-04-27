@@ -626,6 +626,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         if (stockDialog == null) {
             stockDialog = new StockSettingDialog(Global.parentForm);
             stockDialog.setObserver(this);
+            stockDialog.setSize(Global.width - 200, Global.height - 200);
             stockDialog.setLocationRelativeTo(null);
         }
         stockDialog.setData(hmProperty);

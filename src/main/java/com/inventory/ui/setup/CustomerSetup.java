@@ -1292,7 +1292,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 inventoryRepo.deleteTrader(t.getKey()).doOnSuccess((list) -> {
                     if (list.isEmpty()) {
                         customerTabelModel.deleteCustomer(row);
-                        clear();
                         JOptionPane.showMessageDialog(this, "Deleted.");
                     } else {
                         String str = list.stream()
@@ -1300,6 +1299,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                                 .collect(Collectors.joining()); // Concatenate the messages
                         JOptionPane.showMessageDialog(this, str);
                     }
+                }).doOnTerminate(() -> {
+                    sendMessage(t.getTraderName() + " : Deleted.");
+                    clear();
                 }).subscribe();
             }
 

@@ -9,22 +9,23 @@ import com.acc.model.DateModel;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class DateTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(DateTableModel.class);
     private List<DateModel> listDate = new ArrayList<>();
     private final String[] columnNames = {"Date"};
 
-    public DateTableModel(List<DateModel> listDate) {
+    public void setListDate(List<DateModel> listDate) {
         this.listDate = listDate;
+        fireTableDataChanged();
     }
+
 
     @Override
     public String getColumnName(int column) {

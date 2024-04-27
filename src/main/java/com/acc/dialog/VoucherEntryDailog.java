@@ -149,9 +149,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initTable() {
-        accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
-            tableModel.setDepartment(t);
-        }).subscribe();
         txtVouDate.setDate(Util1.getTodayDate());
         tblJournal.setModel(tableModel);
         tblJournal.setCellSelectionEnabled(true);
@@ -275,7 +272,14 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     private boolean isValidEntry() {
-        return ProUtil.isValidDate(txtVouDate.getDate());
+        double amt = Util1.getDouble(txtAmt.getValue());
+        if (amt <= 0) {
+            JOptionPane.showMessageDialog(this, "Invalid Amount.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return false;
+        } else if (!ProUtil.isValidDate(txtVouDate.getDate())) {
+            return false;
+        }
+        return true;
     }
 
     public boolean isValidData() {
@@ -288,7 +292,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             JOptionPane.showMessageDialog(tblJournal, "Please select Currency");
             return false;
         } else {
-            for (Gl g : tableModel.getListVGl()) {
+            for (Gl g : tableModel.getListData()) {
                 g.setCurCode(currency.getCurCode());
                 g.setSrcAccCode(coa.getKey().getCoaCode());
                 g.setGlDate(Util1.toDateTime(txtVouDate.getDate()));
@@ -303,7 +307,14 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 if (lblStatus.getText().equals("EDIT")) {
                     g.setModifyBy(Global.loginUser.getUserCode());
                 }
-                if (g.getAccCode() != null) {
+                double amt = g.getDrAmt() + g.getCrAmt();
+                if (amt > 0) {
+                    if (Util1.isNullOrEmpty(g.getAccCode())) {
+                        JOptionPane.showMessageDialog(tblJournal, "Invalid Account.", "Validation", JOptionPane.WARNING_MESSAGE);
+                        return false;
+                    }
+                }
+                if (!Util1.isNullOrEmpty(g.getAccCode())) {
                     if (g.getDeptCode() == null) {
                         JOptionPane.showMessageDialog(tblJournal, "Invalid Department.");
                         return false;

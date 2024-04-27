@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PurExpenseTableModel extends AbstractTableModel {
 
     private List<PurExpense> listDetail = new ArrayList<>();
-    private final String[] columnNames = {"Name", "Amount", "%"};
+    private final String[] columnNames = {"Name", "Amt", "%"};
     private JTable table;
     private SelectionObserver observer;
     private JFormattedTextField txtVouTotal;
@@ -81,8 +81,7 @@ public class PurExpenseTableModel extends AbstractTableModel {
     }
 
     public List<PurExpense> getExpenseList() {
-        listDetail.removeIf((e) -> Util1.getFloat(e.getAmount()) == 0);
-        return listDetail;
+        return listDetail.stream().filter((t) -> t.getAmount() != 0).toList();
     }
 
     public List<PurExpense> getListDetail() {
@@ -105,9 +104,9 @@ public class PurExpenseTableModel extends AbstractTableModel {
                 case 0 ->
                     b.getExpenseName();
                 case 1 ->
-                    b.getAmount();
+                    Util1.toNull(b.getAmount());
                 case 2 ->
-                    b.getPercent();
+                    Util1.toNull(b.getPercent());
                 default ->
                     null;
             }; //Code
@@ -140,7 +139,7 @@ public class PurExpenseTableModel extends AbstractTableModel {
                         case 1 -> {
                             if (Util1.isNumber(value)) {
                                 e.setAmount(Util1.getDouble(value));
-                                e.setPercent(null);
+                                e.setPercent(0);
                                 checkAndFocus(row + 1);
                             }
                         }

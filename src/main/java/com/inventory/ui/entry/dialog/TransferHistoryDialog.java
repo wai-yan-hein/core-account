@@ -27,6 +27,7 @@ import com.inventory.entity.Trader;
 import com.inventory.entity.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.TransferVouSearchTableModel;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -72,12 +73,13 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public TransferHistoryDialog(JFrame frame) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         initComponents();
         initKeyListener();
         initClientProperty();
     }
-      private void initClientProperty() {
+
+    private void initClientProperty() {
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
@@ -91,9 +93,9 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
 
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
-        inventoryRepo.getLocation().subscribe((t) -> {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
+        }).subscribe();
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);

@@ -56,14 +56,25 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<Stock> search(String stockCode, String stockType, String cat, String brand, 
-            String compCode, Integer deptId, boolean active,boolean deleted) {
-        return dao.search(stockCode, stockType, cat, brand, compCode, deptId, active,deleted);
+    public List<Stock> search(String stockCode, String stockType, String cat, String brand,
+            String compCode, Integer deptId, boolean active, boolean deleted) {
+        return dao.search(stockCode, stockType, cat, brand, compCode, deptId, active, deleted);
     }
 
     @Override
     public List<Stock> findActiveStock(String compCode) {
         return dao.findActiveStock(compCode);
+    }
+
+    @Override
+    public Stock findStockByBarcode(StockKey key) {
+        return dao.findStockByBarcode(key);
+    }
+
+    @Override
+    public Boolean updateDeleted(StockKey key,boolean status) {
+        return dao.updateDeleted(key, status);
+                
     }
 
 }

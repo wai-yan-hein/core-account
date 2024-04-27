@@ -530,7 +530,6 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }//GEN-LAST:event_tblProcessMouseClicked
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        integration.uploadManufacture();
     }//GEN-LAST:event_btnUploadActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed

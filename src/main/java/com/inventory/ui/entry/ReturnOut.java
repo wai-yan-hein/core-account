@@ -147,15 +147,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private void initDateListner() {
         txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
         txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
-        txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        ComponentUtil.addFocusListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            ((JTextFieldDateEditor) e.getSource()).selectAll();
-        }
-
-    };
 
     private void initRetInTable() {
         tblRet.setModel(roTableModel);
@@ -260,6 +253,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
+        rdoPay.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.DEFAULT_STOCK_RO_PAY)));
     }
 
     private void clear() {
@@ -382,6 +376,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ri.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
+            ri.setSPay(rdoPay.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 RetOutHisKey key = new RetOutHisKey();
                 key.setCompCode(Global.compCode);
@@ -552,6 +547,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtVouBalance.setValue(Util1.getDouble(ri.getBalance()));
         txtGrandTotal.setValue(Util1.getDouble(ri.getGrandTotal()));
         chkPaid.setSelected(Util1.getDouble(ri.getPaid()) > 0);
+        rdoPay.setSelected(ri.isSPay());
     }
 
     private void disableForm(boolean status) {
@@ -625,6 +621,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         jLabel23 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
         txtVouNo = new javax.swing.JTextField();
+        rdoPay = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
@@ -751,6 +748,15 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
+        rdoPay.setFont(Global.lableFont);
+        rdoPay.setSelected(true);
+        rdoPay.setText("S - Pay");
+        rdoPay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rdoPayActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -764,7 +770,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -775,15 +781,18 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
                     .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLocation))
+                    .addComponent(txtRemark)
+                    .addGroup(panelSaleLayout.createSequentialGroup()
+                        .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(rdoPay, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCurrency))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtProjectNo)
+                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -801,14 +810,16 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel23)
                         .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(rdoPay))
                     .addComponent(jLabel22))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4)
-                    .addComponent(jLabel6)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel6)
+                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
@@ -816,8 +827,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel21)
                         .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
         lblStatus.setText("NEW");
@@ -1074,9 +1087,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     .addComponent(scroll)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(0, 0, 0)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1090,7 +1103,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(11, 11, 11))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1202,6 +1215,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtVouNoActionPerformed
+
+    private void rdoPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdoPayActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_rdoPayActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblRet.requestFocus();
@@ -1371,6 +1388,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
+    private javax.swing.JRadioButton rdoPay;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblRet;
     private javax.swing.JTextField txtCurrency;
@@ -1407,7 +1425,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     @Override
     public void newForm() {
-        clear();
+        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
+        if (yes) {
+            clear();
+        }
     }
 
     @Override

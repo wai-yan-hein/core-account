@@ -196,9 +196,11 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="chkRec" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="chkPay" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="chkRec" max="32767" attributes="0"/>
+                      <Component id="chkPay" max="32767" attributes="0"/>
+                      <Component id="chkRIR" max="32767" attributes="0"/>
+                      <Component id="chkROP" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -210,6 +212,10 @@
                   <Component id="chkRec" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkPay" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkRIR" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkROP" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -223,7 +229,20 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkPay">
           <Properties>
-            <Property name="text" type="java.lang.String" value="S - Payable"/>
+            <Property name="text" type="java.lang.String" value="P - Payable"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkRIR">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="RI - Receivable"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkRIRActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkROP">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="RO - Payable"/>
           </Properties>
         </Component>
       </SubComponents>

@@ -73,6 +73,18 @@ public class PrinterIntegration {
         return reportName;
     }
 
+    private String getOrderReportName(Integer page) {
+        String reportName = null;
+        switch (page) {
+            case 1 ->
+                reportName = ProUtil.getProperty(ProUtil.ORDER_VOU);
+        }
+        if (reportName != null) {
+            return ProUtil.getReportPath() + reportName + ".jasper";
+        }
+        return reportName;
+    }
+
     private String getPrinterName(Integer page) {
         String printerName = null;
         switch (page) {
@@ -83,5 +95,31 @@ public class PrinterIntegration {
         }
         return printerName;
 
+    }
+
+    public void printOrder(Message message) {
+        String vouNo = message.getVouNo();
+        Map<String, Object> params = message.getParams();
+        List<Integer> listPage = message.getPageSize();
+        if (listPage != null && !listPage.isEmpty()) {
+            inventoryRepo.getOrderReport(vouNo).doOnSuccess((list) -> {
+                listPage.forEach((page) -> {
+                    try {
+                        String reportPath = getOrderReportName(page);
+                        String printerName = getPrinterName(page);
+                        log.info("report :" + reportPath);
+                        log.info("printer name :" + printerName);
+                        if (reportPath != null) {
+                            ByteArrayInputStream stream = new ByteArrayInputStream(Util1.listToByteArray(list));
+                            JsonDataSource ds = new JsonDataSource(stream);
+                            JasperPrint jp = JasperFillManager.fillReport(reportPath, params, ds);
+                            JasperReportUtil.print(jp, printerName,1, page);
+                        }
+                    } catch (JRException e) {
+                        log.error("OrderHisDetail : " + e.getMessage());
+                    }
+                });
+            }).subscribe();
+        }
     }
 }

@@ -17,6 +17,6 @@ public class PurExpense {
 
     private PurExpenseKey key;
     private String expenseName;
-    private Double amount;
-    private Double percent;
+    private double amount;
+    private double percent;
 }

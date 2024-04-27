@@ -225,4 +225,21 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
         return findHSQL(hsql);
     }
 
+    @Override
+    public Stock findStockByBarcode(StockKey key) {
+        String hsql = "select o from Stock o where o.key.stockCode ='" + key.getStockCode() + "' and o.key.compCode ='" + key.getCompCode() + "'";
+        List<Stock> list = findHSQL(hsql);
+        return list.isEmpty() ? null : list.getFirst();
+    }
+
+    @Override
+    public Boolean updateDeleted(StockKey key,boolean status) {
+        Stock s = find(key);
+        if (s != null) {
+            s.setDeleted(true);
+            s.setUpdatedDate(LocalDateTime.now());
+        }
+        return true;
+    }
+
 }

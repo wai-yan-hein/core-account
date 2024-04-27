@@ -21,23 +21,21 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author DELL
  */
+@Slf4j
 public class OrderTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(OrderTableModel.class);
     private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit",
         "Order Qty", "Actual Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<OrderDetailKey> deleteList = new ArrayList();
-    private StockBalanceTableModel sbTableModel;
     private OrderDynamic orderDynamic;
     private boolean change = false;
     private JLabel lblRecord;
@@ -45,11 +43,6 @@ public class OrderTableModel extends AbstractTableModel {
     public void setOrderDynamic(OrderDynamic orderDynamic) {
         this.orderDynamic = orderDynamic;
     }
-
-    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
-        this.sbTableModel = sbTableModel;
-    }
-
     public void setLblRecord(JLabel lblRecord) {
         this.lblRecord = lblRecord;
     }
@@ -97,7 +90,7 @@ public class OrderTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 4, 6, 7, 9, 10 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -145,29 +138,29 @@ public class OrderTableModel extends AbstractTableModel {
                     return sd.getLocName();
                 }
                 case 4 -> {
-                    return Util1.getFloat(sd.getWeight()) == 0 ? null : sd.getWeight();
+                    return Util1.toNull(sd.getWeight());
                 }
                 case 5 -> {
                     return sd.getWeightUnit();
                 }
                 case 6 -> {
                     //qty
-                    return sd.getOrderQty();
+                    return Util1.toNull(sd.getOrderQty());
                 }
                 case 7 -> {
                     //qty
-                    return sd.getQty();
+                    return Util1.toNull(sd.getQty());
                 }
                 case 8 -> {
                     return sd.getUnitCode();
                 }
                 case 9 -> {
                     //price
-                    return Util1.getDouble(sd.getPrice()) == 0 ? null : sd.getPrice();
+                    return Util1.toNull(sd.getPrice());
                 }
                 case 10 -> {
                     //amount
-                    return Util1.getDouble(sd.getAmount()) == 0 ? null : sd.getPrice();
+                    return Util1.toNull(sd.getAmount());
                 }
                 default -> {
                     return null;
@@ -344,7 +337,6 @@ public class OrderTableModel extends AbstractTableModel {
     public void setListDetail(List<OrderHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
-        addNewRow();
         fireTableDataChanged();
     }
 

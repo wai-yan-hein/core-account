@@ -7,7 +7,6 @@ package com.ui;
 
 import com.CloudIntegration;
 import com.CoreAccountApplication;
-import com.H2Repo;
 import com.IconManager;
 import com.SSEListener;
 import com.repo.AccountRepo;
@@ -46,7 +45,6 @@ import com.inventory.ui.entry.LandingEntry;
 import com.inventory.ui.entry.Manufacture;
 import com.user.model.CompanyInfo;
 import com.inventory.ui.entry.OtherSetupMain;
-import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseDynamic;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.PaymentEntry;
@@ -54,7 +52,6 @@ import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
 import com.user.setup.RoleSetting;
-import com.inventory.ui.entry.Sale;
 import com.inventory.ui.setup.CustomerSetup;
 import com.inventory.ui.setup.StockSetup;
 import com.inventory.ui.setup.SupplierSetup;
@@ -141,8 +138,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationMainFrame extends javax.swing.JFrame implements SelectionObserver {
 
-    @Autowired
-    private H2Repo h2Repo;
     @Autowired
     private CloudIntegration integration;
     @Autowired
@@ -317,6 +312,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         setKeyEventDispatcherEnabled(true);
                     }
                 }
+
             }
             return false;
         };
@@ -371,10 +367,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         titlePanel.add(titleLbl);
 
         // close button
-        JLabel closeButton = new JLabel("x", SwingConstants.RIGHT);
-        closeButton.setFont(Global.menuFont);
-        closeButton.setToolTipText("Click to close");
-        closeButton.addMouseListener(new MouseAdapter() {
+        JLabel cb = new JLabel("x", SwingConstants.RIGHT);
+        cb.setFont(Global.menuFont);
+        cb.setToolTipText("Click to close");
+        cb.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 hmPanel.remove(title);
@@ -383,17 +379,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                closeButton.setForeground(Color.RED);
+                cb.setForeground(Color.RED);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                closeButton.setForeground(Util1.DARK_MODE ? Color.white : Color.BLACK);
+                cb.setForeground(Util1.DARK_MODE ? Color.white : Color.BLACK);
             }
         });
 
         titlePanel.setName(title);
-        titlePanel.add(closeButton);
+        titlePanel.add(cb);
         return titlePanel;
     }
 
@@ -419,21 +415,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
         enableToolBar(true);
         switch (menuName) {
-            case "Sale" -> {
-                Sale sale = new Sale();
-                sale.setName(menuName);
-                sale.setObserver(this);
-                sale.setProgress(progress);
-                sale.setStockBalanceDialog(stockBalanceFrame);
-                sale.setUserRepo(userRepo);
-                sale.setInventoryRepo(inventoryRepo);
-                sale.setAccountRepo(accounRepo);
-                sale.setTaskExecutor(taskExecutor);
-                sale.setIntegration(integration);
-                sale.setH2Repo(h2Repo);
-                sale.initMain();
-                return sale;
-            }
             case "Order", "Purchase Order" -> {
                 int type = getOrderType(menuName);
                 OrderDynamic orderDynamic = new OrderDynamic(type);
@@ -455,7 +436,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleOrderEntry.initMain();
                 return saleOrderEntry;
             }
-            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch", "POS" -> {
+            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch", "POS", "Sale" -> {
                 int type = getSaleType(menuName);
                 SaleDynamic s = new SaleDynamic(type);
                 s.setUserRepo(userRepo);
@@ -478,19 +459,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 rfid.initMain();
                 return rfid;
             }
-            case "Purchase" -> {
-                Purchase p = new Purchase();
-                p.setName(menuName);
-                p.setObserver(this);
-                p.setProgress(progress);
-                p.setUserRepo(userRepo);
-                p.setInventoryRepo(inventoryRepo);
-                p.setAccountRepo(accounRepo);
-                p.setIntegration(integration);
-                p.initMain();
-                return p;
-            }
-            case "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy", "Purchase Other" -> {
+            case "Purchase", "Purchase By Weight", "Purchase Rice", "Purchase Export", "Purchase Paddy", "Purchase Other" -> {
                 int type = getPurType(menuName, version);
                 PurchaseDynamic p = new PurchaseDynamic(type);
                 p.setName(menuName);
@@ -575,59 +544,59 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return openingSetup;
             }
             case "Customer" -> {
-                CustomerSetup customerSetup = new CustomerSetup();
-                customerSetup.setName(menuName);
-                customerSetup.setObserver(this);
-                customerSetup.setProgress(progress);
-                customerSetup.setUserRepo(userRepo);
-                customerSetup.setInventoryRepo(inventoryRepo);
-                customerSetup.setAccountRepo(accounRepo);
-                customerSetup.setTaskExecutor(taskExecutor);
-                customerSetup.initMain();
-                return customerSetup;
+                CustomerSetup cs = new CustomerSetup();
+                cs.setName(menuName);
+                cs.setObserver(this);
+                cs.setProgress(progress);
+                cs.setUserRepo(userRepo);
+                cs.setInventoryRepo(inventoryRepo);
+                cs.setAccountRepo(accounRepo);
+                cs.setTaskExecutor(taskExecutor);
+                cs.initMain();
+                return cs;
             }
             case "Supplier" -> {
-                SupplierSetup supplierSetup = new SupplierSetup();
-                supplierSetup.setName(menuName);
-                supplierSetup.setObserver(this);
-                supplierSetup.setProgress(progress);
-                supplierSetup.setUserRepo(userRepo);
-                supplierSetup.setInventoryRepo(inventoryRepo);
-                supplierSetup.setAccountRepo(accounRepo);
-                supplierSetup.initMain();
-                return supplierSetup;
+                SupplierSetup ss = new SupplierSetup();
+                ss.setName(menuName);
+                ss.setObserver(this);
+                ss.setProgress(progress);
+                ss.setUserRepo(userRepo);
+                ss.setInventoryRepo(inventoryRepo);
+                ss.setAccountRepo(accounRepo);
+                ss.initMain();
+                return ss;
             }
             case "Employee" -> {
-                EmployeeSetup employeeSetup = new EmployeeSetup();
-                employeeSetup.setName(menuName);
-                employeeSetup.setObserver(this);
-                employeeSetup.setProgress(progress);
-                employeeSetup.setUserRepo(userRepo);
-                employeeSetup.setInventoryRepo(inventoryRepo);
-                employeeSetup.setAccountRepo(accounRepo);
-                employeeSetup.setTaskExecutor(taskExecutor);
-                employeeSetup.initMain();
-                return employeeSetup;
+                EmployeeSetup es = new EmployeeSetup();
+                es.setName(menuName);
+                es.setObserver(this);
+                es.setProgress(progress);
+                es.setUserRepo(userRepo);
+                es.setInventoryRepo(inventoryRepo);
+                es.setAccountRepo(accounRepo);
+                es.setTaskExecutor(taskExecutor);
+                es.initMain();
+                return es;
             }
             case "Output Cost" -> {
-                OutputCostSetup outputCostSetup = new OutputCostSetup();
-                outputCostSetup.setName(menuName);
-                outputCostSetup.setObserver(this);
-                outputCostSetup.setProgress(progress);
-                outputCostSetup.setInventoryRepo(inventoryRepo);
-                outputCostSetup.setAccountRepo(accounRepo);
-                outputCostSetup.initMain();
-                return outputCostSetup;
+                OutputCostSetup op = new OutputCostSetup();
+                op.setName(menuName);
+                op.setObserver(this);
+                op.setProgress(progress);
+                op.setInventoryRepo(inventoryRepo);
+                op.setAccountRepo(accounRepo);
+                op.initMain();
+                return op;
             }
             case "Job" -> {
-                JobSetup setup = new JobSetup();
-                setup.setName(menuName);
-                setup.setUserRepo(userRepo);
-                setup.setInventoryRepo(inventoryRepo);
-                setup.setObserver(this);
-                setup.setProgress(progress);
-                setup.initMain();
-                return setup;
+                JobSetup s = new JobSetup();
+                s.setName(menuName);
+                s.setUserRepo(userRepo);
+                s.setInventoryRepo(inventoryRepo);
+                s.setObserver(this);
+                s.setProgress(progress);
+                s.initMain();
+                return s;
             }
             case "Other Setup" -> {
                 OtherSetupMain otherSetupMain = new OtherSetupMain();
@@ -1401,7 +1370,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     if (!Util1.isNullOrEmpty(phoneNo)) {
                         Global.companyPhone = phoneNo;
                     }
-                    lblDep.setText(dep.getDeptName());
+                    Global.deptName = dep.getDeptName();
+                    lblDep.setText(Global.deptName);
                 } else {
                     JOptionPane.showMessageDialog(this, "Department not found.");
                     System.exit(0);

@@ -48,7 +48,6 @@ public class AllCashTableModel extends AbstractTableModel {
     private SelectionObserver observer;
     private String glDate;
     private String curCode;
-    private DepartmentA department;
     private AccountRepo accountRepo;
     private JProgressBar progress;
     private UndoStack undo = new UndoStack();
@@ -78,10 +77,6 @@ public class AllCashTableModel extends AbstractTableModel {
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public void setDepartment(DepartmentA department) {
-        this.department = department;
     }
 
     public void setGlDate(String glDate) {
@@ -494,15 +489,17 @@ public class AllCashTableModel extends AbstractTableModel {
             gl.setKey(key);
             gl.setMacId(Global.macId);
             gl.setTranSource("CB");
-            if (department != null) {
-                gl.setDeptCode(department.getKey().getDeptCode());
-                gl.setDeptUsrCode(department.getUserCode());
-            }
-            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.toDate(glDate));
-            gl.setSrcAccCode(sourceAccId);
-            gl.setCurCode(curCode);
-            listVGl.add(gl);
-            fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
+            accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
+                if (t != null) {
+                    gl.setDeptCode(t.getKey().getDeptCode());
+                    gl.setDeptUsrCode(t.getUserCode());
+                }
+                gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.toDate(glDate));
+                gl.setSrcAccCode(sourceAccId);
+                gl.setCurCode(curCode);
+                listVGl.add(gl);
+                fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
+            }).subscribe();
         }
     }
 

@@ -93,6 +93,7 @@ public class ReportNameDialog extends javax.swing.JDialog {
         txtSaleA5.setName(ProUtil.SALE_VOU_A5);
         txtSaleA4.setName(ProUtil.SALE_VOU_A4);
         txtSaleNote.setName(ProUtil.SALE_VOU_NOTE);
+        txtOrderReport.setName(ProUtil.ORDER_VOU);
         ComponentUtil.addFocusListener(this);
     }
 
@@ -105,6 +106,7 @@ public class ReportNameDialog extends javax.swing.JDialog {
         txtSaleA5.setText(hmProperty.get(txtSaleA5.getName()));
         txtSaleA4.setText(hmProperty.get(txtSaleA4.getName()));
         txtSaleNote.setText(hmProperty.get(txtSaleNote.getName()));
+        txtOrderReport.setText(hmProperty.get(txtOrderReport.getName()));
     }
 
     private void save(SysProperty p) {
@@ -138,6 +140,8 @@ public class ReportNameDialog extends javax.swing.JDialog {
         txtSaleA4 = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtSaleNote = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        txtOrderReport = new javax.swing.JTextField();
         panelAcc = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         txtDrCr = new javax.swing.JTextField();
@@ -181,6 +185,11 @@ public class ReportNameDialog extends javax.swing.JDialog {
 
         txtSaleNote.setFont(Global.textFont);
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Order Report");
+
+        txtOrderReport.setFont(Global.textFont);
+
         javax.swing.GroupLayout panelInvLayout = new javax.swing.GroupLayout(panelInv);
         panelInv.setLayout(panelInvLayout);
         panelInvLayout.setHorizontalGroup(
@@ -194,9 +203,11 @@ public class ReportNameDialog extends javax.swing.JDialog {
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelInvLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtOrderReport)
                     .addComponent(txtSaleA4)
                     .addComponent(txtSaleA5)
                     .addComponent(txtSaleVou)
@@ -237,7 +248,11 @@ public class ReportNameDialog extends javax.swing.JDialog {
                 .addGroup(panelInvLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtSaleNote, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelInvLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(txtOrderReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(59, Short.MAX_VALUE))
         );
 
         panelAcc.setBorder(javax.swing.BorderFactory.createTitledBorder("Account"));
@@ -303,10 +318,12 @@ public class ReportNameDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel panelAcc;
     private javax.swing.JPanel panelInv;
     private javax.swing.JTextField txtDrCr;
     private javax.swing.JTextField txtIOVoucher;
+    private javax.swing.JTextField txtOrderReport;
     private javax.swing.JTextField txtPurVou;
     private javax.swing.JTextField txtSaleA4;
     private javax.swing.JTextField txtSaleA5;

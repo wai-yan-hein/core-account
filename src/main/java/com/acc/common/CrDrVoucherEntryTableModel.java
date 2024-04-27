@@ -20,16 +20,15 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class CrDrVoucherEntryTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(CrDrVoucherEntryTableModel.class);
     private List<Gl> listVGl = new ArrayList();
     String[] columnNames = {"Dep:", "Description", "Person", "Account", "Qty", "Price", "Amount"};
     private JTable parent;
@@ -38,7 +37,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     private List<GlKey> delList = new ArrayList<>();
     private boolean change = false;
     private AccountRepo accountRepo;
-    private DepartmentA department;
     private boolean edit = false;
 
     public boolean isEdit() {
@@ -47,14 +45,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
 
     public void setEdit(boolean edit) {
         this.edit = edit;
-    }
-
-    public DepartmentA getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(DepartmentA department) {
-        this.department = department;
     }
 
     public AccountRepo getAccountRepo() {
@@ -190,18 +180,28 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                         }
                     }
                     case 4 -> {
-                        gl.setQty(Util1.getDouble(value));
-                        calAmount(gl);
+                        double qty = Util1.getDouble(value);
+                        if (qty >= 0) {
+                            gl.setQty(qty);
+                            calAmount(gl);
+                            parent.setColumnSelectionInterval(5, 5);
+                        }
                     }
                     case 5 -> {
-                        gl.setPrice(Util1.getDouble(value));
-                        calAmount(gl);
+                        double price = Util1.getDouble(value);
+                        if (price >= 0) {
+                            gl.setPrice(price);
+                            calAmount(gl);
+                        }
                     }
                     case 6 -> {
-                        if (vouType.equals("CR")) {
-                            gl.setDrAmt(Util1.getDouble(value));
-                        } else {
-                            gl.setCrAmt(Util1.getDouble(value));
+                        double amt = Util1.getDouble(value);
+                        if (amt >= 0) {
+                            if (vouType.equals("CR")) {
+                                gl.setDrAmt(amt);
+                            } else {
+                                gl.setCrAmt(amt);
+                            }
                         }
                     }
 
@@ -242,18 +242,15 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     }
 
     private boolean isValidEntry(Gl gl, int column) {
-        boolean status = true;
-        if (column == 5) {
+        if (column > 3) {
             if (Util1.isNull(gl.getAccCode())) {
-                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Account.");
-                status = false;
+                JOptionPane.showMessageDialog(parent, "Invalid Account.", "Validation", JOptionPane.WARNING_MESSAGE);
                 parent.setColumnSelectionInterval(3, 3);
                 parent.requestFocus();
+                return false;
             }
-        } else if (Util1.getFloat(gl.getDrAmt()) + Util1.getFloat(gl.getCrAmt()) == 0) {
-            status = false;
         }
-        return status;
+        return gl.getDrAmt() + gl.getCrAmt() > 0;
     }
 
     @Override
@@ -268,6 +265,10 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
 
     public List<Gl> getListVGl() {
         return listVGl.stream().filter((t) -> !Util1.isNullOrEmpty(t.getAccCode())).toList();
+    }
+
+    public List<Gl> getListData() {
+        return listVGl;
     }
 
     public void setListVGl(List<Gl> listVGl) {
@@ -317,15 +318,16 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
             key.setCompCode(Global.compCode);
             key.setDeptId(Global.deptId);
             gl.setKey(key);
-            if (department != null) {
-                gl.setDeptCode(department.getKey().getDeptCode());
-                gl.setDeptUsrCode(department.getUserCode());
-            }
             gl.setCurCode(Global.currency);
-            listVGl.add(gl);
-            fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
+            accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
+                if (t != null) {
+                    gl.setDeptCode(t.getKey().getDeptCode());
+                    gl.setDeptUsrCode(t.getUserCode());
+                }
+                listVGl.add(gl);
+                fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
+            }).subscribe();
         }
-
     }
 
     private boolean hasEmptyRow() {

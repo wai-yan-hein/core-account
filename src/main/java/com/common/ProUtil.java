@@ -104,9 +104,12 @@ public class ProUtil {
     public static final String SALE_VOU_A5 = "report.sale.A5";
     public static final String SALE_VOU_A4 = "report.sale.A4";
     public static final String SALE_VOU_NOTE = "report.sale.note";
+    public static final String ORDER_VOU = "report.order.voucher";
     public static final String STOCK_USE_WEIHGT = "stock.use.weight";
     public static final String DEFAULT_STOCK_REC = "default.stock.receivable";
     public static final String DEFAULT_STOCK_PAY = "default.stock.payable";
+    public static final String DEFAULT_STOCK_RI_REC = "default.stock.ri.receivable";
+    public static final String DEFAULT_STOCK_RO_PAY = "default.stock.ro.payable";
     public static final String TRADER_BAL_ACC = "trader.balance.account";
     public static final String PRINTER_NAME = "printer.name";
     public static final String PRINTER_POS_NAME = "printer.pos.name";
@@ -246,7 +249,8 @@ public class ProUtil {
     public static boolean isPrint() {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }
-     public static boolean isTraderCOA() {
+
+    public static boolean isTraderCOA() {
         return Util1.getBoolean(Global.hmRoleProperty.get(ENABLE_TRADER_COA));
     }
 

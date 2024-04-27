@@ -657,6 +657,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
                 disableForm(false);
+                observer.selected("delete", true);
             } else if (DateLockUtil.isLockDate(io.getVouDate())) {
                 lblStatus.setText(DateLockUtil.MESSAGE);
                 lblStatus.setForeground(Color.RED);
@@ -1182,7 +1183,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void newForm() {
-        clear();
+        boolean yes = ComponentUtil.checkClear(lblStatus.getText());
+        if (yes) {
+            clear();
+        }
     }
 
     @Override

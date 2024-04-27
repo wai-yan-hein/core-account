@@ -61,5 +61,5 @@ public class MessageType {
     public static final String SYSTEM_PROPERTY = "SYSTEM_PROPERTY";
     //vou
     public static final String SALE = "SALE";
-
+    public static final String ORDER = "ORDER";
 }

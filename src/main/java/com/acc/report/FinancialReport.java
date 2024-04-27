@@ -108,6 +108,12 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         tblReport.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(400);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(50);
+        tblReport.getSelectionModel().addListSelectionListener((e) -> {
+            int selectRow = tblReport.getSelectedRow();
+            if (selectRow >= 0) {
+                row = tblReport.convertRowIndexToModel(selectRow);
+            }
+        });
     }
 
     private void getReport() {
@@ -628,7 +634,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
 
     private void tblReportMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblReportMouseClicked
         // TODO add your handling code here:
-        row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
     }//GEN-LAST:event_tblReportMouseClicked
 
 

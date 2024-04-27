@@ -24,6 +24,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -53,7 +57,7 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private DateTableModel dateTableModel;
+    private DateTableModel dateTableModel = new DateTableModel();
     private DateModel dateModel;
     public AbstractCellEditor editor;
     private int x = 0;
@@ -69,10 +73,10 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         this.textComp = comp;
         initDateDialog();
         setTodayDate();
+        setData();
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.CALENDER_ICON));
         textComp.setFont(Global.textFont);
-        dateTableModel = new DateTableModel(Global.listDate);
         table.setModel(dateTableModel);
         table.setFont(Global.textFont); // NOI18N
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -153,6 +157,12 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
                 table.setRowSelectionInterval(0, 0);
             }
         }
+    }
+    private void setData(){
+      if(Global.listDate==null){
+          Global.listDate = generateDate(Util1.toDateStr(Global.startDate, Global.dateFormat, "yyyy-MM-dd"));
+      }
+      dateTableModel.setListDate(Global.listDate);
     }
 
     public void mouseSelect() {
@@ -337,6 +347,53 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         today.setStartDate(todayDateStr);
         today.setEndDate(todayDateStr);
         setDateModel(today);
+    }
+     public static List<DateModel> generateDate(String fromDate) {
+        List<DateModel> listFix = new ArrayList<>();
+        List<DateModel> list = new ArrayList<>();
+        LocalDate startDate = LocalDate.parse(fromDate).withDayOfMonth(1);
+        LocalDate todayDate = LocalDate.now();
+        while (!startDate.isAfter(todayDate.plusMonths(0))) {
+            String monthName = startDate.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+            String startDateStr = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String endDateStr = startDate.withDayOfMonth(startDate.lengthOfMonth()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            int month = startDate.getMonthValue();
+            int year = startDate.getYear();
+            DateModel m = new DateModel();
+            m.setMonthName(monthName);
+            m.setStartDate(startDateStr);
+            m.setEndDate(endDateStr);
+            m.setMonth(month);
+            m.setYear(year);
+            m.setDescription(monthName + "/" + year);
+            list.add(m);
+            startDate = startDate.plusMonths(1);
+        }
+        String todayDateStr = todayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        //today
+        DateModel today = new DateModel();
+        today.setDescription("Today");
+        today.setMonth(todayDate.getMonthValue());
+        today.setYear(todayDate.getYear());
+        today.setStartDate(todayDateStr);
+        today.setEndDate(todayDateStr);
+        listFix.add(0, today);
+        //yesterday
+        DateModel yesterday = new DateModel();
+        LocalDate yesDate = LocalDate.now().minusDays(1);
+        String yesterdayStr = yesDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        yesterday.setDescription("Yesterday");
+        yesterday.setMonth(yesDate.getMonthValue());
+        yesterday.setYear(yesDate.getYear());
+        yesterday.setStartDate(yesterdayStr);
+        yesterday.setEndDate(yesterdayStr);
+        listFix.add(1, yesterday);
+        DateModel custom = new DateModel();
+        custom.setDescription("Custom");
+        listFix.add(2, custom);
+        List<DateModel> combinedList = new ArrayList<>(listFix);
+        combinedList.addAll(list.reversed());
+        return combinedList;
     }
 
     /*

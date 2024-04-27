@@ -87,6 +87,10 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
+        if (filter) {
+            VouStatus sb = new VouStatus("-", "All");
+            setVoucher(sb);
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);

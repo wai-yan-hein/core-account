@@ -101,6 +101,8 @@ public class SSEListener {
                             switch (entity) {
                                 case MessageType.SALE ->
                                     printer.printSale(message);
+                                case MessageType.ORDER->
+                                    printer.printOrder(message);
                             }
                         }
                     }

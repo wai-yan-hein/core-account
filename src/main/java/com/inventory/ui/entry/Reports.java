@@ -194,10 +194,15 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(900);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(50);
+        tblReport.getSelectionModel().addListSelectionListener((e) -> {
+            int selectRow = tblReport.getSelectedRow();
+            if (selectRow >= 0) {
+                row = tblReport.convertRowIndexToModel(selectRow);
+            }
+        });
     }
 
     private void setEnableExcel() {
-        row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         btnExcel.setEnabled(row > 0 ? excelReport.contains(tableModel.getReport(row).getMenuUrl()) : false);
     }
 
