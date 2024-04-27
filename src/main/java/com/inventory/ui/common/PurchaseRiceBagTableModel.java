@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PurchaseRiceBagTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Stock Name", "Moisture", "Hard Rice", "Std-Weight", "Avg-Weight", "Bag", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Stock Name", "Location", "Moisture", "Hard Rice", "Std-Weight", "Avg-Weight", "Bag", "Price", "Amount"};
     private List<PurHisDetail> listDetail = new ArrayList();
     private final List<PurDetailKey> deleteList = new ArrayList();
     @Setter
@@ -72,7 +72,7 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1 ->
+            case 0, 1, 2 ->
                 String.class;
             default ->
                 Double.class;
@@ -82,7 +82,7 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 8 ->
+            case 9 ->
                 false;
             default ->
                 true;
@@ -103,24 +103,27 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                         return record.getStockName();
                     }
                     case 2 -> {
-                        return Util1.toNull(record.getWet());
+                        return record.getLocName();
                     }
                     case 3 -> {
-                        return Util1.toNull(record.getRice());
+                        return Util1.toNull(record.getWet());
                     }
                     case 4 -> {
-                        return Util1.toNull(record.getWeight());
+                        return Util1.toNull(record.getRice());
                     }
                     case 5 -> {
-                        return Util1.toNull(record.getStdWeight());
+                        return Util1.toNull(record.getWeight());
                     }
                     case 6 -> {
-                        return Util1.toNull(record.getBag());
+                        return Util1.toNull(record.getStdWeight());
                     }
                     case 7 -> {
-                        return Util1.toNull(record.getPrice());
+                        return Util1.toNull(record.getBag());
                     }
                     case 8 -> {
+                        return Util1.toNull(record.getPrice());
+                    }
+                    case 9 -> {
                         return Util1.toNull(record.getAmount());
                     }
                     default -> {
@@ -149,45 +152,63 @@ public class PurchaseRiceBagTableModel extends AbstractTableModel {
                             pd.setCalculate(s.isCalculate());
                             pd.setBag(1);
                             pd.setUnitCode("-");
+                            double price = pd.getPrice();
+                            if (price == 0) {
+                                pd.setPrice(s.getPurPrice());
+                            }
                             addNewRow();
                             parent.setColumnSelectionInterval(2, 2);
                         }
                     }
                     case 2 -> {
+                        //Loc
+                        if (value instanceof Location l) {
+                            pd.setLocCode(l.getKey().getLocCode());
+                            pd.setLocName(l.getLocName());
+                        }
+                    }
+                    case 3 -> {
                         double wet = Util1.getDouble(value);
                         if (wet > 0) {
                             pd.setWet(wet);
                         }
                     }
-                    case 3 -> {
+                    case 4 -> {
                         double rice = Util1.getDouble(value);
                         if (rice > 0) {
                             pd.setRice(rice);
                         }
                     }
-                    case 4 -> {
+                    case 5 -> {
                         double wt = Util1.getDouble(value);
                         if (wt > 0) {
                             pd.setWeight(wt);
                         }
                     }
-                    case 5 -> {
+                    case 6 -> {
                         double wt = Util1.getDouble(value);
                         if (wt > 0) {
                             pd.setStdWeight(wt);
                         }
                     }
-                    case 6 -> {
+                    case 7 -> {
                         double bag = Util1.getDouble(value);
                         if (bag > 0) {
                             pd.setBag(bag);
                         }
                     }
-                    case 7 -> {
+                    case 8 -> {
                         double price = Util1.getDouble(value);
                         if (price > 0) {
                             pd.setPrice(price);
                             pd.setOrgPrice(Util1.getDouble(value));
+                        }
+                    }
+                    case 9 -> {
+                        //Amount
+                        double amount = Util1.getDouble(value);
+                        if (amount > 0) {
+                            pd.setAmount(Util1.getDouble(value));
                         }
                     }
 

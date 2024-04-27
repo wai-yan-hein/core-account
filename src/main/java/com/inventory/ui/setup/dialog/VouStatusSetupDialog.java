@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyListener {
-
+    
     private int selectRow = - 1;
     private VouStatus vou = new VouStatus();
     private final VouStatusTableModel tableModel = new VouStatusTableModel();
@@ -45,7 +45,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-
+    
     public VouStatusSetupDialog(JFrame frame) {
         super(frame, false);
         initComponents();
@@ -53,19 +53,19 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         initClientProperty();
         lblStatus.setForeground(Color.green);
     }
-
+    
     public void initMain() {
         swrf = new StartWithRowFilter(txtSearch);
         initTable();
         txtUserCode.requestFocus();
     }
-
+    
     private void initClientProperty() {
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
-
+    
     private void initKeyListener() {
         txtUserCode.addKeyListener(this);
         txtName.addKeyListener(this);
@@ -73,7 +73,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         btnSave.addKeyListener(this);
         tblVou.addKeyListener(this);
     }
-
+    
     private void initTable() {
         tblVou.setModel(tableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
@@ -91,7 +91,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             }
         });
     }
-
+    
     private void setObject(VouStatus cat) {
         vou = cat;
         vou.setKey(cat.getKey());
@@ -102,9 +102,9 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
-
+        
     }
-
+    
     public void search() {
         progress.setIndeterminate(true);
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
@@ -115,15 +115,15 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         }).subscribe();
         setVisible(true);
     }
-
+    
     public List<VouStatus> getVouStatusList() {
         return tableModel.getListVou();
     }
-
+    
     private void calSize() {
         lblRec.setText(String.valueOf(tableModel.getListVou().size()));
     }
-
+    
     private void save() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -140,10 +140,10 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }).subscribe();
-
+            
         }
     }
-
+    
     private void clear() {
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
@@ -159,7 +159,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         tblVou.requestFocus();
         txtUserCode.requestFocus();
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtName.getText().isEmpty()) {
@@ -181,6 +181,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             }
             vou.setUserCode(txtUserCode.getText());
             vou.setDescription(txtName.getText());
+            vou.setActive(chkActive.isSelected());
             vou.setReportName(txtReport.getText());
             vou.setMillReportName(txtMillReport.getText());
         }
@@ -542,18 +543,18 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JTable jTable) {
             ctrlName = jTable.getName();
         } else if (sourceObj instanceof JTextField jTextField) {

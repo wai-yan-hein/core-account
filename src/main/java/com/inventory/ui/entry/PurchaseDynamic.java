@@ -422,24 +422,28 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purchaseRiceBagTableModel.addNewRow();
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));//code
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));//name
-        tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//wet
-        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
-        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
-        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//avg-wight
-        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
-        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//price
-        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//amt
+        tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//location
+        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//wet
+        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//rice
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//weight
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//avg-wight
+        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//qty
+        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//price
+        tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//amt
         //size
         tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblPur.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
-        tblPur.getColumnModel().getColumn(2).setPreferredWidth(50);//wet
-        tblPur.getColumnModel().getColumn(3).setPreferredWidth(50);//rice
-        tblPur.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
-        tblPur.getColumnModel().getColumn(5).setPreferredWidth(50);//avg
-        tblPur.getColumnModel().getColumn(6).setPreferredWidth(50);//qty
-        tblPur.getColumnModel().getColumn(7).setPreferredWidth(70);//price
-        tblPur.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
-
+        tblPur.getColumnModel().getColumn(2).setPreferredWidth(50);//location
+        tblPur.getColumnModel().getColumn(3).setPreferredWidth(50);//wet
+        tblPur.getColumnModel().getColumn(4).setPreferredWidth(50);//rice
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(50);//weight
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(50);//avg
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(50);//qty
+        tblPur.getColumnModel().getColumn(8).setPreferredWidth(70);//price
+        tblPur.getColumnModel().getColumn(9).setPreferredWidth(100);//amount
+        monoLoc.subscribe((t) -> {
+            tblPur.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
     }
 
     private void initRiceTable() {
