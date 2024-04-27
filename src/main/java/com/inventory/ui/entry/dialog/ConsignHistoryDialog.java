@@ -26,6 +26,7 @@ import com.inventory.entity.VConsign;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIssRecVouSearchTableModel;
 import com.user.editor.DepartmentUserAutoCompleter;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JDialog;
@@ -64,7 +65,7 @@ public class ConsignHistoryDialog extends javax.swing.JDialog implements KeyList
     private TraderAutoCompleter traderAutoCompleter;
 
     public ConsignHistoryDialog(JFrame frame, String tranSource) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         this.tranSource = tranSource;
         initComponents();
         initKeyListener();

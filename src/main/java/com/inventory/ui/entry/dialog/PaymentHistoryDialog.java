@@ -27,6 +27,7 @@ import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.PaymentSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -79,7 +80,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     public PaymentHistoryDialog(JFrame frame, String tranOption) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         this.tranOption = tranOption;
         initComponents();
         initKeyListener();

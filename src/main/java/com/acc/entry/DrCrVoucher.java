@@ -158,7 +158,9 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             cOAAutoCompleter.setListCOA(t);
         }).doOnTerminate(() -> {
             accountRepo.getDefaultCash().doOnSuccess((t) -> {
-                cOAAutoCompleter.setCoa(t);
+                if (t != null) {
+                    cOAAutoCompleter.setCoa(t);
+                }
             }).subscribe();
         }).subscribe();
     }
@@ -199,6 +201,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void search() {
         if (progress != null) {
             progress.setIndeterminate(true);
+            ChartOfAccount coa = cOAAutoCompleter.getCOA();
             ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
             filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
             filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
@@ -206,7 +209,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             filter.setDesp(txtDesp.getText());
             filter.setGlVouNo(txtVouNo.getText());
             filter.setReference(txtRef.getText());
-            filter.setSrcAcc(cOAAutoCompleter.getCOA().getKey().getCoaCode());
+            filter.setSrcAcc(coa == null ? "-" : coa.getKey().getCoaCode());
             voucherTableModel.clear();
             txtDr.setValue(0);
             txtCr.setValue(0);
@@ -270,6 +273,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             } else {
                 progress.setIndeterminate(false);
             }
+        } else {
+            progress.setIndeterminate(false);
         }
     }
 

@@ -21,6 +21,7 @@ import com.inventory.entity.StockPayment;
 import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockPaymentSearchTableModel;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -60,7 +61,7 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
     }
 
     public StockPaymentHistoryDialog(JFrame frame, String tranOption) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         this.tranOption = tranOption;
         initComponents();
         initKeyListener();

@@ -27,6 +27,7 @@ import com.inventory.ui.entry.PurchaseDynamic;
 import com.inventory.ui.entry.SaleDynamic;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.WeightHistoryTableModel;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -76,7 +77,7 @@ public class WeightHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public WeightHistoryDialog(JFrame frame) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         initComponents();
         initKeyListener();
         initProperty();
