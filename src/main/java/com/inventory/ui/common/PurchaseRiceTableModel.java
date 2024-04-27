@@ -137,7 +137,7 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2, 11 ->
+            case 11 ->
                 false;
             default ->
                 true;
