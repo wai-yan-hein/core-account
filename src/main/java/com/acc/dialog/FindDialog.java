@@ -64,24 +64,10 @@ public class FindDialog extends javax.swing.JDialog {
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON, 0.9f));
     }
 
-//    private void find() {
-//
-//        SwingUtilities.invokeLater(() -> {
-//            log.info("search.");
-//            if (txtSearch.getText().isEmpty()) {
-//                sorter.setRowFilter(null);
-//            } else {
-//                sorter.setRowFilter(swrf);
-//            }
-//        });
-//    }
     private void find() {
         SwingUtilities.invokeLater(() -> {
             if (txtSearch.getText().isEmpty()) {
-                for (JTable table : tables) {
-                    sorter = (TableRowSorter<TableModel>) table.getRowSorter();
-                    sorter.setRowFilter(null);
-                }
+                clear();
             } else {
                 for (JTable table : tables) {
                     sorter = (TableRowSorter<TableModel>) table.getRowSorter();
@@ -89,6 +75,13 @@ public class FindDialog extends javax.swing.JDialog {
                 }
             }
         });
+    }
+
+    private void clear() {
+        for (JTable table : tables) {
+            sorter = (TableRowSorter<TableModel>) table.getRowSorter();
+            sorter.setRowFilter(null);
+        }
     }
 
     /**
@@ -110,6 +103,11 @@ public class FindDialog extends javax.swing.JDialog {
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 formFocusLost(evt);
+            }
+        });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
             }
         });
         addKeyListener(new java.awt.event.KeyAdapter() {
@@ -171,6 +169,11 @@ public class FindDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
 
     }//GEN-LAST:event_formKeyReleased
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
