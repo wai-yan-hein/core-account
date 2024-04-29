@@ -835,7 +835,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
         btnReset.setFont(Global.lableFont);
         btnReset.setText("Reset");
-        btnReset.setEnabled(false);
         btnReset.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnResetActionPerformed(evt);

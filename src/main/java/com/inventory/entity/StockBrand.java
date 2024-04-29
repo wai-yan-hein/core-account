@@ -47,6 +47,8 @@ public class StockBrand {
     private Integer deptId;
     @Column(name = "active")
     private boolean active;
+    @Column(name = "deleted")
+    private boolean deleted;
 
     public StockBrand() {
     }
