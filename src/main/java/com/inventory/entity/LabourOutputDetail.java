@@ -11,12 +11,14 @@ public class LabourOutputDetail {
     private String compCode;
     private Integer uniqueId;
     private String jobNo;
+    private String traderCode;
     private String labourCode;
     private String description;
     private String orderVouNo;
     private String refNo;
     private String remark;
     private String vouStatusCode;
+    private double printQty;
     private double outputQty;
     private double rejectQty;
     private double price;

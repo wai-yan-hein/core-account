@@ -573,6 +573,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 op.setObserver(this);
                 op.setProgress(progress);
                 op.setInventoryRepo(inventoryRepo);
+                op.setUserRepo(userRepo);
                 op.initMain();
                 return op;
             }
