@@ -295,6 +295,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         stockType.setCreatedDate(LocalDateTime.now());
         stockType.setMacId(Global.macId);
         stockType.setActive(true);
+        stockType.setGroupType(0);
         return inventoryRepo.saveStockType(stockType).block();
     }
     
@@ -363,6 +364,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         brand.setCreatedDate(LocalDateTime.now());
         brand.setMacId(Global.macId);
         brand.setActive(true);
+        brand.setDeleted(false);
         return inventoryRepo.saveBrand(brand).block();
     }
 
