@@ -38,6 +38,7 @@ public class ReportFilter {
     private String catCode;
     private String stockTypeCode;
     private String traderCode;
+    private String labourCode;
     private String saleManCode;
     private String vouTypeCode;
     private String batchNo;
