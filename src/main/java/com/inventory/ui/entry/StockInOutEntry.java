@@ -199,7 +199,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         inventoryRepo.getJob(ReportFilter).doOnSuccess((t) -> {
             if (t != null) {
                 t.add(new Job());
-                jobAutoCompleter.setListObject(t);
+                jobAutoCompleter.setListData(t);
             }
         }).subscribe();
     }
@@ -387,7 +387,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 txtDate.requestFocus();
                 return;
             }
-            observer.selected("save", true);
+            observer.selected("save", false);
             progress.setIndeterminate(true);
             io.setListSH(getListDetail());
             io.setListDel(getListDelete());

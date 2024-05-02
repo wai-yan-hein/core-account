@@ -1355,13 +1355,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    public void addTrader(Trader t) {
-        traderAutoCompleter.addTrader(t);
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderAutoCompleter.setTrader(t, row);
-    }
 
     private void observeMain() {
         observer.selected("control", this);
@@ -1574,9 +1567,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    private Mono<List<SaleHisDetail>> getSaleDetailFromOrder(int deptId) {
+    private Mono<List<SaleHisDetail>> getSaleDetailFromOrder() {
         return Flux.fromIterable(orderDialog.getListOrder())
-                .flatMap(vouNo -> inventoryRepo.getOrderDetail(vouNo, deptId)
+                .flatMap(vouNo -> inventoryRepo.getOrderDetail(vouNo)
                 .flatMapMany(Flux::fromIterable)
                 .map(od -> {
                     SaleHisDetail sd = new SaleHisDetail();
@@ -1601,10 +1594,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         clear(false);
         if (oh != null) {
             progress.setIndeterminate(true);
-            getSaleDetailFromOrder(oh.getDeptId()).doOnSuccess((t) -> {
-                saleTableModel.setListDetail(t);
+            getSaleDetailFromOrder().doOnSuccess((t) -> {
+                setListDetail(t);
             }).doOnTerminate(() -> {
-                saleTableModel.addNewRow();
+                addNewRow();
                 calculateTotalAmount(false);
                 focusTable();
                 progress.setIndeterminate(false);

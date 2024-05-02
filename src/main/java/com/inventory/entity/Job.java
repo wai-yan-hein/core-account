@@ -4,10 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @Entity
@@ -19,9 +19,9 @@ public class Job {
     @Column(name = "job_name")
     private String jobName;
     @Column(name = "start_date", columnDefinition = "DATE")
-    private Date startDate;
+    private LocalDate startDate;
     @Column(name = "end_date", columnDefinition = "DATE")
-    private Date endDate;
+    private LocalDate endDate;
     @Column(name = "finished")
     private boolean finished;
     @Column(name = "deleted")
@@ -36,6 +36,10 @@ public class Job {
     private String createdBy;
     @Column(name = "dept_id")
     private int deptId;
+    @Column(name = "output_cost")
+    private Double outputCost;
+    @Column(name = "output_qty")
+    private Double outputQty;
 
     @Override
     public String toString() {

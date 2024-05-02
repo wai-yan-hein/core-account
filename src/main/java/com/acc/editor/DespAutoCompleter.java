@@ -50,7 +50,7 @@ public final class DespAutoCompleter implements KeyListener {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final DespTableModel despModel = new DespTableModel();
+    private final DespTableModel despModel = new DespTableModel("Description");
     private VDescription desp;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -110,7 +110,7 @@ public final class DespAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(300, 300);
+        popup.setPopupSize(500, 300);
 
         popup.add(scroll);
 

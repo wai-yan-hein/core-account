@@ -51,5 +51,6 @@ public class OrderHis {
     private String userCode;
     private String orderStatusName;
     private boolean select;
+    private String refNo;
 
 }

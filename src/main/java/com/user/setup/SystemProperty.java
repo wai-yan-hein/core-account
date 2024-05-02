@@ -215,8 +215,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             }
             case "Role" ->
                 hmProperty = userRepo.getRoleProperty(roleCode);
-            case "Machine" ->
-                hmProperty = userRepo.getMachineProperty(macId);
+            case "Machine" -> {
+                hmProperty = new HashMap<>();
+                userRepo.getMachineProperty(macId).block().forEach((t) -> {
+                    hmProperty.put(t.getKey().getPropKey(), t.getPropValue());
+                });
+            }
         }
     }
 

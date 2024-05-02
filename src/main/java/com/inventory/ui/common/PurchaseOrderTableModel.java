@@ -37,17 +37,12 @@ public class PurchaseOrderTableModel extends AbstractTableModel {
     private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<OrderDetailKey> deleteList = new ArrayList();
-    private StockBalanceTableModel sbTableModel;
     private OrderDynamic orderDynamic;
     private boolean change = false;
     private JLabel lblRecord;
 
     public void setOrderDynamic(OrderDynamic orderDynamic) {
         this.orderDynamic = orderDynamic;
-    }
-
-    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
-        this.sbTableModel = sbTableModel;
     }
 
     public void setLblRecord(JLabel lblRecord) {

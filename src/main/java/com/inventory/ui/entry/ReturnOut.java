@@ -580,13 +580,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         }
     }
 
-    public void addTrader(Trader t) {
-        traderAutoCompleter.addTrader(t);
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderAutoCompleter.setTrader(t, row);
-    }
 
     private void observeMain() {
         observer.selected("control", this);

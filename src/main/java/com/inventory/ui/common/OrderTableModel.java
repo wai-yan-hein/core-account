@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,36 +33,16 @@ public class OrderTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit",
         "Order Qty", "Actual Qty", "Unit", "Price", "Amount"};
+    @Setter
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
+    @Setter
     private SelectionObserver observer;
     private final List<OrderDetailKey> deleteList = new ArrayList();
+    @Setter
     private OrderDynamic orderDynamic;
-    private boolean change = false;
+    @Setter
     private JLabel lblRecord;
-
-    public void setOrderDynamic(OrderDynamic orderDynamic) {
-        this.orderDynamic = orderDynamic;
-    }
-    public void setLblRecord(JLabel lblRecord) {
-        this.lblRecord = lblRecord;
-    }
-
-    public boolean isChange() {
-        return change;
-    }
-
-    public void setChange(boolean change) {
-        this.change = change;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -277,7 +258,6 @@ public class OrderTableModel extends AbstractTableModel {
                     }
 
                 }
-                change = true;
                 assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);

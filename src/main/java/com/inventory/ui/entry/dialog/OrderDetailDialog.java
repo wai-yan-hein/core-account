@@ -67,7 +67,7 @@ public class OrderDetailDialog extends javax.swing.JDialog {
     public void searchOrderDetail(String vouNo, Integer deptId) {
         if (!vouNo.isEmpty()) {
             progress.setIndeterminate(true);
-            inventoryRepo.getOrderDetail(vouNo, deptId).doOnSuccess((t) -> {
+            inventoryRepo.getOrderDetail(vouNo).doOnSuccess((t) -> {
                 orderTableModel.setListDetail(t);
             }).doOnTerminate(() -> {
                 progress.setIndeterminate(false);

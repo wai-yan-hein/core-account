@@ -514,13 +514,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
     }
 
-    public void addTrader(Trader t) {
-        traderAutoCompleter.addTrader(t);
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderAutoCompleter.setTrader(t, row);
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.

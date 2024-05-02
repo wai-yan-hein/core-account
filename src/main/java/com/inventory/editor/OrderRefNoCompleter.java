@@ -1,16 +1,19 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.inventory.editor;
 
-import com.acc.common.DespTableModel;
-import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.Resolution;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.inventory.entity.OrderHis;
+import com.inventory.ui.common.OrderRefNoTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -33,73 +36,55 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author Athu Sint
+ * @author wai yan
  */
 @Slf4j
-public final class CarNoAutoCompleter implements KeyListener {
+public class OrderRefNoCompleter implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
-    private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final DespTableModel despModel = new DespTableModel("Car No");
-    private VDescription desp;
+    private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
+    private OrderRefNoTableModel tableModel;
+    private OrderHis object;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    boolean popupOpen = false;
+    @Setter
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
-    private boolean filter;
-    private String tranType;
 
-    public SelectionObserver getObserver() {
-        return observer;
+    public OrderRefNoCompleter() {
     }
 
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public CarNoAutoCompleter() {
-    }
-
-    public CarNoAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter, String tranType) {
+    public OrderRefNoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
+            AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-        this.filter = filter;
         this.inventoryRepo = inventoryRepo;
-        this.tranType = tranType;
-        if (this.filter) {
-            setAutoText(new VDescription("All"));
-        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
+        textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.STOCK));
         textComp.setFont(Global.textFont);
-        table.setModel(despModel);
-        table.getTableHeader().setFont(Global.tblHeaderFont);
+        textComp.addKeyListener(this);
+        textComp.getDocument().addDocumentListener(documentListener);
+        tableModel = new OrderRefNoTableModel();
+        table.setModel(tableModel);
         table.setFont(Global.textFont); // NOI18N
-        table.setRowHeight(Global.tblRowHeight);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setRowHeight(Global.tblRowHeight);
         table.setSelectionForeground(Color.WHITE);
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
-
+        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Ref No
+        table.getColumnModel().getColumn(1).setPreferredWidth(250);//Customer Name 
+        table.getColumnModel().getColumn(2).setPreferredWidth(50);//Order Date
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -112,8 +97,8 @@ public final class CarNoAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(500, 300);
-
+        Resolution r = Util1.getPopSize();
+        popup.setPopupSize(r.getWidth(), r.getHeight());
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -122,12 +107,10 @@ public final class CarNoAutoCompleter implements KeyListener {
             textComp.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    popupOpen = true;
                     showPopup();
                 }
 
             });
-            textComp.getDocument().addDocumentListener(documentListener);
         } else {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
                     InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
@@ -141,45 +124,48 @@ public final class CarNoAutoCompleter implements KeyListener {
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-
             }
 
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 textComp.unregisterKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
-                popupOpen = false;
+
             }
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
-                if (!popupOpen) {
-                    if (editor != null) {
-                        editor.stopCellEditing();
-                    }
-                }
-
             }
         });
 
         table.setRequestFocusEnabled(false);
     }
 
+    public OrderHis getObject() {
+        return object;
+    }
+
+    public void setStock(OrderHis stock) {
+        this.object = stock;
+        this.textComp.setText(this.object == null ? null : this.object.getRefNo());
+    }
+
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            desp = despModel.getRemark(table.convertRowIndexToModel(
+            object = tableModel.getObject(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(desp.getDescription());
-            if (editor == null) {
-                if (observer != null) {
-                    observer.selected("Selected", desp.getDescription());
-                }
+            try {
+                textComp.setText(object.getRefNo());
+            } catch (Exception e) {
             }
-        }
+            popup.setVisible(false);
+            if (observer != null) {
+                observer.selected("OrderHis", "OrderHis");
+            }
+            if (editor != null) {
+                editor.stopCellEditing();
 
-        popup.setVisible(false);
-        popupOpen = false;
-        if (editor != null) {
-            editor.stopCellEditing();
+            }
+
         }
     }
 
@@ -189,73 +175,43 @@ public final class CarNoAutoCompleter implements KeyListener {
             mouseSelect();
         }
     };
-    DocumentListener documentListener = new DocumentListener() {
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            if (editor != null) {
-                popupOpen = true;
-                showPopup();
-            }
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            if (editor != null) {
-                popupOpen = true;
-                showPopup();
-            }
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-        }
-    };
 
     public void closePopup() {
         popup.setVisible(false);
-        popupOpen = false;
     }
 
     public void showPopup() {
-
-        if (popupOpen) {
+        try {
             if (!popup.isVisible()) {
-                textComp.addKeyListener(this);
                 if (textComp.isEnabled()) {
-                    if (textComp instanceof JTextField) {
-                        textComp.getDocument().addDocumentListener(documentListener);
-                    }
-
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
                     if (x == 0) {
                         x = textComp.getWidth();
                         y = textComp.getHeight();
                     }
-                    popup.show(textComp, x, y);
-                    popupOpen = false;
 
+                    popup.show(textComp, x, y);
                 } else {
                     popup.setVisible(false);
-                    popupOpen = false;
                 }
             }
+            textComp.requestFocus();
+        } catch (Exception e) {
+            log.error("showPopup : " + e.getMessage());
         }
-        textComp.requestFocus();
     }
+
     Action showAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CarNoAutoCompleter completer = (CarNoAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            OrderRefNoCompleter completer = (OrderRefNoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
                 } else {
-                    if (!popupOpen) {
-                        popupOpen = true;
-                        completer.showPopup();
-                    }
+                    completer.showPopup();
                 }
             }
         }
@@ -264,7 +220,7 @@ public final class CarNoAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CarNoAutoCompleter completer = (CarNoAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            OrderRefNoCompleter completer = (OrderRefNoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -276,10 +232,9 @@ public final class CarNoAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CarNoAutoCompleter completer = (CarNoAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            OrderRefNoCompleter completer = (OrderRefNoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
-                popupOpen = false;
             }
         }
     };
@@ -318,57 +273,63 @@ public final class CarNoAutoCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public VDescription getAutoText() {
-        return desp;
-
-    }
-
-    public void setAutoText(VDescription desp) {
-        this.desp = desp;
-        textComp.setText(desp == null ? null : desp.getDescription());
-    }
-
-
-    /*
-     * KeyListener implementation
-     */
-    /**
-     * Handle the key typed event from the text field.
-     */
     @Override
     public void keyTyped(KeyEvent e) {
+
     }
 
-    /**
-     * Handle the key-pressed event from the text field.
-     */
     @Override
     public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() != 10) {
+            showPopup();
+        }
+
+    }
+    private final DocumentListener documentListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            if (editor != null) {
+                showPopup();
+            }
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            if (editor != null) {
+                showPopup();
+            }
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+        }
+    };
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+
     }
 
-    /**
-     * Handle the key-released event from the text field.
-     */
     @Override
     public void keyReleased(KeyEvent e) {
-        String str = textComp.getText();
-        if (!str.isEmpty()) {
+        String refNo = textComp.getText();
+        if (!refNo.isEmpty()) {
             if (!containKey(e)) {
-                inventoryRepo.getDescription(str, this.tranType).subscribe((t) -> {
-                    if (this.filter) {
-                        t.add(new VDescription("All"));
+                tableModel.clear();
+                inventoryRepo.searchByRefNo(refNo)
+                        .doOnNext((t) -> {
+                            tableModel.addObject(t);
+                        }).doOnComplete(() -> {
+                    if (tableModel.getSize() > 0) {
+                        table.setRowSelectionInterval(0, 0);
                     }
-                    despModel.setListAutoText(t);
-                }, (err) -> {
-                    log.error(err.getMessage());
-                }, () -> {
-                });
+                }).subscribe();
             }
-
         }
     }
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
+
 }

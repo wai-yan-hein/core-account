@@ -9,7 +9,9 @@ public interface JobService {
 
     Job save(Job status);
 
-    List<Job> findAll(ReportFilter ReportFilter);
+    List<Job> findAll(ReportFilter filter);
+
+    List<Job> getActiveJob(String compCode);
 
     int delete(JobKey key);
 

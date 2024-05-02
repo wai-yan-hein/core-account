@@ -26,7 +26,6 @@ import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OrderStatusService;
-import com.h2.service.OutputCostService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
@@ -147,8 +146,6 @@ public class CloudIntegration {
     private JobService jobService;
     @Autowired
     private PatternService patternService;
-    @Autowired
-    private OutputCostService outputCostService;
     @Autowired
     private AccSettingService accSettingService;
     @Autowired
@@ -471,7 +468,6 @@ public class CloudIntegration {
         downloadLabourGroup();
         downloadJob();
         downloadPattern();
-        downloadOuputStatus();
         downloadAccSettings();
         downloadWarehouse();
         downloadRegion();
@@ -744,18 +740,7 @@ public class CloudIntegration {
         }).subscribe();
     }
 
-    public void downloadOuputStatus() {
-        String maxDate = outputCostService.getMaxDate();
-        inventoryRepo.getOutputCost(maxDate).doOnSuccess((t) -> {
-            if (t != null) {
-                observer.selected("download", "OutputCost List : " + t.size());
-                t.forEach((s) -> {
-                    outputCostService.save(s);
-                });
-                observer.selected("download", "dwonloadOutputCost done.");
-            }
-        }).subscribe();
-    }
+ 
 
     public void downloadAccSettings() {
         String maxDate = accSettingService.getMaxDate();

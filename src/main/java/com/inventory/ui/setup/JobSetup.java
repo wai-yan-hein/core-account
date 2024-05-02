@@ -5,11 +5,11 @@
 package com.inventory.ui.setup;
 
 import com.acc.dialog.FindDialog;
+import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.Job;
@@ -20,6 +20,7 @@ import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import com.user.editor.DepartmentUserAutoCompleter;
 import java.awt.Color;
+import java.awt.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -28,6 +29,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,36 +38,23 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JobSetup extends javax.swing.JPanel implements PanelControl {
-    
+
+    @Setter
     private JProgressBar progress;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private SelectionObserver observer;
-    
+
     private int selectRow = - 1;
     private Job ord = new Job();
     private final JobTableModel jobTableModel = new JobTableModel();
-    
+
     private TableRowSorter<TableModel> sorter;
-    private StartWithRowFilter swrf;
     private DepartmentUserAutoCompleter departmentUserAutoCompleter;
     private FindDialog findDialog;
-    
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-    
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
 
     /**
      * Creates new form JobSetup
@@ -73,8 +62,9 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     public JobSetup() {
         initComponents();
     }
-    
+
     public void initMain() {
+        initTextProperty();
         initCombo();
         initTable();
         searchJob();
@@ -83,11 +73,15 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         txtEndDate.setDate(Util1.getTodayDate());
         txtUserCode.requestFocus();
     }
-    
+
+    private void initTextProperty() {
+        ComponentUtil.setTextProperty(this);
+    }
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblVou);
     }
-    
+
     private void searchJob() {
         progress.setIndeterminate(true);
         ReportFilter ReportFilter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
@@ -101,7 +95,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             progress.setIndeterminate(false);
         }).subscribe();
     }
-    
+
     private void setSize() {
         List<Job> listData = jobTableModel.getListData();
         long countFinished = listData.stream().filter((t) -> t.isFinished()).count();
@@ -109,9 +103,9 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         lblFinised.setText(String.valueOf(countFinished));
         lblProcess.setText(String.valueOf(process));
         lblRecord.setText(String.valueOf(listData.size()));
-        
+
     }
-    
+
     private void initCombo() {
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
         userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
@@ -121,7 +115,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             departmentUserAutoCompleter.setListDepartment(t);
         }).subscribe();
     }
-    
+
     private void initTable() {
         tblVou.setModel(jobTableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
@@ -138,27 +132,28 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                 }
             }
         });
-        swrf = new StartWithRowFilter(txtFilter);
     }
-    
+
     private void setJob(Job cat) {
         ord = cat;
         ord.setKey(cat.getKey());
         txtName.setText(ord.getJobName());
         txtUserCode.setText(ord.getKey().getJobNo());
         chkFinished.setSelected(ord.isFinished());
-        txtStartDate.setDate(ord.getStartDate());
-        txtEndDate.setDate(ord.getEndDate());
-        userRepo.findDepartment(ord.getDeptId()).doOnSuccess((t) -> {
-            departmentUserAutoCompleter.setDepartment(t);
-        }).subscribe();
+        txtStartDate.setDate(Util1.toDate(ord.getStartDate()));
+        txtEndDate.setDate(Util1.toDate(ord.getEndDate()));
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
         chkFinished.setEnabled(true);
-        
+        txtOutputQty.setValue(ord.getOutputQty());
+        txtOutputCost.setValue(ord.getOutputCost());
+        userRepo.findDepartment(ord.getDeptId()).doOnSuccess((t) -> {
+            departmentUserAutoCompleter.setDepartment(t);
+        }).subscribe();
+
     }
-    
+
     private void saveJob() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -181,22 +176,23 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             }).subscribe();
         }
     }
-    
+
     private void sendMessage(String mes) {
         inventoryRepo.sendDownloadMessage(MessageType.JOB, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-    
+
     private void clear() {
         progress.setIndeterminate(false);
         txtUserCode.setText("");
-        txtFilter.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         chkFinished.setSelected(false);
         chkFinished.setEnabled(false);
+        txtOutputCost.setValue(null);
+        txtOutputQty.setValue(null);
         lblStatus.setForeground(Color.green);
         ord = new Job();
         jobTableModel.refresh();
@@ -205,7 +201,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         observeMain();
         setSize();
     }
-    
+
     private boolean isValidEntry() {
         if (txtName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Invalid Name");
@@ -227,14 +223,16 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                 ord.setUpdatedBy(Global.loginUser.getUserCode());
             }
             ord.setDeptId(departmentUserAutoCompleter.getDepartment().getKey().getDeptId());
-            ord.setStartDate(txtStartDate.getDate());
-            ord.setEndDate(txtEndDate.getDate());
+            ord.setStartDate(Util1.toLocalDate(txtStartDate.getDate()));
+            ord.setEndDate(Util1.toLocalDate(txtEndDate.getDate()));
             ord.setJobName(txtName.getText());
             ord.setFinished(chkFinished.isSelected());
+            ord.setOutputCost(Util1.getDouble(txtOutputCost.getText()));
+            ord.setOutputQty(Util1.getDouble(txtOutputQty.getText()));
         }
         return true;
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -255,7 +253,6 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVou = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -276,6 +273,10 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        txtOutputCost = new javax.swing.JFormattedTextField();
+        txtOutputQty = new javax.swing.JFormattedTextField();
         jPanel2 = new javax.swing.JPanel();
         rdoFinish = new javax.swing.JRadioButton();
 
@@ -299,14 +300,6 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
         ));
         tblVou.setName("tblVou"); // NOI18N
         jScrollPane1.setViewportView(tblVou);
-
-        txtFilter.setFont(Global.textFont);
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -410,6 +403,16 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
             }
         });
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Output Qty");
+
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Output Cost");
+
+        txtOutputCost.setFont(Global.textFont);
+
+        txtOutputQty.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -421,23 +424,30 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE)
+                                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(168, 168, 168))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtName)
+                                    .addComponent(chkFinished, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(txtUserCode)
+                                    .addComponent(txtName)
                                     .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(chkFinished, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(txtDep, javax.swing.GroupLayout.Alignment.TRAILING))))
+                                    .addComponent(txtDep)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(txtOutputQty, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel10)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtOutputCost, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)))))
                         .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -474,6 +484,14 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                     .addComponent(jLabel8)
                     .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtOutputCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtOutputQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkFinished)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -491,7 +509,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(lblProcess))
-                .addContainerGap(158, Short.MAX_VALUE))
+                .addContainerGap(130, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -528,7 +546,6 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 510, Short.MAX_VALUE)
-                    .addComponent(txtFilter)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -541,23 +558,12 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
-        // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(swrf);
-        }
-    }//GEN-LAST:event_txtFilterKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -614,6 +620,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkFinished;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -621,6 +628,7 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -633,8 +641,9 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     private javax.swing.JTable tblVou;
     private javax.swing.JTextField txtDep;
     private com.toedter.calendar.JDateChooser txtEndDate;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JFormattedTextField txtOutputCost;
+    private javax.swing.JFormattedTextField txtOutputQty;
     private com.toedter.calendar.JDateChooser txtStartDate;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
@@ -642,35 +651,35 @@ public class JobSetup extends javax.swing.JPanel implements PanelControl {
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
     }
-    
+
     @Override
     public void refresh() {
         searchJob();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void save() {
         saveJob();

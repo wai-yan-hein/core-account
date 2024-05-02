@@ -82,7 +82,6 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.h2.service.OrderStatusService;
-import com.h2.service.OutputCostService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.RegionService;
@@ -100,8 +99,6 @@ import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LabourGroupKey;
 import com.inventory.entity.OrderStatus;
 import com.inventory.entity.OrderStatusKey;
-import com.inventory.entity.OutputCost;
-import com.inventory.entity.OutputCostKey;
 import com.inventory.entity.Pattern;
 import com.inventory.entity.SaleHisDetail;
 import com.inventory.entity.SaleHisKey;
@@ -219,8 +216,6 @@ public class H2Repo {
     @Autowired
     private PatternService patternService;
     @Autowired
-    private OutputCostService outputCostService;
-    @Autowired
     private AccSettingService accSettingService;
     @Autowired
     private WareHouseService wareHouseService;
@@ -302,8 +297,8 @@ public class H2Repo {
         return Mono.justOrEmpty(traderInvService.find(key));
     }
 
-    public Mono<List<Trader>> searchTrader(String str, String type, String compCode, Integer deptId) {
-        return Mono.justOrEmpty(traderInvService.searchTrader(str, type, compCode, deptId));
+    public Flux<Trader> searchTrader(String str, String type, String compCode) {
+        return Flux.fromIterable(traderInvService.searchTrader(str, type, compCode));
     }
 
     public Mono<List<StockFormula>> getStockFormula(String compCode) {
@@ -330,7 +325,6 @@ public class H2Repo {
         return Mono.justOrEmpty(orderStatusService.find(key));
     }
 
-
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
@@ -345,8 +339,6 @@ public class H2Repo {
     public Mono<Pattern> save(Pattern sh) {
         return Mono.justOrEmpty(patternService.save(sh));
     }
-
-
 
     public AppUser save(AppUser user) {
         return userService.save(user);
@@ -601,8 +593,8 @@ public class H2Repo {
         return rolePropertyService.getRoleProperty(roleCode, compCode);
     }
 
-    public List<MachineProperty> getMacProperty(Integer macId) {
-        return macPropertyService.getMacProperty(macId);
+    public Mono<List<MachineProperty>> getMacProperty(Integer macId) {
+        return Mono.justOrEmpty(macPropertyService.getMacProperty(macId));
     }
 
     public Mono<List<DepartmentA>> getDepartmentAccount() {
@@ -815,24 +807,16 @@ public class H2Repo {
         return stockFormulaService.save(t);
     }
 
-    public Mono<List<Job>> getJob(ReportFilter ReportFilter) {
-        return Mono.justOrEmpty(jobService.findAll(ReportFilter));
+    public Mono<List<Job>> getJob(ReportFilter filter) {
+        return Mono.justOrEmpty(jobService.findAll(filter));
+    }
+
+    public Mono<List<Job>> getActiveJob(String compCode) {
+        return Mono.justOrEmpty(jobService.getActiveJob(compCode));
     }
 
     public Mono<Job> find(JobKey key) {
         return Mono.justOrEmpty(jobService.findById(key));
-    }
-
-    public OutputCost save(OutputCost s) {
-        return outputCostService.save(s);
-    }
-
-    public Mono<List<OutputCost>> getOutputCost() {
-        return Mono.justOrEmpty(outputCostService.findAll(Global.compCode));
-    }
-
-    public boolean delete(OutputCostKey key) {
-        return outputCostService.delete(key);
     }
 
     public AccSetting save(AccSetting acc) {

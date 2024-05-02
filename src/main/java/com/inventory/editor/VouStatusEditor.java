@@ -6,12 +6,12 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.inventory.entity.Trader;
-import com.repo.InventoryRepo;
+import com.inventory.entity.VouStatus;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -22,17 +22,14 @@ import javax.swing.table.TableCellEditor;
  *
  * @author Lenovo
  */
-public class TraderCellEditor extends AbstractCellEditor implements TableCellEditor {
+public class VouStatusEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
-    private TraderAutoCompleter completer;
-    private InventoryRepo inventoryRepo;
+    private VouStatusAutoCompleter completer;
+    private List<VouStatus> listData;
 
-    public TraderCellEditor(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public TraderCellEditor() {
+    public VouStatusEditor(List<VouStatus> listData) {
+        this.listData = listData;
     }
 
     @Override
@@ -71,14 +68,24 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new TraderAutoCompleter(jtf, inventoryRepo, null, false, "-");
+        completer = new VouStatusAutoCompleter(jtf, this, false);
+        completer.setListData(listData);
         return component;
     }
 
     @Override
     public Object getCellEditorValue() {
-        Trader t = completer.getTrader();
-        return t != null ? t : ((JTextField) component).getText();
+        Object obj;
+        VouStatus dto = completer.getVouStatus();
+
+        if (dto != null) {
+            obj = dto;
+        } else {
+            obj = ((JTextField) component).getText();
+        }
+
+        return obj;
+
     }
 
     /*
@@ -90,7 +97,6 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
         if (anEvent instanceof MouseEvent) {
             return false;
         } else if (anEvent instanceof KeyEvent ke) {
-
             return !ke.isActionKey(); //Function key
         } else {
             return true;

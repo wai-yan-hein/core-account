@@ -52,8 +52,6 @@ import com.inventory.entity.OrderHisDetail;
 import com.inventory.entity.OrderHisKey;
 import com.inventory.entity.OrderStatus;
 import com.inventory.entity.OrderStatusKey;
-import com.inventory.entity.OutputCost;
-import com.inventory.entity.OutputCostKey;
 import com.inventory.entity.Pattern;
 import com.inventory.entity.PaymentHis;
 import com.inventory.entity.PaymentHisDetail;
@@ -102,6 +100,7 @@ import com.inventory.entity.StockInOutDetail;
 import com.inventory.entity.ConsignHisDetail;
 import com.inventory.entity.ConsignHis;
 import com.inventory.entity.ConsignHisKey;
+import com.inventory.entity.LabourOutput;
 import com.inventory.entity.OrderFileJoin;
 import com.inventory.entity.OrderNote;
 import com.inventory.entity.StockKey;
@@ -244,20 +243,6 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Job.class)
-                .collectList()
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
-
-    public Mono<List<OutputCost>> getOutputCost(String updatedDate) {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getUpdateOutputCost")
-                .queryParam("updatedDate", updatedDate)
-                .build())
-                .retrieve()
-                .bodyToFlux(OutputCost.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -616,20 +601,6 @@ public class InventoryRepo {
                 });
     }
 
-//    public Mono<List<StockUnit>> getUnit(String relCode) {
-//        return inventoryApi.get()
-//                .uri(builder -> builder.path("/setup/getRelation")
-//                .queryParam("relCode", relCode)
-//                .queryParam("compCode", Global.compCode)
-//                .build())
-//                .retrieve()
-//                .bodyToFlux(StockUnit.class)
-//                .collectList()
-//                .onErrorResume((e) -> {
-//                    log.error("error :" + e.getMessage());
-//                    return Mono.empty();
-//                });
-//    }
     public Mono<Trader> findTrader(String code) {
         if (Util1.isNullOrEmpty(code)) {
             return Mono.empty();
@@ -719,22 +690,6 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<OutputCost>> getOutputCost() {
-        if (localDatabase) {
-            return h2Repo.getOutputCost();
-        }
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getOutputCost")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().bodyToFlux(OutputCost.class)
-                .collectList()
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
-
     public Mono<List<Trader>> getEmployee() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getEmployee")
@@ -765,20 +720,18 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Trader>> getTraderList(String text, String type) {
+    public Flux<Trader> getTraderList(String text, String type) {
         if (localDatabase) {
-            return h2Repo.searchTrader(text, type, Global.compCode, ProUtil.getDepId());
+            return h2Repo.searchTrader(text, type, Global.compCode);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getTraderList")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("text", text)
                 .queryParam("type", type)
                 .build())
                 .retrieve()
                 .bodyToFlux(Trader.class)
-                .collectList()
                 .onErrorResume((e) -> {
                     log.error("getTraderList :" + e.getMessage());
                     return Mono.empty();
@@ -1573,13 +1526,30 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Job>> getJob(ReportFilter ReportFilter) {
+    public Mono<List<Job>> getActiveJob() {
         if (localDatabase) {
-            return h2Repo.getJob(ReportFilter);
+            return h2Repo.getActiveJob(Global.compCode);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getActiveJob")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Job.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<Job>> getJob(ReportFilter filter) {
+        if (localDatabase) {
+            return h2Repo.getJob(filter);
         }
         return inventoryApi.post()
                 .uri("/setup/getJob")
-                .body(Mono.just(ReportFilter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Job.class)
                 .collectList()
@@ -1638,23 +1608,6 @@ public class InventoryRepo {
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
                 .bodyToMono(Trader.class)
-                .doOnSuccess((s) -> {
-                    if (localDatabase) {
-                        h2Repo.save(s);
-                    }
-                })
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
-
-    public Mono<OutputCost> saveOutputCost(OutputCost t) {
-        return inventoryApi.post()
-                .uri("/setup/saveOutputCost")
-                .body(Mono.just(t), OutputCost.class)
-                .retrieve()
-                .bodyToMono(OutputCost.class)
                 .doOnSuccess((s) -> {
                     if (localDatabase) {
                         h2Repo.save(s);
@@ -1887,10 +1840,6 @@ public class InventoryRepo {
                     if (localDatabase) {
                         h2Repo.save(t);
                     }
-                })
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
                 });
     }
 
@@ -2545,23 +2494,6 @@ public class InventoryRepo {
                 .collectList()
                 .doOnNext(list -> {
                     if (list.isEmpty() && localDatabase) {
-                        h2Repo.delete(key);
-                    }
-                })
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
-
-    public Mono<Integer> deleteOutputCost(OutputCostKey key) {
-        return inventoryApi.post()
-                .uri("/setup/deleteOutputCost")
-                .body(Mono.just(key), OutputCostKey.class)
-                .retrieve()
-                .bodyToMono(Integer.class)
-                .doOnSuccess((s1) -> {
-                    if (localDatabase) {
                         h2Repo.delete(key);
                     }
                 })
@@ -3478,6 +3410,15 @@ public class InventoryRepo {
 
     }
 
+    public Mono<LabourOutput> save(LabourOutput sh) {
+        return inventoryApi.post()
+                .uri("/labourOutput")
+                .body(Mono.just(sh), LabourOutput.class)
+                .retrieve()
+                .bodyToMono(LabourOutput.class);
+
+    }
+
     public Mono<OrderHis> uploadOrder(OrderHis sh) {
         return inventoryApi.post()
                 .uri("/order/saveOrder")
@@ -3779,12 +3720,11 @@ public class InventoryRepo {
                 .bodyToFlux(OrderHis.class);
     }
 
-    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
+    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/order/getOrderDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve().bodyToFlux(OrderHisDetail.class)
                 .collectList()
@@ -4238,6 +4178,34 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> deleteLabourOutput(String vouNo, String compCode) {
+        return inventoryApi.delete()
+                .uri(builder -> builder.path("/labourOutput")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error: " + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> restoreLabourOutput(String vouNo, String compCode) {
+        return inventoryApi.put()
+                .uri(builder -> builder.path("/labourOutput")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error: " + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Flux<VConsign> getStockIssRecHistory(ReportFilter filter) {
         return inventoryApi
                 .post()
@@ -4397,4 +4365,33 @@ public class InventoryRepo {
                 .bodyToMono(Boolean.class);
     }
 
+    public Flux<VDescription> getDesign(String str) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/order/getDesign")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(VDescription.class);
+    }
+
+    public Flux<VDescription> getSize(String str) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/order/getSize")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(VDescription.class);
+    }
+
+    public Flux<OrderHis> searchByRefNo(String refNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/order/searchByRefNo")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("refNo", refNo)
+                .build())
+                .retrieve()
+                .bodyToFlux(OrderHis.class);
+    }
 }

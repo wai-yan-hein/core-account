@@ -50,7 +50,7 @@ public final class BatchNoAutoCompeter implements KeyListener {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final DespTableModel despModel = new DespTableModel();
+    private final DespTableModel despModel = new DespTableModel("Batch No");
     private VDescription desp;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;

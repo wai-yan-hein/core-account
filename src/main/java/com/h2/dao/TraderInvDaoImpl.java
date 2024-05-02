@@ -49,14 +49,13 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
     }
 
     @Override
-    public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
+    public List<Trader> searchTrader(String str, String type, String compCode) {
         str = Util1.cleanStr(str);
         str = str + "%";
         String filter = """
                 where active = true
                 and deleted = false
                 and comp_code =?
-                and (dept_id =? or 0 =?)
                 and (LOWER(REPLACE(user_code, ' ', '')) like ? or LOWER(REPLACE(trader_name, ' ', '')) like ?)
                 """;
         if (!type.equals("-")) {
@@ -68,7 +67,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
                      """ + filter + "\n"
                 + "order by user_code,trader_name\n"
                 + "limit 100\n";
-        ResultSet rs = getResult(sql, compCode, deptId, deptId, str, str);
+        ResultSet rs = getResult(sql, compCode, str, str);
         List<Trader> list = new ArrayList<>();
         try {
             if (rs != null) {
@@ -78,7 +77,6 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
                     key.setCompCode(compCode);
                     key.setCode(rs.getString("code"));
                     t.setKey(key);
-                    t.setDeptId(deptId);
                     t.setUserCode(rs.getString("user_code"));
                     t.setTraderName(rs.getString("trader_name"));
                     t.setPriceType(rs.getString("price_type"));

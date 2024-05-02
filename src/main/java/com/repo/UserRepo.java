@@ -211,6 +211,7 @@ public class UserRepo {
                     }
                 });
     }
+
     public Mono<Boolean> generateTemplate(CompanyInfo app) {
         return userApi.post()
                 .uri("/user/generateTemplate")
@@ -437,26 +438,18 @@ public class UserRepo {
         return hm;
     }
 
-    public HashMap<String, String> getMachineProperty(Integer macId) {
-        HashMap<String, String> hm = new HashMap<>();
-        List<MachineProperty> prop;
-        if (macId == null) {
-            return hm;
-        }
+    public Mono<List<MachineProperty>> getMachineProperty(Integer macId) {
         if (localdatabase) {
-            prop = h2Repo.getMacProperty(macId);
-        } else {
-            Mono<ResponseEntity<List<MachineProperty>>> result = userApi.get()
-                    .uri(builder -> builder.path("/user/getMacProperty")
-                    .queryParam("macId", macId)
-                    .build())
-                    .retrieve().toEntityList(MachineProperty.class);
-            prop = result.block().getBody();
+            return h2Repo.getMacProperty(macId);
         }
-        prop.forEach((t) -> {
-            hm.put(t.getKey().getPropKey(), t.getPropValue());
-        });
-        return hm;
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getMacProperty")
+                .queryParam("macId", macId)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(MachineProperty.class)
+                .collectList();
     }
 
     public Mono<SysProperty> saveSys(SysProperty prop) {

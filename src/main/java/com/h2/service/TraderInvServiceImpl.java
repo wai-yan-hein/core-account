@@ -46,8 +46,8 @@ public class TraderInvServiceImpl implements TraderInvService {
     }
 
     @Override
-    public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
-        return dao.searchTrader(str, type, compCode, deptId);
+    public List<Trader> searchTrader(String str, String type, String compCode) {
+        return dao.searchTrader(str, type, compCode);
     }
 
     @Override

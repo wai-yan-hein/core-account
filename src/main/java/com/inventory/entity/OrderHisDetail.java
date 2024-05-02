@@ -51,5 +51,6 @@ public class OrderHisDetail {
     private Stock stock;
     private String saleManName;
     private String vouNo;
+    private double heatPressQty;
 
 }

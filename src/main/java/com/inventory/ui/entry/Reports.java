@@ -394,6 +394,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                             JsonDataSource ds = new JsonDataSource(input);
                             int dataCount = ds.recordCount();
                             if (dataCount > 0) {
+                                param.put("p_rel_name", t.getRelName());
+                                param.put("p_pur_rel", t.getPurRel());
+                                param.put("p_in_rel", t.getInRel());
+                                param.put("p_out_rel", t.getOutRel());
+                                param.put("p_sale_rel", t.getSaleRel());
                                 JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
                                 JRViewer viwer = new JRViewer(js);
                                 JFrame frame = new JFrame("Core Value Report");

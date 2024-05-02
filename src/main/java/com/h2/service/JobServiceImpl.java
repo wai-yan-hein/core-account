@@ -65,4 +65,9 @@ public class JobServiceImpl implements JobService {
         int seqNo = seqService.getSequence(0, "Job", period, compCode);
         return period + "-" + String.format("%0" + 5 + "d", seqNo);
     }
+
+    @Override
+    public List<Job> getActiveJob(String compCode) {
+        return dao.getActiveJob(compCode);
+    }
 }

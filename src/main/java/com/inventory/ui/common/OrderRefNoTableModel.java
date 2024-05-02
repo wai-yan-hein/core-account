@@ -6,23 +6,22 @@
 package com.inventory.ui.common;
 
 import com.common.Util1;
-import com.inventory.entity.Trader;
+import com.inventory.entity.OrderHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-public class TraderTableModel extends AbstractTableModel {
+@Slf4j
+public class OrderRefNoTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(TraderTableModel.class);
-    private List<Trader> listTrader = new ArrayList<>();
-    private final String[] columnNames = {"Code", "Name", "Address"};
+    private List<OrderHis> listDetail = new ArrayList<>();
+    private final String[] columnNames = {"Ref No", "Customer Name", "Order Date"};
     private JTable table;
 
     public JTable getTable() {
@@ -33,7 +32,7 @@ public class TraderTableModel extends AbstractTableModel {
         this.table = table;
     }
 
-    public TraderTableModel() {
+    public OrderRefNoTableModel() {
     }
 
     @Override
@@ -51,34 +50,29 @@ public class TraderTableModel extends AbstractTableModel {
         return String.class;
     }
 
-    public List<Trader> getListTrader() {
-        return listTrader;
+    public List<OrderHis> getListDetail() {
+        return listDetail;
     }
 
-    public void setListTrader(List<Trader> listTrader) {
-        this.listTrader = listTrader;
+    public void setListDetail(List<OrderHis> listDetail) {
+        this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
     @Override
     public Object getValueAt(int row, int column) {
-        if (listTrader == null) {
+        if (listDetail.isEmpty()) {
             return null;
         }
-
-        if (listTrader.isEmpty()) {
-            return null;
-        }
-
         try {
-            Trader trader = listTrader.get(row);
+            OrderHis b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
+                    b.getRefNo();
                 case 1 ->
-                    trader.getTraderName();
+                    b.getTraderName();
                 case 2 ->
-                    trader.getAddress();
+                    Util1.toDateStr(b.getVouDate(), "dd/MM/yyyy");
                 default ->
                     null;
             }; //Code
@@ -95,27 +89,22 @@ public class TraderTableModel extends AbstractTableModel {
 
     }
 
-    public void setTrader(Trader t, int row) {
-        listTrader.set(row, t);
+    public void setBatch(OrderHis t, int row) {
+        listDetail.set(row, t);
         fireTableRowsUpdated(row, row);
     }
 
-    public void addTrader(Trader t) {
-        listTrader.add(t);
-        int lastIndex = listTrader.size() - 1;
-        if (lastIndex >= 0) {
-            fireTableRowsInserted(lastIndex, lastIndex);
-        } else {
-            fireTableRowsInserted(0, 0);
-        }
+    public void addBatch(OrderHis t) {
+        listDetail.add(t);
+        fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
     }
 
     @Override
     public int getRowCount() {
-        if (listTrader == null) {
+        if (listDetail == null) {
             return 0;
         } else {
-            return listTrader.size();
+            return listDetail.size();
         }
     }
 
@@ -124,26 +113,36 @@ public class TraderTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public Trader getTrader(int row) {
-        if (listTrader == null) {
+    public OrderHis getObject(int row) {
+        if (listDetail == null) {
             return null;
-        } else if (listTrader.isEmpty()) {
+        } else if (listDetail.isEmpty()) {
             return null;
         } else {
-            return listTrader.get(row);
+            return listDetail.get(row);
         }
     }
 
     public int getSize() {
-        if (listTrader == null) {
+        if (listDetail == null) {
             return 0;
         } else {
-            return listTrader.size();
+            return listDetail.size();
+        }
+    }
+
+    public void addObject(OrderHis d) {
+        listDetail.add(d);
+        int lastIndex = listDetail.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
         }
     }
 
     public void clear() {
-        listTrader.clear();
+        listDetail.clear();
         fireTableDataChanged();
     }
 }

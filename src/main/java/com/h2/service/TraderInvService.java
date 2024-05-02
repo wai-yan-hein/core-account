@@ -25,6 +25,6 @@ public interface TraderInvService {
     String getMaxDate();
     Boolean delete(TraderKey key);
 
-    List<Trader> searchTrader(String str, String type, String compCode, Integer deptId);
+    List<Trader> searchTrader(String str, String type, String compCode);
 
 }

@@ -55,8 +55,8 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
                     jKey.setCompCode(rs.getString("comp_code"));
                     job.setKey(jKey);
                     job.setJobName(rs.getString("job_name"));
-                    job.setStartDate(rs.getDate("start_date"));
-                    job.setEndDate(rs.getDate("end_date"));
+                    job.setStartDate(Util1.toLocalDate(rs.getDate("start_date")));
+                    job.setEndDate(Util1.toLocalDate(rs.getDate("end_date")));
                     job.setDeptId(rs.getInt("dept_id"));
                     job.setCreatedBy(rs.getString("created_by"));
                     jList.add(job);
@@ -107,5 +107,11 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
         String jpql = "select max(o.updatedDate) from Job o";
         LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
+    }
+
+    @Override
+    public List<Job> getActiveJob(String compCode) {
+        String sql = "select o from Job o where o.key.compCode = '" + compCode + "' and o.deleted = false";
+        return findHSQL(sql);
     }
 }

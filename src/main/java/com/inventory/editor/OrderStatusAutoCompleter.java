@@ -8,22 +8,19 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.IconUtil;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.OrderStatus;
 import com.inventory.ui.setup.dialog.common.OrderStatusTableModel;
-import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -35,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -62,56 +58,36 @@ public class OrderStatusAutoCompleter implements KeyListener, SelectionObserver 
     private int y = 0;
     private SelectionObserver observer;
     private boolean filter = false;
-    private InventoryRepo inventoryRepo;
-    private FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            inventoryRepo.getOrderStatus().subscribe((t) -> {
-                if (filter) {
-                    OrderStatus loc = new OrderStatus("-", "All");
-                    t.add(0, loc);
-                    setOrderStatus(loc);
-                }
-                orderStatusTableModel.setListVou(t);
-                if (!t.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
-            });
+    private StartWithRowFilter rowFilter;
 
+    public void setListData(List<OrderStatus> listData) {
+        if (filter) {
+            OrderStatus sb = new OrderStatus("-", "All");
+            listData.add(0, sb);
+            setOrderStatus(sb);
         }
-
-    };
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
+        orderStatusTableModel.setListVou(listData);
+        if (!listData.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
     public OrderStatusAutoCompleter() {
     }
 
-    public OrderStatusAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
+    public OrderStatusAutoCompleter(JTextComponent comp,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.inventoryRepo = inventoryRepo;
-
-        List<OrderStatus> list = new ArrayList<>();
         if (filter) {
-            OrderStatus loc = new OrderStatus("-", "All");
-            list.add(0, loc);
-            setOrderStatus(loc);
-            orderStatusTableModel.setListVou(list);
+            OrderStatus sb = new OrderStatus("-", "All");
+            setOrderStatus(sb);
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        textComp.addFocusListener(fa);
         textComp.getDocument().addDocumentListener(documentListener);
         table.setModel(orderStatusTableModel);
         table.setSize(50, 50);
@@ -122,6 +98,7 @@ public class OrderStatusAutoCompleter implements KeyListener, SelectionObserver 
         table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
+        rowFilter = new StartWithRowFilter(comp);
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
@@ -353,11 +330,11 @@ public class OrderStatusAutoCompleter implements KeyListener, SelectionObserver 
 
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
+        String f = textComp.getText();
+        if (f.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(startsWithFilter);
+            sorter.setRowFilter(rowFilter);
             try {
                 if (!containKey(e)) {
                     if (table.getRowCount() >= 0) {
@@ -369,19 +346,6 @@ public class OrderStatusAutoCompleter implements KeyListener, SelectionObserver 
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

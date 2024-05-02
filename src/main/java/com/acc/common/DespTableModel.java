@@ -9,24 +9,20 @@ import com.acc.model.VDescription;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class DespTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(DespTableModel.class);
     private List<VDescription> listAutoText = new ArrayList<>();
-    private final String[] columnNames = {"Description"};
+    private String[] columnNames = {"Description"};
 
-    public DespTableModel() {
-    }
-
-    public List<VDescription> getListAutoText() {
-        return listAutoText;
+    public DespTableModel(String columnName) {
+        this.columnNames = new String[]{columnName};
     }
 
     public void setListAutoText(List<VDescription> listAutoText) {
@@ -106,6 +102,12 @@ public class DespTableModel extends AbstractTableModel {
 
     public void addObject(VDescription d) {
         listAutoText.add(d);
+        int lastIndex = listAutoText.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
     }
 
     public void clear() {

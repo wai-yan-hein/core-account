@@ -23,11 +23,9 @@ public class MachinePropertyKey implements Serializable {
     private Integer macId;
     @Column(name = "prop_key")
     private String propKey;
+    @Column(name = "comp_code")
+    private String compCode;
 
-    public MachinePropertyKey(Integer macId, String propKey) {
-        this.macId = macId;
-        this.propKey = propKey;
-    }
 
     public MachinePropertyKey() {
     }

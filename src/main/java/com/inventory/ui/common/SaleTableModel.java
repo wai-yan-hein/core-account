@@ -170,11 +170,11 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setQty(1.0);
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(Util1.getDouble(getTraderPrice(s)));
-                            sd.setOrgPrice(sd.getPrice());
                             sd.setStock(s);
-                            sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
+                            sd.setPrice(sd.getPrice() == 0 ? Util1.getDouble(s.getSalePriceN()) : Util1.getDouble(sd.getPrice()));
                             sd.setWeight(Util1.getDouble(s.getWeight()));
                             sd.setWeightUnit(s.getWeightUnit());
+                            sd.setOrgPrice(sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
                         }
@@ -239,13 +239,13 @@ public class SaleTableModel extends AbstractTableModel {
 
                 }
                 if (column != 6) {
-                    if (Util1.getDouble(sd.getPrice()) == 0) {
+                    if (sd.getPrice() == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             String stockCode = sd.getStockCode();
                             if (stockCode != null && sd.getUnitCode() != null) {
                                 inventoryRepo.getSaleRecentPrice(stockCode,
                                         Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).doOnSuccess((t) -> {
-                                    sd.setPrice(Util1.getDouble(t.getAmount()));
+                                    sd.setPrice(t == null ? 0 : Util1.getDouble(t.getAmount()));
                                     sd.setOrgPrice(sd.getPrice());
                                     calculateAmount(sd);
                                     fireTableRowsUpdated(row, row);
@@ -258,7 +258,6 @@ public class SaleTableModel extends AbstractTableModel {
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                observer.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
@@ -342,6 +341,7 @@ public class SaleTableModel extends AbstractTableModel {
             double stdSalePrice = Util1.getDouble(sale.getPrice());
             double amount = saleQty * stdSalePrice;
             sale.setAmount(Util1.getDouble(Math.round(amount)));
+            observer.selected("SALE-TOTAL", "SALE-TOTAL");
         }
     }
 
@@ -376,7 +376,7 @@ public class SaleTableModel extends AbstractTableModel {
     }
 
     private double getTraderPrice(Stock s) {
-        double price = 0.0;
+        Double price = 0.0;
         String priceType = getTraderType();
         switch (priceType) {
             case "N" -> {
@@ -398,7 +398,7 @@ public class SaleTableModel extends AbstractTableModel {
                 price = s.getSalePriceE();
             }
         }
-        return price;
+        return Util1.getDouble(price);
     }
 
     public void delete(int row) {

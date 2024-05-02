@@ -4,128 +4,105 @@
  */
 package com.inventory.ui.common;
 
+import com.acc.model.VDescription;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.LocationAutoCompleter;
+import com.inventory.entity.Location;
 import com.inventory.entity.OrderDetailKey;
 import com.inventory.entity.OrderHisDetail;
-import com.inventory.ui.entry.SaleOrderEntry;
+import com.inventory.entity.Stock;
+import com.inventory.ui.entry.OrderDynamic;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author DELL
  */
-public class SaleOrderTableModel extends AbstractTableModel {
-    
-    private static final Logger log = LoggerFactory.getLogger(SaleOrderTableModel.class);
-    private String[] columnNames = {"Design", "Size", "Qty"};
+@Slf4j
+public class OrderDesginTableModel extends AbstractTableModel {
+
+    private String[] columnNames = {"Design", "Size", "Order Qty", "Heat Press Qty"};
+    @Setter
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
+    @Setter
     private SelectionObserver observer;
     private final List<OrderDetailKey> deleteList = new ArrayList();
-    private StockBalanceTableModel sbTableModel;
-    private SaleOrderEntry saleOrderEntry;
-    private boolean change = false;
+    @Setter
+    private OrderDynamic orderDynamic;
+    @Setter
     private JLabel lblRecord;
 
-//    public void setOrderDynamic(OrderDynamic orderDynamic) {
-//        this.orderDynamic = orderDynamic;
-//    }
-    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
-        this.sbTableModel = sbTableModel;
-    }
-    
-    public void setLblRecord(JLabel lblRecord) {
-        this.lblRecord = lblRecord;
-    }
-    
-    public boolean isChange() {
-        return change;
-    }
-    
-    public void setChange(boolean change) {
-        this.change = change;
-    }
-    
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
     }
-    
+
     @Override
     public int getColumnCount() {
         return columnNames.length;
     }
-    
+
     public String[] getColumnNames() {
         return columnNames;
     }
-    
+
     public void setColumnNames(String[] columnNames) {
         this.columnNames = columnNames;
     }
-    
+
     @Override
     public int getRowCount() {
         return listDetail.size();
     }
-    
+
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2 ->
+            case 2, 3 ->
                 Double.class;
             default ->
                 String.class;
         };
     }
-    
+
     @Override
     public boolean isCellEditable(int row, int column) {
         return true;
     }
-    
+
     @Override
     public Object getValueAt(int row, int column) {
         try {
             OrderHisDetail sd = listDetail.get(row);
-            switch (column) {
-                case 0 -> {
-                    return sd.getDesign();
-                }
-                case 1 -> {
-                    
-                    return sd.getSize();
-                }
-                case 2 -> {
-                    return sd.getQty();
-                }
-                default -> {
-                    return null;
-                }
-            }
+            return switch (column) {
+                case 0 ->
+                    sd.getDesign();
+                case 1 ->
+                    sd.getSize();
+                case 2 ->
+                    Util1.toNull(sd.getQty());
+                case 3 ->
+                    Util1.toNull(sd.getHeatPressQty());
+                default ->
+                    null;
+            };
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
         return null;
     }
-    
+
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
@@ -133,48 +110,71 @@ public class SaleOrderTableModel extends AbstractTableModel {
             if (value != null) {
                 switch (column) {
                     case 0 -> {
-                        sd.setDesign(String.valueOf(value));
-                        setSelection(row, 1);
+                        //Code
+                        if (value instanceof VDescription d) {
+                            sd.setDesign(d.getDescription());
+                        } else {
+                            sd.setDesign(value.toString());
+                        }
                         addNewRow();
+                        setSelection(row, column + 1);
                     }
                     case 1 -> {
-                        sd.setSize(String.valueOf(value));
-                        setSelection(row, 2);
+                        //Code
+                        if (value instanceof VDescription d) {
+                            sd.setSize(d.getDescription());
+                        } else {
+                            sd.setSize(value.toString());
+                        }
+                        setSelection(row, column + 1);
                     }
                     case 2 -> {
-                        //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            setSelection(row, column);
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setQty(qty);
+                            setSelection(row, column + 1);
                         }
                     }
-                    
+                    case 3 -> {
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setHeatPressQty(qty);
+                            setSelection(row + 1, 0);
+                        }
+                    }
                 }
-                change = true;
+                sd.setStockCode("-");
+                sd.setUnitCode("-");
+                assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                observer.selected("ORDER-TOTAL", "ORDER-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
-    
+
     private void setSelection(int row, int column) {
         parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(column, column);
         parent.requestFocus();
     }
-    
+
+    private void assignLocation(OrderHisDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = orderDynamic.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
+        }
+    }
+
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
@@ -184,55 +184,43 @@ public class SaleOrderTableModel extends AbstractTableModel {
             }
         }
     }
-    
+
     private boolean hasEmptyRow() {
-        boolean status = false;
         if (listDetail.size() >= 1) {
             OrderHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStockCode() == null || get.getDesign() == null) {
-                status = true;
+            if (Util1.isNullOrEmpty(get.getDesign())) {
+                return true;
             }
         }
-        return status;
+        return false;
     }
-    
+
     public List<OrderHisDetail> getListDetail() {
         return listDetail;
     }
-    
+
     public void setListDetail(List<OrderHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
-        addNewRow();
         fireTableDataChanged();
     }
-    
+
     private void setRecord(int size) {
         lblRecord.setText("Records : " + size);
     }
-    
-    public void removeListDetail() {
-        this.listDetail.clear();
-        addNewRow();
-    }
-    
+
     private void calculateAmount(OrderHisDetail oh) {
         if (oh.getStockCode() != null) {
             double amount = Util1.getDouble(oh.getQty()) * Util1.getDouble(oh.getPrice());
             oh.setAmount(Util1.getDouble(Math.round(amount)));
+            observer.selected("ORDER-TOTAL", "ORDER-TOTAL");
         }
     }
-    
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(Global.parentForm, text);
-    }
-    
+
     public boolean isValidEntry() {
         boolean status = true;
         for (OrderHisDetail sdh : listDetail) {
-            sdh.setLocCode("");
-            sdh.setUnitCode("");
-            if (sdh.getStockCode() != null || sdh.getDesign() != null) {
+            if (!Util1.isNullOrEmpty(sdh.getDesign())) {
                 if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     status = false;
@@ -248,17 +236,11 @@ public class SaleOrderTableModel extends AbstractTableModel {
         }
         return status;
     }
-    
+
     public List<OrderDetailKey> getDelList() {
         return deleteList;
     }
-    
-    public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
-        }
-    }
-    
+
     public void delete(int row) {
         OrderHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
@@ -274,21 +256,22 @@ public class SaleOrderTableModel extends AbstractTableModel {
         }
         parent.requestFocus();
     }
-    
+
     public void addOrder(OrderHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
-    
+
     public OrderHisDetail getOrderEntry(int row) {
         return listDetail.get(row);
     }
-    
+
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            fireTableDataChanged();
         }
     }
 }

@@ -435,7 +435,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             inventoryRepo.findJob(jobNo).doOnSuccess((s) -> {
                 if (s != null) {
                     s.setFinished(true);
-                    s.setEndDate(Util1.convertToDate(milling.getVouDate()));
+                    s.setEndDate(milling.getVouDate().toLocalDate());
                     inventoryRepo.saveJob(s).doOnSuccess((a) -> {
                         progress.setIndeterminate(false);
                     }).doOnError((e) -> {
@@ -849,14 +849,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         } else {
             txtCus.requestFocus();
         }
-    }
-
-    public void addTrader(Trader t) {
-        traderAutoCompleter.addTrader(t);
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderAutoCompleter.setTrader(t, row);
     }
 
     private void usageDialog() {

@@ -1,6 +1,7 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.inventory.editor;
 
@@ -36,49 +37,41 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author Athu Sint
+ * @author Lenovo
  */
 @Slf4j
-public final class CarNoAutoCompleter implements KeyListener {
+public final class DesignAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final DespTableModel despModel = new DespTableModel("Car No");
+    private final DespTableModel despModel = new DespTableModel("Design");
     private VDescription desp;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
+    @Setter
     private SelectionObserver observer;
-    private InventoryRepo inventoryRepo;
+    private InventoryRepo inventroyRepo;
     private boolean filter;
-    private String tranType;
 
-    public SelectionObserver getObserver() {
-        return observer;
+    public DesignAutoCompleter() {
     }
 
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public CarNoAutoCompleter() {
-    }
-
-    public CarNoAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter, String tranType) {
+    public DesignAutoCompleter(JTextComponent comp, InventoryRepo accountRepo,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.inventoryRepo = inventoryRepo;
-        this.tranType = tranType;
+        this.inventroyRepo = accountRepo;
         if (this.filter) {
             setAutoText(new VDescription("All"));
         }
@@ -89,7 +82,6 @@ public final class CarNoAutoCompleter implements KeyListener {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
@@ -168,14 +160,16 @@ public final class CarNoAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             desp = despModel.getRemark(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(desp.getDescription());
-            if (editor == null) {
-                if (observer != null) {
-                    observer.selected("Selected", desp.getDescription());
-                }
+        } else {
+            String text = textComp.getText();
+            desp = new VDescription(text);
+        }
+        ((JTextField) textComp).setText(desp.getDescription());
+        if (editor == null) {
+            if (observer != null) {
+                observer.selected("Selected", desp.getDescription());
             }
         }
-
         popup.setVisible(false);
         popupOpen = false;
         if (editor != null) {
@@ -217,7 +211,6 @@ public final class CarNoAutoCompleter implements KeyListener {
     }
 
     public void showPopup() {
-
         if (popupOpen) {
             if (!popup.isVisible()) {
                 textComp.addKeyListener(this);
@@ -228,13 +221,14 @@ public final class CarNoAutoCompleter implements KeyListener {
 
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
+
+                    // Get the location of the text component relative to its parent container
                     if (x == 0) {
                         x = textComp.getWidth();
                         y = textComp.getHeight();
                     }
                     popup.show(textComp, x, y);
                     popupOpen = false;
-
                 } else {
                     popup.setVisible(false);
                     popupOpen = false;
@@ -243,11 +237,12 @@ public final class CarNoAutoCompleter implements KeyListener {
         }
         textComp.requestFocus();
     }
+
     Action showAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CarNoAutoCompleter completer = (CarNoAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            DesignAutoCompleter completer = (DesignAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -264,7 +259,7 @@ public final class CarNoAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CarNoAutoCompleter completer = (CarNoAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            DesignAutoCompleter completer = (DesignAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -276,7 +271,7 @@ public final class CarNoAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CarNoAutoCompleter completer = (CarNoAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            DesignAutoCompleter completer = (DesignAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
                 popupOpen = false;
@@ -354,15 +349,11 @@ public final class CarNoAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                inventoryRepo.getDescription(str, this.tranType).subscribe((t) -> {
-                    if (this.filter) {
-                        t.add(new VDescription("All"));
-                    }
-                    despModel.setListAutoText(t);
-                }, (err) -> {
-                    log.error(err.getMessage());
-                }, () -> {
-                });
+                despModel.clear();
+                inventroyRepo.getDesign(str)
+                        .doOnNext((t) -> {
+                            despModel.addObject(t);
+                        }).subscribe();
             }
 
         }

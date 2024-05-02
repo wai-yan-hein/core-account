@@ -47,5 +47,10 @@ public class ReturnObject {
     private String opDate;
     private String compCode;
     private long timestampUtc;
+    private String relName;
+    private String saleRel;
+    private String inRel;
+    private String outRel;
+    private String purRel;
 
 }

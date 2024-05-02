@@ -221,7 +221,6 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void initPopup() {
         popupmenu = new JPopupMenu("Edit");
-        popupmenu.setFont(Global.textFont);
         JMenuItem newMenu = new JMenuItem("New Menu");
         JMenuItem delete = new JMenuItem("Delete");
         JMenuItem newReport = new JMenuItem("New Report");
@@ -231,6 +230,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         popupmenu.add(newMenu);
         popupmenu.add(newReport);
         popupmenu.add(delete);
+        ComponentUtil.setFont(popupmenu, Global.textFont);
     }
 
     private void newMenu(String type) {

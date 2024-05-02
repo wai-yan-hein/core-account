@@ -650,13 +650,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         }
     }
 
-    public void addTrader(Trader t) {
-        traderAutoCompleter.addTrader(t);
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderAutoCompleter.setTrader(t, row);
-    }
 
     public void historySale() {
         if (sDialog == null) {

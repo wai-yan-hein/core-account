@@ -8,6 +8,7 @@ import com.toedter.calendar.JDateChooser;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JDialog;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ComponentUtil {
+
     public static void setComponentHierarchyEnabled(Component component, boolean enabled) {
         component.setEnabled(enabled);
         if (component instanceof JPanel panel) {
@@ -100,11 +102,21 @@ public class ComponentUtil {
             }
         }
     }
+
     public static void enableFocus(Container container, boolean status) {
         for (Component component : container.getComponents()) {
             component.setFocusable(status);
             if (component instanceof Container c) {
                 enableFocus(c, status);
+            }
+        }
+    }
+
+    public static void setFont(Container container, Font font) {
+        for (Component component : container.getComponents()) {
+            component.setFont(font);
+            if (component instanceof Container c) {
+                setFont(c, font);
             }
         }
     }

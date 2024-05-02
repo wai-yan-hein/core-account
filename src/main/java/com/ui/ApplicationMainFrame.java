@@ -82,7 +82,7 @@ import com.inventory.ui.entry.PurOrderHisEntry;
 import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.ConsignEntry;
-import com.inventory.ui.entry.SaleOrderEntry;
+import com.inventory.ui.entry.LabourOutputEntry;
 import com.inventory.ui.entry.StockPaymentEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightEntry;
@@ -92,7 +92,6 @@ import com.inventory.ui.setup.EmployeeSetup;
 import com.inventory.ui.setup.JobSetup;
 import com.inventory.ui.setup.LanguageSetup;
 import com.inventory.ui.setup.OpeningDynamic;
-import com.inventory.ui.setup.OutputCostSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
 import com.repo.DMSRepo;
@@ -415,26 +414,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
         enableToolBar(true);
         switch (menuName) {
-            case "Order", "Purchase Order" -> {
+            case "Order", "Purchase Order", "Order Design" -> {
                 int type = getOrderType(menuName);
-                OrderDynamic orderDynamic = new OrderDynamic(type);
-                orderDynamic.setName(menuName);
-                orderDynamic.setInventoryRepo(inventoryRepo);
-                orderDynamic.setUserRepo(userRepo);
-                orderDynamic.setObserver(this);
-                orderDynamic.setProgress(progress);
-                orderDynamic.initMain();
-                return orderDynamic;
-            }
-            case "Sale Order" -> {
-                SaleOrderEntry saleOrderEntry = new SaleOrderEntry();
-                saleOrderEntry.setName(menuName);
-                saleOrderEntry.setInventoryRepo(inventoryRepo);
-                saleOrderEntry.setUserRepo(userRepo);
-                saleOrderEntry.setObserver(this);
-                saleOrderEntry.setProgress(progress);
-                saleOrderEntry.initMain();
-                return saleOrderEntry;
+                OrderDynamic o = new OrderDynamic(type);
+                o.setName(menuName);
+                o.setInventoryRepo(inventoryRepo);
+                o.setUserRepo(userRepo);
+                o.setObserver(this);
+                o.setProgress(progress);
+                o.initMain();
+                return o;
             }
             case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch", "POS", "Sale" -> {
                 int type = getSaleType(menuName);
@@ -578,13 +567,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 es.initMain();
                 return es;
             }
-            case "Output Cost" -> {
-                OutputCostSetup op = new OutputCostSetup();
+            case "Labour Output" -> {
+                LabourOutputEntry op = new LabourOutputEntry();
                 op.setName(menuName);
                 op.setObserver(this);
                 op.setProgress(progress);
                 op.setInventoryRepo(inventoryRepo);
-                op.setAccountRepo(accounRepo);
                 op.initMain();
                 return op;
             }
@@ -1159,6 +1147,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 OrderDynamic.ORDER;
             case "Purchase Order" ->
                 OrderDynamic.PUR_ORDER;
+            case "Order Design" ->
+                OrderDynamic.DESIGN;
             default ->
                 0;
         };

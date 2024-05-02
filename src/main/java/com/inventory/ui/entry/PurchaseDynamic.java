@@ -1392,14 +1392,6 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }
     }
 
-    public void addTrader(Trader t) {
-        traderAutoCompleter.addTrader(t);
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderAutoCompleter.setTrader(t, row);
-    }
-
     private void setVoucherDetail(GRN g) {
         clearDetail();
         Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
