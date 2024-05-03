@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Util1;
-import com.inventory.entity.VStockIO;
+import com.inventory.entity.LabourOutput;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -18,20 +18,18 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class StockIOVouSearchTableModel extends AbstractTableModel {
+public class LabourOutputHistoryTableModel extends AbstractTableModel {
 
-    private List<VStockIO> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Description", "Remark", "Voucher Type", "In Qty", "Out Qty"};
+    private List<LabourOutput> listDetail = new ArrayList();
+    private final String[] columnNames = {"Date", "Vou No", "Remark", "Output Qty", "Reject Qty", "Amount"};
     @Getter
     private int size;
     @Getter
-    private double inBag;
+    private double outputQty;
     @Getter
-    private double inQty;
+    private double rejectQty;
     @Getter
-    private double outBag;
-    @Getter
-    private double outQty;
+    private double amount;
 
     @Override
     public String getColumnName(int column) {
@@ -56,7 +54,7 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 5, 6 ->
+            case 3, 4, 5 ->
                 Double.class;
             default ->
                 String.class;
@@ -66,7 +64,7 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            VStockIO his = listDetail.get(row);
+            LabourOutput his = listDetail.get(row);
 
             switch (column) {
                 case 0 -> {
@@ -76,30 +74,26 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
                 case 1 -> {
                     //vou-no
                     String vouNo = his.getVouNo();
-                    if (Util1.getBoolean(his.isDeleted())) {
+                    if (his.isDeleted()) {
                         return Util1.getStar(vouNo);
                     } else {
                         return vouNo;
                     }
                 }
                 case 2 -> {
-                    //customer
-                    return his.getDescription();
+                    //remark
+                    return his.getRemark();
                 }
                 case 3 -> {
                     //user
-                    return his.getRemark();
+                    return his.getOutputQty();
                 }
                 case 4 -> {
-                    return his.getVouTypeName();
+                    return his.getRejectQty();
                 }
                 case 5 -> {
                     //v-total
-                    return his.getInQty();
-                }
-                case 6 -> {
-                    //v-total
-                    return his.getOutQty();
+                    return his.getAmount();
                 }
             }
         } catch (Exception ex) {
@@ -108,26 +102,25 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VStockIO> getListDetail() {
+    public List<LabourOutput> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<VStockIO> listDetail) {
+    public void setListDetail(List<LabourOutput> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public VStockIO getSelectVou(int row) {
+    public LabourOutput getSelectVou(int row) {
         return listDetail.get(row);
     }
 
-    public void addObject(VStockIO t) {
+    public void addObject(LabourOutput t) {
         listDetail.add(t);
         size += 1;
-        inBag += t.getInBag();
-        inQty += t.getInQty();
-        outBag += t.getOutBag();
-        outQty += t.getOutQty();
+        outputQty += t.getOutputQty();
+        rejectQty += t.getRejectQty();
+        amount += t.getAmount();
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
             fireTableRowsInserted(lastIndex, lastIndex);
@@ -139,10 +132,9 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     public void clear() {
         listDetail.clear();
         size = 0;
-        inBag = 0;
-        inQty = 0;
-        outBag = 0;
-        outQty = 0;
+        outputQty = 0;
+        rejectQty = 0;
+        amount = 0;
         fireTableDataChanged();
     }
 }

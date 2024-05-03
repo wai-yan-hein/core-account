@@ -93,6 +93,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private String stDueDate;
     private String enDueDate;
     private TraderAutoCompleter traderAutoCompleter;
+    private TraderAutoCompleter empAutoCompleter;
     private SaleManAutoCompleter saleManAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private StockTypeAutoCompleter stockTypeAutoCompleter;
@@ -263,6 +264,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
         locationAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
+        empAutoCompleter = new TraderAutoCompleter(txtEmployee, inventoryRepo, null, true, "EMP");
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
         categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, null, true);
@@ -306,6 +308,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setToDueDate(enDueDate);
                     filter.setCurCode(getCurCode());
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+                    filter.setLabourCode(empAutoCompleter.getTrader().getKey().getCode());
                     filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
                     filter.setListLocation(locationAutoCompleter.getListOption());
                     filter.setStockTypeCode(stockTypeAutoCompleter.getStockType().getKey().getStockTypeCode());
@@ -610,6 +613,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtWH = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        jLabel22 = new javax.swing.JLabel();
+        txtEmployee = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
         txtDate = new javax.swing.JTextField();
@@ -855,6 +860,20 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             }
         });
 
+        jLabel22.setFont(Global.lableFont);
+        jLabel22.setText("Employee");
+
+        txtEmployee.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtEmployeeFocusGained(evt);
+            }
+        });
+        txtEmployee.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtEmployeeKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -877,7 +896,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtBatchNo, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtRegion, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtVouType, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtLG, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -900,11 +918,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                                     .addComponent(txtToDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(txtProjectNo)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(txtWH)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtVouType, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtWH))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtLocation))))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtLocation))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtEmployee))))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -976,9 +1002,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         .addComponent(txtWH)
                         .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtVouType)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtVouType)
+                        .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtEmployee, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtRegion)
@@ -1289,6 +1319,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepKeyReleased
 
+    private void txtEmployeeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtEmployeeFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEmployeeFocusGained
+
+    private void txtEmployeeKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtEmployeeKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEmployeeKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExcel;
@@ -1307,6 +1345,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1327,6 +1366,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtEmployee;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private com.toedter.calendar.JDateChooser txtFromDueDate;
     private javax.swing.JTextField txtLG;

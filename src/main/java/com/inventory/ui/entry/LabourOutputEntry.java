@@ -19,7 +19,9 @@ import com.inventory.editor.VouStatusEditor;
 import com.inventory.entity.LabourOutput;
 import com.inventory.entity.LabourOutputDetail;
 import com.inventory.ui.common.LabourOutputTableModel;
+import com.inventory.ui.entry.dialog.LabourOutputHistory;
 import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import com.user.editor.AutoClearEditor;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -42,9 +44,12 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
     @Setter
     private InventoryRepo inventoryRepo;
     @Setter
+    private UserRepo userRepo;
+    @Setter
     private SelectionObserver observer;
     @Setter
     private JProgressBar progress;
+    private LabourOutputHistory dialog;
     private final LabourOutputTableModel tableModel = new LabourOutputTableModel();
     private LabourOutput dto = LabourOutput.builder().build();
 
@@ -82,11 +87,14 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
         tblOutput.getColumnModel().getColumn(1).setPreferredWidth(50);//Order No
         tblOutput.getColumnModel().getColumn(2).setPreferredWidth(200);//Name
         tblOutput.getColumnModel().getColumn(3).setPreferredWidth(200);//Desp
-        tblOutput.getColumnModel().getColumn(4).setPreferredWidth(100);//Job
-        tblOutput.getColumnModel().getColumn(5).setPreferredWidth(50);//status
-        tblOutput.getColumnModel().getColumn(6).setPreferredWidth(30);//out-qty
-        tblOutput.getColumnModel().getColumn(7).setPreferredWidth(30);//reject-qty
-        tblOutput.getColumnModel().getColumn(8).setPreferredWidth(100);//remark
+        tblOutput.getColumnModel().getColumn(4).setPreferredWidth(100);//remark
+        tblOutput.getColumnModel().getColumn(5).setPreferredWidth(80);//Job
+        tblOutput.getColumnModel().getColumn(6).setPreferredWidth(80);//status
+        tblOutput.getColumnModel().getColumn(7).setPreferredWidth(50);//reject-qty
+        tblOutput.getColumnModel().getColumn(8).setPreferredWidth(50);//output-qty
+        tblOutput.getColumnModel().getColumn(9).setPreferredWidth(30);//print-qty
+        tblOutput.getColumnModel().getColumn(10).setPreferredWidth(80);//price
+        tblOutput.getColumnModel().getColumn(11).setPreferredWidth(100);//amout
         tblOutput.getTableHeader().setFont(Global.tblHeaderFont);
         tblOutput.setCellSelectionEnabled(true);
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -105,6 +113,7 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
         tblOutput.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblOutput.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblOutput.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
+        tblOutput.getColumnModel().getColumn(11).setCellEditor(new AutoClearEditor());
         inventoryRepo.getActiveJob().doOnSuccess((t) -> {
             tblOutput.getColumnModel().getColumn(5).setCellEditor(new JobEditor(t));
         }).subscribe();
@@ -160,6 +169,9 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
         } else {
             dto.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             dto.setRemark(txtRemark.getText());
+            dto.setOutputQty(Util1.getDouble(txtOutput.getValue()));
+            dto.setRejectQty(Util1.getDouble(txtReject.getValue()));
+            dto.setAmount(Util1.getDouble(txtTotal.getValue()));
             if (lblStatus.getText().equals("NEW")) {
                 dto.setCompCode(Global.compCode);
                 dto.setDeptId(Global.deptId);
@@ -213,8 +225,85 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
         txtReject.setValue(0);
         txtTotal.setValue(0);
         tableModel.clear();
+        tableModel.addNewRow();
         lblStatus.setText("NEW");
+        progress.setIndeterminate(false);
         disableForm(true);
+    }
+
+    private void historyDialog() {
+        if (dialog == null) {
+            dialog = new LabourOutputHistory(Global.parentForm);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 20, Global.height - 20);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+    }
+
+    private void setVoucher(LabourOutput dto) {
+        txtOutput.setValue(0);
+        txtReject.setValue(0);
+        txtTotal.setValue(0);
+        if (dto != null) {
+            this.dto = dto;
+            progress.setIndeterminate(true);
+            setHeader(dto);
+            setDetail(dto.getVouNo());
+        }
+    }
+
+    private void setDetail(String vouNo) {
+        inventoryRepo.getLabourOutputDetail(vouNo).doOnSuccess((t) -> {
+            tableModel.setListDetail(t);
+            tableModel.addNewRow();
+        }).doOnTerminate(() -> {
+            focusOnTable();
+            progress.setIndeterminate(false);
+        }).subscribe();
+    }
+
+    private void setHeader(LabourOutput dto) {
+        dto.setVouLock(!Global.deptId.equals(dto.getDeptId()));
+        String vouNo = dto.getVouNo();
+        txtVouNo.setText(vouNo);
+        txtVouDate.setDate(Util1.convertToDate(dto.getVouDate()));
+        txtRemark.setText(dto.getRemark());
+        txtReject.setValue(dto.getRejectQty());
+        txtOutput.setValue(dto.getOutputQty());
+        txtTotal.setValue(dto.getAmount());
+        if (Util1.getBoolean(dto.isVouLock())) {
+            lblStatus.setText("Voucher Locked.");
+            lblStatus.setForeground(Color.red);
+            disableForm(false);
+        } else if (dto.isDeleted()) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.red);
+            disableForm(false);
+            observer.selected("delete", true);
+        } else if (DateLockUtil.isLockDate(dto.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else {
+            lblStatus.setText("EDIT");
+            lblStatus.setForeground(Color.blue);
+            disableForm(true);
+        }
+    }
+
+    private void focusOnTable() {
+        int rc = tblOutput.getRowCount();
+        if (rc > 1) {
+            tblOutput.setRowSelectionInterval(rc - 1, rc - 1);
+            tblOutput.setColumnSelectionInterval(0, 0);
+            tblOutput.requestFocus();
+        } else {
+            txtVouDate.requestFocusInWindow();
+        }
     }
 
     private void disableForm(boolean status) {
@@ -469,6 +558,7 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
 
     @Override
     public void history() {
+        historyDialog();
     }
 
     @Override
@@ -493,7 +583,11 @@ public class LabourOutputEntry extends javax.swing.JPanel implements PanelContro
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.equals("LABOUR_TOTAL")) {
+        if (source.equals("LO-HISTORY")) {
+            if (selectObj instanceof LabourOutput l) {
+                setVoucher(l);
+            }
+        } else if (source.equals("LABOUR_TOTAL")) {
             calToal();
         }
     }

@@ -101,6 +101,7 @@ import com.inventory.entity.ConsignHisDetail;
 import com.inventory.entity.ConsignHis;
 import com.inventory.entity.ConsignHisKey;
 import com.inventory.entity.LabourOutput;
+import com.inventory.entity.LabourOutputDetail;
 import com.inventory.entity.OrderFileJoin;
 import com.inventory.entity.OrderNote;
 import com.inventory.entity.StockKey;
@@ -4204,6 +4205,26 @@ public class InventoryRepo {
                     log.error("error: " + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Flux<LabourOutput> getLabourOutputHistory(ReportFilter filter) {
+        return inventoryApi
+                .post()
+                .uri("/labourOutput/getHistory")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(LabourOutput.class)
+                .onErrorResume((t) -> Flux.empty());
+    }
+    public Mono<List<LabourOutputDetail>> getLabourOutputDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/labourOutput/getLabourOutputDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(LabourOutputDetail.class)
+                .collectList();
     }
 
     public Flux<VConsign> getStockIssRecHistory(ReportFilter filter) {

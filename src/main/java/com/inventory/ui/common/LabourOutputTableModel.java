@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LabourOutputTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Labour Name", "Order No", "Customer Name", "Description", "Remark",
-        "Job", "Status", "Output Qty", "Reject Qty", "Price", "Amount"};
+        "Job", "Status", "Reject Qty", "Output Qty", "Print Qty", "Price", "Amount"};
     @Setter
     private JTable parent;
     private List<LabourOutputDetail> listDetail = new ArrayList();
@@ -65,7 +65,7 @@ public class LabourOutputTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 7, 8, 9, 10 ->
+            case 7, 8, 9, 10, 11 ->
                 Double.class;
             default ->
                 String.class;
@@ -105,13 +105,16 @@ public class LabourOutputTableModel extends AbstractTableModel {
                     return sd.getVouStatusName();
                 }
                 case 7 -> {
-                    return Util1.toNull(sd.getOutputQty());
-                }
-                case 8 -> {
                     //qty
                     return Util1.toNull(sd.getRejectQty());
                 }
+                case 8 -> {
+                    return Util1.toNull(sd.getOutputQty());
+                }
                 case 9 -> {
+                    return Util1.toNull(sd.getPrintQty());
+                }
+                case 10 -> {
                     return Util1.toNull(sd.getPrice());
                 }
                 default -> {
@@ -141,7 +144,9 @@ public class LabourOutputTableModel extends AbstractTableModel {
                         if (value instanceof OrderHis oh) {
                             sd.setRefNo(oh.getRefNo());
                             sd.setOrderVouNo(oh.getKey().getVouNo());
+                            sd.setTraderCode(oh.getTraderCode());
                             sd.setTraderName(oh.getTraderName());
+                            sd.setPrintQty(1);
                             setSelection(row, column + 2);
                             addNewRow();
                         }
@@ -176,18 +181,26 @@ public class LabourOutputTableModel extends AbstractTableModel {
                     case 7 -> {
                         double qty = Util1.getDouble(value);
                         if (qty > 0) {
-                            sd.setOutputQty(qty);
+                            sd.setRejectQty(qty);
                             setSelection(row, column + 1);
                         }
                     }
                     case 8 -> {
                         double qty = Util1.getDouble(value);
                         if (qty > 0) {
-                            sd.setRejectQty(qty);
+                            sd.setOutputQty(qty);
                             setSelection(row, column + 1);
                         }
                     }
                     case 9 -> {
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setPrintQty(qty);
+                            setSelection(row, column + 1);
+                        }
+                    }
+
+                    case 10 -> {
                         double price = Util1.getDouble(value);
                         if (price > 0) {
                             sd.setPrice(price);
@@ -207,7 +220,7 @@ public class LabourOutputTableModel extends AbstractTableModel {
     }
 
     private void calAmount(LabourOutputDetail d) {
-        double amount = d.getOutputQty() * d.getPrice();
+        double amount = d.getOutputQty() * d.getPrice() * d.getPrintQty();
         d.setAmount(amount);
         observer.selected("LABOUR_TOTAL", "LABOUR_TOTAL");
     }
