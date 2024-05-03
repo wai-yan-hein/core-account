@@ -249,7 +249,7 @@ public class SaleDesginTableModel extends AbstractTableModel {
         if (oh.getStockCode() != null) {
             double amount = Util1.getDouble(oh.getQty()) * Util1.getDouble(oh.getPrice());
             oh.setAmount(Util1.getDouble(Math.round(amount)));
-            observer.selected("ORDER-TOTAL", "ORDER-TOTAL");
+            observer.selected("SALE-TOTAL", "SALE-TOTAL");
         }
     }
 
@@ -288,7 +288,7 @@ public class SaleDesginTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addOrder(SaleHisDetail sd) {
+    public void addSale(SaleHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
