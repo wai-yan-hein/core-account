@@ -53,6 +53,7 @@ import com.inventory.entity.GRN;
 import com.inventory.entity.OrderHis;
 import com.inventory.entity.WeightHis;
 import com.inventory.ui.common.SaleByBatchTableModel;
+import com.inventory.ui.common.SaleDesginTableModel;
 import com.inventory.ui.common.SalePaddyTableModel;
 import com.inventory.ui.common.SaleQtyTableModel;
 import com.inventory.ui.common.SaleRiceTableModel;
@@ -123,6 +124,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     public static final int PADDY = 4;
     public static final int BATCH = 5;
     public static final int QTY = 6;
+    public static final int DESIGN = 7;
     private final SaleByWeightTableModel saleWeightTableModel = new SaleByWeightTableModel();
     private final SaleExportTableModel saleExportTableModel = new SaleExportTableModel();
     private final SaleRiceTableModel saleRiceTableModel = new SaleRiceTableModel();
@@ -130,6 +132,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
     private final SaleByBatchTableModel saleByBatchTableModel = new SaleByBatchTableModel();
     private final SaleQtyTableModel saleQtyTableModel = new SaleQtyTableModel();
     private final SaleTableModel saleTableModel = new SaleTableModel();
+    private final SaleDesginTableModel saleDesginTableModel = new SaleDesginTableModel();
 
     private SaleHistoryDialog dialog;
     @Setter
@@ -321,6 +324,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case QTY -> {
                 return saleQtyTableModel.getObject(row);
             }
+            case DESIGN -> {
+                return saleDesginTableModel.getObject(row);
+            }
         }
         return null;
     }
@@ -347,6 +353,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case QTY -> {
                 initQtyTable();
+            }
+            case DESIGN -> {
+                initSaleDesignTable();
             }
         }
     }
@@ -556,6 +565,35 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//
     }
 
+    private void initSaleDesignTable() {
+        tblSale.setModel(saleDesginTableModel);
+        saleDesginTableModel.setLblRecord(lblRec);
+        saleDesginTableModel.setSale(this);
+        saleDesginTableModel.setParent(tblSale);
+        saleDesginTableModel.addNewRow();
+        saleDesginTableModel.setObserver(this);
+        saleDesginTableModel.setVouDate(txtSaleDate);
+        saleDesginTableModel.setInventoryRepo(inventoryRepo);
+        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//qty
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(1);//price
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(40);//amt
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//qty
+        if (ProUtil.isSalePriceChange()) {
+            if (ProUtil.isPriceOption()) {
+                tblSale.getColumnModel().getColumn(3).setCellEditor(new SalePriceCellEditor(inventoryRepo));//price
+            } else {
+                tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//price
+            }
+
+        } else {
+            tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//price
+        }
+    }
+
     private void initTable() {
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
@@ -679,6 +717,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             case QTY -> {
                 saleQtyTableModel.clear();
             }
+            case DESIGN -> {
+                saleDesginTableModel.clear();
+            }
         }
     }
 
@@ -704,6 +745,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case QTY -> {
                 saleQtyTableModel.addNewRow();
+            }
+            case DESIGN -> {
+                saleDesginTableModel.addNewRow();
             }
         }
     }
@@ -764,6 +808,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case QTY -> {
                 return saleQtyTableModel.isValidEntry();
+            }
+            case DESIGN -> {
+                return saleDesginTableModel.isValidEntry();
             }
         }
         return false;
@@ -1030,6 +1077,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleByBatchTableModel.delete(row);
             case QTY ->
                 saleQtyTableModel.delete(row);
+            case DESIGN ->
+                saleDesginTableModel.delete(row);
         }
     }
 
@@ -1049,6 +1098,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleByBatchTableModel.addSale(sd);
             case QTY ->
                 saleQtyTableModel.addSale(sd);
+            case DESIGN ->
+                saleDesginTableModel.addSale(sd);
         }
     }
 
@@ -1074,6 +1125,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             }
             case QTY -> {
                 return saleQtyTableModel.getListDetail();
+            }
+            case DESIGN -> {
+                return saleDesginTableModel.getListDetail();
             }
             default ->
                 throw new AssertionError();
@@ -1260,6 +1314,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 saleQtyTableModel.setListDetail(list);
                 saleQtyTableModel.addNewRow();
             }
+            case DESIGN -> {
+                saleDesginTableModel.setListDetail(list);
+                saleDesginTableModel.addNewRow();
+            }
         }
     }
 
@@ -1354,7 +1412,6 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             txtCus.requestFocus();
         }
     }
-
 
     private void observeMain() {
         observer.selected("control", this);
