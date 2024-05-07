@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Data;
@@ -109,10 +110,14 @@ public class Stock {
     private Double saleAmt;
     @Column(name = "sale_qty")
     private Double saleQty;
-    private transient String relName;
-    private transient String groupName;
-    private transient String brandName;
-    private transient String catName;
+    @Transient
+    private String relName;
+    @Transient
+    private String groupName;
+    @Transient
+    private String brandName;
+    @Transient
+    private String catName;
 
     public Stock() {
     }

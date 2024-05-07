@@ -739,14 +739,7 @@ public class EmployeeSetup extends javax.swing.JPanel implements KeyListener, Pa
     }//GEN-LAST:event_tblCustomerKeyReleased
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        CustomerImportDialog dialog = new CustomerImportDialog(Global.parentForm);
-        dialog.setAccountRepo(accountRepo);
-        dialog.setTaskExecutor(taskExecutor);
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.setUserRepo(userRepo);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        // TODO add your handling code here
 
     }//GEN-LAST:event_jButton1ActionPerformed
 

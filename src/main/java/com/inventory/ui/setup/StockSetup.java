@@ -524,11 +524,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             relationSetupDialog = new RelationSetupDialog(Global.parentForm);
             relationSetupDialog.setInventoryRepo(inventoryRepo);
             relationSetupDialog.initMain();
-            relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
+            relationSetupDialog.setSize(Global.width - 200, Global.height - 200);
             relationSetupDialog.setLocationRelativeTo(null);
         }
-        relationSetupDialog.setListUnitRelation(relationAutoCompleter.getListRelation());
-        relationSetupDialog.setVisible(true);
+        relationSetupDialog.search();
+        relationAutoCompleter.setListRelation(relationAutoCompleter.getListRelation());
     }
 
     private void printFile() {

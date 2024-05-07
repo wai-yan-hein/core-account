@@ -22,6 +22,7 @@ import com.inventory.ui.entry.SaleDynamic;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -53,6 +54,7 @@ public class SaleTableModel extends AbstractTableModel {
     private JLabel lblRecord;
     @Setter
     private StockBalanceFrame dialog;
+    private HashMap<String, Integer> hmStock = new HashMap<>();
 
     @Override
     public String getColumnName(int column) {
@@ -175,8 +177,12 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setWeight(Util1.getDouble(s.getWeight()));
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setOrgPrice(sd.getPrice());
-                            parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
+                            if (!Util1.isNullOrEmpty(s.getBarcode())) {
+                                mergeStock(sd, row);
+                            } else {
+                                setSelection(row, 4);
+                            }
                         }
                     }
                     case 3 -> {
@@ -262,6 +268,27 @@ public class SaleTableModel extends AbstractTableModel {
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setColumnSelectionInterval(column, column);
+        parent.setRowSelectionInterval(row, row);
+    }
+
+    private void mergeStock(SaleHisDetail sh, int row) {
+        String stockCode = sh.getStockCode();
+        if (hmStock.containsKey(stockCode)) {
+            Integer existRow = hmStock.get(stockCode);
+            SaleHisDetail obj = listDetail.get(existRow);
+            double qty = obj.getQty() + sh.getQty();
+            obj.setQty(qty);
+            delete(row);
+            fireTableRowsUpdated(existRow, existRow);
+            setSelection(row, 1);
+        } else {
+            hmStock.put(stockCode, row);
+            setSelection(row + 1, 0);
         }
     }
 
@@ -426,6 +453,7 @@ public class SaleTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            hmStock.clear();
             fireTableDataChanged();
         }
     }

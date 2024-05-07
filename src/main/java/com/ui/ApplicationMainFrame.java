@@ -1226,6 +1226,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 CompanyOptionDialog d = new CompanyOptionDialog(Global.parentForm);
                 d.setListCompany(t);
                 d.initMain();
+                d.setSize(800, 600);
                 d.setLocationRelativeTo(null);
                 d.setVisible(true);
                 if (d.getCompanyInfo() == null) {

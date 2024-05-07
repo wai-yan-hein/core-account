@@ -17,6 +17,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,22 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RoleCompany extends javax.swing.JPanel {
 
+    @Setter
     private UserRepo userRepo;
     private final RoleCompanyTableModel tableModel = new RoleCompanyTableModel();
+    @Setter
     private JProgressBar progress;
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
 
     /**
      * Creates new form SystemProperty
@@ -69,16 +59,16 @@ public class RoleCompany extends javax.swing.JPanel {
     };
 
     public void searchCompany(String roleCode) {
+        progress.setIndeterminate(true);
         tableModel.clear();
         userRepo.getPrivilegeCompany(roleCode)
-                .subscribe((t) -> {
-                    tableModel.setRoleCode(roleCode);
+                .doOnSuccess((t) -> {
                     tableModel.setListProperty(t);
                     tableModel.addNewRow();
                     tblSystem.requestFocus();
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                }).doOnTerminate(() -> {
+            progress.setIndeterminate(false);
+        }).subscribe();
     }
 
     /**

@@ -52,6 +52,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -62,39 +63,31 @@ import org.springframework.core.task.TaskExecutor;
  * @author Lenovo
  */
 @Slf4j
-public class CustomerSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
+public class CustomerSetup extends javax.swing.JPanel implements KeyListener, PanelControl, SelectionObserver {
 
     private int row = 0;
     private Trader customer = new Trader();
     private final CustomerTabelModel customerTabelModel = new CustomerTabelModel();
+    @Setter
     private TaskExecutor taskExecutor;
     private TraderGroupAutoCompleter traderGroupAutoCompleter;
     private COAAutoCompleter cOAAutoCompleter;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private AccountRepo accountRepo;
+    @Setter
     private UserRepo userRepo;
     private RegionAutoCompleter regionAutoCompleter;
     private CountryAutoCompleter countryAutoCompleter;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
     private RegionSetup regionSetup;
+    @Setter
     private FindDialog findDialog;
-
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    private CustomerImportDialog customerImportDialog;
 
     enum Header {
         UserCode,
@@ -108,22 +101,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         Nrc,
         Group,
         Department
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
     }
 
     /**
@@ -406,6 +383,16 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
         regionSetup.search();
         regionAutoCompleter.setListRegion(regionSetup.getListRegion());
+    }
+
+    private void customerImportDialog() {
+        customerImportDialog = new CustomerImportDialog(Global.parentForm);
+        customerImportDialog.setTaskExecutor(taskExecutor);
+        customerImportDialog.setInventoryRepo(inventoryRepo);
+        customerImportDialog.setUserRepo(userRepo);
+        customerImportDialog.setObserver(this);
+        customerImportDialog.setLocationRelativeTo(null);
+        customerImportDialog.setVisible(true);
     }
 
     /**
@@ -931,13 +918,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        CustomerImportDialog dialog = new CustomerImportDialog(Global.parentForm);
-        dialog.setAccountRepo(accountRepo);
-        dialog.setTaskExecutor(taskExecutor);
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.setUserRepo(userRepo);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        customerImportDialog();
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -1066,8 +1047,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     @Override
     public void keyPressed(KeyEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
     }
 
     @Override
@@ -1334,6 +1313,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     @Override
     public String panelName() {
         return this.getName();
+    }
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        if (source.equals("Trader")) {
+            if (selectObj instanceof Trader t) {
+                customerTabelModel.addCustomer(t);
+            }
+        }
     }
 
     private void printFile() {

@@ -20,7 +20,7 @@ public class MyTreeTable extends JTable {
 
     public MyTreeTable(MyAbstractTreeTableModel treeTableModel) {
         super();
-
+        getTableHeader().setFont(Global.tblHeaderFont);
         // JTree erstellen.
         tree = new MyTreeTableCellRenderer(this, treeTableModel);
         tree.setFont(Global.textFont);

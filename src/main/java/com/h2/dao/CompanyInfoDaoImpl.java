@@ -32,7 +32,7 @@ public class CompanyInfoDaoImpl extends AbstractDao<String, CompanyInfo> impleme
 
     @Override
     public List<CompanyInfo> findAll(boolean active) {
-        String sql = "select o from CompanyInfo o";
+        String sql = "select o from CompanyInfo o order by o.orderId";
         return findHSQL(sql);
     }
 

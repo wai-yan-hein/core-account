@@ -82,4 +82,19 @@ public class TraderImportTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public void addObject(Trader t) {
+        listTrader.add(t);
+        int lastIndex = listTrader.size() - 1;
+        if (lastIndex >= 0) {
+            fireTableRowsInserted(lastIndex, lastIndex);
+        } else {
+            fireTableRowsInserted(0, 0);
+        }
+    }
+
+    public void delete(int row) {
+        listTrader.remove(row);
+        fireTableRowsDeleted(row, row);
+    }
+
 }

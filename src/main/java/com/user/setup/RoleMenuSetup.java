@@ -14,8 +14,8 @@ import com.repo.UserRepo;
 import com.user.model.Menu;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,22 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, SelectionObserver {
 
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
+    @Setter
     private UserRepo userRepo;
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     /**
      * Creates new form RoleSetup
@@ -52,16 +42,13 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     public void createMenuTree(String roleCode) {
         progress.setIndeterminate(true);
         userRepo.getRoleMenuTree(roleCode)
-                .subscribe((t) -> {
-                    Menu vRoleMenu = new Menu("Best-System", "System", true, t);
-                    MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userRepo, this);
+                .doOnSuccess((t) -> {
+                    Menu m = new Menu("Best-System", "System", true, t);
+                    MyAbstractTreeTableModel treeTableModel = new MyDataModel(m, userRepo, this);
                     MyTreeTable treeTable = new MyTreeTable(treeTableModel);
                     scrollPane.getViewport().add(treeTable);
                     progress.setIndeterminate(false);
-                }, (e) -> {
-                    progress.setIndeterminate(false);
-                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                });
+                }).subscribe();
     }
 
     @SuppressWarnings("unchecked")
@@ -136,8 +123,9 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
 
     private void btnApplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnApplyActionPerformed
         // TODO add your handling code here:
-        if (observer != null)
+        if (observer != null) {
             observer.selected("menu", "menu");
+        }
     }//GEN-LAST:event_btnApplyActionPerformed
 
 

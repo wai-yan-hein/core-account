@@ -977,6 +977,24 @@ public class Util1 {
         return str;
     }
 
+
+    public static String convertToTitleCase(String name) {
+        if (Util1.isNullOrEmpty(name)) {
+            return null;
+        }
+        StringBuilder result = new StringBuilder();
+        String[] words = name.trim().split("\\s+");
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase())
+                        .append(" ");
+            }
+        }
+
+        return result.toString().trim();
+    }
+
     public static void writeJsonFile(Object data, String exportPath) {
         try (Writer writer = new FileWriter(exportPath, StandardCharsets.UTF_8)) {
             gson.toJson(data, writer);

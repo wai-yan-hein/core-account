@@ -111,6 +111,7 @@ public class UserRepo {
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/getAppUser")
+                .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(AppUser.class)
                 .collectList();

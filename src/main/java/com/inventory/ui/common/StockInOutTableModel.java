@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,58 +36,21 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Stock Code", "Stock Name", "Location",
         "In-Qty", "In-Unit", "Out-Qty", "Out-Unit", "Cost Price", "Amount"};
+    @Setter
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
     private List<StockInOutKey> deleteList = new ArrayList();
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private JDateChooser vouDate;
+    @Setter
     private JLabel lblRec;
-    private boolean negative = false;
+    @Setter
+    private boolean negative;
 
-    public boolean isNegative() {
-        return negative;
-    }
-
-    public void setNegative(boolean negative) {
-        this.negative = negative;
-    }
-
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public int getRowCount() {
@@ -117,7 +81,7 @@ public class StockInOutTableModel extends AbstractTableModel {
             StockInOutDetail io = listStock.get(row);
             switch (column) {
                 case 0 -> {
-                    return io.getUserCode() == null ? io.getStockCode() : io.getUserCode();
+                    return io.getUserCode();
                 }
                 case 1 -> {
                     String stockName = null;
@@ -135,23 +99,23 @@ public class StockInOutTableModel extends AbstractTableModel {
                     return io.getLocName();
                 }
                 case 3 -> {
-                    return Util1.getDouble(io.getInQty()) == 0 ? null : Util1.getDouble(io.getInQty());
+                    return Util1.toNull(io.getInQty());
                 }
                 case 4 -> {
                     return io.getInUnitCode();
                 }
                 case 5 -> {
-                    return Util1.getDouble(io.getOutQty()) == 0 ? null : Util1.getDouble(io.getOutQty());
+                    return Util1.toNull(io.getOutQty());
                 }
                 case 6 -> {
                     return io.getOutUnitCode();
                 }
                 case 7 -> {
-                    return Util1.getDouble(io.getCostPrice()) == 0 ? null : Util1.getDouble(io.getCostPrice());
+                    return Util1.toNull(io.getCostPrice());
                 }
                 case 8 -> {
                     double amt = Util1.getDouble(io.getCostPrice()) * (Util1.getDouble(io.getInQty()) + Util1.getDouble(io.getOutQty()));
-                    return amt == 0 ? null : amt;
+                    return Util1.toNull(amt);
                 }
 
             }
@@ -193,13 +157,14 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setOutUnitCode(s.getPurUnitCode());
                             assignDefaultLocation(io, row);
                             genPattern(s, io, row);
+                            setSelection(row, 2);
                         }
                     }
                     case 2 -> {
                         if (value instanceof Location l) {
                             io.setLocCode(l.getKey().getLocCode());
                             io.setLocName(l.getLocName());
-                            setSelection(row, 5);
+                            setSelection(row, column + 1);
                         }
                     }
                     case 3 -> {
@@ -209,10 +174,9 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setOutUnitCode(null);
                             if (io.getInUnitCode() != null) {
                                 addNewRow();
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                                parent.setColumnSelectionInterval(0, 0);
+                                setSelection(row + 1, 0);
                             } else {
-                                parent.setColumnSelectionInterval(4, 4);
+                                setSelection(row, column + 1);
                             }
                         }
 
@@ -223,8 +187,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setInUnitCode(unit.getKey().getUnitCode());
                             io.setOutUnitCode(null);
                             addNewRow();
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                            parent.setColumnSelectionInterval(0, 0);
+                            setSelection(row + 1, 0);
                         }
                     }
                     case 5 -> {
@@ -234,10 +197,9 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setInUnitCode(null);
                             if (io.getOutUnitCode() != null) {
                                 addNewRow();
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                                parent.setColumnSelectionInterval(0, 0);
+                                setSelection(row + 1, 0);
                             } else {
-                                parent.setColumnSelectionInterval(6, 6);
+                                setSelection(row, column + 1);
                             }
                         }
                     }
@@ -246,13 +208,13 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setOutUnitCode(unit.getKey().getUnitCode());
                             io.setInUnitCode(null);
                             addNewRow();
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                            parent.setColumnSelectionInterval(0, 0);
+                            setSelection(row, column + 1);
                         }
                     }
                     case 7 -> {
                         if (Util1.isNumber(value)) {
                             io.setCostPrice(Util1.getDouble(value));
+                            setSelection(row, column + 1);
                         }
                     }
                 }
@@ -265,7 +227,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                             String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
                             String vouDateStr = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
                             inventoryRepo.getPrice(stockCode, vouDateStr, unit).doOnSuccess((t) -> {
-                                io.setCostPrice(t.getAmount());
+                                io.setCostPrice(t == null ? 0 : t.getAmount());
                                 fireTableRowsUpdated(row, row);
                             }).subscribe();
                         }

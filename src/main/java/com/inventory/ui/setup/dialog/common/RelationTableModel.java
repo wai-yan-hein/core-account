@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RelationTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Sys Code", "Relation Name"};
+    private final String[] columnNames = {"Code", "Relation Name"};
     private List<UnitRelation> listRelation = new ArrayList<>();
 
     @Override
@@ -61,7 +61,7 @@ public class RelationTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        return false;
     }
 
     public List<UnitRelation> getListRelation() {

@@ -164,6 +164,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
     public Stock getStock() {
         return stock;
     }
+    
 
     public void setStock(Stock stock) {
         this.stock = stock;

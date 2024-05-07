@@ -8,6 +8,8 @@ package com.inventory.editor;
 import com.common.Global;
 import com.inventory.entity.Stock;
 import com.repo.InventoryRepo;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -17,34 +19,43 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class StockCellEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
     private StockAutoCompleter1 completer;
     private InventoryRepo inventoryRepo;
+    private boolean barcode;
+    private JTextField jtf;
 
     public StockCellEditor(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
+    public StockCellEditor(InventoryRepo inventoryRepo, boolean barcode) {
+        this.inventoryRepo = inventoryRepo;
+        this.barcode = barcode;
+    }
+
     public StockCellEditor() {
+
     }
 
     @Override
     public java.awt.Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int rowIndex, int vColIndex) {
-        JTextField jtf = new JTextField();
+        jtf = new JTextField();
         jtf.setFont(Global.textFont);
         KeyListener keyListener = new KeyListener() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {
                 int keyCode = keyEvent.getKeyCode();
-
                 if ((keyEvent.isControlDown() && (keyCode == KeyEvent.VK_DELETE))
                         || (keyEvent.isShiftDown() && (keyCode == KeyEvent.VK_DELETE))
                         || (keyCode == KeyEvent.VK_F5)
@@ -58,10 +69,12 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
 
             @Override
             public void keyReleased(KeyEvent keyEvent) {
+
             }
 
             @Override
             public void keyTyped(KeyEvent keyEvent) {
+                String barCode = jtf.getText();
             }
         };
 
@@ -71,22 +84,23 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             jtf.selectAll();
         }
+        if (barcode) {
+            return component;
+        }
         completer = new StockAutoCompleter1(jtf, inventoryRepo, this, false);
         return component;
     }
 
     @Override
     public Object getCellEditorValue() {
-        Object obj;
-        Stock stock = completer.getStock();
-
-        if (stock != null) {
-            obj = stock;
-        } else {
-            obj = ((JTextField) component).getText();
+        if (barcode) {
+            String barCode = jtf.getText();
+            log.info("find Barcode : " + barCode);
+            Stock s = inventoryRepo.findStockByBarcode(barCode).block();
+            s.setBarcode(barCode);
+            return s;
         }
-
-        return obj;
+        return completer.getStock();
 
     }
 
