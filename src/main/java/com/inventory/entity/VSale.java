@@ -98,5 +98,6 @@ public class VSale {
     private ZonedDateTime vouDateTime;
     private List<VouDiscount> listDiscount;
     private boolean sPay;
-
+    private String design;
+    private String size;
 }

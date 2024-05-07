@@ -425,7 +425,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 o.initMain();
                 return o;
             }
-            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch", "POS", "Sale" -> {
+            case "Sale By Weight", "Sale Export", "Sale Rice", "Sale Paddy", "Sale By Batch", "POS", "Sale", "Sale Design" -> {
                 int type = getSaleType(menuName);
                 SaleDynamic s = new SaleDynamic(type);
                 s.setUserRepo(userRepo);
@@ -1128,6 +1128,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SaleDynamic.BATCH;
             case "POS" ->
                 SaleDynamic.QTY;
+            case "Sale Design" ->
+                SaleDynamic.DESIGN;
             default ->
                 0;
         };
