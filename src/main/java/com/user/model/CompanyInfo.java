@@ -69,6 +69,8 @@ public class CompanyInfo {
     private String reportCompany;
     @Column(name = "report_url")
     private String reportUrl;
+    @Column(name = "order_id")
+    private Integer orderId;
     @Transient
     private String token;
     @Transient

@@ -131,14 +131,10 @@ public class OtherSetup extends javax.swing.JPanel {
             relationSetupDialog = new RelationSetupDialog(Global.parentForm);
             relationSetupDialog.setInventoryRepo(inventoryRepo);
             relationSetupDialog.initMain();
-            relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
+            relationSetupDialog.setSize(Global.width - 200, Global.height - 200);
             relationSetupDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getUnitRelation().doOnSuccess((t) -> {
-            relationSetupDialog.setListUnitRelation(t);
-        }).doOnTerminate(() -> {
-            relationSetupDialog.setVisible(true);
-        }).subscribe();
+        relationSetupDialog.search();
     }
 
     private void wareHouseDialog() {

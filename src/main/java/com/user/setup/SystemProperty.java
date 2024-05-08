@@ -183,6 +183,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTraderBalAcc.setName(ProUtil.TRADER_BAL_ACC);
         chkBarCode.setName(ProUtil.BARCODE);
         chkETCOA.setName(ProUtil.ENABLE_TRADER_COA);
+        chkPurVouEdit.setName(ProUtil.PURCHASE_VOUCHER_EDIT);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -285,7 +286,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkSaleEdit.setSelected(Util1.getBoolean(hmProperty.get(chkSaleEdit.getName())));
         chkPriceChange.setName("sale.price.change");
         chkPriceChange.setSelected(Util1.getBoolean(hmProperty.get(chkPriceChange.getName())));
-        chkPurVouEdit.setName("purchase.voucher.edit");
         chkPurVouEdit.setSelected(Util1.getBoolean(hmProperty.get(chkPurVouEdit.getName())));
         chkBalance.setName("trader.balance");
         chkBalance.setSelected(Util1.getBoolean(hmProperty.get(chkBalance.getName())));

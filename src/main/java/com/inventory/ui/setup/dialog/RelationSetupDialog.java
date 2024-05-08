@@ -6,9 +6,11 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.UnitFormatRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.RelationKey;
@@ -24,7 +26,6 @@ import java.awt.event.KeyListener;
 import java.util.List;
 import java.util.Objects;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -48,13 +49,6 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<UnitRelation> listUnitRelation;
-
-
-    public void setListUnitRelation(List<UnitRelation> listUnitRelation) {
-        relationTableModel.setListRelation(listUnitRelation);
-        this.listUnitRelation = listUnitRelation;
-    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -65,12 +59,19 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         super(frame, false);
         initComponents();
         initKeyListener();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
         initTable();
         initTableRelD();
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initKeyListener() {
@@ -94,21 +95,23 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                     UnitRelation rel = relationTableModel.getRelation(selectRow);
                     String relCode = rel.getKey().getRelCode();
                     if (relCode != null) {
+                        progress.setIndeterminate(true);
                         lblName.setText(rel.getRelName());
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
-                        inventoryRepo.getRelationDetail(relCode).subscribe((t) -> {
+                        inventoryRepo.getRelationDetail(relCode).doOnSuccess((t) -> {
                             relationDetailTableModel.setListRelation(t);
+                            relationDetailTableModel.addEmptyRow();
                             relationDetailTableModel.setRelation(rel);
-
-                        });
+                            progress.setIndeterminate(false);
+                        }).subscribe();
 
                     }
 
                 }
             }
         });
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
     }
 
     private void initTableRelD() {
@@ -144,16 +147,17 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             rel.setDetailList(listD);
         }
         if (!listD.isEmpty()) {
-            inventoryRepo.saveUnitRelation(rel).subscribe((t) -> {
+            progress.setIndeterminate(true);
+            inventoryRepo.saveUnitRelation(rel).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("NEW")) {
-                    listUnitRelation.add(t);
+                    relationTableModel.addRelation(t);
                 } else {
-                    listUnitRelation.set(selectRow, t);
+                    relationTableModel.setRelation(t, selectRow);
                 }
-                relationTableModel.setListRelation(listUnitRelation);
-                clear();
                 sendMessage(t.getRelName());
-            });
+            }).doOnTerminate(() -> {
+                clear();
+            }).subscribe();
 
         }
     }
@@ -166,7 +170,8 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void clear() {
-        txtFilter.setText(null);
+        progress.setIndeterminate(false);
+        txtSearch.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         lblName.setText("");
@@ -186,6 +191,19 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         tblRelD.requestFocus();
     }
 
+    public void search() {
+        progress.setIndeterminate(true);
+        inventoryRepo.getUnitRelation().doOnSuccess((t) -> {
+            relationTableModel.setListRelation(t);
+            progress.setIndeterminate(false);
+        }).subscribe();
+        setVisible(true);
+    }
+
+    public List<UnitRelationDetail> getDetail() {
+        return relationDetailTableModel.getListRelation();
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -197,15 +215,15 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRel = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         btnSave = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblRelD = new javax.swing.JTable();
         lblName = new javax.swing.JLabel();
+        progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Relation Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
@@ -224,10 +242,10 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         tblRel.setName("tblRel"); // NOI18N
         jScrollPane1.setViewportView(tblRel);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -267,7 +285,6 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         ));
         tblRelD.setRowHeight(Global.tblRowHeight);
-        tblRelD.setShowGrid(true);
         tblRelD.setShowHorizontalLines(true);
         tblRelD.setShowVerticalLines(true);
         jScrollPane3.setViewportView(tblRelD);
@@ -282,18 +299,21 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtSearch)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
+                            .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSave))
-                    .addComponent(lblName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnSave))
+                            .addComponent(lblName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 
@@ -303,9 +323,11 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtFilter))
+                    .addComponent(txtSearch))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -325,12 +347,7 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        try {
-            save();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Save Category", JOptionPane.ERROR_MESSAGE);
-            log.error("Save Categor :" + e.getMessage());
-        }
+        save();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -338,14 +355,14 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     /**
      * @param args the command line arguments
@@ -358,9 +375,10 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblRel;
     private javax.swing.JTable tblRelD;
-    private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
     @Override

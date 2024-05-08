@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,24 +23,8 @@ public class RoleCompanyTableModel extends AbstractTableModel {
 
     private List<PrivilegeCompany> listProperty = new ArrayList();
     private final String[] columnNames = {"Company Name", "Allow"};
-    private String roleCode;
+    @Setter
     private UserRepo userRepo;
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public String getRoleCode() {
-        return roleCode;
-    }
-
-    public void setRoleCode(String roleCode) {
-        this.roleCode = roleCode;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -81,7 +66,10 @@ public class RoleCompanyTableModel extends AbstractTableModel {
             if (!Objects.isNull(value)) {
                 switch (column) {
                     case 1 -> {
-                        p.setAllow((Boolean) value);
+                        if (value instanceof Boolean active) {
+                            log.info(active + "");
+                            p.setAllow(active);
+                        }
                     }
                 }
                 save(p);

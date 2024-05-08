@@ -314,12 +314,16 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                         return false;
                     }
                 }
+                String srcAcc = coa.getKey().getCoaCode();
                 if (!Util1.isNullOrEmpty(g.getAccCode())) {
                     if (g.getDeptCode() == null) {
                         JOptionPane.showMessageDialog(tblJournal, "Invalid Department.");
                         return false;
                     } else if (Util1.getDouble(g.getDrAmt()) + Util1.getDouble(g.getCrAmt()) == 0) {
                         JOptionPane.showMessageDialog(tblJournal, "Invalid Amount.");
+                        return false;
+                    } else if (srcAcc.equals(g.getAccCode())) {
+                        JOptionPane.showMessageDialog(tblJournal, "Invalid, Same Account.");
                         return false;
                     }
                 }

@@ -12,6 +12,7 @@ import com.user.model.PMKey;
 import com.repo.UserRepo;
 import com.user.model.Menu;
 import java.util.List;
+import javax.swing.event.TreeModelListener;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -92,7 +93,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
                     if (node instanceof Menu roleMenu) {
                         roleMenu.setAllow((Boolean) aValue);
                         savePrivilege(roleMenu, (Boolean) aValue);
-
+                        fireTreeNodesChanged(node, null, null, null);
                     }
                 }
             }
@@ -129,6 +130,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
                 }
                 sendMessage("Menu Update.");
             }).subscribe();
+
         }
 
     }

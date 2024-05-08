@@ -16,6 +16,8 @@ import com.common.QRUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.common.YNDialog;
+import com.common.YNOptionPane;
 import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
 import com.user.common.CompanyTableModel;
@@ -165,34 +167,43 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void saveCompany() {
         if (isValidEntry()) {
-            progress.setIndeterminate(true);
-            observer.selected("save", false);
-            String status = lblStatus.getText();
-            userRepo.saveCompany(company).doOnSuccess((t) -> {
-                if (status.equals("NEW")) {
-                    tableModel.addCompany(t);
-                } else {
-                    tableModel.setCompany(selectRow, t);
-                }
-                updateCompany(t);
-                clear();
-                sendMessage(t.getCompName());
-            }).doOnError((e) -> {
-                log.error("saveCompany : " + e.getMessage());
-                progress.setIndeterminate(false);
-                observer.selected("save", true);
-                if (e instanceof WebClientRequestException) {
-                    OfflineOptionPane pane = new OfflineOptionPane();
-                    JDialog dialog = pane.createDialog("Offline");
-                    dialog.setVisible(true);
-                    int yn = (int) pane.getValue();
-                    if (yn == JOptionPane.YES_OPTION) {
-                        saveCompany();
+            SecurityDialog d = new SecurityDialog(Global.parentForm);
+            d.setLocationRelativeTo(null);
+            d.setVisible(true);
+            if (d.isCorrect()) {
+                JOptionPane.showMessageDialog(this, "This may take a few minutes.");
+                progress.setIndeterminate(true);
+                observer.selected("save", false);
+                ComponentUtil.enableForm(this, false);
+                String status = lblStatus.getText();
+                userRepo.saveCompany(company).doOnSuccess((t) -> {
+                    if (status.equals("NEW")) {
+                        tableModel.addCompany(t);
+                    } else {
+                        tableModel.setCompany(selectRow, t);
                     }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }).subscribe();
+                    updateCompany(t);
+                    clear();
+                    sendMessage(t.getCompName());
+                }).doOnError((e) -> {
+                    log.error("saveCompany : " + e.getMessage());
+                    progress.setIndeterminate(false);
+                    observer.selected("save", true);
+                    ComponentUtil.enableForm(this, true);
+                    if (e instanceof WebClientRequestException) {
+                        OfflineOptionPane pane = new OfflineOptionPane();
+                        JDialog dialog = pane.createDialog("Offline");
+                        dialog.setVisible(true);
+                        int yn = (int) pane.getValue();
+                        if (yn == JOptionPane.YES_OPTION) {
+                            saveCompany();
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }).subscribe();
+            }
+
         }
     }
 
@@ -270,6 +281,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         progress.setIndeterminate(false);
         assignDefault();
         observeMain();
+        ComponentUtil.enableForm(this, true);
     }
 
     private void updateCompany(CompanyInfo info) {

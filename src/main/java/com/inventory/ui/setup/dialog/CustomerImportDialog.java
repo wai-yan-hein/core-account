@@ -8,6 +8,7 @@ import com.common.FontUtil;
 import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.entity.CFont;
@@ -27,16 +28,19 @@ import java.awt.FileDialog;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -45,48 +49,21 @@ import org.springframework.core.task.TaskExecutor;
 @Slf4j
 public class CustomerImportDialog extends javax.swing.JDialog {
 
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
-    private AccountRepo accountRepo;
+
     private final TraderImportTableModel tableModel = new TraderImportTableModel();
+    @Setter
     private TaskExecutor taskExecutor;
     private final HashMap<String, String> hmRegion = new HashMap<>();
     private final HashMap<String, String> hmTraderGp = new HashMap<>();
     private final HashMap<String, String> hmDepartment = new HashMap<>();
     private HashMap<Integer, Integer> hmZG = new HashMap<>();
     List<CFont> listFont = new ArrayList<>();
-
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public TaskExecutor getTaskExecutor() {
-        return taskExecutor;
-    }
-
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    @Setter
+    private SelectionObserver observer;
 
     /**
      * Creates new form CustomerImportDialog
@@ -122,21 +99,25 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         List<Trader> traders = tableModel.getListTrader();
         btnSave.setEnabled(false);
         progress.setIndeterminate(true);
-        traders.forEach((trader) -> {
-            try {
-                Trader t = inventoryRepo.saveTrader(trader).block();
-                lblLog.setText("Importing :" + t.getTraderName());
-                lblLog.setForeground(Color.black);
-            } catch (Exception e) {
-                progress.setIndeterminate(false);
-                btnSave.setEnabled(true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }
-        });
-        lblLog.setText("Imported");
-        lblLog.setForeground(Color.green);
-        tableModel.clear();
-        btnSave.setEnabled(true);
+        Flux.fromIterable(traders)
+                .delayElements(Duration.ofMillis(300))
+                .doOnNext((trader) -> {
+                    inventoryRepo.saveTrader(trader)
+                            .doOnSuccess((t) -> {
+                                lblLog.setText("Importing :" + trader.getTraderName());
+                                lblLog.setForeground(Color.black);
+                                observer.selected("Trader", t);
+                            }).subscribe();
+                }).doOnError((e) -> {
+            progress.setIndeterminate(false);
+            btnSave.setEnabled(true);
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }).doOnTerminate(() -> {
+            lblLog.setText("Imported");
+            lblLog.setForeground(Color.green);
+            tableModel.clear();
+            btnSave.setEnabled(true);
+        }).subscribe();
     }
 
     private String getRegion(String str) {
@@ -198,6 +179,9 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     }
 
     private Integer getDepartment(String str) {
+        if (Util1.isNullOrEmpty(str)) {
+            return Global.deptId;
+        }
         if (hmDepartment.isEmpty()) {
             List<DepartmentUser> list = userRepo.getDeparment(true).block();
             if (list != null) {
@@ -226,12 +210,11 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         user.setUpdatedDate(LocalDateTime.now());
 
         return userRepo.saveDepartment(user).block();
-    }    
+    }
 
     private void readFile(String path) {
-        List<Trader> listTrader = new ArrayList<>();
+        progress.setIndeterminate(true);
         try {
-            progress.setIndeterminate(true);
             listFont = FontUtil.generateCFonts();
             hmZG = new HashMap<>();
             if (listFont != null) {
@@ -248,14 +231,14 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     .setIgnoreHeaderCase(true)
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(in);
-            records.forEach((row) -> {
+            Flux.fromIterable(records).doOnNext((row) -> {
                 Trader t = new Trader();
                 String name = row.isMapped("Name") ? row.get("Name") : ""; // Util1.convertToUniCode(row.get("Name"))
                 t.setTraderName(chkIntegra.isSelected() ? Util1.convertToUniCode(FontUtil.getZawgyiText(name, hmZG)) : Util1.convertToUniCode(name));
+                t.setTraderName(Util1.convertToTitleCase(t.getTraderName()));
                 if (!t.getTraderName().equals("")) {
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
-//                    t.setDeptId(Global.deptId);
                     t.setKey(key);
                     t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
                     t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
@@ -273,17 +256,17 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setMacId(Global.macId);
                     t.setType(getImportType());
                     t.setAccount(getAccount());
-                    listTrader.add(t);
+                    tableModel.addObject(t);
                 }
-
-            });
-            tableModel.setListTrader(listTrader);
-            progress.setIndeterminate(false);
+            }).doOnTerminate(() -> {
+                progress.setIndeterminate(false);
+            }).subscribe();
         } catch (IOException e) {
             progress.setIndeterminate(false);
             log.error("readFile : " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Invalid Format.");
         }
+
     }
 
     private String getAccount() {
@@ -328,7 +311,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         cboType = new javax.swing.JComboBox<>();
         lblLog = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Import Dialog");
 
         tblTrader.setFont(Global.textFont);
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
@@ -345,6 +328,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         tblTrader.setRowHeight(Global.tblRowHeight);
         jScrollPane1.setViewportView(tblTrader);
 
+        btnSave.setFont(Global.textFont);
         btnSave.setText("Save");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -352,6 +336,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             }
         });
 
+        jButton2.setFont(Global.textFont);
         jButton2.setText("Choose File");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
