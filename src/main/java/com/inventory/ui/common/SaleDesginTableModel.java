@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SaleDesginTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Design", "Size", "Order Qty", "Price", "Amount"};
+    private String[] columnNames = {"Design", "Size", "Length", "Height", "Divider", "Order Qty", "Total Sqft", "Price", "Amount"};
     @Setter
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
@@ -74,15 +74,20 @@ public class SaleDesginTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2, 3, 4 ->
-                Double.class;
-            default ->
+            case 1, 2 ->
                 String.class;
+            default ->
+                Double.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
+        switch (column) {
+            case 6, 8 -> {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -96,10 +101,18 @@ public class SaleDesginTableModel extends AbstractTableModel {
                 case 1 ->
                     sd.getSize();
                 case 2 ->
-                    Util1.toNull(sd.getQty());
+                    Util1.toNull(sd.getLength());
                 case 3 ->
-                    Util1.toNull(sd.getPrice());
+                    Util1.toNull(sd.getHeight());
                 case 4 ->
+                    Util1.toNull(sd.getDivider());
+                case 5 ->
+                    Util1.toNull(sd.getQty());
+                case 6 ->
+                    Util1.toNull(sd.getTotalSqft());
+                case 7 ->
+                    Util1.toNull(sd.getPrice());
+                case 8 ->
                     Util1.toNull(sd.getAmount());
                 default ->
                     null;
@@ -123,6 +136,7 @@ public class SaleDesginTableModel extends AbstractTableModel {
                         } else {
                             sd.setDesign(value.toString());
                         }
+                        sd.setDivider(144);
                         addNewRow();
                         setSelection(row, column + 1);
                     }
@@ -136,13 +150,34 @@ public class SaleDesginTableModel extends AbstractTableModel {
                         setSelection(row, column + 1);
                     }
                     case 2 -> {
+                        double length = Util1.getDouble(value);
+                        if (length > 0) {
+                            sd.setLength(length);
+                            setSelection(row, column + 1);
+                        }
+                    }
+                    case 3 -> {
+                        double height = Util1.getDouble(value);
+                        if (height > 0) {
+                            sd.setHeight(height);
+                            setSelection(row, column + 1);
+                        }
+                    }
+                    case 4 -> {
+                        double divider = Util1.getDouble(value);
+                        if (divider > 0) {
+                            sd.setQty(divider);
+                            setSelection(row, column + 1);
+                        }
+                    }
+                    case 5 -> {
                         double qty = Util1.getDouble(value);
                         if (qty > 0) {
                             sd.setQty(qty);
                             setSelection(row, column + 1);
                         }
                     }
-                    case 3 -> {
+                    case 7 -> {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getDouble(value))) {
                                 sd.setPrice(Util1.getDouble(value));
@@ -159,7 +194,7 @@ public class SaleDesginTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                if (column != 3) {
+                if (column != 8) {
                     if (sd.getPrice() == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             String stockCode = sd.getStockCode();
@@ -249,6 +284,9 @@ public class SaleDesginTableModel extends AbstractTableModel {
         if (oh.getStockCode() != null) {
             double amount = Util1.getDouble(oh.getQty()) * Util1.getDouble(oh.getPrice());
             oh.setAmount(Util1.getDouble(Math.round(amount)));
+
+            double totalSqft = Util1.getDouble(oh.getQty()) * Util1.getDouble((oh.getLength() * oh.getHeight()) / oh.getDivider());
+            oh.setTotalSqft(totalSqft);
             observer.selected("SALE-TOTAL", "SALE-TOTAL");
         }
     }

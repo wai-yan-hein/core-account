@@ -580,13 +580,20 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         saleDesginTableModel.setVouDate(txtSaleDate);
         saleDesginTableModel.setInventoryRepo(inventoryRepo);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        tblSale.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
-        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//qty
-        tblSale.getColumnModel().getColumn(3).setPreferredWidth(1);//price
-        tblSale.getColumnModel().getColumn(4).setPreferredWidth(40);//amt
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(50);//Name
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//length
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//height
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(60);//divider
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(60);//qty
+        tblSale.getColumnModel().getColumn(6).setPreferredWidth(60);//total sqft
+        tblSale.getColumnModel().getColumn(7).setPreferredWidth(1);//price
+        tblSale.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
         tblSale.getColumnModel().getColumn(0).setCellEditor(new DesignEditor(inventoryRepo));
         tblSale.getColumnModel().getColumn(1).setCellEditor(new SizeEditor(inventoryRepo));
         tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
                 tblSale.getColumnModel().getColumn(3).setCellEditor(new SalePriceCellEditor(inventoryRepo));//price
