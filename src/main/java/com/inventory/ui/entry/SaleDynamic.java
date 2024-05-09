@@ -590,9 +590,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
         tblSale.getColumnModel().getColumn(0).setCellEditor(new DesignEditor(inventoryRepo));
         tblSale.getColumnModel().getColumn(1).setCellEditor(new SizeEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//qty
-        tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
-        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//length
+        tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//height
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//divider
         tblSale.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
