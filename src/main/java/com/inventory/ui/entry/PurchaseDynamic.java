@@ -1236,7 +1236,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         try {
             String reportName = Util1.isNull(ProUtil.getProperty(ProUtil.PURCHASE_VOUCHER), "PurchaseVoucherA5Bag");
             List<PurHisDetail> detail = ph.getListPD().stream().filter((t) -> t.getStockCode() != null).toList();
-            double totalBag =detail.stream().filter((f)->f.isCalculate()).mapToDouble((t)->t.getBag()).sum();
+            double totalBag = detail.stream().filter((f) -> f.isCalculate()).mapToDouble((t) -> t.getBag()).sum();
             Map<String, Object> param = getDefaultParam(ph);
             param.put("p_total_bag", totalBag);
             String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
@@ -1362,6 +1362,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         param.put("p_ref", p.getReference());
         param.put("p_warehouse", locationAutoCompleter.getLocation().getLocName());
         Trader t = traderAutoCompleter.getTrader();
+        param.put("p_supplier_name", t.getTraderName());
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(ph.getReference(), t.getTraderName()));
             param.put("p_trader_address", t.getAddress());
