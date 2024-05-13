@@ -62,9 +62,13 @@ public class SaleHisDetail {
     private double wet;
     private double rice;
     private double bag;
-    private boolean calculate;    
+    private boolean calculate;
     private String design;
     private String size;
+    private double length;
+    private double height;
+    private double divider;
+    private double totalSqft;
     @Transient
     private String userCode;
     @Transient
