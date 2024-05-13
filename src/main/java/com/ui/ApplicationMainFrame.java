@@ -1238,6 +1238,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             } else {
                 assignCompany(t.get(0));
             }
+            initUser();
             initDate();
             departmentAssign();
             initMenu();
@@ -1294,7 +1295,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         setTitle("Core Account Cloud : " + Global.version);
         initStockBalanceFrame();
         scheduleNetwork();
-        initUser();
         companyUserRoleAssign();
     }
 
@@ -1332,7 +1332,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void departmentAssign() {
         Integer deptId = Global.loginUser.getDeptId();
-        if (Util1.isNullOrEmpty(deptId)) {
+        if (Util1.isNullOrEmpty(deptId) || deptId == 0) {
             userRepo.getDeparment(true).doOnSuccess((t) -> {
                 if (!t.isEmpty()) {
                     DepartmentUser dep;

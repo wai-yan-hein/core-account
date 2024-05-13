@@ -315,8 +315,10 @@ public class OrderRefNoCompleter implements KeyListener, SelectionObserver {
         String refNo = textComp.getText();
         if (!refNo.isEmpty()) {
             if (!containKey(e)) {
-                tableModel.clear();
                 inventoryRepo.searchByRefNo(refNo)
+                        .doFirst(() -> {
+                            tableModel.clear();
+                        })
                         .doOnNext((t) -> {
                             tableModel.addObject(t);
                         }).doOnComplete(() -> {

@@ -33,6 +33,8 @@ public class AppRole implements java.io.Serializable {
     private LocalDateTime updatedDate;
     @Transient
     private String exampleRole;
+    @Transient
+    private String compCode;
 
     public AppRole() {
     }

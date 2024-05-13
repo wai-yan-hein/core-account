@@ -50,6 +50,7 @@ public class RoleSetupDialog extends javax.swing.JDialog {
         tblRole.setModel(userRoleTableModel);
         userRoleTableModel.setTable(tblRole);
         tblRole.getTableHeader().setFont(Global.tblHeaderFont);
+        tblRole.setFont(Global.textFont);
         tblRole.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblRole.setRowHeight(Global.tblRowHeight);
         tblRole.setDefaultRenderer(Object.class, new TableCellRender());
@@ -70,10 +71,16 @@ public class RoleSetupDialog extends javax.swing.JDialog {
             AppRole role = new AppRole();
             role.setRoleName(txtRoleName.getText());
             role.setExampleRole(exRole.getRoleCode());
+            role.setCompCode(Global.compCode);
+            btnCreate.setEnabled(false);
             userRepo.saveAppRole(role).doOnSuccess((t) -> {
+                btnCreate.setEnabled(true);
                 observer.selected("Refresh", "Refresh");
                 sendMessage(t.getRoleName());
                 this.dispose();
+            }).doOnError((e) -> {
+                btnCreate.setEnabled(true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             }).subscribe();
         } else {
             JOptionPane.showMessageDialog(this, "Select Role.");
@@ -100,7 +107,7 @@ public class RoleSetupDialog extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRole = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
+        btnCreate = new javax.swing.JButton();
         txtRoleName = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -142,13 +149,13 @@ public class RoleSetupDialog extends javax.swing.JDialog {
         ));
         jScrollPane1.setViewportView(tblRole);
 
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Create ");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnCreate.setBackground(Global.selectionColor);
+        btnCreate.setFont(Global.lableFont);
+        btnCreate.setForeground(new java.awt.Color(255, 255, 255));
+        btnCreate.setText("Create ");
+        btnCreate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnCreateActionPerformed(evt);
             }
         });
 
@@ -164,7 +171,7 @@ public class RoleSetupDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCreate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtRoleName))
                 .addContainerGap())
         );
@@ -178,24 +185,24 @@ public class RoleSetupDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtRoleName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addComponent(btnCreate)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
         createRole();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnCreateActionPerformed
 
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnCreate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
