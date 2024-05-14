@@ -929,6 +929,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         param.put("p_total_payment", sh.getTotalPayment());
         param.put("p_closing", sh.getOutstanding());
         Trader t = traderAutoCompleter.getTrader();
+        param.put("cus_name", t.getTraderName());
         if (t != null) {
             param.put("p_trader_name", Util1.isNull(p.getReference(), t.getTraderName()));
             param.put("p_cus_name", t.getTraderName());
@@ -1402,7 +1403,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     private String getReportName() {
         if (type == RICE) {
-            return "SaleVoucherA5Bag";
+            return !Util1.isNull(ProUtil.getProperty(ProUtil.SALE_RICE)) ? ProUtil.getProperty(ProUtil.SALE_RICE) : "SaleVoucherA5Bag";
         } else if (type == PADDY) {
             return "SaleVoucherA5Qty";
         } else if (chkVou.isSelected()) {

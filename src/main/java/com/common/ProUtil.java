@@ -101,6 +101,8 @@ public class ProUtil {
     public static final String DECIMAL_PLACE = "decimal.palace";
     public static final String STOCK_IR_EDIT = "stockir.voucher";
     public static final String SALE_VOU = "report.sale.voucher";
+    public static final String SALE_RICE = "report.sale.rice";
+    public static final String SALE_PADDY = "report.sale.paddy";
     public static final String SALE_VOU_A5 = "report.sale.A5";
     public static final String SALE_VOU_A4 = "report.sale.A4";
     public static final String SALE_VOU_NOTE = "report.sale.note";
