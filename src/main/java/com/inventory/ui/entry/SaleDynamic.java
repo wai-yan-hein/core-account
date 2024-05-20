@@ -611,8 +611,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.setCellSelectionEnabled(true);
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender());
-        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+//        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+//                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
@@ -700,7 +700,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         rdoPay.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.DEFAULT_STOCK_PAY)));
         chkA4.setSelected(Util1.getBoolean(ProUtil.getProperty(ProUtil.CHECK_SALE_A4)));
         chkA5.setSelected(Util1.getBoolean(ProUtil.getProperty(ProUtil.CHECK_SALE_A5)));
-        chkBarCode.setSelected(Util1.getBoolean(ProUtil.getProperty(ProUtil.BARCODE)));
+        chkBarCode.setSelected(Util1.getBoolean(ProUtil.useBarCode()));
         if (!lblStatus.getText().equals("NEW")) {
             txtSaleDate.setDate(Util1.getTodayDate());
         }

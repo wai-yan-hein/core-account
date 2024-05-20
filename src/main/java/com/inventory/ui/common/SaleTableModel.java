@@ -285,7 +285,7 @@ public class SaleTableModel extends AbstractTableModel {
             obj.setQty(qty);
             delete(row);
             fireTableRowsUpdated(existRow, existRow);
-            setSelection(row, 1);
+            setSelection(row, 0);
         } else {
             hmStock.put(stockCode, row);
             setSelection(row + 1, 0);

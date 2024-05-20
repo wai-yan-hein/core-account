@@ -21,6 +21,7 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -186,6 +187,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         btnExport.setEnabled(false);
         String outputPath = OUTPUT_FILE_PATH + "IndividualLedgerExcel.xlsx";
         taskExecutor.execute(() -> {
+
             try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
                 workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
                 Font font = workbook.createFont();
@@ -204,6 +206,10 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                         String sheetName = Util1.replaceSpecialCharactersWithSpace(coaName);
                         createCOASheet(workbook, data, coaCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
                     });
+                    if (chkSingle.isSelected()) {
+                        lblMessage.setText("Merging sheets... Please wait.");
+                        mergeSheets(workbook, "IndividualLedgerExcel", cellStyle);
+                    }
                     lblMessage.setText("Exporting File... Please wait.");
                     workbook.write(outputStream);
                     lastPath = outputPath;
@@ -391,6 +397,57 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         return uniqueName;
     }
 
+    private void mergeSheets(SXSSFWorkbook workbook, String targetSheetName, CellStyle headerStyle) {
+        Sheet targetSheet = workbook.createSheet(targetSheetName);
+        int targetRowNum = 0;
+
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            if (sheet.getSheetName().equals(targetSheetName)) {
+                continue;
+            }
+            // Add sheet name as a header
+            Row sheetNameRow = targetSheet.createRow(targetRowNum++);
+            Cell sheetNameCell = sheetNameRow.createCell(0);
+            sheetNameCell.setCellValue(sheet.getSheetName());
+            sheetNameCell.setCellStyle(headerStyle);
+
+            int lastRowNum = sheet.getLastRowNum();
+            for (int j = 0; j <= lastRowNum; j++) {
+                Row sourceRow = sheet.getRow(j);
+                Row targetRow = targetSheet.createRow(targetRowNum++);
+                if (sourceRow != null) {
+                    for (int k = 0; k < sourceRow.getLastCellNum(); k++) {
+                        Cell sourceCell = sourceRow.getCell(k);
+                        Cell targetCell = targetRow.createCell(k);
+
+                        if (sourceCell != null) {
+                            copyCell(sourceCell, targetCell);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void copyCell(Cell sourceCell, Cell targetCell) {
+        targetCell.setCellStyle(sourceCell.getCellStyle());
+        switch (sourceCell.getCellType()) {
+            case BOOLEAN ->
+                targetCell.setCellValue(sourceCell.getBooleanCellValue());
+            case NUMERIC ->
+                targetCell.setCellValue(sourceCell.getNumericCellValue());
+            case STRING ->
+                targetCell.setCellValue(sourceCell.getStringCellValue());
+            case ERROR ->
+                targetCell.setCellValue(sourceCell.getErrorCellValue());
+            case FORMULA ->
+                targetCell.setCellFormula(sourceCell.getCellFormula());
+            default -> {
+            }
+        }
+    }
+
     private ReportFilter getFilter(String srcAcc, String traderCode) {
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
@@ -446,6 +503,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         jLabel3 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
+        chkSingle = new javax.swing.JRadioButton();
         tabMain = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
         chkSelect = new javax.swing.JCheckBox();
@@ -495,6 +553,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             }
         });
 
+        chkSingle.setSelected(true);
+        chkSingle.setText("Single Sheet");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -504,6 +565,8 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(chkSingle)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnExport, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -515,7 +578,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtDate)
-                            .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE))))
+                            .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -535,7 +598,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                         .addComponent(btnExport)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblMessage))
-                    .addComponent(jButton2))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton2)
+                        .addComponent(chkSingle)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -761,6 +826,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExport;
     private javax.swing.JCheckBox chkSelect;
+    private javax.swing.JRadioButton chkSingle;
     private javax.swing.JCheckBox chkTraderSelect;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
