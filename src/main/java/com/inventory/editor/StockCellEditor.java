@@ -97,8 +97,11 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
             String barCode = jtf.getText();
             log.info("find Barcode : " + barCode);
             Stock s = inventoryRepo.findStockByBarcode(barCode).block();
-            s.setBarcode(barCode);
-            return s;
+            if (s != null) {
+                s.setBarcode(barCode);
+                return s;
+            }
+            return null;
         }
         return completer.getStock();
 
