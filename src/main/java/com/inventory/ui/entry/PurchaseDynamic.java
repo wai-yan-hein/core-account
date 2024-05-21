@@ -965,9 +965,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         double totalVouBalance;
         listDetail = getListDetail();
         double qty = listDetail.stream().mapToDouble((t) -> t.getQty()).sum();
+        double bag = listDetail.stream().mapToDouble((t) -> t.isCalculate() ? t.getBag() : 0).sum();
         double weight = listDetail.stream().mapToDouble((t) -> t.getTotalWeight()).sum();
         txtWeight.setValue(weight);
-        txtQty.setValue(qty);
+        txtQty.setValue(qty != 0 ? qty : bag);
         double totalAmount = listDetail.stream().mapToDouble((t) -> t.getAmount()).sum();
         txtVouTotal.setValue(Util1.round(totalAmount));
 
