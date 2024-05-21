@@ -84,7 +84,7 @@ public class SaleDesginTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 6, 8 -> {
+            case 5, 8 -> {
                 return false;
             }
         }
@@ -107,9 +107,9 @@ public class SaleDesginTableModel extends AbstractTableModel {
                 case 4 ->
                     Util1.toNull(Util1.getDouble(sd.getDivider()));
                 case 5 ->
-                    Util1.toNull(Util1.getDouble(sd.getQty()));
-                case 6 ->
                     Util1.toNull(Util1.getDouble(sd.getTotalSqft()));
+                case 6 ->
+                    Util1.toNull(Util1.getDouble(sd.getQty()));
                 case 7 ->
                     Util1.toNull(Util1.getDouble(sd.getPrice()));
                 case 8 ->
@@ -166,11 +166,11 @@ public class SaleDesginTableModel extends AbstractTableModel {
                     case 4 -> {
                         double divider = Util1.getDouble(value);
                         if (divider > 0) {
-                            sd.setQty(divider);
-                            setSelection(row, column + 1);
+                            sd.setDivider(divider);
+                            setSelection(row, column + 2);
                         }
                     }
-                    case 5 -> {
+                    case 6 -> {
                         double qty = Util1.getDouble(value);
                         if (qty > 0) {
                             sd.setQty(qty);

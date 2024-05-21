@@ -593,7 +593,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//length
         tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//height
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//divider
-        tblSale.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//qty
+
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
                 tblSale.getColumnModel().getColumn(3).setCellEditor(new SalePriceCellEditor(inventoryRepo));//price
@@ -611,8 +613,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.setCellSelectionEnabled(true);
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender());
-//        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-//                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
