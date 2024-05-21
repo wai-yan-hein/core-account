@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SaleDesginTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Design", "Size", "Length", "Height", "Divider", "Order Qty", "Total Sqft", "Price", "Amount"};
+    private String[] columnNames = {"Design", "Size", "Length", "Height", "Divider", "Total Sqft", "Order Qty", "Price", "Amount"};
     @Setter
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
@@ -74,7 +74,7 @@ public class SaleDesginTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 1, 2 ->
+            case 0, 1 ->
                 String.class;
             default ->
                 Double.class;
@@ -101,19 +101,19 @@ public class SaleDesginTableModel extends AbstractTableModel {
                 case 1 ->
                     sd.getSize();
                 case 2 ->
-                    Util1.toNull(sd.getLength());
+                    Util1.toNull(Util1.getDouble(sd.getLength()));
                 case 3 ->
-                    Util1.toNull(sd.getHeight());
+                    Util1.toNull(Util1.getDouble(sd.getHeight()));
                 case 4 ->
-                    Util1.toNull(sd.getDivider());
+                    Util1.toNull(Util1.getDouble(sd.getDivider()));
                 case 5 ->
-                    Util1.toNull(sd.getQty());
+                    Util1.toNull(Util1.getDouble(sd.getQty()));
                 case 6 ->
-                    Util1.toNull(sd.getTotalSqft());
+                    Util1.toNull(Util1.getDouble(sd.getTotalSqft()));
                 case 7 ->
-                    Util1.toNull(sd.getPrice());
+                    Util1.toNull(Util1.getDouble(sd.getPrice()));
                 case 8 ->
-                    Util1.toNull(sd.getAmount());
+                    Util1.toNull(Util1.getDouble(sd.getAmount()));
                 default ->
                     null;
             };
