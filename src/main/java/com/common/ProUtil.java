@@ -112,6 +112,7 @@ public class ProUtil {
     public static final String DEFAULT_STOCK_PAY = "default.stock.payable";
     public static final String DEFAULT_STOCK_RI_REC = "default.stock.ri.receivable";
     public static final String DEFAULT_STOCK_RO_PAY = "default.stock.ro.payable";
+    public static final String DEFAULT_STOCK_SKIP_INV = "default.stock.skip.inventory";
     public static final String TRADER_BAL_ACC = "trader.balance.account";
     public static final String PRINTER_NAME = "printer.name";
     public static final String PRINTER_POS_NAME = "printer.pos.name";
@@ -120,6 +121,7 @@ public class ProUtil {
     public static final String DARK_MODE = "dark.mode";
     public static final String ENABLE_TRADER_COA = "enable.trader.coa";
     public static final String PURCHASE_VOUCHER_EDIT = "purchase.voucher.edit";
+
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
     }

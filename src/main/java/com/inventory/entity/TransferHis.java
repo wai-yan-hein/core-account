@@ -62,6 +62,8 @@ public class TransferHis {
     private String jobCode;
     @Column(name = "print_count")
     private Integer printCount;
+    @Column(name = "skip_inv")
+    private Boolean skipInv;
     @Transient
     private List<TransferHisDetail> listTD;
     @Transient

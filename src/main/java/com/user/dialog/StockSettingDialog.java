@@ -27,13 +27,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class StockSettingDialog extends javax.swing.JDialog {
-
+    
     private SelectionObserver observer;
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     private final ActionListener action = (ActionEvent e) -> {
         if (e.getSource() instanceof JCheckBox chk) {
             String key = chk.getName();
@@ -77,9 +77,9 @@ public class StockSettingDialog extends javax.swing.JDialog {
         addActionListener(panel2);
         addActionListener(panel3);
         initTextBox();
-
+        
     }
-
+    
     private void initTextBox() {
         chkDisableMill.setName(ProUtil.DISABLE_MILL);
         chkDisableSale.setName(ProUtil.DISABLE_SALE);
@@ -94,8 +94,9 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkPay.setName(ProUtil.DEFAULT_STOCK_PAY);
         chkRIR.setName(ProUtil.DEFAULT_STOCK_RI_REC);
         chkROP.setName(ProUtil.DEFAULT_STOCK_RO_PAY);
+        chkSkipInv.setName(ProUtil.DEFAULT_STOCK_SKIP_INV);
     }
-
+    
     public void setData(HashMap<String, String> hmProperty) {
         chkDisableSale.setSelected(Util1.getBoolean(hmProperty.get(chkDisableSale.getName())));
         chkDisablePur.setSelected(Util1.getBoolean(hmProperty.get(chkDisablePur.getName())));
@@ -110,15 +111,16 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkPay.setSelected(Util1.getBoolean(hmProperty.get(chkPay.getName())));
         chkRIR.setSelected(Util1.getBoolean(hmProperty.get(chkRIR.getName())));
         chkROP.setSelected(Util1.getBoolean(hmProperty.get(chkROP.getName())));
+        chkSkipInv.setSelected(Util1.getBoolean(hmProperty.get(chkSkipInv.getName())));
     }
-
+    
     private void save(SysProperty p) {
         int yn = JOptionPane.showConfirmDialog(this, "Are you sure to change setting?", "Setting", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (yn == JOptionPane.YES_OPTION) {
             observer.selected("save", p);
         }
     }
-
+    
     private void addActionListener(JPanel panel) {
         for (Component component : panel.getComponents()) {
             if (component instanceof JTextField txt) {
@@ -156,6 +158,7 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkPay = new javax.swing.JCheckBox();
         chkRIR = new javax.swing.JCheckBox();
         chkROP = new javax.swing.JCheckBox();
+        chkSkipInv = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -252,6 +255,13 @@ public class StockSettingDialog extends javax.swing.JDialog {
 
         chkROP.setText("RO - Payable");
 
+        chkSkipInv.setText("Skip - Inventory");
+        chkSkipInv.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSkipInvActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panel3Layout = new javax.swing.GroupLayout(panel3);
         panel3.setLayout(panel3Layout);
         panel3Layout.setHorizontalGroup(
@@ -262,7 +272,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
                     .addComponent(chkRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkPay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkRIR, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkROP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkROP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkSkipInv, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panel3Layout.setVerticalGroup(
@@ -275,6 +286,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
                 .addComponent(chkRIR)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkROP)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkSkipInv)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -309,6 +322,10 @@ public class StockSettingDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_chkRIRActionPerformed
 
+    private void chkSkipInvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSkipInvActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkSkipInvActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -325,6 +342,7 @@ public class StockSettingDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox chkROP;
     private javax.swing.JCheckBox chkRec;
     private javax.swing.JCheckBox chkSWB;
+    private javax.swing.JCheckBox chkSkipInv;
     private javax.swing.JCheckBox chkWeight;
     private javax.swing.JCheckBox chkWeightPoint;
     private javax.swing.JPanel panel1;
