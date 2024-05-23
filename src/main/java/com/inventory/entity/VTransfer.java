@@ -29,6 +29,7 @@ public class VTransfer {
     private String unit;
     private String unitName;
     private Double qty;
+    private Double bag;
     private Double price;
     private Double amount;
     private String stockTypeName;

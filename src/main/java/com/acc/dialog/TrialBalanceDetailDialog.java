@@ -74,7 +74,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
-    
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
@@ -130,8 +129,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         initKeyListener();
 
     }
-
-    
 
     private void initKeyListener() {
         ComponentUtil.addFocusListener(this);
@@ -246,8 +243,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private Mono<TmpOpening> getOpening() {
         log.info("calulate opening.");
         String startDate = dateAutoCompleter.getDateModel().getStartDate();
+        String endDate = dateAutoCompleter.getDateModel().getEndDate();
+
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(startDate);
+        filter.setToDate(endDate);
         filter.setCurCode(getCurrency());
         filter.setListDepartment(getListDep());
         filter.setCoaCode(coaCode);
@@ -349,7 +349,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         }
 
     }
-
 
     /**
      * This method is called from within the constructor to initialize the form.

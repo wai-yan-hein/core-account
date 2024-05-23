@@ -55,8 +55,8 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
                     jKey.setCompCode(rs.getString("comp_code"));
                     job.setKey(jKey);
                     job.setJobName(rs.getString("job_name"));
-                    job.setStartDate(Util1.toLocalDate(rs.getDate("start_date")));
-                    job.setEndDate(Util1.toLocalDate(rs.getDate("end_date")));
+                    job.setStartDate(rs.getDate("start_date").toLocalDate());
+                    job.setEndDate(rs.getDate("end_date").toLocalDate());
                     job.setDeptId(rs.getInt("dept_id"));
                     job.setCreatedBy(rs.getString("created_by"));
                     jList.add(job);

@@ -81,7 +81,7 @@ public class VRoleMenuDaoImpl extends AbstractDao<String, Menu> implements VRole
                 where o.role_code=? and o.menu_type='Report'
                 and o.comp_code=? and(o.menu_class=? or'-'=?)
                 and allow = true
-                order by o.order_by""";
+                order by o.menu_name""";
         List<Menu> vList = new ArrayList<>();
         ResultSet rs = getResult(sql, roleCode, compCode, menuClass, menuClass);
         if (rs != null) {

@@ -5,12 +5,12 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.entity.VTransfer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,12 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 public class TransferVouSearchTableModel extends AbstractTableModel {
 
     private List<VTransfer> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Location From", "Location To", "Remark", "Ref No", "Trader", "Created By"};
+    private final String[] columnNames = {"Date", "Vou No", "Location From", "Location To", "Remark", "Ref No", "Trader", "Qty", "Bag"};
+    @Getter
     private int size;
-
-    public int getSize() {
-        return size;
-    }
+    @Getter
+    private int qty;
+    @Getter
+    private int bag;
 
     @Override
     public String getColumnName(int column) {
@@ -50,7 +51,12 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return String.class;
+        return switch (column) {
+            case 7, 8 ->
+                Double.class;
+            default ->
+                String.class;
+        };
     }
 
     @Override
@@ -65,10 +71,11 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
                 }
                 case 1 -> {
                     //vou-no
+                    String vouNo = his.getVouNo();
                     if (Util1.getBoolean(his.isDeleted())) {
-                        return his.getVouNo() + "***";
+                        return Util1.getStar(vouNo);
                     } else {
-                        return his.getVouNo();
+                        return vouNo;
                     }
                 }
                 case 2 -> {
@@ -89,7 +96,10 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
                     return his.getTraderName();
                 }
                 case 7 -> {
-                    return Global.hmUser.get(his.getCreatedBy());
+                    return his.getQty();
+                }
+                case 8 -> {
+                    return his.getBag();
                 }
             }
         } catch (Exception ex) {
@@ -114,6 +124,8 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
     public void addObject(VTransfer t) {
         listDetail.add(t);
         size += 1;
+        qty += t.getQty();
+        bag += t.getBag();
         int lastIndex = listDetail.size() - 1;
         if (lastIndex >= 0) {
             fireTableRowsInserted(lastIndex, lastIndex);
@@ -125,6 +137,8 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
     public void clear() {
         listDetail.clear();
         size = 0;
+        qty = 0;
+        bag =0;
         fireTableDataChanged();
     }
 }

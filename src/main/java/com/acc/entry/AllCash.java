@@ -698,8 +698,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private ReportFilter getOPFilter() {
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
+        String endDate = dateAutoCompleter.getDateModel().getEndDate();
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(clDate);
+        filter.setToDate(endDate);
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());

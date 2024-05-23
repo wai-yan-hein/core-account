@@ -86,7 +86,7 @@ import reactor.util.function.Tuple2;
 @Slf4j
 public class TraderAdjustment extends javax.swing.JPanel implements SelectionObserver,
         PanelControl {
-    
+
     private TaskExecutor taskExecutor;
     private DateAutoCompleter dateAutoCompleter;
     private TraderAAutoCompleter traderAutoCompleter;
@@ -112,27 +112,27 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private double opening;
     private int selectRow = -1;
     private FindDialog findDialog;
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public AccountRepo getAccounRepo() {
         return accountRepo;
     }
-    
+
     public void setAccounRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
+
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -150,13 +150,13 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         initTableCashOP();
         initDateDecorator();
         actionMapping();
-        
+
     }
-    
+
     private void initListener() {
         tblCash.addMouseListener(new ColumnHeaderListener(tblCash));
     }
-    
+
     private void initFocus() {
         txtDate.addFocusListener(fa);
         txtDepartment.addFocusListener(fa);
@@ -173,13 +173,13 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             ((JTextField) e.getSource()).selectAll();
         }
     };
-    
+
     private void batchLock(boolean lock) {
         tblCash.setEnabled(lock);
         observer.selected("save", lock);
         observer.selected("delete", lock);
     }
-    
+
     private void initTableModel() {
         accountRepo.getDefaultDepartment().subscribe((t) -> {
             adjustmentTableModel.setDepartment(t);
@@ -195,12 +195,12 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         adjustmentTableModel.setObserver(this);
         adjustmentTableModel.addNewRow();
     }
-    
+
     private void initDateDecorator() {
         decorator = DateTableDecorator.decorate(panelDate);
         decorator.setObserver(this);
     }
-    
+
     private void createDateFilter() {
         HashMap<Integer, String> hmDate = new HashMap<>();
         HashMap<String, Integer> hmPage = new HashMap<>();
@@ -215,7 +215,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         decorator.setHmData(hmDate);
         decorator.refreshButton(dateAutoCompleter.getDateModel().getEndDate());
     }
-    
+
     private void initFilter() {
         monoCur = userRepo.getCurrency();
         monoDep = accountRepo.getDepartment();
@@ -246,7 +246,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         batAutoCompleter.setObserver(this);
 //model
     }
-    
+
     public void initMain() {
         batchLock(!Global.batchLock);
         initFilter();
@@ -255,11 +255,11 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         initFindDialog();
         createDateFilter();
     }
-    
+
     private void initFindDialog() {
         findDialog = new FindDialog(Global.parentForm, tblCash);
     }
-    
+
     private void requestFoucsTable() {
         int rc = tblCash.getRowCount();
         if (rc >= 1) {
@@ -270,7 +270,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCash.setColumnSelectionInterval(0, 0);
         tblCash.requestFocus();
     }
-    
+
     private void initTableCashInOut() {
         tblCIO.setModel(inOutTableModel);
         tblCIO.getTableHeader().setFont(Global.tblHeaderFont);
@@ -282,7 +282,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCIO.getColumnModel().getColumn(1).setPreferredWidth(100);
         tblCIO.getColumnModel().getColumn(2).setPreferredWidth(100);
     }
-    
+
     private void initTableCashOP() {
         tblCashOP.setModel(opTableModel);
         tblCashOP.getTableHeader().setFont(Global.tblHeaderFont);
@@ -294,9 +294,9 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCashOP.getColumnModel().getColumn(1).setPreferredWidth(100);
         tblCashOP.getColumnModel().getColumn(2).setPreferredWidth(100);
     }
-    
+
     private void initTableCB() {
-        
+
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
         tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
         tblCash.setCellSelectionEnabled(true);
@@ -328,7 +328,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
     }
-    
+
     private void actionMapping() {
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
@@ -337,7 +337,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK), "force-delete");
         tblCash.getActionMap().put("force-delete", forceDelete);
     }
-    
+
     private void initPopup() {
         lblMessage.setFont(Global.textFont);
         lblMessage.setHorizontalAlignment(JLabel.CENTER);
@@ -345,11 +345,11 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         popupmenu.setFocusable(false);
         popupmenu.add(lblMessage);
     }
-    
+
     public boolean isCellEditable(int row, int column) {
         return tblCash.getModel().isCellEditable(row, column);
     }
-    
+
     private final Action actionDelete = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -362,13 +362,13 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             deleteVoucher(true);
         }
     };
-    
+
     private void closeCellEditor() {
         if (tblCash.getCellEditor() != null) {
             tblCash.getCellEditor().stopCellEditing();
         }
     }
-    
+
     private void deleteVoucher(boolean force) {
         closeCellEditor();
         selectRow = tblCash.getSelectedRow();
@@ -400,13 +400,13 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                             adjustmentTableModel.deleteVGl(selectRow);
                         }
                     });
-                    
+
                     calDebitCredit();
                 }
             }
         }
     }
-    
+
     public void printVoucher() {
         String currency = currencyAutoCompleter.getCurrency().getCurCode();
         String stDate = dateAutoCompleter.getDateModel().getStartDate();
@@ -445,7 +445,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                     progress.setIndeterminate(false);
                     JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     log.error("printVoucher : " + ex.getMessage());
-                    
+
                 } catch (FileNotFoundException ex) {
                     log.error(ex.getMessage());
                 }
@@ -453,31 +453,33 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         } else {
             JOptionPane.showMessageDialog(this, "Select Currency.");
         }
-        
+
     }
-    
+
     private String getCurCode() {
         if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currencyAutoCompleter.getCurrency().getCurCode();
     }
-    
+
     private List<String> getListDep() {
         return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
-    
+
     private ReportFilter getOPFilter() {
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
+        String endDate = dateAutoCompleter.getDateModel().getEndDate();
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(clDate);
+        filter.setToDate(endDate);
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
         return filter;
     }
-    
+
     private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
@@ -500,7 +502,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         filter.setAcc(accCode);
         return filter;
     }
-    
+
     private void searchCash() {
         TraderA trader = traderAutoCompleter.getTrader();
         String traderCode = trader.getKey().getCode();
@@ -541,7 +543,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             }
         });
     }
-    
+
     private void checkDateLock(List<Gl> list) {
         list.forEach((t) -> {
             if (DateLockUtil.isLockDate(t.getGlDate())) {
@@ -549,17 +551,17 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             }
         });
     }
-    
+
     private void setData(List<Gl> list, String fromDate) {
         adjustmentTableModel.setListVGl(list);
         adjustmentTableModel.setGlDate(fromDate);
         adjustmentTableModel.addNewRow();
     }
-    
+
     public void clearFilter() {
         searchCash();
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -1173,7 +1175,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
         txtRecord.setValue(listVGl.size());
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         if (selectObj != null) {
@@ -1192,46 +1194,46 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             }
         }
     }
-    
+
     @Override
     public void save() {
-        
+
     }
-    
+
     @Override
     public void delete() {
         deleteVoucher(false);
     }
-    
+
     @Override
     public void newForm() {
         clearFilter();
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
         printVoucher();
     }
-    
+
     @Override
     public void refresh() {
         chkSummary.setSelected(false);
         chkSummary.setText("Detail Mode");
         searchCash();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
 }

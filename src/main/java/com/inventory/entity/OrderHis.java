@@ -5,7 +5,6 @@
 package com.inventory.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Entity;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -52,5 +51,6 @@ public class OrderHis {
     private String orderStatusName;
     private boolean select;
     private String refNo;
+    private boolean invUpdate;
 
 }

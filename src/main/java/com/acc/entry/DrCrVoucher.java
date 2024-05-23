@@ -9,7 +9,6 @@ import com.acc.editor.DateAutoCompleter;
 import com.acc.common.VoucherTableModel;
 import com.acc.dialog.FindDialog;
 import com.acc.dialog.VoucherEntryDailog;
-import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.Gl;
 import com.common.Global;
@@ -244,14 +243,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void calculateClosing() {
-        double ttlDr = Util1.getDouble(txtDr.getValue());
-        double ttlCr = Util1.getDouble(txtCr.getValue());
         double opening = Util1.getDouble(txtOpening.getValue());
+        double closing = Util1.getDouble(txtOpening.getValue());
         txtOpening.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
-        txtClosing.setForeground(opening >= 0 ? Color.GREEN : Color.RED);
-        txtDr.setValue(ttlDr);
-        txtCr.setValue(ttlCr);
-        txtClosing.setValue(ttlDr - ttlCr + opening);
+        txtClosing.setForeground(closing >= 0 ? Color.GREEN : Color.RED);
     }
 
     private void calOpening() {
@@ -259,13 +254,18 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         if (coa != null) {
             if (!coa.getKey().getCoaCode().equals("-")) {
                 String startDate = dateAutoCompleter.getDateModel().getStartDate();
+                String endDate = dateAutoCompleter.getDateModel().getEndDate();
                 ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
+                filter.setToDate(endDate);
                 filter.setFromDate(startDate);
                 filter.setCurCode(Global.currency);
                 filter.setListDepartment(getListDep());
                 filter.setCoaCode(coa.getKey().getCoaCode());
-                accountRepo.getOpening(filter).doOnSuccess((t) -> {
-                    txtOpening.setValue(t == null ? 0 : t.getOpening());
+                accountRepo.getOpeningClosing(filter).doOnSuccess((t) -> {
+                    txtOpening.setValue(t.getOpening());
+                    txtDr.setValue(t.getDrAmt());
+                    txtCr.setValue(t.getCrAmt());
+                    txtClosing.setValue(t.getClosing());
                 }).doOnTerminate(() -> {
                     calculateClosing();
                     progress.setIndeterminate(false);
@@ -795,6 +795,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             if (selectObj instanceof Boolean status) {
                 progress.setIndeterminate(status);
             }
+        } else if (source.equals("refresh")) {
+            search();
         } else {
             search();
         }
