@@ -64,7 +64,7 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
  * @author Lenovo
  */
 public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
-
+    
     public static final int TRAN = 1;
     public static final int TRAN_PADDY = 2;
     private final TransferTableModel tranTableModel = new TransferTableModel();
@@ -81,23 +81,23 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private JProgressBar progress;
     private int type;
     private FindDialog findDialog;
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
@@ -111,7 +111,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         initDateListner();
         actionMapping();
     }
-
+    
     public void initMain() {
         initTable();
         initModel();
@@ -121,23 +121,23 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         initFind();
         clear(true);
     }
-
+    
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblTransfer);
     }
-
+    
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblTransfer, 30);
         scroll.setRowHeaderView(list);
     }
-
+    
     private void initButttonGroup() {
         chkGroupReport.add(rdoA4);
         chkGroupReport.add(rdoA5);
         rdoA5.setSelected(true);
     }
-
+    
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -148,23 +148,23 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtTo.addKeyListener(this);
         ComponentUtil.addFocusListener(this);
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblTransfer.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initCombo() {
         fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, null, false, false);
         toLocaitonCompleter = new LocationAutoCompleter(txtTo, null, false, false);
@@ -180,7 +180,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
     }
-
+    
     private void initTable() {
         tblTransfer.getTableHeader().setFont(Global.tblHeaderFont);
         tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -191,7 +191,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.changeSelection(0, 0, false, false);
         tblTransfer.requestFocus();
     }
-
+    
     private void initModel() {
         switch (type) {
             case TRAN -> {
@@ -202,7 +202,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private void initTransfer() {
         tranTableModel.setVouDate(txtDate);
         tranTableModel.setLblRec(lblRec);
@@ -227,7 +227,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             tblTransfer.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
     }
-
+    
     private void initTransferPaddy() {
         tranPaddingTableModel.setVouDate(txtDate);
         tranPaddingTableModel.setLblRec(lblRec);
@@ -254,7 +254,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
     }
-
+    
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -277,14 +277,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-
+                    
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblTransfer.convertRowIndexToModel(tblTransfer.getSelectedRow());
         if (row >= 0) {
@@ -298,7 +298,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private boolean isValidDetail() {
         switch (type) {
             case TRAN -> {
@@ -309,11 +309,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
             default -> {
                 return false;
-
+                
             }
         }
     }
-
+    
     private List<TransferHisDetail> getListDetail() {
         switch (type) {
             case TRAN -> {
@@ -325,7 +325,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return null;
     }
-
+    
     private List<THDetailKey> getDeleteList() {
         switch (type) {
             case TRAN -> {
@@ -337,7 +337,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return null;
     }
-
+    
     public void saveVoucher(boolean print) {
         if (isValidEntry() && isValidDetail()) {
             if (DateLockUtil.isLockDate(txtDate.getDate())) {
@@ -371,13 +371,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }).subscribe();
         }
     }
-
+    
     private void assingnDefault() {
         inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             fromLocaitonCompleter.setLocation(tt);
         }).subscribe();
+        rdoSkipInv.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.DEFAULT_STOCK_SKIP_INV)));
     }
-
+    
     private void clearModel() {
         switch (type) {
             case TRAN -> {
@@ -390,7 +391,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private void clear(boolean focus) {
         assingnDefault();
         clearModel();
@@ -408,7 +409,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         labourGroupAutoCompleter.setObject(null);
         disableForm(true);
     }
-
+    
     private void focusOnTable() {
         int rc = tblTransfer.getRowCount();
         if (rc > 1) {
@@ -419,7 +420,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             txtDate.requestFocus();
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         Location fromLoc = fromLocaitonCompleter.getLocation();
@@ -446,6 +447,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             io.setLocCodeFrom(fromLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setLocCodeTo(toLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setStatus(lblStatus.getText());
+            io.setSkipInv(rdoSkipInv.isSelected());
             Trader t = traderAutoCompleter.getTrader();
             if (t != null) {
                 String traderCode = t.getKey().getCode();
@@ -474,7 +476,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return status;
     }
-
+    
     private void setVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
         io = s;
@@ -496,6 +498,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtDate.setDate(Util1.convertToDate(io.getVouDate()));
         txtRemark.setText(io.getRemark());
         txtRefNo.setText(io.getRefNo());
+        rdoSkipInv.setSelected(io.getSkipInv());
         if (io.isVouLock()) {
             lblStatus.setText("Voucher is locked.");
             lblStatus.setForeground(Color.RED);
@@ -527,9 +530,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             progress.setIndeterminate(false);
             focusOnTable();
         }).subscribe();
-
+        
     }
-
+    
     private void setListDetail(List<TransferHisDetail> list) {
         switch (type) {
             case TRAN -> {
@@ -542,14 +545,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     private void disableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -558,7 +561,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         observer.selected("delete", true);
         observer.selected("refresh", true);
     }
-
+    
     private void printVoucher(TransferHis his) {
         String vouNo = his.getKey().getVouNo();
         inventoryRepo.getTransferReport(vouNo).doOnSuccess((t) -> {
@@ -621,6 +624,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         jPanel2 = new javax.swing.JPanel();
         rdoA5 = new javax.swing.JRadioButton();
         rdoA4 = new javax.swing.JRadioButton();
+        jPanel4 = new javax.swing.JPanel();
+        rdoSkipInv = new javax.swing.JRadioButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -714,13 +719,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtVou)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFrom, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE))
+                        .addComponent(txtFrom))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -732,7 +737,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+                        .addComponent(txtRemark)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel11))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -741,8 +746,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
-                    .addComponent(txtLabour, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                    .addComponent(txtCustomer)
+                    .addComponent(txtLabour, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
 
@@ -815,7 +820,28 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdoA5)
                     .addComponent(rdoA4))
-                .addContainerGap(35, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        rdoSkipInv.setText("Skip Inventory");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(rdoSkipInv, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(rdoSkipInv)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -834,16 +860,22 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 1107, Short.MAX_VALUE))
+                    .addComponent(scroll)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 986, Short.MAX_VALUE)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -863,7 +895,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         // TODO add your handling code here:
     }//GEN-LAST:event_tblTransferKeyReleased
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup chkGroupReport;
     private javax.swing.JLabel jLabel11;
@@ -876,10 +907,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JRadioButton rdoA4;
     private javax.swing.JRadioButton rdoA5;
+    private javax.swing.JRadioButton rdoSkipInv;
     private javax.swing.JScrollPane scroll;
     private javax.swing.JTable tblTransfer;
     private javax.swing.JTextField txtCustomer;
@@ -896,12 +929,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public void save() {
         saveVoucher(false);
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         boolean yes = ComponentUtil.checkClear(lblStatus.getText());
@@ -909,7 +942,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             clear(true);
         }
     }
-
+    
     @Override
     public void history() {
         if (dialog == null) {
@@ -923,22 +956,22 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         dialog.search();
     }
-
+    
     @Override
     public void print() {
         saveVoucher(true);
     }
-
+    
     @Override
     public void refresh() {
         initCombo();
     }
-
+    
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("TR-HISTORY")) {
@@ -948,22 +981,22 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 }).subscribe();
             }
         }
-
+        
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
