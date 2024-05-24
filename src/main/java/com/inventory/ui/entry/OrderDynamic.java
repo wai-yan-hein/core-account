@@ -16,6 +16,7 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.common.YNOptionPane;
 import com.inventory.editor.DesignEditor;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -57,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -480,6 +482,15 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             status = false;
             txtOrderDate.requestFocus();
         } else {
+            if (chkInvUpdate.isSelected()) {
+                YNOptionPane pane = new YNOptionPane("Do you want to proceed with the inventory update for this order?", JOptionPane.WARNING_MESSAGE);
+                JDialog ynDialog = pane.createDialog("Confirm Message");
+                ynDialog.setVisible(true);
+                int yn = (int) pane.getValue();
+                if (yn == JOptionPane.NO_OPTION) {
+                    return false;
+                }
+            }
             SaleMan sm = saleManCompleter.getSaleMan();
             Project p = projectAutoCompleter.getProject();
             oh.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
@@ -498,6 +509,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             oh.setOrderStatus(os == null ? null : os.getKey().getCode());
             oh.setOrderStatusName(os == null ? null : os.getDescription());
             oh.setRefNo(txtRefNo.getText());
+            oh.setInvUpdate(chkInvUpdate.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 OrderHisKey key = new OrderHisKey();
                 key.setCompCode(Global.compCode);
@@ -657,6 +669,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         txtRefNo.setText(oh.getRefNo());
         txtOrderDate.setDate(Util1.convertToDate(oh.getVouDate()));
         txtVouTotal.setValue(Util1.getFloat(oh.getVouTotal()));
+        chkInvUpdate.setSelected(oh.isInvUpdate());
     }
 
     private void disableForm(boolean status) {
@@ -759,7 +772,6 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         }
     }
 
-
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -811,6 +823,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         jPanel4 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         txtVouTotal = new javax.swing.JFormattedTextField();
+        chkInvUpdate = new javax.swing.JRadioButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1084,10 +1097,9 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblRec, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 49, Short.MAX_VALUE))
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(lblStatus)
+                    .addComponent(lblRec, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1158,6 +1170,14 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        chkInvUpdate.setFont(Global.lableFont);
+        chkInvUpdate.setText("Inventory Update");
+        chkInvUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkInvUpdateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1167,6 +1187,8 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkInvUpdate)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1)
@@ -1183,7 +1205,8 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkInvUpdate))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1262,6 +1285,10 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     private void txtOrderStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOrderStatusActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtOrderStatusActionPerformed
+
+    private void chkInvUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkInvUpdateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkInvUpdateActionPerformed
 
     @Override
     public void keyEvent(KeyEvent e) {
@@ -1384,6 +1411,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton chkInvUpdate;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;

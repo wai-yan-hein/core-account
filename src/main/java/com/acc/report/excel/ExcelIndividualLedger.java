@@ -460,11 +460,14 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
     private ReportFilter getOPFilter(String srcAcc, String traderCode) {
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
+        String endDate = dateAutoCompleter.getDateModel().getEndDate();
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(clDate);
+        filter.setToDate(endDate);
         filter.setCurCode(getCurrency());
         filter.setCoaCode(srcAcc);
         filter.setTraderCode(traderCode);
+
         return filter;
     }
 

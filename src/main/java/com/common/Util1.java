@@ -58,6 +58,7 @@ import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.Type;
@@ -977,7 +978,6 @@ public class Util1 {
         return str;
     }
 
-
     public static String convertToTitleCase(String name) {
         if (Util1.isNullOrEmpty(name)) {
             return null;
@@ -1273,12 +1273,20 @@ public class Util1 {
 
     public static <T> List<T> readJsonToList(InputStream inputStream, Class<T> targetType) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            // Use the TypeReference to specify the target type (List<T>)
-            return objectMapper.readValue(inputStream, objectMapper.getTypeFactory().constructCollectionType(List.class, targetType));
+            // Read the JSON data as a String
+            StringBuilder jsonBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                jsonBuilder.append(line);
+            }
+
+            // Use TypeToken to specify the target type (List<T>)
+            Type listType = TypeToken.getParameterized(List.class, targetType).getType();
+            return gson.fromJson(jsonBuilder.toString(), listType);
         } catch (IOException e) {
-            log.error("readJsonToList : " + e.getMessage());
+            log.error("readJsonToList : {}", e.getMessage());
             return null; // Handle the exception or return an appropriate value
         }
     }

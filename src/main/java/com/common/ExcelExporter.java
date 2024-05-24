@@ -694,7 +694,7 @@ public class ExcelExporter {
     private void createSaleByStockSummary(Workbook workbook, List<VSale> data, String sheetName,
             CellStyle cellStyle) {
         String[] HEADER = {
-            "Stock Code", "Stock Name", "Relation", "Total Qty", "Total Amount"
+            "Stock Code", "Stock Name", "Relation", "Qty", "Percent", "Amount"
         };
         String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
         Sheet sheet = workbook.createSheet(uniqueSheetName);
@@ -718,8 +718,9 @@ public class ExcelExporter {
             row.createCell(0).setCellValue(d.getStockCode());
             row.createCell(1).setCellValue(d.getStockName());
             row.createCell(2).setCellValue(d.getRelName());
-            row.createCell(3).setCellValue(Util1.getDouble(d.getTotalQty()));
-            row.createCell(4).setCellValue(Util1.getDouble(d.getSaleAmount()));
+            row.createCell(3).setCellValue(Util1.getDouble(d.getQty()));
+            row.createCell(4).setCellValue(Util1.format2(Util1.getDouble(d.getQtyPercent())) + " %");
+            row.createCell(5).setCellValue(Util1.getDouble(d.getSaleAmount()));
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }

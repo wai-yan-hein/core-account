@@ -171,8 +171,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(100);//remark
             tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);//ref
             tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(15);//status
-            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(5);//post
-            tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(5);//select
+            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(5);//inv-update
+            tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(5);//post
+            tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(5);//select
         } else {
             tblVoucher.setModel(orderVouTableModel);
             tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
@@ -180,9 +181,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
             tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
             tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(50);
-            tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(15);
+            tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);
             tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
-            tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(100);
+            tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(10);
             tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(10);
         }
     }

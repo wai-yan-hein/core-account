@@ -428,6 +428,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);
             }
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
         });
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -793,6 +796,11 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private void txtForActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtForActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtForActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        observer.selected("refresh", "refrsh");
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments

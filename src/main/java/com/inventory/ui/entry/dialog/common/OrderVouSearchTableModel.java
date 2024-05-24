@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.common.Global;
 import com.common.Util1;
 import com.inventory.entity.OrderHis;
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderVouSearchTableModel extends AbstractTableModel {
 
     private List<OrderHis> listOrderHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Status", "V-Total", "Post"};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Status", "V-Total", "Inv-Update", "Post"};
     @Getter
     private int size;
 
@@ -52,10 +51,10 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 7 -> {
+            case 6 -> {
                 return Double.class;
             }
-            case 8 -> {
+            case 7, 8 -> {
                 return Boolean.class;
             }
         }
@@ -95,15 +94,14 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
                         return his.getReference();
                     }
                     case 5 -> {
-                        //user
-                        return Global.hmUser.get(his.getCreatedBy());
-                    }
-                    case 6 -> {
                         //paid
                         return his.getOrderStatusName();
                     }
-                    case 7 -> {
+                    case 6 -> {
                         return his.getVouTotal();
+                    }
+                    case 7 -> {
+                        return his.isInvUpdate();
                     }
                     case 8 -> {
                         return his.isPost();

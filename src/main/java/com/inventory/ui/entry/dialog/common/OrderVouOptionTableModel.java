@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderVouOptionTableModel extends AbstractTableModel {
 
     private List<OrderHis> listOrderHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Status", "Post", "Select"};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Status", "Inv-Update", "Post", "Select"};
     @Getter
     private int size = 0;
 
@@ -45,13 +45,13 @@ public class OrderVouOptionTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == 7;
+        return column == 8;
     }
 
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6, 7 -> {
+            case 6, 7, 8 -> {
                 return Boolean.class;
             }
         }
@@ -90,9 +90,12 @@ public class OrderVouOptionTableModel extends AbstractTableModel {
                         return his.getOrderStatusName();
                     }
                     case 6 -> {
-                        return his.isPost();
+                        return his.isInvUpdate();
                     }
                     case 7 -> {
+                        return his.isPost();
+                    }
+                    case 8 -> {
                         return his.isSelect();
                     }
                 }

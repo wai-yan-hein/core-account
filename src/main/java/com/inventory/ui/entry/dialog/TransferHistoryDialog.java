@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,29 +49,20 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
      * Creates new form SaleVouSearchDialog
      */
     private final TransferVouSearchTableModel tableModel = new TransferVouSearchTableModel();
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private InventoryRepo inventoryRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private DepartmentUserAutoCompleter departmentAutoCompleter;
+    @Setter
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private int row = 0;
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public TransferHistoryDialog(JFrame frame) {
         super(frame, Dialog.ModalityType.MODELESS);
@@ -121,9 +113,10 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(200);
         tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(200);
         tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(5);
+        tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(10);
+        tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(10);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
-        tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtSearch);
@@ -167,6 +160,8 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
             filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         }
         txtRecord.setValue(0);
+        txtQty.setValue(0);
+        txtBag.setValue(0);
         tableModel.clear();
         inventoryRepo.getTrasnfer(filter)
                 .doOnNext(obj -> btnSearch.setEnabled(false))
@@ -186,6 +181,8 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
 
     private void calTotal() {
         txtRecord.setValue(tableModel.getSize());
+        txtQty.setValue(tableModel.getQty());
+        txtBag.setValue(tableModel.getBag());
     }
 
     private void select() {
@@ -262,6 +259,10 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         jPanel2 = new javax.swing.JPanel();
         lblTtlRecord = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
+        lblTtlRecord1 = new javax.swing.JLabel();
+        txtQty = new javax.swing.JFormattedTextField();
+        txtBag = new javax.swing.JFormattedTextField();
+        lblTtlRecord2 = new javax.swing.JLabel();
         btnSearch = new javax.swing.JButton();
 
         setTitle("Transfer Voucher Search Dialog");
@@ -512,11 +513,25 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblTtlRecord.setFont(Global.lableFont);
-        lblTtlRecord.setText("Total Record :");
+        lblTtlRecord.setText("Record :");
 
         txtRecord.setEditable(false);
         txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtRecord.setFont(Global.amtFont);
+
+        lblTtlRecord1.setFont(Global.lableFont);
+        lblTtlRecord1.setText("Qty :");
+
+        txtQty.setEditable(false);
+        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtQty.setFont(Global.amtFont);
+
+        txtBag.setEditable(false);
+        txtBag.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBag.setFont(Global.amtFont);
+
+        lblTtlRecord2.setFont(Global.lableFont);
+        lblTtlRecord2.setText("Bag :");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -527,15 +542,30 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTtlRecord2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
+
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtBag, txtQty, txtRecord});
+
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTtlRecord)
-                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlRecord1)
+                    .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtBag, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTtlRecord2))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -674,12 +704,16 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblTtlRecord;
+    private javax.swing.JLabel lblTtlRecord1;
+    private javax.swing.JLabel lblTtlRecord2;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JFormattedTextField txtBag;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JTextField txtDep;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
+    private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRefNo;
     private javax.swing.JTextField txtRemark;

@@ -52,6 +52,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import lombok.Setter;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -70,40 +71,27 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private final TransferTableModel tranTableModel = new TransferTableModel();
     private final TransferPaddingTableModel tranPaddingTableModel = new TransferPaddingTableModel();
     private TransferHistoryDialog dialog;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
     private LocationAutoCompleter fromLocaitonCompleter;
     private LocationAutoCompleter toLocaitonCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private TransferHis io = new TransferHis();
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
     private int type;
     private FindDialog findDialog;
-    
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-    
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-    
-    public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
-        this.traderAutoCompleter = traderAutoCompleter;
-    }
+
+
 
     /**
      * Creates new form StockInOutEntry
+     * @param type
      */
     public Transfer(int type) {
         this.type = type;

@@ -561,7 +561,18 @@ public class AccountRepo {
                 .bodyToMono(TmpOpening.class)
                 .onErrorResume((e) -> {
                     log.info("getOpening " + e.getMessage());
-                    return Mono.empty();
+                    return Mono.just(new TmpOpening());
+                }).defaultIfEmpty(new TmpOpening());
+    }
+    public Mono<TmpOpening> getOpeningClosing(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/getCOAOpeningClosing")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToMono(TmpOpening.class)
+                .onErrorResume((e) -> {
+                    log.info("getOpeningClosing " + e.getMessage());
+                    return Mono.just(new TmpOpening());
                 }).defaultIfEmpty(new TmpOpening());
     }
 
