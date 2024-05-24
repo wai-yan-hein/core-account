@@ -80,7 +80,7 @@ public final class ProjectAutoCompleter implements KeyListener {
         this.filter = filter;
         this.userRepo = userRepo;
         if (this.filter) {
-            setProject(new Project(new ProjectKey("All", Global.compCode), "All"));
+            setProject(new Project(new ProjectKey("All", "All", Global.compCode), "All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
@@ -354,7 +354,7 @@ public final class ProjectAutoCompleter implements KeyListener {
             if (!containKey(e)) {
                 userRepo.searchProjectByCode(str).subscribe((t) -> {
                     if (this.filter) {
-                        t.add(new Project(new ProjectKey("All", Global.compCode), "All"));
+                        t.add(new Project(new ProjectKey("All", "All", Global.compCode), "All"));
                     }
                     projectTableModel.setListProject(t);
                     if (!t.isEmpty()) {
@@ -374,7 +374,7 @@ public final class ProjectAutoCompleter implements KeyListener {
     }
 
     public void clear() {
-        ProjectKey key = new ProjectKey("All", Global.compCode);
+        ProjectKey key = new ProjectKey("All", "All", Global.compCode);
         setProject(new Project(key, "All"));
     }
 }

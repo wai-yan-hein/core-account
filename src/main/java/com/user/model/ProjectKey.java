@@ -17,18 +17,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Embeddable
-public class ProjectKey implements Serializable{
+public class ProjectKey implements Serializable {
+
+    @Column(name = "project_code")
+    private String projectCode;
     @Column(name = "project_no")
     private String projectNo;
     @Column(name = "comp_code")
     private String compCode;
 
-    public ProjectKey(String projectNo, String compCode) {
+    public ProjectKey(String projectNo, String projectCode, String compCode) {
         this.projectNo = projectNo;
         this.compCode = compCode;
+        this.projectCode = projectCode;
     }
 
     public ProjectKey() {
     }
-    
+
 }
