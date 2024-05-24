@@ -1907,11 +1907,10 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         carNoLabel.setText("Car No");
 
         carNoLabel1.setFont(Global.lableFont);
-        carNoLabel1.setText("Contract No");
+        carNoLabel1.setText("Project No");
 
         txtProjectNo.setFont(Global.textFont);
         txtProjectNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtProjectNo.setEnabled(false);
         txtProjectNo.setName("txtCurrency"); // NOI18N
         txtProjectNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1990,7 +1989,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCus)
-                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                    .addComponent(txtSaleDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
                     .addComponent(txtVouNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -2012,7 +2011,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
                     .addComponent(txtCurrency)
                     .addComponent(txtReference))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

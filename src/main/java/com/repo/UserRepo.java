@@ -740,9 +740,9 @@ public class UserRepo {
                 .collectList();
     }
     
-    public Mono<Project> find(String projectCode) {
-        ProjectKey key = new ProjectKey(null, projectCode, Global.compCode);
-        if (Util1.isNullOrEmpty(key.getProjectCode())) {
+    public Mono<Project> find(String projectNo) {
+        ProjectKey key = new ProjectKey(projectNo, Global.compCode);
+        if (Util1.isNullOrEmpty(key.getProjectNo())) {
             return Mono.empty();
         }
         if (localdatabase) {
@@ -751,7 +751,7 @@ public class UserRepo {
         return userApi.get()
                 .uri(builder -> builder.path("/user/findProject")
                 .queryParam("projectNo", key.getProjectNo())
-                .queryParam("projectCode", projectCode)
+//                .queryParam("projectCode", projectCode)
                 .queryParam("compCode", key.getCompCode())
                 .build())
                 .retrieve().bodyToMono(Project.class);

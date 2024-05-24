@@ -26,10 +26,9 @@ public class ProjectKey implements Serializable {
     @Column(name = "comp_code")
     private String compCode;
 
-    public ProjectKey(String projectNo, String projectCode, String compCode) {
+    public ProjectKey(String projectNo, String compCode) {
         this.projectNo = projectNo;
         this.compCode = compCode;
-        this.projectCode = projectCode;
     }
 
     public ProjectKey() {
