@@ -352,7 +352,7 @@ public final class ProjectAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                userRepo.searchProjectByCode(str).subscribe((t) -> {
+                userRepo.searchProject().subscribe((t) -> {
                     if (this.filter) {
                         t.add(new Project(new ProjectKey("All", Global.compCode), "All"));
                     }

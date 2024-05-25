@@ -36,22 +36,22 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ProjectSetup extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
-    
+
     private UserRepo userRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private final ProjectTableModel projectTableModel = new ProjectTableModel();
     private Project p = new Project();
     private FindDialog findDialog;
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
@@ -66,22 +66,22 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         initFormat();
         initKeyListener();
     }
-    
+
     public void initMain() {
         initTable();
         initFind();
         searchProject();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblProject);
     }
-    
+
     private void initFormat() {
         txtBudget.setFormatterFactory(Util1.getDecimalFormat());
         txtBudget.setHorizontalAlignment(JTextField.RIGHT);
     }
-    
+
     private void initKeyListener() {
         txtProjectNo.addKeyListener(this);
         txtProjectName.addKeyListener(this);
@@ -90,9 +90,9 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         txtStartDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtEndDate.getDateEditor().getUiComponent().setName("txtEndDate");
         txtEndDate.getDateEditor().getUiComponent().addKeyListener(this);
-        
+
     }
-    
+
     private void initTable() {
         tblProject.setModel(projectTableModel);
         tblProject.getTableHeader().setFont(Global.textFont);
@@ -105,14 +105,14 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
             setProject(projectTableModel.get(row));
         });
     }
-    
+
     private void initDate() {
         txtStartDate.setDateFormatString(Global.dateFormat);
         txtEndDate.setDateFormatString(Global.dateFormat);
         txtStartDate.setDate(Util1.getTodayDate());
         txtEndDate.setDate(Util1.getTodayDate());
     }
-    
+
     private void initFoucsAdapter() {
         txtProjectNo.addFocusListener(fa);
         txtProjectName.addFocusListener(fa);
@@ -134,14 +134,14 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
             }
         }
     };
-    
+
     private void setProject(Project p) {
         this.p = p;
-        txtProjectNo.setText(p.getKey().getProjectNo());
+        txtProjectNo.setText(p.getKey().getProjectCode());
         txtProjectName.setText(p.getProjectName());
         txtBudget.setValue(p.getBudget());
-        txtStartDate.setDate(p.getStartDate());
-        txtEndDate.setDate(p.getEndDate());
+        txtStartDate.setDate(Util1.convertToDate(p.getStartDate()));
+        txtEndDate.setDate(Util1.convertToDate(p.getEndDate()));
         cboStatus.setSelectedIndex(ProjectStatus.valueOf(p.getProjectStatus()).ordinal());
         if (DateLockUtil.isLockDate(p.getStartDate()) || DateLockUtil.isLockDate(p.getStartDate())) {
             lblStatus.setText(DateLockUtil.MESSAGE);
@@ -150,7 +150,7 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         }
         lblStatus.setText("EDIT");
     }
-    
+
     private void disableForm(boolean status) {
         txtProjectNo.setEnabled(status);
         txtProjectName.setEnabled(status);
@@ -160,9 +160,9 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
-        
+
     }
-    
+
     private void saveProject() {
         if (isValidEntry()) {
             if (DateLockUtil.isLockDate(txtStartDate.getDate())) {
@@ -186,14 +186,14 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-    
+
     private void sendMessage(String mes) {
         userRepo.sendDownloadMessage(MessageType.PROJECT, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-    
+
     private void clear() {
         txtProjectNo.setText(null);
         txtProjectName.setText(null);
@@ -203,7 +203,7 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         progress.setIndeterminate(false);
         txtProjectNo.requestFocus();
     }
-    
+
     private boolean isValidEntry() {
         String projectNo = txtProjectNo.getText();
         if (projectNo.isEmpty()) {
@@ -223,27 +223,28 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
             txtEndDate.requestFocus();
             return false;
         } else {
-            String pNo =txtProjectNo.getText();
-            ProjectKey key = new ProjectKey();
-            key.setCompCode(Global.compCode);
-            key.setProjectNo(pNo);
+            String pNo = txtProjectNo.getText();
             if (lblStatus.getText().equals("NEW")) {
-                if (userRepo.find(pNo).block() != null) {
-                    JOptionPane.showMessageDialog(this, "Duplicate Project No.");
-                    return false;
-                }
+                ProjectKey key = new ProjectKey();
+                key.setCompCode(Global.compCode);
+                key.setProjectCode(pNo);
+                key.setProjectNo(null);
+                p.setKey(key);
+//                if (userRepo.find(pNo).block() != null) {
+//                    JOptionPane.showMessageDialog(this, "Duplicate Project No.");
+//                    return false;
+//                }
             }
-            p.setKey(key);
             ProjectStatus s = (ProjectStatus) cboStatus.getSelectedItem();
             p.setProjectStatus(s.name());
             p.setProjectName(txtProjectName.getText());
-            p.setStartDate(txtStartDate.getDate());
-            p.setEndDate(txtEndDate.getDate());
+            p.setStartDate(Util1.toLocalDate(txtStartDate.getDate()));
+            p.setEndDate(Util1.toLocalDate(txtEndDate.getDate()));
             p.setBudget(Util1.getDouble(txtBudget.getValue()));
         }
         return true;
     }
-    
+
     private void searchProject() {
         progress.setIndeterminate(true);
         userRepo.searchProject().subscribe((t) -> {
@@ -452,52 +453,52 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
     @Override
     public void selected(Object source, Object selectObj) {
     }
-    
+
     @Override
     public void save() {
         saveProject();
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
     }
-    
+
     @Override
     public void refresh() {
         searchProject();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -527,9 +528,9 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-    
+
     private boolean isEnter(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_ENTER;
     }
-    
+
 }

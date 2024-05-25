@@ -41,7 +41,7 @@ public class ProjectTableModel extends AbstractTableModel {
             Project p = listProject.get(row);
             switch (column) {
                 case 0 -> {
-                    return p.getKey().getProjectNo();
+                    return p.getKey().getProjectCode();
                 }
                 case 1 -> {
                     return p.getProjectName();

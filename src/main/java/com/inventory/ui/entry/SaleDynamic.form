@@ -88,7 +88,7 @@
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="txtCus" max="32767" attributes="0"/>
-                      <Component id="txtSaleDate" alignment="1" pref="95" max="32767" attributes="0"/>
+                      <Component id="txtSaleDate" alignment="1" pref="98" max="32767" attributes="0"/>
                       <Component id="txtVouNo" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -115,7 +115,7 @@
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="txtDueDate" alignment="0" pref="95" max="32767" attributes="0"/>
+                      <Component id="txtDueDate" alignment="0" pref="98" max="32767" attributes="0"/>
                       <Component id="txtCurrency" max="32767" attributes="0"/>
                       <Component id="txtReference" max="32767" attributes="0"/>
                   </Group>
@@ -417,7 +417,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Contract No"/>
+            <Property name="text" type="java.lang.String" value="Project No"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtProjectNo">
@@ -428,7 +428,6 @@
             <Property name="disabledTextColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="0" green="0" red="0" type="rgb"/>
             </Property>
-            <Property name="enabled" type="boolean" value="false"/>
             <Property name="name" type="java.lang.String" value="txtCurrency" noResource="true"/>
           </Properties>
           <Events>
