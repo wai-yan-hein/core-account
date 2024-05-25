@@ -10,6 +10,7 @@ import com.acc.editor.DateAutoCompleter;
 import com.common.ComponentUtil;
 import com.common.ExcelExporter;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
@@ -120,6 +121,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
      */
     public Reports() {
         initComponents();
+        initButton();
     }
 
     public void initMain() {
@@ -133,6 +135,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         initDate();
         initFind();
         getReport();
+    }
+
+    private void initButton() {
+        btnExcel.setToolTipText("Export Excel");
+        btnSIF.setToolTipText("Show In Folder");
     }
 
     private void initFind() {
@@ -1280,16 +1287,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtProjectNo.selectAll();        // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoFocusGained
 
-    private void btnExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcelActionPerformed
-        // TODO add your handling code here:
-        report(true);
-    }//GEN-LAST:event_btnExcelActionPerformed
-
-    private void btnSIFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSIFActionPerformed
-        // TODO add your handling code here:
-        Util1.openFolder(exporter.getLastPath());
-    }//GEN-LAST:event_btnSIFActionPerformed
-
     private void tblReportMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblReportMouseClicked
         // TODO add your handling code here:
         setEnableExcel();
@@ -1326,6 +1323,16 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private void txtEmployeeKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtEmployeeKeyReleased
         // TODO add your handling code here:
     }//GEN-LAST:event_txtEmployeeKeyReleased
+
+    private void btnSIFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSIFActionPerformed
+        // TODO add your handling code here:
+        Util1.openFolder(exporter.getLastPath());
+    }//GEN-LAST:event_btnSIFActionPerformed
+
+    private void btnExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcelActionPerformed
+        // TODO add your handling code here:
+        report(true);
+    }//GEN-LAST:event_btnExcelActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

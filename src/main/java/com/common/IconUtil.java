@@ -30,9 +30,17 @@ public class IconUtil {
     public static final String WARE_HOUSE = "warehouse.svg";
     public static final String STOCK = "stock.svg";
     public static final String GROUP = "group.svg";
+    public static final String EXCEL = "excel.svg";
+    public static final String FOLDER = "folder.svg";
+
     public static final Icon getIcon(String name) {
         FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.8f);
         icon.setColorFilter(colorFilter);
+        return icon;
+    }
+
+    public static final Icon getIconOrg(String name) {
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.8f);
         return icon;
     }
 
@@ -51,6 +59,11 @@ public class IconUtil {
     public static final Icon getIconSmall(String name, Color iconColor) {
         FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.6f);
         icon.setColorFilter(new FlatSVGIcon.ColorFilter(color -> iconColor));
+        return icon;
+    }
+
+    public static final Icon getIconSmallOrg(String name) {
+        FlatSVGIcon icon = new FlatSVGIcon("svg/" + name, 0.6f);
         return icon;
     }
     private static final FlatSVGIcon.ColorFilter colorFilter = new FlatSVGIcon.ColorFilter(color -> {

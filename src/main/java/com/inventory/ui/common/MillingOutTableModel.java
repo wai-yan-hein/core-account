@@ -37,42 +37,6 @@ public class MillingOutTableModel extends AbstractTableModel {
     @Setter
     private SelectionObserver observer;
     private final List<MillingOutDetailKey> deleteList = new ArrayList();
-    private InventoryRepo inventoryRepo;
-    private JLabel lblStockName;
-    private JButton btnProgress;
-    private JDateChooser vouDate;
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public JLabel getLblStockName() {
-        return lblStockName;
-    }
-
-    public void setLblStockName(JLabel lblStockName) {
-        this.lblStockName = lblStockName;
-    }
-
-    public JButton getBtnProgress() {
-        return btnProgress;
-    }
-
-    public void setBtnProgress(JButton btnProgress) {
-        this.btnProgress = btnProgress;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -220,6 +184,7 @@ public class MillingOutTableModel extends AbstractTableModel {
                         double price = Util1.getDouble(value);
                         if (price > 0) {
                             sd.setPrice(price);
+                            sd.setRecentPrice(price);
                             calculateAmount(sd);
                             setSelection(row + 1, 0);
                         }
@@ -235,6 +200,10 @@ public class MillingOutTableModel extends AbstractTableModel {
                     case 9 -> {
                         if (value instanceof Boolean t) {
                             sd.setCalculate(t);
+                            if (!t) {
+                                sd.setPrice(sd.getRecentPrice());
+                                sd.setAmount(sd.getPrice() * sd.getQty());
+                            }
                         }
                     }
                 }
