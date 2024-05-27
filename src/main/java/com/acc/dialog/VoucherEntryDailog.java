@@ -26,7 +26,9 @@ import com.user.editor.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
+import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Currency;
+import com.user.model.Project;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -66,6 +68,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private UserRepo userRepo;
     private COAAutoCompleter completer;
     private CurrencyAutoCompleter currencyAutoCompleter;
+    private ProjectAutoCompleter projectAutoCompleter;
 
     public void setVouType(String vouType) {
         this.vouType = vouType;
@@ -129,6 +132,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private void initCompleter() {
         completer = new COAAutoCompleter(txtCB, null, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCur, null);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProject, null, false);
         accountRepo.getCashBank().doOnSuccess((t) -> {
             completer.setListCOA(t);
         }).subscribe();
@@ -140,6 +144,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setCurrency(t);
+        }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
         }).subscribe();
     }
 
@@ -197,6 +204,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     }).subscribe();
                     userRepo.findCurrency(vgl.getCurCode()).doOnSuccess((t) -> {
                         currencyAutoCompleter.setCurrency(t);
+                    }).subscribe();
+                    userRepo.find(vgl.getProjectNo()).doOnSuccess((t) -> {
+                        projectAutoCompleter.setProject(t);
                     }).subscribe();
                     if (DateLockUtil.isLockDate(vgl.getGlDate())) {
                         enableForm(false);
@@ -285,6 +295,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     public boolean isValidData() {
         ChartOfAccount coa = completer.getCOA();
         Currency currency = currencyAutoCompleter.getCurrency();
+        Project project = projectAutoCompleter.getProject();
         if (coa == null) {
             JOptionPane.showMessageDialog(tblJournal, "Please select Cash / Bank");
             return false;
@@ -304,6 +315,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 g.setTranSource(vouType);
                 g.setGlVouNo(txtVouNo.getText());
                 g.setEdit(tableModel.isEdit());
+                g.setProjectNo(project == null ? null : project.getKey().getProjectNo());
                 if (lblStatus.getText().equals("EDIT")) {
                     g.setModifyBy(Global.loginUser.getUserCode());
                 }
@@ -404,6 +416,8 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         txtCB = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtCur = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        txtProject = new javax.swing.JTextField();
         scroll = new javax.swing.JScrollPane();
         tblJournal = new javax.swing.JTable();
         panelFooter = new javax.swing.JPanel();
@@ -523,6 +537,11 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
         txtCur.setFont(Global.textFont);
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Project No");
+
+        txtProject.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -534,32 +553,36 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtVouNo)
-                    .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE))
+                    .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
+                    .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lable1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFor, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
-                    .addComponent(txtFrom))
+                    .addComponent(txtFor, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
+                    .addComponent(txtFrom, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
-                    .addComponent(txtNa))
+                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
+                    .addComponent(txtNa, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCur)
-                    .addComponent(txtCB, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE))
+                    .addComponent(txtCur, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
+                    .addComponent(txtCB, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtProject, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -572,7 +595,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                             .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel4)
                             .addComponent(jLabel6)
-                            .addComponent(txtCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9)
+                            .addComponent(txtProject, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -816,6 +841,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JLabel lable1;
     private javax.swing.JLabel lblMessage;
@@ -830,6 +856,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JTextField txtFor;
     private javax.swing.JTextField txtFrom;
     private javax.swing.JTextField txtNa;
+    private javax.swing.JTextField txtProject;
     private javax.swing.JTextField txtRefrence;
     private com.toedter.calendar.JDateChooser txtVouDate;
     private javax.swing.JTextField txtVouNo;

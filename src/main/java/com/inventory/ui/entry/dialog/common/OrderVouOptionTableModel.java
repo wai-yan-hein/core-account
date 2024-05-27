@@ -111,7 +111,7 @@ public class OrderVouOptionTableModel extends AbstractTableModel {
         try {
             OrderHis his = listOrderHis.get(rowIndex);
             switch (columnIndex) {
-                case 7 -> {
+                case 8 -> {
                     if (aValue instanceof Boolean select) {
                         his.setSelect(select);
                     }

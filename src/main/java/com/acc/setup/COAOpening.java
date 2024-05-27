@@ -173,8 +173,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         });
         coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         coaAutoCompleter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         projectAutoCompleter.setObserver(this);
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
 
     private void initProperty() {
@@ -219,7 +222,9 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(accountRepo));
         tblOpening.getColumnModel().getColumn(4).setCellEditor(new TraderCellEditor(accountRepo));
-        tblOpening.getColumnModel().getColumn(5).setCellEditor(new ProjectCellEditor(userRepo));
+        userRepo.searchProject().doOnSuccess((t) -> {
+            tblOpening.getColumnModel().getColumn(5).setCellEditor(new ProjectCellEditor(t));
+        }).subscribe();
         userRepo.getCurrency().doOnSuccess((t) -> {
             tblOpening.getColumnModel().getColumn(6).setCellEditor(new CurrencyEditor(t));
         }).subscribe();

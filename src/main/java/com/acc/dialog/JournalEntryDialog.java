@@ -83,7 +83,10 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initCombo() {
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, false);
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
 
     private void initFocusListener() {

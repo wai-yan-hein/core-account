@@ -124,7 +124,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
@@ -145,6 +145,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
+        }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
         }).subscribe();
     }
 

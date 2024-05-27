@@ -6,7 +6,6 @@
 package com.user.editor;
 
 import com.common.Global;
-import com.repo.UserRepo;
 import com.user.model.Project;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -14,6 +13,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -28,7 +28,7 @@ public class ProjectCellEditor extends AbstractCellEditor implements TableCellEd
 
     private JComponent component = null;
     private ProjectAutoCompleter completer;
-    private UserRepo userRepo;
+    private List<Project> listData;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -42,8 +42,8 @@ public class ProjectCellEditor extends AbstractCellEditor implements TableCellEd
 
     };
 
-    public ProjectCellEditor(UserRepo userRepo) {
-        this.userRepo = userRepo;
+    public ProjectCellEditor(List<Project> listData) {
+        this.listData = listData;
     }
 
     @Override
@@ -83,7 +83,8 @@ public class ProjectCellEditor extends AbstractCellEditor implements TableCellEd
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new ProjectAutoCompleter(jtf, userRepo, this, false);
+        completer = new ProjectAutoCompleter(jtf, this, false);
+        completer.setListProject(listData);
         return component;
     }
 

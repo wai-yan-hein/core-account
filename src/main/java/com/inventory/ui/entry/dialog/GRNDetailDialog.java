@@ -68,7 +68,7 @@ public class GRNDetailDialog extends javax.swing.JDialog {
     public void searchGRNDetail(String batchNo) {
         if (!batchNo.isEmpty()) {
             progress.setIndeterminate(true);
-            inventoryRepo.getGRNDetailBatch(batchNo, 0).subscribe((t) -> {
+            inventoryRepo.getGRNDetail(batchNo).subscribe((t) -> {
                 grnTableModel.setListDetail(t);
                 progress.setIndeterminate(false);
             }, (e) -> {

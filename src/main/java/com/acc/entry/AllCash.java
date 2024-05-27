@@ -290,8 +290,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         traderAutoCompleter.setObserver(this);
         batchNoAutoCompeter = new BatchNoAutoCompeter(txtBatchNo, accountRepo, null, true);
         batchNoAutoCompeter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         projectAutoCompleter.setObserver(this);
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
 
     }
 
@@ -336,7 +339,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountRepo));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new ProjectCellEditor(userRepo));
+        userRepo.searchProject().doOnSuccess((t) -> {
+            tblCash.getColumnModel().getColumn(6).setCellEditor(new ProjectCellEditor(t));
+        }).subscribe();
         tblCash.getColumnModel().getColumn(7).setCellEditor(new TraderCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.doOnSuccess((t) -> {

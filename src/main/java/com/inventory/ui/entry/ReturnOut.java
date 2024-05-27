@@ -208,8 +208,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
         }).subscribe();
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, false);
         projectAutoCompleter.setObserver(this);
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
 
     private void initKeyListener() {
@@ -579,7 +582,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             txtCus.requestFocus();
         }
     }
-
 
     private void observeMain() {
         observer.selected("control", this);

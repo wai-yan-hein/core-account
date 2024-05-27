@@ -265,6 +265,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setListDepartment(t);
         }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
 
     private void initCombo() {
@@ -284,7 +287,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         dateAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
         batchAutoCompeter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         projectAutoCompleter.setObserver(this);
         labourGroupAutoCompleter = new LabourGroupAutoCompleter(txtLG, null, true);
         labourGroupAutoCompleter.setObserver(this);

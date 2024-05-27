@@ -61,7 +61,7 @@ import org.springframework.core.task.TaskExecutor;
 @Slf4j
 public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
-    
+
     private int selectRow = -1;
     private DateAutoCompleter dateAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
@@ -80,7 +80,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
      * Creates new form AparGlReport
      */
     private final GLListingTableModel glListingTableModel = new GLListingTableModel();
-    
+
     private COA3AutoCompleter cOAAutoCompleter;
     private SelectionObserver observer;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -88,34 +88,34 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private boolean isGLCal = false;
     private JProgressBar progress;
     private FindDialog findDialog;
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public GLReport() {
         initComponents();
         initKeyListener();
         initDateDecorator();
     }
-    
+
     private void initDateDecorator() {
         decorator = DateTableDecorator.decorate(panelDate);
         decorator.setObserver(this);
     }
-    
+
     private void createDateFilter() {
         HashMap<Integer, String> hmDate = new HashMap<>();
         HashMap<String, Integer> hmPage = new HashMap<>();
@@ -130,21 +130,21 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         decorator.setHmData(hmDate);
         decorator.refreshButton(dateAutoCompleter.getDateModel().getStartDate());
     }
-    
+
     private void initKeyListener() {
         txtDep.addKeyListener(this);
         txtCOA.addKeyListener(this);
         txtProjectNo.addKeyListener(this);
         ComponentUtil.addFocusListener(this);
     }
-    
+
     private void initTextBox() {
         ComponentUtil.setTextProperty(panelFooter);
         txtDrAmt.setFont(Global.menuFont);
         txtCrAmt.setFont(Global.menuFont);
         txtOB.setFont(Global.menuFont);
     }
-    
+
     public void initMain() {
         initTextBox();
         initCombo();
@@ -155,21 +155,21 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         createDateFilter();
         searchGLListing();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblGL);
     }
-    
+
     private void assingDefaultValue() {
         txtCurrency.setEnabled(ProUtil.isMultiCur());
     }
-    
+
     private void initTableModel() {
         tblGL.setModel(glListingTableModel);
         tblGL.setDefaultRenderer(Double.class, new GLTableCellRender(3, 4));
         tblGL.setDefaultRenderer(Object.class, new GLTableCellRender(3, 4));
     }
-    
+
     private void initTable() {
         tblGL.setAutoCreateRowSorter(false);
         tblGL.getTableHeader().setFont(Global.menuFont);
@@ -201,18 +201,18 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
     }
-    
+
     private String getCurCode() {
         if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currencyAutoCompleter.getCurrency().getCurCode();
     }
-    
+
     private List<String> getListDep() {
         return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
-    
+
     private String getTranSource() {
         if (tranSourceAutoCompleter == null || tranSourceAutoCompleter.getAutoText() == null) {
             return "-";
@@ -220,7 +220,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         return tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
                 : tranSourceAutoCompleter.getAutoText().getTranSource();
     }
-    
+
     private void searchGLListing() {
         if (!isGLCal) {
             long start = new GregorianCalendar().getTimeInMillis();
@@ -263,11 +263,11 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 lblCalTime.setText(pt / 1000 + " s");
                 tblGL.requestFocus();
             }).subscribe();
-            
+
         }
-        
+
     }
-    
+
     private void openTBDDialog(String coaCode, String coaName) {
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
@@ -286,7 +286,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setDateModel(dateAutoCompleter.getDateModel());
         dialog.searchTriBalDetail();
     }
-    
+
     private void calGLTotlaAmount() {
         List<VTriBalance> list = glListingTableModel.getListTBAL();
         double ttlDrAmt = list.stream().mapToDouble((t) -> t.getDrAmt()).sum();
@@ -297,13 +297,13 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         txtOB.setValue(outBal);
         txtOB.setForeground(outBal == 0 ? Color.green : Color.red);
     }
-    
+
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
         cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         cOAAutoCompleter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         projectAutoCompleter.setObserver(this);
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
         tranSourceAutoCompleter.setObserver(this);
@@ -323,8 +323,11 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
         }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
-    
+
     private void printGLListing() {
         try {
             progress.setIndeterminate(true);
@@ -351,31 +354,31 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             log.error("printGLListing : " + ex.getMessage());
         }
     }
-    
+
     public void clear() {
         txtCurrency.setText(null);
         txtDate.setText(null);
         txtDep.setText(null);
         txtCOA.setText(null);
     }
-    
+
     private void removeZero() {
         if (chkZero.isSelected()) {
             List<VTriBalance> mutableList = new ArrayList<>(glListingTableModel.getListTBAL());
             List<VTriBalance> listFilter = mutableList.stream().filter(t -> t.getDrAmt() + t.getCrAmt() != 0).toList();
             glListingTableModel.setListTBAL(listFilter);
-            
+
         } else {
             glListingTableModel.setListTBAL(glListingTableModel.getListOrg());
         }
     }
-    
+
     private void exportExcel() {
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
         exporter.exportTriBalance(glListingTableModel.getListTBAL(), "TriBlance");
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -892,51 +895,51 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-    
+
     @Override
     public void save() {
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
         printGLListing();
     }
-    
+
     @Override
     public void refresh() {
         searchGLListing();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
     }

@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProjectTableModel extends AbstractTableModel {
 
     private List<Project> listProject = new ArrayList();
-    private final String[] columnNames = {"Project No", "Project Name", "Status"};
+    private final String[] columnNames = {"Project No", "Project Name"};
 
     @Override
     public String getColumnName(int column) {
@@ -45,9 +45,6 @@ public class ProjectTableModel extends AbstractTableModel {
                 }
                 case 1 -> {
                     return p.getProjectName();
-                }
-                case 2 -> {
-                    return p.getProjectStatus();
                 }
             }
         } catch (Exception e) {

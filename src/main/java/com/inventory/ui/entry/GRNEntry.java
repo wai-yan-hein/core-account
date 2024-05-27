@@ -63,7 +63,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
-    
+
     private SelectionObserver observer;
     private JProgressBar progress;
     private TraderAutoCompleter traderAutoCompleter;
@@ -74,31 +74,31 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private GRNHistoryDialog dialog;
     private GRN grn = new GRN();
     private FindDialog findDialog;
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -112,18 +112,18 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         initKeyListener();
         actionMapping();
     }
-    
+
     public void initMain() {
         initCombo();
         initTable();
         initFind();
         assignDefaultValue();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblGRN);
     }
-    
+
     private void initFocusAdapter() {
         txtDate.addFocusListener(fa);
         txtTrader.addFocusListener(fa);
@@ -131,7 +131,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         txtRemark.addFocusListener(fa);
         txtLocation.addFocusListener(fa);
     }
-    
+
     private void initKeyListener() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -149,7 +149,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             }
         }
     };
-    
+
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
@@ -159,7 +159,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
     }
-    
+
     private void assignDefaultValue() {
         txtDate.setDate(Util1.getTodayDate());
         chkClose.setSelected(false);
@@ -167,23 +167,23 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             locationAutoCompleter.setLocation(tt);
         });
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblGRN.getActionMap().put(solve, new DeleteAction());
-        
+
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     private void deleteTran() {
         int row = tblGRN.convertRowIndexToModel(tblGRN.getSelectedRow());
         if (row >= 0) {
@@ -197,7 +197,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             }
         }
     }
-    
+
     private void initTable() {
         tableModel.setLblRec(lblRec);
         tableModel.setParent(tblGRN);
@@ -236,9 +236,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblGRN.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
     }
-    
+
     public boolean saveGRN(boolean print) {
         boolean status = false;
         try {
@@ -263,7 +263,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     progress.setIndeterminate(false);
                     observer.selected("save", false);
                 });
-                
+
             }
         } catch (HeadlessException ex) {
             log.error("savePur :" + ex.getMessage());
@@ -271,7 +271,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         }
         return status;
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -304,14 +304,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             grn.setRemark(txtRemark.getText());
             grn.setClosed(chkClose.isSelected());
             if (lblStatus.getText().equals("NEW")) {
-                String batchNo = txtBatchNo.getText();
-                if (!batchNo.isEmpty()) {
-                    batchNo = inventoryRepo.findByBatchNo(txtBatchNo.getText()).block().getBatchNo();
-                    if (!Util1.isNullOrEmpty(batchNo)) {
-                        JOptionPane.showMessageDialog(Global.parentForm, String.format("Batch No %s already exists.", txtBatchNo.getText()));
-                        return false;
-                    }
-                }
                 GRNKey key = new GRNKey();
                 key.setCompCode(Global.compCode);
                 key.setVouNo(null);
@@ -325,7 +317,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         }
         return status;
     }
-    
+
     private void setAllLocation() {
         List<GRNDetail> listSaleDetail = tableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -337,7 +329,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         }
         tableModel.setListDetail(listSaleDetail);
     }
-    
+
     private void clear() {
         disableForm(true);
         assignDefaultValue();
@@ -354,7 +346,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         grn = new GRN();
         focusTable();
     }
-    
+
     private void disableForm(boolean status) {
         txtDate.setEnabled(status);
         txtTrader.setEnabled(status);
@@ -366,7 +358,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         observer.selected("save", status);
         observer.selected("print", status);
     }
-    
+
     private void printVoucher(String vouNo, String reportName, boolean local) {
         if (local) {
 //            List<VPurchase> list = h2Repo.getSaleReport(vouNo);
@@ -381,7 +373,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             });
         }
     }
-    
+
     private void viewReport(byte[] t, String reportName) {
         if (reportName != null) {
             try {
@@ -410,7 +402,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 //            chkVou.requestFocus();
         }
     }
-    
+
     private void focusTable() {
         int rc = tblGRN.getRowCount();
         if (rc >= 1) {
@@ -421,7 +413,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             txtDate.requestFocusInWindow();
         }
     }
-    
+
     private void historyGRN() {
         if (dialog == null) {
             dialog = new GRNHistoryDialog(Global.parentForm);
@@ -434,7 +426,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         }
         dialog.search();
     }
-    
+
     public void setVoucher(GRN g) {
         if (g != null) {
             progress.setIndeterminate(true);
@@ -455,9 +447,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     locationAutoCompleter.setLocation(null);
                 }
             });
-            
+
             String vouNo = grn.getKey().getVouNo();
-            inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((t) -> {
+            inventoryRepo.getGRNDetail(vouNo).subscribe((t) -> {
                 tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (grn.isClosed()) {
@@ -490,10 +482,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
-            
+
         }
     }
-    
+
     private void deleteGRN() {
         String status = lblStatus.getText();
         switch (status) {
@@ -532,14 +524,14 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                             txtBatchNo.setEditable(false);
                         }
                     }).subscribe();
-                    
+
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -837,56 +829,56 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         } else if (source.equals("Location")) {
             setAllLocation();
         }
-        
+
     }
-    
+
     @Override
     public void save() {
         saveGRN(false);
     }
-    
+
     @Override
     public void delete() {
         deleteGRN();
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
         historyGRN();
     }
-    
+
     @Override
     public void print() {
         saveGRN(true);
     }
-    
+
     @Override
     public void refresh() {
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();

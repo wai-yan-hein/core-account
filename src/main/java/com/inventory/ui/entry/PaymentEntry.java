@@ -60,7 +60,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Slf4j
 public class PaymentEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-    
+
     private final PaymentTableModel tableModel = new PaymentTableModel();
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -75,23 +75,23 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     private PaymentHistoryDialog dialog;
     private String tranOption;
     private FindDialog findDialog;
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
@@ -109,30 +109,30 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         configureOption();
         actionMapping();
     }
-    
+
     private void configureOption() {
         lblTrader.setText(tranOption.equals("C") ? "Customer" : "Supplier");
     }
-    
+
     private void initFormat() {
         ComponentUtil.setTextProperty(this);
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPayment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
         tblPayment.getActionMap().put(solve, new DeleteAction());
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     private void deleteTran() {
         if (lblStatus.getText().equals("EDIT")) {
             int row = tblPayment.convertRowIndexToModel(tblPayment.getSelectedRow());
@@ -151,11 +151,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             JOptionPane.showMessageDialog(this, "Can't delete in payment mode.");
         }
     }
-    
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
         userRepo.getCurrency().doOnSuccess((t) -> {
@@ -168,12 +168,15 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             t.add(new ChartOfAccount());
             cOAAutoCompleter.setListCOA(t);
         }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
-    
+
     private void initFocusAdapter() {
         ComponentUtil.addFocusListener(this);
     }
-    
+
     public void initMain() {
         initDate();
         initCombo();
@@ -181,21 +184,21 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         initRowHeader();
         initFind();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblPayment);
     }
-    
+
     private void initDate() {
         txtVouDate.setDate(Util1.getTodayDate());
     }
-    
+
     private void initRowHeader() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPayment, 30);
         scroll.setRowHeaderView(list);
     }
-    
+
     private void initTable() {
         tableModel.setObserver(this);
         tableModel.setTable(tblPayment);
@@ -223,7 +226,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         tblPayment.setDefaultRenderer(String.class, new DecimalFormatRender());
         tblPayment.setDefaultRenderer(Double.class, new DecimalFormatRender());
     }
-    
+
     private void searchTraderBalance() {
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
@@ -247,7 +250,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             }
         }
     }
-    
+
     private void calTotalPayment() {
         double creditAmt = Util1.getDouble(txtCreditAmt.getValue());
         double payment = tableModel.getListDetail().stream().mapToDouble((obj) -> Util1.getDouble(obj.getPayAmt())).sum();
@@ -257,7 +260,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         txtDifAmt.setValue(outstanding - creditAmt);
         txtRecord.setValue(tableModel.getListDetail().size());
     }
-    
+
     private void savePayment(boolean print) {
         if (isValidEntry() && tableModel.isValidEntry()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
@@ -283,7 +286,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             }).subscribe();
         }
     }
-    
+
     private void enableToolBar(boolean status) {
         progress.setIndeterminate(!status);
         observer.selected("refresh", status);
@@ -291,7 +294,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         observer.selected("save", false);
         observer.selected("history", true);
     }
-    
+
     private void printVoucher(String vouNo) {
         enableToolBar(false);
         inventoryRepo.paymentReport(vouNo).subscribe((t) -> {
@@ -317,7 +320,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             }
         });
     }
-    
+
     private boolean isValidEntry() {
         Trader t = traderAutoCompleter.getTrader();
         if (t == null) {
@@ -371,7 +374,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         }
         return true;
     }
-    
+
     private void clear() {
         traderAutoCompleter.setTrader(null);
         projectAutoCompleter.setProject(null);
@@ -391,7 +394,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         enableForm(true);
         ph = new PaymentHis();
     }
-    
+
     private void historyPayment() {
         if (dialog == null) {
             dialog = new PaymentHistoryDialog(Global.parentForm, tranOption);
@@ -406,7 +409,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         }
         dialog.search();
     }
-    
+
     private void setVoucherDetail(PaymentHis ph) {
         this.ph = ph;
         String vouNo = ph.getVouNo();
@@ -461,14 +464,14 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             tblPayment.requestFocus();
         }).subscribe();
     }
-    
+
     private void enableForm(boolean status) {
         ComponentUtil.enableForm(this, status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-    
+
     private void deletePayment() {
         String status = lblStatus.getText();
         switch (status) {
@@ -502,7 +505,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-    
+
     private void generateFIFOPayment() {
         List<PaymentHisDetail> list = tableModel.getListDetail();
         list.stream().forEach((p) -> {
@@ -532,7 +535,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             txtAmount.requestFocus();
         }
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -935,41 +938,41 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             searchTraderBalance();
         }
     }
-    
+
     @Override
     public void save() {
         savePayment(false);
     }
-    
+
     @Override
     public void delete() {
         deletePayment();
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
         historyPayment();
     }
-    
+
     @Override
     public void print() {
         savePayment(true);
     }
-    
+
     @Override
     public void refresh() {
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();

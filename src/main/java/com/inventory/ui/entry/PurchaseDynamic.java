@@ -1402,8 +1402,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         }).subscribe();
         txtRemark.setText(g.getRemark());
         String vouNo = g.getKey().getVouNo();
-        Integer deptId = g.getDeptId();
-        inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((list) -> {
+        inventoryRepo.getGRNDetail(vouNo).subscribe((list) -> {
             list.forEach((t) -> {
                 PurHisDetail pd = new PurHisDetail();
                 pd.setStockCode(t.getStockCode());

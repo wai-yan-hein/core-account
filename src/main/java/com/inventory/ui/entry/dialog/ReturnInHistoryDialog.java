@@ -98,7 +98,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
         }).subscribe();
@@ -116,6 +116,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
+        }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
         }).subscribe();
         if (inventoryRepo.localDatabase) {
             chkLocal.setVisible(true);

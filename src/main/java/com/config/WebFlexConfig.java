@@ -9,7 +9,11 @@ import com.common.TokenFile;
 import com.common.Util1;
 import com.user.model.AuthenticationRequest;
 import com.user.model.AuthenticationResponse;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.time.Duration;
+import javax.net.ssl.SSLException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -49,7 +53,7 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
-                .baseUrl(getUrl(url, port))
+                .baseUrl(getUrls(url, port))
                 .clientConnector(reactorClientHttpConnector())
                 .build();
 
@@ -66,25 +70,11 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
-                .baseUrl(getUrl(url, port))
+                .baseUrl(getUrls(url, port))
                 .clientConnector(reactorClientHttpConnector())
                 .build();
     }
 
-    @Bean
-    public WebClient accountApiSecond() {
-        String url = environment.getProperty("account.url");
-        return WebClient.builder()
-                .exchangeStrategies(ExchangeStrategies.builder()
-                        .codecs(configurer -> configurer
-                        .defaultCodecs()
-                        .maxInMemorySize(100 * 1024 * 1024))
-                        .build())
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
-                .baseUrl(getUrl(url, 8080))
-                .clientConnector(reactorClientHttpConnector())
-                .build();
-    }
 
     @Bean
     public WebClient userApi() {
@@ -97,7 +87,7 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
-                .baseUrl(getUrl(url, port))
+                .baseUrl(getUrls(url, port))
                 .clientConnector(reactorClientHttpConnector())
                 .build();
     }
@@ -150,6 +140,21 @@ public class WebFlexConfig {
         String hostName = environment.getProperty("host.name");
         if (hostName != null) {
             String protocol = "http";
+            String path = "/"; // or whatever path you want to use
+            return UriComponentsBuilder.newInstance()
+                    .scheme(protocol)
+                    .host(Util1.getServerIp(hostName))
+                    .port(port)
+                    .path(path)
+                    .toUriString();
+        }
+        return url;
+    }
+
+    private String getUrls(String url, int port) {
+        String hostName = environment.getProperty("host.name");
+        if (hostName != null) {
+            String protocol = "https";
             String path = "/"; // or whatever path you want to use
             return UriComponentsBuilder.newInstance()
                     .scheme(protocol)
@@ -217,7 +222,14 @@ public class WebFlexConfig {
 
     @Bean
     public HttpClient httpClient() {
-        return HttpClient.create(connectionProvider());
+        try {
+            SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+            return HttpClient.create(connectionProvider())
+                    .secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
+        } catch (SSLException ex) {
+            log.error("Error creating HttpClient: " + ex.getMessage());
+        }
+        return HttpClient.create(); // Return a default HttpClient if an error occurs
     }
 
     @Bean

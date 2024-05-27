@@ -9,10 +9,12 @@ import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.ProUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.Expense;
 import com.inventory.entity.ExpenseKey;
 import com.inventory.ui.common.ExpenseTableModel;
@@ -32,6 +34,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,28 +49,14 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private int selectRow = - 1;
     private Expense exp = new Expense();
     private ExpenseTableModel expenseTableModel = new ExpenseTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private AccountRepo accountRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
     private boolean needAccount;
-
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
-    public void setAccountRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -86,7 +75,14 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         initComponents();
         initKeyListener();
         initSpinner();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initSpinner() {
@@ -95,11 +91,10 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
         initTable();
         initCombo();
-        searchCategory();
-        txtName.requestFocus();
+        txtUserCode.requestFocus();
     }
 
     private void initCombo() {
@@ -121,10 +116,15 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         tblCategory.addKeyListener(this);
     }
 
-    private void searchCategory() {
-        inventoryRepo.getExpense().subscribe((t) -> {
+    public void search() {
+        inventoryRepo.getExpense().doOnSuccess((t) -> {
             expenseTableModel.setListDetail(t);
-        });
+        }).subscribe();
+        setVisible(true);
+    }
+
+    public List<Expense> getListExpense() {
+        return expenseTableModel.getListDetail();
     }
 
     private void initTable() {
@@ -172,14 +172,20 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void save() {
         if (isValidEntry()) {
-            inventoryRepo.saveExpense(exp).subscribe((t) -> {
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
+            inventoryRepo.saveExpense(exp).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     expenseTableModel.setObject(t, selectRow);
                 } else {
                     expenseTableModel.addObject(t);
                 }
                 clear();
-            });
+            }).doOnError((e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }).subscribe();
 
         }
     }
@@ -187,7 +193,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private void clear() {
         txtName.setText(null);
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         cboAccount.setSelectedItem(null);
         cboAccount.repaint();
         spPercent.setValue(0);
@@ -195,7 +201,9 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setForeground(Color.green);
         exp = new Expense();
         tblCategory.requestFocus();
-        txtName.requestFocus();
+        txtUserCode.requestFocus();
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
     }
 
     private void setExpenseValue() {
@@ -242,7 +250,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCategory = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         btnSave = new javax.swing.JButton();
@@ -256,8 +264,8 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         spPercent = new javax.swing.JSpinner();
         jLabel5 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
+        progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Expense Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
@@ -276,10 +284,10 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         tblCategory.setName("tblCategory"); // NOI18N
         jScrollPane1.setViewportView(tblCategory);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -383,11 +391,11 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtUserCode)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
                         .addGap(26, 26, 26)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnClear)))
                 .addContainerGap())
         );
 
@@ -429,20 +437,25 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -468,14 +481,14 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -521,10 +534,11 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JSpinner spPercent;
     private javax.swing.JTable tblCategory;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 

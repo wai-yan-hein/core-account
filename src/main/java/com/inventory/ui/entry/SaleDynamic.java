@@ -642,8 +642,11 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         }).subscribe();
         carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false, "Sale");
         carNoAutoCompleter.setObserver(this);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, false);
         projectAutoCompleter.setObserver(this);
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
+        }).subscribe();
     }
 
     private void initKeyListener() {

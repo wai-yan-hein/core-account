@@ -757,7 +757,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/grn/getBatchList")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("batchNo", batchNo)
                 .build())
                 .retrieve().bodyToFlux(GRN.class)
@@ -768,19 +767,6 @@ public class InventoryRepo {
                 });
     }
     
-    public Mono<GRN> findByBatchNo(String batchNo) {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/grn/findByBatchNo")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
-                .queryParam("batchNo", batchNo)
-                .build())
-                .retrieve().bodyToMono(GRN.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
     
     public Mono<GRN> findGRN(String vouNo) {
         GRNKey key = new GRNKey();
@@ -3581,7 +3567,6 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/milling/getRawDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(MillingRawDetail.class)
@@ -3597,7 +3582,6 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/milling/getOutputDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(MillingOutDetail.class)
@@ -3887,12 +3871,11 @@ public class InventoryRepo {
                 });
     }
     
-    public Mono<List<GRNDetail>> getGRNDetail(String vouNo, Integer deptId) {
+    public Mono<List<GRNDetail>> getGRNDetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/grn/getGRNDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve().bodyToFlux(GRNDetail.class)
                 .collectList();
@@ -4013,17 +3996,7 @@ public class InventoryRepo {
                 .collectList();
     }
     
-    public Mono<List<GRNDetail>> getGRNDetailBatch(String batchNo, Integer deptId) {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/grn/getGRNDetailBatch")
-                .queryParam("batchNo", batchNo)
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
-                .build())
-                .retrieve()
-                .bodyToFlux(GRNDetail.class)
-                .collectList();
-    }
+    
     
     public Mono<List<VDescription>> getDescription(String str, String tranType) {
         return inventoryApi.get()

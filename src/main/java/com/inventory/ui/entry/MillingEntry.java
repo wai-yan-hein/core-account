@@ -40,6 +40,7 @@ import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.user.editor.AutoClearEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
+import com.inventory.entity.Expense;
 import com.inventory.entity.Job;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.MillingUsage;
@@ -77,6 +78,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
  *
@@ -93,6 +95,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private final MillingRawTableModel millingRawTableModel = new MillingRawTableModel();
     private final MillingExpenseTableModel millingExpenseTableModel = new MillingExpenseTableModel();
     private MillingHistoryDialog dialog;
+    private ExpenseSetupDialog expDialog;
     @Setter
     private InventoryRepo inventoryRepo;
     @Setter
@@ -113,7 +116,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private JobSearchDialog jobSearchDialog;
     private FindDialog findDialog;
     private VouStatusSetupDialog vsDialog;
-
 
     /**
      * Creates new form SaleEntry1
@@ -233,9 +235,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblExpense.getColumnModel().getColumn(2).setPreferredWidth(50);
         tblExpense.getColumnModel().getColumn(3).setPreferredWidth(60);
         tblExpense.getColumnModel().getColumn(4).setPreferredWidth(100);
-        inventoryRepo.getExpense().subscribe((t) -> {
-            tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
-        });
+        inventoryRepo.getExpense().doOnSuccess((t) -> {
+            setListExpense(t);
+        }).subscribe();
         tblExpense.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//qty
         tblExpense.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//price
         tblExpense.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -243,6 +245,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    }
+
+    private void setListExpense(List<Expense> t) {
+        tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
+        tblExpense.getColumnModel().getColumn(1).setCellEditor(new ExpenseEditor(t));
     }
 
     private void initOutputTable() {
@@ -287,7 +294,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, false);
         projectAutoCompleter.setObserver(this);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
@@ -298,6 +305,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private void initData() {
         userRepo.getCurrency().doOnSuccess((t) -> {
             currAutoCompleter.setListCurrency(t);
+        }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
         }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
@@ -395,17 +405,24 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             inventoryRepo.save(milling).doOnSuccess((t) -> {
                 milling.getKey().setVouNo(t.getKey().getVouNo());
                 updateJob(t.getJobNo());
+                clear();
             }).doOnError((e) -> {
-                observer.selected("save", true);
-                JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveSale(print);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
             }).doOnTerminate(() -> {
                 if (print) {
                     printVoucher(milling);
                 } else {
                     txtCus.requestFocus();
                 }
-                clear();
             }).subscribe();
         }
     }
@@ -1999,12 +2016,15 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm, false);
-        d.setInventoryRepo(inventoryRepo);
-        d.setAccountRepo(accountRepo);
-        d.initMain();
-        d.setLocationRelativeTo(null);
-        d.setVisible(true);
+        if (expDialog == null) {
+            expDialog = new ExpenseSetupDialog(Global.parentForm, false);
+            expDialog.setLocationRelativeTo(null);
+            expDialog.setInventoryRepo(inventoryRepo);
+            expDialog.setAccountRepo(accountRepo);
+            expDialog.initMain();
+        }
+        expDialog.search();
+        setListExpense(expDialog.getListExpense());
     }
 
     public void jobDialog() {

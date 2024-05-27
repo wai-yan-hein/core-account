@@ -200,7 +200,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, false);
         projectAutoCompleter.setObserver(this);
         monoLoc.doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
@@ -210,6 +210,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         }).subscribe();
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
+        }).subscribe();
+        userRepo.searchProject().doOnSuccess((t) -> {
+            projectAutoCompleter.setListProject(t);
         }).subscribe();
     }
 
@@ -649,7 +652,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             txtCus.requestFocus();
         }
     }
-
 
     public void historySale() {
         if (sDialog == null) {

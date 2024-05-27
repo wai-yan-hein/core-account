@@ -8,10 +8,10 @@ package com.user.editor;
 import com.common.Global;
 import com.common.IconUtil;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.user.common.ProjectTableModel;
-import com.repo.UserRepo;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;
@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -38,6 +39,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,33 +57,33 @@ public final class ProjectAutoCompleter implements KeyListener {
     private Project project;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
+    private StartWithRowFilter startWithRowFilter;
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
+    @Setter
     private SelectionObserver observer;
-    private UserRepo userRepo;
     private boolean filter;
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
+    public void setListProject(List<Project> list) {
+        projectTableModel.setListProject(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
     public ProjectAutoCompleter() {
     }
 
-    public ProjectAutoCompleter(JTextComponent comp, UserRepo userRepo,
+    public ProjectAutoCompleter(JTextComponent comp,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.userRepo = userRepo;
         if (this.filter) {
             setProject(new Project(new ProjectKey("All", Global.compCode), "All"));
         }
+        startWithRowFilter = new StartWithRowFilter(textComp);
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.FILTER_ICON_ALT));
         textComp.setFont(Global.textFont);
@@ -99,6 +101,7 @@ public final class ProjectAutoCompleter implements KeyListener {
         scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
+        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Code
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -112,7 +115,7 @@ public final class ProjectAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(300, 300);
+        popup.setPopupSize(400, 400);
 
         popup.add(scroll);
 
@@ -168,7 +171,7 @@ public final class ProjectAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             project = projectTableModel.get(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(project.getKey().getProjectNo());
+            ((JTextField) textComp).setText(project.getProjectName());
             if (editor == null) {
                 if (observer != null) {
                     observer.selected("Selected", project);
@@ -324,7 +327,7 @@ public final class ProjectAutoCompleter implements KeyListener {
 
     public void setProject(Project project) {
         this.project = project;
-        textComp.setText(project == null ? null : project.getKey().getProjectNo());
+        textComp.setText(project == null ? null : project.getProjectName());
     }
 
     /*
@@ -349,21 +352,18 @@ public final class ProjectAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String str = textComp.getText();
-        if (!str.isEmpty()) {
-            if (!containKey(e)) {
-                userRepo.searchProject().subscribe((t) -> {
-                    if (this.filter) {
-                        t.add(new Project(new ProjectKey("All", Global.compCode), "All"));
-                    }
-                    projectTableModel.setListProject(t);
-                    if (!t.isEmpty()) {
+        String text = textComp.getText();
+        if (text.length() == 0) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(startWithRowFilter);
+            try {
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
                         table.setRowSelectionInterval(0, 0);
                     }
-                }, (err) -> {
-                    log.error(err.getMessage());
-                }, () -> {
-                });
+                }
+            } catch (Exception ex) {
             }
 
         }
