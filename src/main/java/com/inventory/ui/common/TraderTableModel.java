@@ -101,12 +101,14 @@ public class TraderTableModel extends AbstractTableModel {
     }
 
     public void addTrader(Trader t) {
-        listTrader.add(t);
-        int lastIndex = listTrader.size() - 1;
-        if (lastIndex >= 0) {
-            fireTableRowsInserted(lastIndex, lastIndex);
-        } else {
-            fireTableRowsInserted(0, 0);
+        if (!listTrader.contains(t)) {
+            listTrader.add(t);
+            int lastIndex = listTrader.size() - 1;
+            if (lastIndex >= 0) {
+                fireTableRowsInserted(lastIndex, lastIndex);
+            } else {
+                fireTableRowsInserted(0, 0);
+            }
         }
     }
 

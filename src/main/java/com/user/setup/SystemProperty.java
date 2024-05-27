@@ -184,6 +184,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkBarCode.setName(ProUtil.BARCODE);
         chkETCOA.setName(ProUtil.ENABLE_TRADER_COA);
         chkPurVouEdit.setName(ProUtil.PURCHASE_VOUCHER_EDIT);
+        chkSaleClose.setName(ProUtil.SALE_CLOSED);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -313,6 +314,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkTraderBalAcc.setSelected(Util1.getBoolean(hmProperty.get(chkTraderBalAcc.getName())));
         chkBarCode.setSelected(Util1.getBoolean(hmProperty.get(chkBarCode.getName())));
         chkETCOA.setSelected(Util1.getBoolean(hmProperty.get(chkETCOA.getName())));
+        chkSaleClose.setSelected(Util1.getBoolean(hmProperty.get(chkSaleClose.getName())));
     }
 
     private void initTextBox() {
@@ -711,6 +713,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jSeparator7 = new javax.swing.JSeparator();
         chkSaleExpenseShown = new javax.swing.JCheckBox();
         chkSaleStockInfo = new javax.swing.JCheckBox();
+        chkSaleClose = new javax.swing.JCheckBox();
         jPanel3 = new javax.swing.JPanel();
         chkPurVouEdit = new javax.swing.JCheckBox();
         jSeparator4 = new javax.swing.JSeparator();
@@ -1122,6 +1125,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             }
         });
 
+        chkSaleClose.setText("Sale Closed");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1152,7 +1157,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(chkSaleExpenseShown)
-                                    .addComponent(chkSaleEdit)))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(chkSaleEdit)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(chkSaleClose))))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(chkSVou)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1174,7 +1182,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(chkSA5)
-                            .addComponent(chkSaleEdit)))
+                            .addComponent(chkSaleEdit)
+                            .addComponent(chkSaleClose)))
                     .addComponent(chkSaleExpenseShown))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(chkSaleStockInfo)
@@ -1873,6 +1882,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkSA5;
     private javax.swing.JCheckBox chkSLP;
     private javax.swing.JCheckBox chkSVou;
+    private javax.swing.JCheckBox chkSaleClose;
     private javax.swing.JCheckBox chkSaleEdit;
     private javax.swing.JCheckBox chkSaleExpenseShown;
     private javax.swing.JCheckBox chkSalePaid;

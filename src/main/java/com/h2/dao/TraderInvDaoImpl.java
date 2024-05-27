@@ -52,22 +52,18 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
     public List<Trader> searchTrader(String str, String type, String compCode) {
         str = Util1.cleanStr(str);
         str = str + "%";
-        String filter = """
+        String sql = """
+                select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days,account
+                from trader
                 where active = true
                 and deleted = false
-                and comp_code =?
+                and comp_code = ?
                 and (LOWER(REPLACE(user_code, ' ', '')) like ? or LOWER(REPLACE(trader_name, ' ', '')) like ?)
+                and (multi =true or type = ? or '-' = ?)
+                order by user_code,trader_name
+                limit 100
                 """;
-        if (!type.equals("-")) {
-            filter += "and (multi =true or type ='" + type + "')";
-        }
-        String sql = """
-                     select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days,account
-                     from trader
-                     """ + filter + "\n"
-                + "order by user_code,trader_name\n"
-                + "limit 100\n";
-        ResultSet rs = getResult(sql, compCode, str, str);
+        ResultSet rs = getResult(sql, compCode, str, str, type, type);
         List<Trader> list = new ArrayList<>();
         try {
             if (rs != null) {

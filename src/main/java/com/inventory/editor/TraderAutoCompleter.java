@@ -360,11 +360,9 @@ public final class TraderAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                traderTableModel.clear();
                 inventoryRepo.getTraderList(str, traderType)
-                        .doOnNext((t) -> {
-                            traderTableModel.addTrader(t);
-                        })
+                        .doFirst(() -> traderTableModel.clear())
+                        .doOnNext((t) -> traderTableModel.addTrader(t))
                         .doOnComplete(() -> {
                             if (filter) {
                                 traderTableModel.addTrader(new Trader("-", "All"));

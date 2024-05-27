@@ -6,8 +6,6 @@ package com.inventory.entity;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 
 /**
@@ -15,12 +13,9 @@ import java.io.Serializable;
  * @author DELL
  */
 @Data
-@Embeddable
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GRNKey implements Serializable {
 
-    @Column(name = "vou_no")
     private String vouNo;
-    @Column(name = "comp_code")
     private String compCode;
 }

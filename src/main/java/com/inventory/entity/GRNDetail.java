@@ -6,50 +6,28 @@ package com.inventory.entity;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 /**
  *
  * @author DELL
  */
 @Data
-@Entity
-@Table(name = "grn_detail")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GRNDetail {
 
-    @EmbeddedId
     private GRNDetailKey key;
-    @Column(name = "dept_id")
     private Integer deptId;
-    @Column(name = "stock_code")
     private String stockCode;
-    @Column(name = "qty")
-    private Double qty;
-    @Column(name = "unit")
+    private double qty;
     private String unit;
-    @Column(name = "loc_code")
     private String locCode;
-    @Column(name = "weight")
-    private Double weight;
-    @Column(name = "weight_unit")
+    private double weight;
     private String weightUnit;
-    @Column(name = "total_weight")
-    private Double totalWeight;
-    @Transient
+    private double totalWeight;
     private String userCode;
-    @Transient
     private String stockName;
-    @Transient
     private String relName;
-    @Transient
     private String locName;
-    @Transient
-    private Double stdWeight;
-    @Transient
+    private double stdWeight;
     private Stock stock;
 }

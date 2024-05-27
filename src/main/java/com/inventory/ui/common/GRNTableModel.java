@@ -5,10 +5,8 @@
  */
 package com.inventory.ui.common;
 
-import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.entity.Location;
@@ -17,7 +15,6 @@ import com.inventory.entity.GRNDetailKey;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
 import com.inventory.ui.entry.GRNEntry;
-import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -34,76 +32,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GRNTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total"};
+    private String[] columnNames = {"Code", "Description", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total"};
+    @Setter
     private JTable parent;
     private List<GRNDetail> listDetail = new ArrayList();
-    private SelectionObserver observer;
     private List<GRNDetailKey> listDel = new ArrayList();
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
+    @Setter
     private JLabel lblRec;
+    @Setter
     private boolean editable = true;
+    @Setter
     private GRNEntry grn;
-
-    public void setGrn(GRNEntry grn) {
-        this.grn = grn;
-    }
-
-    public boolean isEditable() {
-        return editable;
-    }
-
-    public void setEditable(boolean editable) {
-        this.editable = editable;
-    }
-
-    public List<GRNDetailKey> getListDel() {
-        return listDel;
-    }
-
-    public void setListDel(List<GRNDetailKey> listDel) {
-        this.listDel = listDel;
-    }
-
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -134,7 +73,7 @@ public class GRNTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 5, 6, 8 ->
+            case 3, 4, 5, 7 ->
                 Double.class;
             default ->
                 String.class;
@@ -145,7 +84,7 @@ public class GRNTableModel extends AbstractTableModel {
     public boolean isCellEditable(int row, int column) {
         if (editable) {
             return switch (column) {
-                case 2, 8 ->
+                case 7 ->
                     false;
                 default ->
                     true;
@@ -162,44 +101,32 @@ public class GRNTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //code
-                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
+                        return record.getUserCode();
                     }
                     case 1 -> {
-                        //Name
-                        String stockName = null;
-                        if (record.getStockCode() != null) {
-                            stockName = record.getStockName();
-                        }
-                        return stockName;
+                        return record.getStockName();
                     }
                     case 2 -> {
-                        return record.getRelName();
-                    }
-                    case 3 -> {
                         //loc
                         return record.getLocName();
                     }
-                    case 4 -> {
-                        if (Util1.getDouble(record.getWeight()) == 0) {
-                            return null;
-                        }
-                        return record.getWeight();
+                    case 3 -> {
+                        return Util1.toNull(record.getWeight());
                     }
-                    case 5 -> {
+                    case 4 -> {
                         return record.getWeightUnit();
                     }
-                    case 6 -> {
+                    case 5 -> {
                         //qty
-                        return record.getQty();
+                        return Util1.toNull(record.getQty());
                     }
-                    case 7 -> {
+                    case 6 -> {
                         //unit
                         return record.getUnit();
                     }
 
-                    case 8 -> {
-                        double ttl = Util1.getDouble(record.getTotalWeight());
-                        return ttl == 0 ? null : ttl;
+                    case 7 -> {
+                        return Util1.toNull(record.getTotalWeight());
                     }
                     default -> {
                         return new Object();
@@ -216,8 +143,6 @@ public class GRNTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             GRNDetail record = listDetail.get(row);
-
-            String key = "stock.use.weight";
             switch (column) {
                 case 0, 1 -> {
                     //Code
@@ -227,64 +152,54 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0);
-                            record.setUnit(s.getPurUnitCode());
+                            record.setQty(0 );
+                            record.setUnit(Util1.isNull(s.getPurUnitCode(), "-"));
                             record.setWeight(s.getWeight());
-                            record.setWeightUnit(s.getWeightUnit());
+                            record.setWeightUnit(Util1.isNull(s.getWeightUnit(), "-"));
                             record.setStock(s);
                             addNewRow();
                             if (ProUtil.isUseWeight()) {
-                                setSelection(row, 4);
+                                setSelection(row, 3);
                             } else {
-                                setSelection(row, 6);
+                                setSelection(row, 5);
                             }
                         }
                     }
                 }
-                case 3 -> {
+                case 2 -> {
                     //Loc
                     if (value instanceof Location l) {
                         record.setLocCode(l.getKey().getLocCode());
                         record.setLocName(l.getLocName());
                     }
                 }
-                case 4 -> {
+                case 3 -> {
                     record.setWeight(Util1.getDouble(value));
                     setSelection(row, 6);
                 }
-                case 5 -> {
+                case 4 -> {
                     if (value instanceof StockUnit u) {
                         record.setWeightUnit(u.getKey().getUnitCode());
                         setSelection(row + 1, 0);
                     }
                 }
-                case 6 -> {
+                case 5 -> {
                     //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            if (ProUtil.isUseWeightPoint()) {
-                                String str = String.valueOf(value);
-                                double wt = Util1.getDouble(record.getWeight());
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                            } else {
-                                record.setQty(Util1.getDouble(value));
-                                if (record.getQty() != null && record.getWeight() != null) {
-                                    record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
-                                }
-                            }
-
-                            setSelection(row, column);
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
+                        if (ProUtil.isUseWeightPoint()) {
+                            String str = String.valueOf(value);
+                            double wt = Util1.getDouble(record.getWeight());
+                            record.setQty(Util1.getDouble(value));
+                            record.setTotalWeight(Util1.getTotalWeight(wt, str));
                         } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
+                            record.setQty(Util1.getDouble(value));
+                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
                         setSelection(row, column);
                     }
                 }
-                case 7 -> {
+                case 6 -> {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit u) {
@@ -357,10 +272,6 @@ public class GRNTableModel extends AbstractTableModel {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
-    }
-
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(Global.parentForm, text);
     }
 
     public boolean isValidEntry() {

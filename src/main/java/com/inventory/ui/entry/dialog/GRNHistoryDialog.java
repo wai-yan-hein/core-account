@@ -25,6 +25,7 @@ import com.inventory.entity.Stock;
 import com.inventory.entity.Trader;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.GRNHistoryTableModel;
+import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
@@ -70,7 +71,7 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     public GRNHistoryDialog(JFrame frame) {
-        super(frame, true);
+        super(frame, Dialog.ModalityType.MODELESS);
         initComponents();
         initKeyListener();
         ComponentUtil.addFocusListener(panelFilter);
@@ -224,7 +225,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         jLabel13 = new javax.swing.JLabel();
         txtBatchNo = new javax.swing.JTextField();
         chkClose = new javax.swing.JCheckBox();
-        chkLocal = new javax.swing.JCheckBox();
         txtSearch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -345,9 +345,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         chkClose.setFont(Global.lableFont);
         chkClose.setText("Batch Close");
 
-        chkLocal.setFont(Global.lableFont);
-        chkLocal.setText("Local");
-
         javax.swing.GroupLayout panelFilterLayout = new javax.swing.GroupLayout(panelFilter);
         panelFilter.setLayout(panelFilterLayout);
         panelFilterLayout.setHorizontalGroup(
@@ -372,7 +369,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(chkClose))
                     .addComponent(txtUser)
@@ -393,7 +389,7 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
 
         panelFilterLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel11, jLabel2, jLabel4, jLabel8});
 
-        panelFilterLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {chkClose, chkDel, chkLocal});
+        panelFilterLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {chkClose, chkDel});
 
         panelFilterLayout.setVerticalGroup(
             panelFilterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -439,19 +435,17 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkDel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkLocal)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkClose)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
-                        .addGap(0, 44, Short.MAX_VALUE))
+                        .addGap(0, 70, Short.MAX_VALUE))
                     .addComponent(jSeparator2))
                 .addContainerGap())
         );
 
         panelFilterLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
 
-        panelFilterLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {chkClose, chkDel, chkLocal});
+        panelFilterLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {chkClose, chkDel});
 
         txtSearch.setFont(Global.textFont);
         txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -632,7 +626,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     private javax.swing.JButton btnSearch3;
     private javax.swing.JCheckBox chkClose;
     private javax.swing.JCheckBox chkDel;
-    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

@@ -866,6 +866,9 @@ public class InventoryRepo {
     }
     
     public Mono<Job> findJob(String jobCode) {
+        if(Util1.isNullOrEmpty(jobCode)){
+            return Mono.empty();
+        }
         JobKey key = new JobKey();
         key.setCompCode(Global.compCode);
         key.setJobNo(jobCode);
@@ -2989,11 +2992,7 @@ public class InventoryRepo {
                 .uri("/grn")
                 .body(Mono.just(grn), GRN.class)
                 .retrieve()
-                .bodyToMono(GRN.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(GRN.class);
     }
     
     public Mono<WeightHis> saveWeight(WeightHis his) {

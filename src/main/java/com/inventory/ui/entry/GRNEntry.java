@@ -5,6 +5,7 @@
 package com.inventory.ui.entry;
 
 import com.acc.dialog.FindDialog;
+import com.common.ComponentUtil;
 import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -21,8 +22,6 @@ import com.inventory.entity.GRN;
 import com.inventory.entity.GRNDetail;
 import com.inventory.entity.GRNKey;
 import com.inventory.entity.Location;
-import com.inventory.entity.StockUnit;
-import com.inventory.entity.Trader;
 import com.inventory.ui.common.GRNTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.GRNHistoryDialog;
@@ -30,10 +29,7 @@ import com.user.editor.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -49,13 +45,17 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import reactor.core.publisher.Mono;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  *
@@ -64,51 +64,27 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private JProgressBar progress;
     private TraderAutoCompleter traderAutoCompleter;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
     private UserRepo userRepo;
+    @Getter
     private LocationAutoCompleter locationAutoCompleter;
     private final GRNTableModel tableModel = new GRNTableModel();
     private GRNHistoryDialog dialog;
     private GRN grn = new GRN();
     private FindDialog findDialog;
 
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
     /**
      * Creates new form Batch
      */
     public GRNEntry() {
         initComponents();
-        initFocusAdapter();
         initKeyListener();
         actionMapping();
     }
@@ -117,6 +93,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         initCombo();
         initTable();
         initFind();
+        initFocus();
         assignDefaultValue();
     }
 
@@ -124,12 +101,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         findDialog = new FindDialog(Global.parentForm, tblGRN);
     }
 
-    private void initFocusAdapter() {
-        txtDate.addFocusListener(fa);
-        txtTrader.addFocusListener(fa);
-        txtBatchNo.addFocusListener(fa);
-        txtRemark.addFocusListener(fa);
-        txtLocation.addFocusListener(fa);
+    private void initFocus() {
+        ComponentUtil.addFocusListener(this);
     }
 
     private void initKeyListener() {
@@ -139,23 +112,13 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         txtBatchNo.addKeyListener(this);
         txtRemark.addKeyListener(this);
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                txt.selectAll();
-            } else if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
-        inventoryRepo.getLocation().subscribe((t) -> {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
+        }).subscribe();
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
     }
@@ -163,9 +126,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private void assignDefaultValue() {
         txtDate.setDate(Util1.getTodayDate());
         chkClose.setSelected(false);
-        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             locationAutoCompleter.setLocation(tt);
-        });
+        }).subscribe();
     }
 
     private void actionMapping() {
@@ -211,26 +174,22 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         tblGRN.setFont(Global.textFont);
         tblGRN.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblGRN.getColumnModel().getColumn(1).setPreferredWidth(350);//Name
-        tblGRN.getColumnModel().getColumn(2).setPreferredWidth(60);//relation
-        tblGRN.getColumnModel().getColumn(3).setPreferredWidth(60);//weight
-        tblGRN.getColumnModel().getColumn(4).setPreferredWidth(5);//unit
-        tblGRN.getColumnModel().getColumn(5).setPreferredWidth(60);//qty
-        tblGRN.getColumnModel().getColumn(6).setPreferredWidth(5);//unit
-        tblGRN.getColumnModel().getColumn(7).setPreferredWidth(70);//total
+        tblGRN.getColumnModel().getColumn(2).setPreferredWidth(60);//weight
+        tblGRN.getColumnModel().getColumn(3).setPreferredWidth(5);//unit
+        tblGRN.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
+        tblGRN.getColumnModel().getColumn(5).setPreferredWidth(5);//unit
+        tblGRN.getColumnModel().getColumn(6).setPreferredWidth(70);//total
         tblGRN.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblGRN.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        inventoryRepo.getLocation().subscribe((t) -> {
-            tblGRN.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
-        });
-        tblGRN.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
-        monoUnit.subscribe((t) -> {
-            tblGRN.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
-        });
-        tblGRN.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
-        monoUnit.subscribe((t) -> {
-            tblGRN.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));
-        });
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
+            tblGRN.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        }).subscribe();
+        tblGRN.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            tblGRN.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+            tblGRN.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+        }).subscribe();
+        tblGRN.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
         tblGRN.setDefaultRenderer(String.class, new DecimalFormatRender());
         tblGRN.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -239,37 +198,45 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 
     }
 
-    public boolean saveGRN(boolean print) {
-        boolean status = false;
-        try {
-            if (isValidEntry() && tableModel.isValidEntry()) {
-                if (DateLockUtil.isLockDate(txtDate.getDate())) {
-                    DateLockUtil.showMessage(this);
-                    txtDate.requestFocus();
-                    return false;
-                }
-                progress.setIndeterminate(true);
-                observer.selected("save", false);
-                grn.setListDetail(tableModel.getListDetail());
-                grn.setListDel(tableModel.getListDel());
-                inventoryRepo.saveGRN(grn).subscribe((t) -> {
-                    clear();
-                    progress.setIndeterminate(false);
-                    if (print) {
-                        printVoucher(t.getKey().getVouNo(), "GRNVoucher", false);
-                    }
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                    observer.selected("save", false);
-                });
-
+    public void saveGRN(boolean print) {
+        if (isValidEntry() && tableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtDate.requestFocus();
+                return;
             }
-        } catch (HeadlessException ex) {
-            log.error("savePur :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could not saved.");
+            progress.setIndeterminate(true);
+            observer.selected("save", false);
+            grn.setListDetail(tableModel.getListDetail());
+            inventoryRepo.saveGRN(grn).doOnSuccess((t) -> {
+                clear();
+                progress.setIndeterminate(false);
+                if (print) {
+                    printVoucher(t.getKey().getVouNo(), "GRNVoucher", false);
+                }
+            }).doOnError((e) -> {
+                progress.setIndeterminate(false);
+                observeMain();
+                if (e instanceof WebClientRequestException) {
+                    int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yn == JOptionPane.YES_OPTION) {
+                        saveGRN(print);
+                    }
+                } else if (e instanceof WebClientResponseException ex) {
+                    if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+                        // Handle conflict status (HTTP 409)
+                        JOptionPane.showMessageDialog(this, "Duplicate Batch No. Please check your input.", "Conflict", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        // Handle other types of response errors
+                        JOptionPane.showMessageDialog(this, "Server Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }).subscribe();
+
         }
-        return status;
     }
 
     private boolean isValidEntry() {
@@ -432,24 +399,14 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             progress.setIndeterminate(true);
             tableModel.clear();
             grn = g;
-            Integer deptId = g.getDeptId();
-            Mono<Trader> trader = inventoryRepo.findTrader(grn.getTraderCode());
-            trader.subscribe((t) -> {
+            inventoryRepo.findTrader(grn.getTraderCode()).doOnSuccess((t) -> {
                 traderAutoCompleter.setTrader(t);
-            });
-            Mono<Location> loc = inventoryRepo.findLocation(grn.getLocCode());
-            loc.hasElement().subscribe((element) -> {
-                if (element) {
-                    loc.subscribe((t) -> {
-                        locationAutoCompleter.setLocation(t);
-                    });
-                } else {
-                    locationAutoCompleter.setLocation(null);
-                }
-            });
-
+            }).subscribe();
+            inventoryRepo.findLocation(grn.getLocCode()).doOnSuccess((t) -> {
+                locationAutoCompleter.setLocation(t);
+            }).subscribe();
             String vouNo = grn.getKey().getVouNo();
-            inventoryRepo.getGRNDetail(vouNo).subscribe((t) -> {
+            inventoryRepo.getGRNDetail(vouNo).doOnSuccess((t) -> {
                 tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (grn.isClosed()) {
@@ -478,10 +435,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 chkClose.setSelected(grn.isClosed());
                 focusTable();
                 progress.setIndeterminate(false);
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
 
         }
     }
@@ -617,6 +574,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             }
         });
 
+        chkClose.setFont(Global.lableFont);
         chkClose.setText("Close");
 
         lblStatus.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N

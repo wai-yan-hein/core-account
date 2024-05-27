@@ -674,7 +674,11 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="chkSaleExpenseShown" min="-2" max="-2" attributes="0"/>
-                                      <Component id="chkSaleEdit" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" attributes="0">
+                                          <Component id="chkSaleEdit" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="chkSaleClose" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
@@ -706,6 +710,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="chkSA5" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="chkSaleEdit" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkSaleClose" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <Component id="chkSaleExpenseShown" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -835,6 +840,11 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkSaleStockInfoActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkSaleClose">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Sale Closed"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

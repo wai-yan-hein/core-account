@@ -121,6 +121,7 @@ public class ProUtil {
     public static final String DARK_MODE = "dark.mode";
     public static final String ENABLE_TRADER_COA = "enable.trader.coa";
     public static final String PURCHASE_VOUCHER_EDIT = "purchase.voucher.edit";
+    public static final String SALE_CLOSED = "sale.closed";
 
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
