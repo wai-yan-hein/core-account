@@ -89,7 +89,9 @@ public class StockFormulaTableModel extends AbstractTableModel {
                     case 2 ->
                         s.setActive(Util1.getBoolean(value));
                 }
-                save(s, row);
+                if (column != 0) {
+                    save(s, row);
+                }
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
             } catch (Exception e) {
@@ -122,9 +124,21 @@ public class StockFormulaTableModel extends AbstractTableModel {
             JOptionPane.showMessageDialog(table, "Name can't empty.");
             return false;
         }
-        if (f.getKey().getFormulaCode() != null) {
+        if (Util1.isNullOrEmpty(f.getKey()) || Util1.isNullOrEmpty(f.getKey().getFormulaCode())) {
+            StockFormulaKey key = new StockFormulaKey();
+            key.setFormulaCode(null);
+            key.setCompCode(Global.compCode);
+            f.setKey(key);
+            f.setCreatedDate(Util1.getTodayLocalDateTime());
+            f.setCreatedBy(Global.loginUser.getUserCode());
+            f.setUpdatedBy(Global.loginUser.getUserCode());
+            f.setActive(true);
+            f.setDeleted(true);
+            f.setQty(0.0);
+        } else {
             f.setUpdatedBy(Global.loginUser.getUserCode());
         }
+
         f.setActive(true);
         return f.getFormulaName() != null;
     }
