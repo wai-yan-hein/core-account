@@ -229,7 +229,7 @@ public class WebFlexConfig {
         } catch (SSLException ex) {
             log.error("Error creating HttpClient: " + ex.getMessage());
         }
-        return HttpClient.create(); // Return a default HttpClient if an error occurs
+        return HttpClient.create(connectionProvider()); // Return a default HttpClient if an error occurs
     }
 
     @Bean

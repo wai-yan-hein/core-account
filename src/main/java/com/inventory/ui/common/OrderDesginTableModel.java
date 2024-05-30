@@ -15,6 +15,7 @@ import com.inventory.entity.OrderDetailKey;
 import com.inventory.entity.OrderHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.ui.entry.OrderDynamic;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
@@ -42,6 +43,7 @@ public class OrderDesginTableModel extends AbstractTableModel {
     private OrderDynamic orderDynamic;
     @Setter
     private JLabel lblRecord;
+
 
     @Override
     public String getColumnName(int column) {

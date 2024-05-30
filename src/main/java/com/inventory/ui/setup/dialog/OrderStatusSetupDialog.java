@@ -6,8 +6,10 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
+import com.common.IconUtil;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.MessageType;
 import com.inventory.entity.OrderStatus;
 import com.inventory.entity.OrderStatusKey;
@@ -17,7 +19,6 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -44,18 +45,6 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<OrderStatus> listVou = new ArrayList<>();
-
-    public List<OrderStatus> getListVou() {
-        return listVou;
-    }
-
-    public void setListVou(List<OrderStatus> listVou) {
-        orderStatusTableModel.setListVou(listVou);
-        this.listVou = listVou;
-        
-    }
-
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -65,14 +54,20 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         super(frame, false);
         initComponents();
         initKeyListener();
+        initClientProperty();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
+        swrf = new StartWithRowFilter(txtSearch);
         initTable();
-        searchCategory();
         txtUserCode.requestFocus();
+    }
+
+    private void initClientProperty() {
+        txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search Here");
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, IconUtil.getIcon(IconUtil.SEARCH_ICON));
     }
 
     private void initKeyListener() {
@@ -83,8 +78,15 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         tblVou.addKeyListener(this);
     }
 
-    private void searchCategory() {
-        orderStatusTableModel.setListVou(listVou);
+    public void search() {
+        inventoryRepo.getOrderStatus().doOnSuccess((t) -> {
+            orderStatusTableModel.setListVou(t);
+        }).subscribe();
+        setVisible(true);
+    }
+
+    public List<OrderStatus> getListOrderStatus() {
+        return orderStatusTableModel.getListVou();
     }
 
     private void initTable() {
@@ -99,13 +101,13 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
             if (e.getValueIsAdjusting()) {
                 if (tblVou.getSelectedRow() >= 0) {
                     selectRow = tblVou.convertRowIndexToModel(tblVou.getSelectedRow());
-                    setCategory(orderStatusTableModel.getOrderStatus(selectRow));
+                    setObject(orderStatusTableModel.getOrderStatus(selectRow));
                 }
             }
         });
     }
 
-    private void setCategory(OrderStatus cat) {
+    private void setObject(OrderStatus cat) {
         ord = cat;
         ord.setKey(cat.getKey());
         txtName.setText(ord.getDescription());
@@ -124,9 +126,9 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
             btnSave.setEnabled(false);
             inventoryRepo.saveOrderStatus(ord).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    listVou.set(selectRow, t);
+                    orderStatusTableModel.setOrderStatus(t, selectRow);
                 } else {
-                    listVou.add(t);
+                    orderStatusTableModel.addOrderStatus(t);
                 }
                 clear();
                 sendMessage(t.getDescription());
@@ -149,7 +151,7 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         progress.setIndeterminate(false);
         btnSave.setEnabled(true);
         txtUserCode.setText(null);
-        txtFilter.setText(null);
+        txtSearch.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
@@ -198,7 +200,7 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVou = new javax.swing.JTable();
-        txtFilter = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
@@ -213,7 +215,6 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         chkActive = new javax.swing.JCheckBox();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Order Status Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
@@ -232,10 +233,10 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         tblVou.setName("tblVou"); // NOI18N
         jScrollPane1.setViewportView(tblVou);
 
-        txtFilter.setName("txtFilter"); // NOI18N
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtSearch.setName("txtSearch"); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
+                txtSearchKeyReleased(evt);
             }
         });
 
@@ -373,7 +374,7 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
-                            .addComponent(txtFilter))
+                            .addComponent(txtSearch))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -387,7 +388,7 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -412,14 +413,14 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
 
-    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
         // TODO add your handling code here:
-        if (txtFilter.getText().isEmpty()) {
+        if (txtSearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
         }
-    }//GEN-LAST:event_txtFilterKeyReleased
+    }//GEN-LAST:event_txtSearchKeyReleased
 
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
@@ -452,8 +453,8 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
     private javax.swing.JProgressBar progress;
     private javax.swing.JSpinner spinnerOrderBy;
     private javax.swing.JTable tblVou;
-    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 

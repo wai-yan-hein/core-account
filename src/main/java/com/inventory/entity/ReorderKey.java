@@ -17,6 +17,5 @@ public class ReorderKey {
 
     private String stockCode;
     private String compCode;
-    private Integer deptId;
     private String locCode;
 }

@@ -422,6 +422,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 o.setUserRepo(userRepo);
                 o.setObserver(this);
                 o.setProgress(progress);
+                o.setStockBalanceDialog(stockBalanceFrame);
                 o.initMain();
                 return o;
             }

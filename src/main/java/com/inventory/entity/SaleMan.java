@@ -41,7 +41,7 @@ public class SaleMan {
     @Column(name = "user_code")
     private String userCode;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "updated_by")

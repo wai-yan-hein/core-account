@@ -24,6 +24,7 @@ import com.inventory.entity.SaleManKey;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.SaleManTableModel;
 import java.awt.Color;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.table.TableModel;
@@ -141,7 +142,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                 saleMan.setKey(key);
                 saleMan.setDeptId(Global.deptId);
                 saleMan.setMacId(Global.macId);
-                saleMan.setCreatedDate(Util1.getTodayDate());
+                saleMan.setCreatedDate(LocalDateTime.now());
                 saleMan.setCreatedBy(Global.loginUser.getUserCode());
             } else {
                 saleMan.setUpdatedBy(Global.loginUser.getUserCode());

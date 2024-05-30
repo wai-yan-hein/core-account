@@ -107,12 +107,7 @@ public class OtherSetup extends javax.swing.JPanel {
             osDialog.setSize(Global.width / 2, Global.height / 2);
             osDialog.setLocationRelativeTo(null);
         }
-        inventoryRepo.getOrderStatus().doOnSuccess((t) -> {
-            osDialog.setListVou(t);
-        }).doOnTerminate(() -> {
-            osDialog.setVisible(true);
-        }).subscribe();
-
+        osDialog.search();
     }
 
     private void labourGroupSetup() {

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class ReorderLevel {
 
     private ReorderKey key;
+    private Integer deptId;
     private String userCode;
     private String stockName;
     private String groupName;

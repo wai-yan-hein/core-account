@@ -40,6 +40,7 @@ import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.ui.common.OrderDesginTableModel;
 import com.inventory.ui.common.PurchaseOrderTableModel;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -93,6 +94,8 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     private InventoryRepo inventoryRepo;
     @Setter
     private UserRepo userRepo;
+    @Setter
+    private StockBalanceFrame stockBalanceDialog;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private SaleManAutoCompleter saleManCompleter;
@@ -160,6 +163,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     }
 
     public void initMain() {
+        initStockBalance();
         initCombo();
         initTable();
         initModel();
@@ -171,6 +175,11 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
 
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblOrder);
+    }
+
+    private void initStockBalance() {
+        stockBalanceDialog.setVisible(true);
+        deskPane.add(stockBalanceDialog);
     }
 
     private void initModel() {
@@ -253,6 +262,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         orderTableModel.setOrderDynamic(this);
         orderTableModel.addNewRow();
         orderTableModel.setObserver(this);
+        orderTableModel.setDialog(stockBalanceDialog);
         tblOrder.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblOrder.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
         tblOrder.getColumnModel().getColumn(2).setPreferredWidth(60);//Rel
@@ -827,6 +837,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         jLabel13 = new javax.swing.JLabel();
         txtVouTotal = new javax.swing.JFormattedTextField();
         chkInvUpdate = new javax.swing.JRadioButton();
+        deskPane = new javax.swing.JDesktopPane();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1181,6 +1192,17 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             }
         });
 
+        javax.swing.GroupLayout deskPaneLayout = new javax.swing.GroupLayout(deskPane);
+        deskPane.setLayout(deskPaneLayout);
+        deskPaneLayout.setHorizontalGroup(
+            deskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        deskPaneLayout.setVerticalGroup(
+            deskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 200, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1191,8 +1213,10 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(deskPane)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkInvUpdate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1)
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1204,13 +1228,18 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
                 .addContainerGap()
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkInvUpdate))
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(deskPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(chkInvUpdate))
+                        .addGap(113, 113, 113))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1415,6 +1444,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton chkInvUpdate;
+    private javax.swing.JDesktopPane deskPane;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;

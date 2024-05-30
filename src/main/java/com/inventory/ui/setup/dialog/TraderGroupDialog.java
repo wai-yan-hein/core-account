@@ -166,9 +166,9 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
             if (lblStatus.getText().equals("NEW")) {
                 TraderGroupKey key = new TraderGroupKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setGroupCode(null);
                 group.setKey(key);
+                group.setDeptId(Global.deptId);
             }
         }
         return status;

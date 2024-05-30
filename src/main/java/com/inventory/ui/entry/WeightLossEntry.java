@@ -23,12 +23,10 @@ import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.repo.UserRepo;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -294,7 +292,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         String vouNo = his.getKey().getVouNo();
         Integer deptId = his.getDeptId();
         his.setVouLock(deptId.equals(Global.deptId));
-        inventoryRepo.getWeightLossDetail(vouNo, deptId).subscribe((t) -> {
+        inventoryRepo.getWeightLossDetail(vouNo).subscribe((t) -> {
             lblRecord.setText("Records : " + t.size());
             tableModel.setListDetail(t);
             tableModel.addNewRow();

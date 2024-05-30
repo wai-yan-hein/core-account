@@ -15,6 +15,7 @@ import com.inventory.entity.OrderHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
 import com.inventory.ui.entry.OrderDynamic;
+import com.inventory.ui.entry.dialog.StockBalanceFrame;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
@@ -43,6 +44,8 @@ public class OrderTableModel extends AbstractTableModel {
     private OrderDynamic orderDynamic;
     @Setter
     private JLabel lblRecord;
+    @Setter
+    private StockBalanceFrame dialog;
 
     @Override
     public String getColumnName(int column) {
@@ -97,7 +100,7 @@ public class OrderTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //code
-                    return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
+                    return sd.getUserCode();
                 }
                 case 1 -> {
                     String stockName = null;
@@ -162,6 +165,7 @@ public class OrderTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
+                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());

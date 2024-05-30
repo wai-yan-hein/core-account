@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class TraderGroup {
 
     private TraderGroupKey key;
+    private Integer deptId;
     private String userCode;
     private String groupName;
 
@@ -32,6 +33,5 @@ public class TraderGroup {
     public String toString() {
         return groupName;
     }
-    
 
 }
