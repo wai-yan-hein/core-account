@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class StockFormulaSetup extends javax.swing.JPanel implements SelectionObserver, PanelControl {
-    
+
     private StockCriteriaSetupDialog scDialog;
     private InventoryRepo inventoryRepo;
     private SelectionObserver observer;
@@ -51,15 +51,15 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     private StockFormulaQtyTableModel stockFormulaQtyTableModel = new StockFormulaQtyTableModel();
     private GradeDetailTableModel gradeDetailTableModel = new GradeDetailTableModel();
     private FindDialog findDialog;
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -71,7 +71,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         initComponents();
         actionMapping();
     }
-    
+
     public void initMain() {
         initTableFormula();
         initTablePrice();
@@ -84,35 +84,35 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         initRowHeaderGrade();
         initFind();
     }
-    
+
     private void initFind() {
         findDialog = new FindDialog(Global.parentForm, tblQty);
     }
-    
+
     private void initRowHeaderFormula() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblFormula, 30);
         s1.setRowHeaderView(list);
     }
-    
+
     private void initRowHeaderQty() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblQty, 30);
         s2.setRowHeaderView(list);
     }
-    
+
     private void initRowHeaderPrice() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblPrice, 30);
         s3.setRowHeaderView(list);
     }
-    
+
     private void initRowHeaderGrade() {
         RowHeader header = new RowHeader();
         JList list = header.createRowHeader(tblGrade, 30);
         s4.setRowHeaderView(list);
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -123,15 +123,15 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblFormula.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblFormula.getActionMap().put(solve, new DeleteAction("Formula"));
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         private String option;
-        
+
         public DeleteAction(String option) {
             this.option = option;
         }
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             switch (option) {
@@ -144,7 +144,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void deleteTranPrice() {
         int row = tblPrice.convertRowIndexToModel(tblPrice.getSelectedRow());
         if (row >= 0) {
@@ -166,7 +166,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void deleteTranGrade() {
         int row = tblGrade.convertRowIndexToModel(tblGrade.getSelectedRow());
         if (row >= 0) {
@@ -188,7 +188,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void deleteFormula() {
         int row = tblFormula.convertRowIndexToModel(tblFormula.getSelectedRow());
         if (row >= 0) {
@@ -210,14 +210,14 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void sendMessage(String mesType, String mes) {
         inventoryRepo.sendDownloadMessage(mesType, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-    
+
     private void stockCriteriaDialog() {
         if (scDialog == null) {
             scDialog = new StockCriteriaSetupDialog(Global.parentForm);
@@ -227,7 +227,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         }
         scDialog.search();
     }
-    
+
     private void initTableFormula() {
         stockFormulaTableModel.setTable(tblFormula);
         stockFormulaTableModel.setInventoryRepo(inventoryRepo);
@@ -253,7 +253,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         });
     }
-    
+
     private void initTablePrice() {
         stockFormulaPriceTableModel.setInventoryRepo(inventoryRepo);
         stockFormulaPriceTableModel.setParent(tblPrice);
@@ -283,7 +283,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         });
     }
-    
+
     private void initTableGrade() {
         gradeDetailTableModel.setInventoryRepo(inventoryRepo);
         gradeDetailTableModel.setParent(tblGrade);
@@ -304,7 +304,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblGrade.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblGrade.getColumnModel().getColumn(2).setPreferredWidth(50);
     }
-    
+
     private void initTableQty() {
         stockFormulaQtyTableModel.setInventoryRepo(inventoryRepo);
         stockFormulaQtyTableModel.setParent(tblQty);
@@ -333,7 +333,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblQty.getColumnModel().getColumn(4).setPreferredWidth(20);//unit
         tblQty.getColumnModel().getColumn(5).setPreferredWidth(5);//percent
     }
-    
+
     private void searchFormual() {
         progress.setIndeterminate(true);
         inventoryRepo.getStockFormula().doOnSuccess((t) -> {
@@ -345,12 +345,12 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             progress.setIndeterminate(false);
         }).subscribe();
     }
-    
+
     private void searchFormulaPrice() {
         int row = tblFormula.convertRowIndexToModel(tblFormula.getSelectedRow());
         if (row >= 0) {
             StockFormula f = stockFormulaTableModel.getObject(row);
-            String formulaCode = f.getKey().getFormulaCode();
+            String formulaCode = f.getKey() == null ? null : f.getKey().getFormulaCode();
             if (!Util1.isNullOrEmpty(formulaCode)) {
                 inventoryRepo.getStockFormulaPrice(formulaCode).doOnSuccess((t) -> {
                     stockFormulaPriceTableModel.setListDetail(t);
@@ -364,12 +364,12 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void searchFormulaQty() {
         int row = tblFormula.convertRowIndexToModel(tblFormula.getSelectedRow());
         if (row >= 0) {
             StockFormula f = stockFormulaTableModel.getObject(row);
-            String formulaCode = f.getKey().getFormulaCode();
+            String formulaCode = f.getKey() == null ? null : f.getKey().getFormulaCode();
             if (!Util1.isNullOrEmpty(formulaCode)) {
                 inventoryRepo.getStockFormulaQty(formulaCode).doOnSuccess((t) -> {
                     stockFormulaQtyTableModel.setListDetail(t);
@@ -381,12 +381,12 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void searchGradeDetail() {
         int row = tblPrice.convertRowIndexToModel(tblPrice.getSelectedRow());
         if (row >= 0) {
             StockFormulaPrice f = stockFormulaPriceTableModel.getObject(row);
-            String formulaCode = f.getKey().getFormulaCode();
+            String formulaCode = f.getKey() == null ? null : f.getKey().getFormulaCode();
             String criteraCode = f.getCriteriaCode();
             if (!Util1.isNullOrEmpty(formulaCode) && !Util1.isNullOrEmpty(criteraCode)) {
                 inventoryRepo.getGradeDetail(formulaCode, criteraCode).doOnSuccess((t) -> {
@@ -401,7 +401,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             }
         }
     }
-    
+
     private void focusOnTablePrice() {
         int rc = tblPrice.getRowCount();
         if (rc > 1) {
@@ -412,7 +412,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             tblPrice.requestFocus();
         }
     }
-    
+
     private void focusOnTableGrade() {
         int rc = tblGrade.getRowCount();
         if (rc > 1) {
@@ -423,7 +423,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             tblGrade.requestFocus();
         }
     }
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -703,37 +703,37 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     @Override
     public void selected(Object source, Object selectObj) {
     }
-    
+
     @Override
     public void save() {
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
     }
-    
+
     @Override
     public void refresh() {
         searchFormual();
     }
-    
+
     @Override
     public void filter() {
         findDialog.setVisible(!findDialog.isVisible());
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();

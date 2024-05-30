@@ -33,6 +33,7 @@ public class StockFormula {
     private boolean active;
     @Column(name = "mac_id")
     private Integer macId;
+    private Double qty;
     private transient List<StockFormulaQty> listQty;
     private transient List<StockFormulaPrice> listPrice;
 }
