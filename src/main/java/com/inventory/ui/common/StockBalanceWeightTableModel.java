@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.common;
 
+import com.common.Util1;
 import com.ui.management.model.ClosingBalance;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class StockBalanceWeightTableModel extends AbstractTableModel {
     @Getter
     private double total;
     private List<ClosingBalance> listStockBalance = new ArrayList();
-    private final String[] columnNames = {"Locaiton", "Total Weight", "Total Qty"};
+    private final String[] columnNames = {"Locaiton", "Weight", "Qty", "Bag"};
 
     @Override
     public String getColumnName(int column) {
@@ -42,19 +43,22 @@ public class StockBalanceWeightTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         if (listStockBalance != null) {
             try {
-                ClosingBalance stock = listStockBalance.get(row);
+                ClosingBalance s = listStockBalance.get(row);
                 switch (column) {
                     case 0 -> {
                         //Location
-                        return stock.getLocName();
+                        return s.getLocName();
                     }
                     case 1 -> {
                         //Unit
-                        return stock.getWeight();
+                        return Util1.toNull(s.getWeight());
                     }
                     case 2 -> {
                         //Unit
-                        return stock.getTotalQty();
+                        return Util1.toNull(s.getBalQty());
+                    }
+                    case 3 -> {
+                        return Util1.toNull(s.getBalBag());
                     }
                 }
             } catch (Exception ex) {

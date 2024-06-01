@@ -40,7 +40,7 @@ public class StockIOMoreDialog extends javax.swing.JDialog {
     }
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "CUS");
+        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
     }
 
     public void setData(StockInOut io) {

@@ -50,6 +50,8 @@ import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.entity.LabourGroup;
 import com.inventory.entity.LandingHis;
+import com.inventory.entity.StockInOut;
+import com.inventory.entity.VStockIO;
 import com.inventory.entity.WeightHis;
 import com.inventory.ui.common.PurchaseExportTableModel;
 import com.inventory.ui.common.PurchaseOtherTableModel;
@@ -60,6 +62,7 @@ import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.entry.dialog.LandingHistoryDialog;
 import com.inventory.ui.entry.dialog.AccountOptionDialog;
 import com.inventory.ui.entry.dialog.PurchaseWeightLossPriceDialog;
+import com.inventory.ui.entry.dialog.StockIOHistoryDialog;
 import com.inventory.ui.entry.dialog.WeightHistoryDialog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
@@ -96,6 +99,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -149,6 +153,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private FindDialog findDialog;
     private PurchaseWeightLossPriceDialog purchaseWLDialog;
+    private StockIOHistoryDialog ioDialog;
 
     /**
      * Creates new form Purchase
@@ -1549,6 +1554,49 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.requestFocus();
     }
 
+    private void setDetailFromIO(StockInOut oh) {
+        clear(false);
+        if (oh != null) {
+            progress.setIndeterminate(true);
+            getPurDetailFromIO().doOnSuccess((t) -> {
+                setListDetail(t);
+            }).doOnTerminate(() -> {
+                addNewRow();
+                calculateTotalAmount(false);
+                focusTable();
+                progress.setIndeterminate(false);
+            }).subscribe();
+            btnIO.setBackground(Color.green);
+            inventoryRepo.findTrader(oh.getTraderCode()).doOnSuccess((t) -> {
+                traderAutoCompleter.setTrader(t);
+            }).subscribe();
+            txtRemark.setText(oh.getRemark());
+            txtReference.setText(oh.getDescription());
+        }
+    }
+
+    private Mono<List<PurHisDetail>> getPurDetailFromIO() {
+        return Flux.fromIterable(ioDialog.getListIO())
+                .flatMap(vouNo -> inventoryRepo.getPurDetail(vouNo)
+                .flatMapMany(Flux::fromIterable)
+                .map(od -> {
+                    PurHisDetail sd = new PurHisDetail();
+                    sd.setStockCode(od.getStockCode());
+                    sd.setUserCode(od.getUserCode());
+                    sd.setStockName(od.getStockName());
+                    sd.setRelName(od.getRelName());
+                    sd.setWeight(od.getWeight());
+                    sd.setWeightUnit(od.getWeightUnit());
+                    sd.setQty(Util1.getDouble(od.getQty()));
+                    sd.setAmount(Util1.getDouble(od.getAmount()));
+                    sd.setUnitCode(od.getUnitCode());
+                    sd.setPrice(Util1.getDouble(od.getPrice()));
+                    sd.setLocCode(od.getLocCode());
+                    sd.setLocName(od.getLocName());
+                    return sd;
+                })).collectList();
+    }
+
     private void addPurchase(PurHisDetail p) {
         switch (type) {
             case PURCHASE ->
@@ -1596,6 +1644,20 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             weightHistoryDialog.setLocationRelativeTo(null);
         }
         weightHistoryDialog.search();
+    }
+
+    private void ioDialog() {
+        if (ioDialog == null) {
+            ioDialog = new StockIOHistoryDialog(Global.parentForm);
+            ioDialog.setInventoryRepo(inventoryRepo);
+            ioDialog.setUserRepo(userRepo);
+            ioDialog.setObserver(this);
+            ioDialog.setOption(true);
+            ioDialog.initMain();
+            ioDialog.setSize(Global.width - 20, Global.height - 20);
+            ioDialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
     }
 
     private void observeMain() {
@@ -1658,6 +1720,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         jLabel12 = new javax.swing.JLabel();
         txtWeight = new javax.swing.JFormattedTextField();
         btnWeight = new javax.swing.JButton();
+        btnIO = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -2034,6 +2097,16 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             }
         });
 
+        btnIO.setBackground(Global.selectionColor);
+        btnIO.setFont(Global.lableFont);
+        btnIO.setForeground(new java.awt.Color(255, 255, 255));
+        btnIO.setText("I / O");
+        btnIO.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIOActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -2042,7 +2115,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnBatch)
@@ -2050,7 +2123,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnWeight)))
+                        .addComponent(btnWeight))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(76, 76, 76)
+                        .addComponent(btnIO)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
@@ -2086,6 +2162,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(btnWeight)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnIO)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
@@ -2513,6 +2591,11 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
     private void txtVouNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtVouNoActionPerformed
+
+    private void btnIOActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIOActionPerformed
+        // TODO add your handling code here:
+        ioDialog();
+    }//GEN-LAST:event_btnIOActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -2574,6 +2657,13 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             case "DISCOUNT" -> {
                 double discount = Util1.getDouble(selectObj);
                 txtVouDiscount.setValue(discount);
+            }
+            case "IO-HISTORY" -> {
+                if (selectObj instanceof VStockIO v) {
+                    inventoryRepo.findStockIO(v.getVouNo()).doOnSuccess((t) -> {
+                        setDetailFromIO(t);
+                    }).subscribe();
+                }
             }
         }
     }
@@ -2720,6 +2810,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatch;
+    private javax.swing.JButton btnIO;
     private javax.swing.JButton btnLanding;
     private javax.swing.JButton btnWeight;
     private javax.swing.JCheckBox chkPaid;

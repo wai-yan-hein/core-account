@@ -26,17 +26,22 @@ import com.user.model.AppUser;
 import com.inventory.entity.Stock;
 import com.inventory.entity.VStockIO;
 import com.inventory.entity.VouStatus;
+import com.inventory.ui.entry.dialog.common.StockIOVouSearchOptionTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIOVouSearchTableModel;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -50,40 +55,30 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
      * Creates new form SaleVouSearchDialog
      */
     private final StockIOVouSearchTableModel tableModel = new StockIOVouSearchTableModel();
+    private final StockIOVouSearchOptionTableModel optionTableModel = new StockIOVouSearchOptionTableModel();
+    @Setter
     private UserRepo userRepo;
+    @Setter
     private InventoryRepo inventoryRepo;
+    @Setter
+    private SelectionObserver observer;
     private AppUserAutoCompleter appUserAutoCompleter;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private DepartmentUserAutoCompleter departmentAutoCompleter;
-    private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private JobSearchDialog jobSearchDialog;
+    @Setter
+    @Getter
     private Job job;
     private int row = 0;
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
+    @Setter
+    private boolean option;
+    @Getter
+    private List<String> listIO = new ArrayList<>();
 
     public StockIOHistoryDialog(JFrame frame) {
         super(frame, Dialog.ModalityType.MODELESS);
@@ -101,7 +96,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     public void initMain() {
         ComponentUtil.addFocusListener(panelFilter);
         initTextBox();
-        initTableVoucher();
+        initTable();
+        initModel();
         setTodayDate();
         initCombo();
     }
@@ -127,9 +123,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             departmentAutoCompleter.setDepartment(t);
         }).subscribe();
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
-        inventoryRepo.getLocation().subscribe((t) -> {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
+        }).subscribe();
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, true);
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListData(t);
@@ -139,16 +135,33 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
     }
 
-    private void initTableVoucher() {
-        tblVoucher.setModel(tableModel);
+    private void initModel() {
+        if (option) {
+            tblVoucher.setModel(optionTableModel);
+            tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
+            tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);//vouno
+            tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
+            tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
+            tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);
+            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(50);
+            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(10);
+            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(10);
+        } else {
+            tblVoucher.setModel(tableModel);
+            tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
+            tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);//vouno
+            tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
+            tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
+            tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);
+            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(50);
+        }
+    }
+
+    private void initTable() {
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
-        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);//vouno
-        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
-        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);
-        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(50);
+        tblVoucher.setFont(Global.textFont);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -232,12 +245,33 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private void select() {
         if (row >= 0) {
             VStockIO his = tableModel.getSelectVou(row);
+            if (option) {
+                if (his.isPost()) {
+                    JOptionPane.showMessageDialog(this, "This Voucher is already posted.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+            setSelectVoucher(his);
             observer.selected("IO-HISTORY", his);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void setSelectVoucher(VStockIO obj) {
+        listIO.clear();
+        getListDetail().stream().filter((t) -> t.isSelect()).forEach((t) -> {
+            listIO.add(t.getVouNo());
+        });
+        if (listIO.isEmpty()) {
+            listIO.add(obj.getVouNo());
+        }
+    }
+
+    private List<VStockIO> getListDetail() {
+        return option ? optionTableModel.getListDetail() : tableModel.getListDetail();
     }
 
     private void initKeyListener() {

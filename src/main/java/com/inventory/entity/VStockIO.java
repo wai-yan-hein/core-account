@@ -58,5 +58,8 @@ public class VStockIO {
     private double weight;
     private double inBag;
     private double outBag;
+    private boolean post;
+    private boolean select;
+    private String traderCode;
 
 }

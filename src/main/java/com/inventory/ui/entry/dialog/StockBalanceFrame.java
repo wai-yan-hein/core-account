@@ -42,9 +42,10 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
     private void initMain(boolean weight) {
         if (weight) {
             tblStock.setModel(stockBalanceWeightTableModel);
-            tblStock.getColumnModel().getColumn(0).setPreferredWidth(200);//Unit
-            tblStock.getColumnModel().getColumn(1).setPreferredWidth(80);//qty
+            tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//loc
+            tblStock.getColumnModel().getColumn(1).setPreferredWidth(80);//weight
             tblStock.getColumnModel().getColumn(2).setPreferredWidth(80);//qty
+            tblStock.getColumnModel().getColumn(3).setPreferredWidth(80);//bag
         } else {
             tblStock.setModel(stockBalanceTableModel);
             tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//

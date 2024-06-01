@@ -61,4 +61,6 @@ public class ClosingBalance {
     private String unitName;
     private double weight;
     private double totalQty;
+    private double balBag;
+
 }

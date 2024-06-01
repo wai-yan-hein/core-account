@@ -42,6 +42,8 @@ import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -57,6 +59,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
      */
     private OrderVouSearchTableModel orderVouTableModel = new OrderVouSearchTableModel();
     private OrderVouOptionTableModel orderOptionTableModel = new OrderVouOptionTableModel();
+    @Setter
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -64,35 +67,19 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private SaleManAutoCompleter saleManAutoCompleter;
     private DepartmentUserAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
+    @Setter
     private SelectionObserver observer;
+    @Setter
     private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
+    @Setter
     private boolean option;
     private OrderStatusComboBoxModel orderStatusComboBoxModel = new OrderStatusComboBoxModel();
+    @Getter
     private List<String> listOrder = new ArrayList<>();
     private int row = 0;
-
-    public List<String> getListOrder() {
-        return listOrder;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setOption(boolean option) {
-        this.option = option;
-    }
 
     public OrderHistoryDialog(JFrame frame) {
         super(frame, Dialog.ModalityType.MODELESS);

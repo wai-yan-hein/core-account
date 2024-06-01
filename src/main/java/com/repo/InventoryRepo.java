@@ -2210,7 +2210,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockInOut> findStockIO(String vouNo, boolean local) {
+    public Mono<StockInOut> findStockIO(String vouNo) {
         StockIOKey key = new StockIOKey();
         key.setCompCode(Global.compCode);
         key.setVouNo(vouNo);

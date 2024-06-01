@@ -1222,9 +1222,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("IO-HISTORY")) {
             if (selectObj instanceof VStockIO v) {
-                inventoryRepo.findStockIO(v.getVouNo(), false).subscribe((t) -> {
+                inventoryRepo.findStockIO(v.getVouNo()).doOnSuccess((t) -> {
                     setVoucher(t, false);
-                });
+                }).subscribe();
             }
         }
         if (source.toString().equals("CAL-TOTAL")) {

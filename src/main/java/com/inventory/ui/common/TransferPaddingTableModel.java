@@ -5,15 +5,12 @@
  */
 package com.inventory.ui.common;
 
-import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.entity.Stock;
 import com.inventory.entity.TransferHisDetail;
 import com.inventory.entity.THDetailKey;
-import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,49 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 public class TransferPaddingTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Stock Code", "Stock Name", "Moisture", "Head Rice", "Weight", "Qty", "Bag", "Price", "Amount"};
+    @Setter
     private JTable parent;
     private List<TransferHisDetail> listTransfer = new ArrayList();
     private List<THDetailKey> deleteList = new ArrayList();
-    private SelectionObserver observer;
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
+    @Setter
     private JLabel lblRec;
-
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
-    public void setLblRec(JLabel lblRec) {
-        this.lblRec = lblRec;
-    }
-
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public int getRowCount() {
@@ -242,7 +203,8 @@ public class TransferPaddingTableModel extends AbstractTableModel {
     }
 
     private void calAmount(TransferHisDetail thd) {
-        double amt = thd.getQty() * thd.getPrice();
+        double qty = thd.getQty() == 0 ? thd.getBag() : thd.getQty();
+        double amt = qty * thd.getPrice();
         thd.setAmount(amt);
     }
 
@@ -267,9 +229,9 @@ public class TransferPaddingTableModel extends AbstractTableModel {
         boolean status = true;
         for (TransferHisDetail od : listTransfer) {
             if (od.getStockCode() != null) {
-                if (Util1.getDouble(od.getQty()) <= 0) {
+                if (od.getQty() <= 0 && od.getBag() <= 0) {
                     status = false;
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty/Bag.");
                     parent.requestFocus();
                 }
             }
@@ -317,7 +279,7 @@ public class TransferPaddingTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         if (listTransfer.size() >= 1) {
             TransferHisDetail get = listTransfer.get(listTransfer.size() - 1);
-            if (get.getStockCode()== null) {
+            if (get.getStockCode() == null) {
                 return true;
             }
         }
