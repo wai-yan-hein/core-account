@@ -172,8 +172,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//weight unit
         tblRet.getColumnModel().getColumn(8).setPreferredWidth(1);//price
         tblRet.getColumnModel().getColumn(9).setPreferredWidth(40);//amt
-        tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
             tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
@@ -474,7 +474,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     public void setVoucher(RetInHis ri) {
         if (ri != null) {
-            setHeader(ri);
             setDetail(ri);
         }
     }
@@ -528,7 +527,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     private void setHeader(RetInHis ri) {
         this.ri = ri;
-        progress.setIndeterminate(true);
         String vouNo = ri.getKey().getVouNo();
         inventoryRepo.findLocation(ri.getLocCode()).doOnSuccess((t) -> {
             locationAutoCompleter.setLocation(t);
@@ -575,6 +573,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void setDetail(RetInHis his) {
+        progress.setIndeterminate(true);
+        disableForm(false);
         String vouNo = his.getKey().getVouNo();
         inventoryRepo.getReturnInDetail(vouNo)
                 .doOnSuccess((t) -> {
@@ -586,6 +586,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 })
                 .doOnTerminate(() -> {
                     retInTableModel.addNewRow();
+                    setHeader(ri);
                     progress.setIndeterminate(false);
                     focusTable();
                 }).subscribe();

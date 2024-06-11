@@ -96,8 +96,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     public void initMain() {
         ComponentUtil.addFocusListener(panelFilter);
         initTextBox();
-        initTable();
         initModel();
+        initTable();
         setTodayDate();
         initCombo();
     }
@@ -145,8 +145,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
             tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);
             tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(50);
-            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(10);
-            tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(10);
+            tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(10);
+            tblVoucher.getColumnModel().getColumn(8).setPreferredWidth(10);
         } else {
             tblVoucher.setModel(tableModel);
             tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
@@ -164,6 +164,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         tblVoucher.setFont(Global.textFont);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtSearch);
@@ -193,10 +194,18 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
+    private void clearModel() {
+        if (option) {
+            optionTableModel.clear();
+        } else {
+            tableModel.clear();
+        }
+    }
+
     public void search() {
         progress.setIndeterminate(true);
         txtRecord.setValue(0);
-        tableModel.clear();
+        clearModel();
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
@@ -220,7 +229,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         txtOutBag.setValue(0);
         inventoryRepo.getStockIO(filter)
                 .doOnNext(obj -> btnSearch.setEnabled(false))
-                .doOnNext(tableModel::addObject)
+                .doOnNext(this::addObject)
                 .doOnNext(obj -> calTotal())
                 .doOnError(e -> {
                     progress.setIndeterminate(false);
@@ -234,17 +243,29 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         setVisible(true);
     }
 
+    private void addObject(VStockIO io) {
+        if (option) {
+            optionTableModel.addObject(io);
+        } else {
+            tableModel.addObject(io);
+        }
+    }
+
     private void calTotal() {
-        txtRecord.setValue(tableModel.getSize());
-        txtInQty.setValue(tableModel.getInQty());
-        txtInBag.setValue(tableModel.getInBag());
-        txtOutQty.setValue(tableModel.getOutQty());
-        txtOutBag.setValue(tableModel.getOutBag());
+        txtRecord.setValue(option ? optionTableModel.getSize() : tableModel.getSize());
+        txtInQty.setValue(option ? optionTableModel.getInQty() : tableModel.getInQty());
+        txtInBag.setValue(option ? optionTableModel.getInBag() : tableModel.getInBag());
+        txtOutQty.setValue(option ? optionTableModel.getOutQty() : tableModel.getOutQty());
+        txtOutBag.setValue(option ? optionTableModel.getOutBag() : tableModel.getOutBag());
+    }
+
+    private VStockIO getSelectVou(int row) {
+        return option ? optionTableModel.getSelectVou(row) : tableModel.getSelectVou(row);
     }
 
     private void select() {
         if (row >= 0) {
-            VStockIO his = tableModel.getSelectVou(row);
+            VStockIO his = getSelectVou(row);
             if (option) {
                 if (his.isPost()) {
                     JOptionPane.showMessageDialog(this, "This Voucher is already posted.", "Warning", JOptionPane.WARNING_MESSAGE);

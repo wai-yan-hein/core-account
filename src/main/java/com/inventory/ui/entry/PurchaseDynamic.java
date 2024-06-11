@@ -384,8 +384,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
         tblPur.getColumnModel().getColumn(6).setPreferredWidth(1);//price
         tblPur.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
             tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
@@ -417,8 +417,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(8).setPreferredWidth(30);//unit
         tblPur.getColumnModel().getColumn(9).setPreferredWidth(50);//price
         tblPur.getColumnModel().getColumn(10).setPreferredWidth(70);//amount
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.subscribe((t) -> {
             tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         });
@@ -445,8 +445,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purchasePaddyTableModel.setPurchase(this);
         purchasePaddyTableModel.setObserver(this);
         purchasePaddyTableModel.addNewRow();
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
@@ -466,8 +466,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purchaseOtherTableModel.setPurchase(this);
         purchaseOtherTableModel.setObserver(this);
         purchaseOtherTableModel.addNewRow();
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
@@ -480,8 +480,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         purchaseRiceBagTableModel.setObserver(this);
         purchaseRiceBagTableModel.setParent(tblPur);
         purchaseRiceBagTableModel.addNewRow();
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));//code
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));//name
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));//code
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));//name
         tblPur.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//location
         tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//wet
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//rice
@@ -528,8 +528,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(7).setPreferredWidth(50);//total weight
         tblPur.getColumnModel().getColumn(8).setPreferredWidth(50);//price
         tblPur.getColumnModel().getColumn(9).setPreferredWidth(70);//amount
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.subscribe((t) -> {
             tblPur.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         });
@@ -570,8 +570,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(10).setPreferredWidth(30);//total qty
         tblPur.getColumnModel().getColumn(11).setPreferredWidth(50);//price
         tblPur.getColumnModel().getColumn(12).setPreferredWidth(70);//amount
-        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.subscribe((t) -> {
             tblPur.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         });
@@ -785,6 +785,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             observer.selected("save", false);
             ph.setListPD(getListDetail());
             ph.setListExpense(expenseTableModel.getExpenseList());
+            ph.setListIO(getListIO());
             inventoryRepo.save(ph).doOnSuccess((t) -> {
                 if (print) {
                     String landVouNo = t.getLandVouNo();
@@ -898,9 +899,9 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Purchase Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(ph.getKey()).doOnSuccess((t) -> {
                         clear(true);
-                    });
+                    }).subscribe();
                 }
             }
             case "DELETED" -> {
@@ -1086,22 +1087,23 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     public void setVoucher(PurHis pur) {
         if (pur != null) {
-            progress.setIndeterminate(true);
             ph = pur;
-            String vouNo = ph.getKey().getVouNo();
-            setPurchase(ph);
-            searchPurchaseDetail(vouNo);
-            searchExpense(vouNo);
+            searchPurchaseDetail(ph);
+            searchExpense(ph);
         }
     }
 
-    private void searchPurchaseDetail(String vouNo) {
+    private void searchPurchaseDetail(PurHis ph) {
+        progress.setIndeterminate(true);
+        disableForm(false);
+        String vouNo = ph.getKey().getVouNo();
         inventoryRepo.getPurDetail(vouNo).doOnSuccess((t) -> {
             setListDetail(t);
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         }).doOnTerminate(() -> {
+            setPurchase(ph);
             progress.setIndeterminate(false);
             focusTable();
         }).subscribe();
@@ -1166,7 +1168,8 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         rdoRec.setSelected(ph.isSRec());
     }
 
-    private void searchExpense(String vouNo) {
+    private void searchExpense(PurHis ph) {
+        String vouNo = ph.getKey().getVouNo();
         if (panelExpense.isVisible()) {
             expProgress.setIndeterminate(true);
             inventoryRepo.getPurExpense(vouNo).subscribe((t) -> {
@@ -1554,10 +1557,16 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.requestFocus();
     }
 
+    private List<String> getListIO() {
+        return ioDialog == null ? null : ioDialog.getListIO();
+    }
+
     private void setDetailFromIO(StockInOut oh) {
         clear(false);
         if (oh != null) {
             progress.setIndeterminate(true);
+            rdoRec.setSelected(true);
+            rdoRec.setEnabled(false);
             getPurDetailFromIO().doOnSuccess((t) -> {
                 setListDetail(t);
             }).doOnTerminate(() -> {
@@ -1577,7 +1586,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
 
     private Mono<List<PurHisDetail>> getPurDetailFromIO() {
         return Flux.fromIterable(ioDialog.getListIO())
-                .flatMap(vouNo -> inventoryRepo.getPurDetail(vouNo)
+                .flatMap(vouNo -> inventoryRepo.getStockIODetail(vouNo)
                 .flatMapMany(Flux::fromIterable)
                 .map(od -> {
                     PurHisDetail sd = new PurHisDetail();
@@ -1587,10 +1596,12 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
                     sd.setRelName(od.getRelName());
                     sd.setWeight(od.getWeight());
                     sd.setWeightUnit(od.getWeightUnit());
-                    sd.setQty(Util1.getDouble(od.getQty()));
+                    sd.setQty(Util1.getDouble(od.getInQty()));
+                    sd.setBag(Util1.getDouble(od.getInBag()));
                     sd.setAmount(Util1.getDouble(od.getAmount()));
-                    sd.setUnitCode(od.getUnitCode());
-                    sd.setPrice(Util1.getDouble(od.getPrice()));
+                    sd.setUnitCode(od.getInUnitCode());
+                    sd.setPrice(0);
+                    sd.setAmount(0);
                     sd.setLocCode(od.getLocCode());
                     sd.setLocName(od.getLocName());
                     return sd;
@@ -1657,7 +1668,7 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             ioDialog.setSize(Global.width - 20, Global.height - 20);
             ioDialog.setLocationRelativeTo(null);
         }
-        dialog.search();
+        ioDialog.search();
     }
 
     private void observeMain() {

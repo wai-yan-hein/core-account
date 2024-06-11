@@ -243,6 +243,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
         jButton9.setFont(Global.lableFont);
         jButton9.setText("Stock Color");
+        jButton9.setEnabled(false);
         jButton9.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton9ActionPerformed(evt);

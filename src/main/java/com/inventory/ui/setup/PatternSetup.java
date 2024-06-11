@@ -8,6 +8,7 @@ import com.acc.dialog.FindDialog;
 import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
@@ -213,8 +214,8 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblPD.setRowHeight(Global.tblRowHeight);
         tblPD.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblPD.setFont(Global.textFont);
-        tblPD.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPD.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPD.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPD.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             tblPD.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         }).subscribe();

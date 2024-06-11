@@ -14,6 +14,7 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
@@ -173,8 +174,8 @@ public class PurOrderHisEntry extends javax.swing.JPanel implements PanelControl
         tblPurOrder.getColumnModel().getColumn(6).setPreferredWidth(100);
         tblPurOrder.getColumnModel().getColumn(7).setPreferredWidth(100);
         tblPurOrder.getColumnModel().getColumn(8).setPreferredWidth(100);
-        tblPurOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPurOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblPurOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblPurOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblPurOrder.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblPurOrder.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPurOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());

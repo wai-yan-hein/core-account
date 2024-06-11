@@ -49,13 +49,13 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     }
 
     @Override
-    public List<Stock> getStock(String str, String compCode, Integer deptId) {
+    public List<Stock> getStock(String str, String compCode, Integer deptId, boolean contain) {
         str = Util1.cleanStr(str);
-        str += "%";
-        return getStockList(str, compCode, deptId);
+        str = contain ? "%".concat(str).concat("%") : str.concat("%");
+        return getStockList(str, compCode, deptId, contain);
     }
 
-    private List<Stock> getStockList(String str, String compCode, Integer deptId) {
+    private List<Stock> getStockList(String str, String compCode, Integer deptId, boolean contain) {
         List<Stock> listStock = new ArrayList<>();
         String sql = """
                 select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
@@ -233,7 +233,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     }
 
     @Override
-    public Boolean updateDeleted(StockKey key,boolean status) {
+    public Boolean updateDeleted(StockKey key, boolean status) {
         Stock s = find(key);
         if (s != null) {
             s.setDeleted(true);

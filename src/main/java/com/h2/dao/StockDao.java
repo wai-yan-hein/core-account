@@ -24,7 +24,7 @@ public interface StockDao {
 
     String getMaxDate();
 
-    List<Stock> getStock(String str, String compCode, Integer deptId);
+    List<Stock> getStock(String str, String compCode, Integer deptId,boolean contain);
 
     List<Stock> findAll(String compCode);
 

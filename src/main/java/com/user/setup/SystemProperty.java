@@ -203,6 +203,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtDivider.setName(ProUtil.DIVIDER);
         txtConversionAcc.setName(ProUtil.CONVERSION_ACC);
         txtEmp.setName(ProUtil.EMP_ACC);
+        txtLogoName.setName(ProUtil.LOGO);
+        txtWaterMark.setName(ProUtil.WATERMARK);
+        txtCreditAmt.setName(ProUtil.C_CREDIT_AMT);
         addActionListener(this);
 
     }
@@ -318,10 +321,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     }
 
     private void initTextBox() {
-        txtCreditAmt.setName(ProUtil.C_CREDIT_AMT);
         txtCreditAmt.setText(hmProperty.get(txtCreditAmt.getName()));
-        txtLogoName.setName("logo.name");
-        txtLogoName.setText(hmProperty.get("logo.name"));
+        txtLogoName.setText(hmProperty.get(txtLogoName.getName()));
+        txtWaterMark.setText(hmProperty.get(txtWaterMark.getName()));
         txtPages.setText(hmProperty.get(txtPages.getName()));
         txtComP.setText(hmProperty.get(txtComP.getName()));
         txtComAmt.setText(hmProperty.get(txtComAmt.getName()));
@@ -695,6 +697,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jLabel5 = new javax.swing.JLabel();
         txtPosPrinter = new javax.swing.JTextField();
         chkBarCode = new javax.swing.JCheckBox();
+        jLabel9 = new javax.swing.JLabel();
+        txtWaterMark = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -995,6 +999,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             }
         });
 
+        jLabel9.setText("Warter Mark");
+
+        txtWaterMark.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1008,13 +1016,15 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtPrinter)
                             .addComponent(txtLogoName)
                             .addComponent(txtPages)
-                            .addComponent(txtPosPrinter)))
+                            .addComponent(txtPosPrinter)
+                            .addComponent(txtWaterMark)))
                     .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1075,6 +1085,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtLogoName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(txtWaterMark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1930,6 +1944,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
@@ -1985,6 +2000,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtStock;
     private javax.swing.JTextField txtSup;
     private javax.swing.JTextField txtSupplier;
+    private javax.swing.JTextField txtWaterMark;
     // End of variables declaration//GEN-END:variables
 
     @Override

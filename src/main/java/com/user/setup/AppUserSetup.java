@@ -71,10 +71,10 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         departmentUserAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, false);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepAcc, null, false, false);
         locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, false, false);
-        userRepo.getAppRole().subscribe((t) -> {
+        userRepo.getAppRole().doOnSuccess((t) -> {
             roleAutoCompleter = new RoleAutoCompleter(txtRole, t, null, false);
             roleAutoCompleter.setAppRole(null);
-        });
+        }).subscribe();
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentUserAutoCompleter.setListDepartment(t);
         }).subscribe();
@@ -147,7 +147,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void saveUser() {
         if (isValidEntry()) {
-            userRepo.saveUser(appUser).subscribe((t) -> {
+            progress.setIndeterminate(true);
+            userRepo.saveUser(appUser).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("NEW")) {
                     userTableModel.addUser(t);
                 } else {
@@ -155,7 +156,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                 }
                 clear();
                 sendMessage(t.getUserLongName());
-            });
+            }).subscribe();
 
         }
     }
@@ -220,6 +221,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         departmentAutoCompleter.setDepartment(null);
         departmentUserAutoCompleter.setDepartment(null);
         locationAutoCompleter.setLocation(null);
+        progress.setIndeterminate(false);
     }
 
     private void observeMain() {

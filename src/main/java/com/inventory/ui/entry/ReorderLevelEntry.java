@@ -174,8 +174,8 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         tblOrder.setRowHeight(Global.tblRowHeight);
         tblOrder.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblOrder.setFont(Global.textFont);
-        tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblOrder.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         monoUnit.subscribe((t) -> {
             tblOrder.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));

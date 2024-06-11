@@ -40,8 +40,10 @@ import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.entry.dialog.StockIOHistoryDialog;
 import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.Job;
 import com.inventory.entity.LabourGroup;
+import com.inventory.entity.Trader;
 import com.inventory.ui.common.StockInOutPaddyTableModel;
 import com.inventory.ui.entry.dialog.StockIOMoreDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
@@ -98,6 +100,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private int type;
     private LabourGroupAutoCompleter labourGroupAutoCompleter;
     private JobAutoCompleter jobAutoCompleter;
+    private TraderAutoCompleter traderAutoCompleter;
     private StockIOMoreDialog moreDialog;
     private FindDialog findDialog;
     private VouStatusSetupDialog vsDialog;
@@ -179,6 +182,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         labourGroupAutoCompleter.setObserver(this);
         jobAutoCompleter = new JobAutoCompleter(txtJob, null, false);
         jobAutoCompleter.setObserver(this);
+        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
+        traderAutoCompleter.setObserver(this);
 
     }
 
@@ -222,7 +227,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         outTableModel.setVouDate(txtDate);
         outTableModel.setInventoryRepo(inventoryRepo);
         outTableModel.setLblRec(lblRec);
-//        outTableModel.addNewRow();
         outTableModel.setParent(tblStock);
         outTableModel.setObserver(this);
         tblStock.setModel(outTableModel);
@@ -236,8 +240,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
             tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
@@ -272,8 +276,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(10).setPreferredWidth(80);//amt
         tblStock.getColumnModel().getColumn(11).setPreferredWidth(80);//total weight
 
-        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.subscribe((t) -> {
             tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         });
@@ -307,8 +311,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(9).setPreferredWidth(50);//bag
         tblStock.getColumnModel().getColumn(10).setPreferredWidth(50);//cost
         tblStock.getColumnModel().getColumn(11).setPreferredWidth(80);//amt
-        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
             tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
@@ -458,6 +462,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         vouStatusAutoCompleter.setVoucher(null);
         labourGroupAutoCompleter.setObject(null);
         jobAutoCompleter.setObject(null);
+        traderAutoCompleter.setTrader(null);
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
@@ -588,12 +593,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         } else {
             LabourGroup lg = labourGroupAutoCompleter.getObject();
             Job job = jobAutoCompleter.getObject();
+            Trader trader = traderAutoCompleter.getTrader();
             io.setDescription(txtDesp.getText());
             io.setRemark(txtRemark.getText());
             io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             io.setVouStatusCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
             io.setLabourGroupCode(lg == null ? null : lg.getKey() == null ? null : lg.getKey().getCode());
             io.setJobCode(job == null ? null : job.getKey() == null ? null : job.getKey().getJobNo());
+            io.setTraderCode(trader == null ? null : trader.getKey().getCode());
             if (lblStatus.getText().equals("NEW")) {
                 StockIOKey key = new StockIOKey();
                 key.setCompCode(Global.compCode);
@@ -617,59 +624,68 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         return status;
     }
 
-    private void setVoucher(StockInOut s, boolean local) {
+    private void setHeader(StockInOut io) {
+        io.setVouLock(!Global.deptId.equals(io.getDeptId()));
+        inventoryRepo.findVouStatus(io.getVouStatusCode()).doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setVoucher(t);
+        }).subscribe();
+        inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
+            labourGroupAutoCompleter.setObject(t);
+        }).subscribe();
+        inventoryRepo.findTrader(io.getTraderCode()).doOnSuccess((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }).subscribe();
+        String jobNo = io.getJobCode();
+        if (!Util1.isNullOrEmpty(jobNo)) {
+            inventoryRepo.findJob(jobNo).doOnSuccess((t) -> {
+                if (t != null) {
+                    jobAutoCompleter.setObject(t);
+                    if (t.isFinished()) {
+                        lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
+                        lblStatus.setForeground(Color.red);
+                        disableForm(false);
+                    }
+                }
+            }).subscribe();
+        }
+        String vouNo = io.getKey().getVouNo();
+        txtVou.setText(vouNo);
+        txtDate.setDate(Util1.convertToDate(io.getVouDate()));
+        txtRemark.setText(io.getRemark());
+        txtDesp.setText(io.getDescription());
+        if (Util1.getBoolean(io.isVouLock())) {
+            lblStatus.setText("Voucher Locked.");
+            lblStatus.setForeground(Color.red);
+            disableForm(false);
+        } else if (Util1.getBoolean(io.getDeleted())) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.red);
+            disableForm(false);
+            observer.selected("delete", true);
+        } else if (DateLockUtil.isLockDate(io.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else {
+            lblStatus.setText("EDIT");
+            lblStatus.setForeground(Color.blue);
+            disableForm(true);
+        }
+    }
+
+    private void setVoucher(StockInOut s) {
         txtCost.setValue(0);
         txtInQty.setValue(0);
         txtOutQty.setValue(0);
         if (s != null) {
-            progress.setIndeterminate(true);
             io = s;
-            io.setVouLock(!Global.deptId.equals(io.getDeptId()));
-            inventoryRepo.findVouStatus(io.getVouStatusCode()).doOnSuccess((t) -> {
-                vouStatusAutoCompleter.setVoucher(t);
-            }).subscribe();
-            inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
-                labourGroupAutoCompleter.setObject(t);
-            }).subscribe();
-            String jobNo = io.getJobCode();
-            if (!Util1.isNullOrEmpty(jobNo)) {
-                inventoryRepo.findJob(jobNo).doOnSuccess((t) -> {
-                    if (t != null) {
-                        jobAutoCompleter.setObject(t);
-                        if (t.isFinished()) {
-                            lblStatus.setText("Your voucher has been locked as the associated job has been successfully completed..");
-                            lblStatus.setForeground(Color.red);
-                            disableForm(false);
-                        }
-                    }
-                }).subscribe();
-            }
+            progress.setIndeterminate(true);
+            disableForm(false);
             String vouNo = io.getKey().getVouNo();
-            txtVou.setText(vouNo);
-            txtDate.setDate(Util1.convertToDate(io.getVouDate()));
-            txtRemark.setText(io.getRemark());
-            txtDesp.setText(io.getDescription());
-            if (Util1.getBoolean(io.isVouLock())) {
-                lblStatus.setText("Voucher Locked.");
-                lblStatus.setForeground(Color.red);
-                disableForm(false);
-            } else if (Util1.getBoolean(io.getDeleted())) {
-                lblStatus.setText("DELETED");
-                lblStatus.setForeground(Color.red);
-                disableForm(false);
-                observer.selected("delete", true);
-            } else if (DateLockUtil.isLockDate(io.getVouDate())) {
-                lblStatus.setText(DateLockUtil.MESSAGE);
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-            } else {
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                disableForm(true);
-            }
-            inventoryRepo.getStockIODetail(vouNo, local).doOnSuccess((t) -> {
+            inventoryRepo.getStockIODetail(vouNo).doOnSuccess((t) -> {
                 setListDetail(t);
             }).doOnTerminate(() -> {
+                setHeader(io);
                 calTotalAmt();
                 focusOnTable();
                 progress.setIndeterminate(false);
@@ -803,6 +819,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtJob = new javax.swing.JTextField();
         txtVou = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+        txtTrader = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -910,6 +928,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
         });
 
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Trader");
+
+        txtTrader.setFont(Global.textFont);
+        txtTrader.setName("txtRemark"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -921,22 +945,22 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
+                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
+                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
-                    .addComponent(txtJob, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)
+                    .addComponent(txtJob, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE))
+                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -944,15 +968,16 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton2)))
-                .addGap(18, 18, 18))
+                    .addComponent(txtTrader)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel4, jLabel7});
@@ -962,12 +987,18 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel5)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel7)
-                        .addComponent(txtVouType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButton3))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7)
+                            .addComponent(txtVouType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton3)
+                            .addComponent(jButton2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(txtTrader, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -985,10 +1016,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                             .addComponent(jLabel10)
                             .addComponent(jLabel4)
                             .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2)
                             .addComponent(txtLG, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap())
+                .addGap(5, 5, 5))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -1105,7 +1135,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -1143,6 +1173,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1166,6 +1197,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JTextField txtLG;
     private javax.swing.JFormattedTextField txtOutQty;
     private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtTrader;
     private javax.swing.JTextField txtVou;
     private javax.swing.JTextField txtVouType;
     private javax.swing.JFormattedTextField txtWeight;
@@ -1223,7 +1255,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (source.toString().equals("IO-HISTORY")) {
             if (selectObj instanceof VStockIO v) {
                 inventoryRepo.findStockIO(v.getVouNo()).doOnSuccess((t) -> {
-                    setVoucher(t, false);
+                    setVoucher(t);
                 }).subscribe();
             }
         }

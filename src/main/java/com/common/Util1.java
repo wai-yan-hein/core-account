@@ -967,7 +967,7 @@ public class Util1 {
 
     public static String convertToUniCode(String str) {
         if (isNull(str)) {
-            return null;
+            return "";
         }
         ZawgyiDetector zd = new ZawgyiDetector();
         Double score = zd.getZawgyiProbability(str);

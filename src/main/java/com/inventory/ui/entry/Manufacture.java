@@ -10,6 +10,7 @@ import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
@@ -204,8 +205,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         tblProcessDetail.getColumnModel().getColumn(7).setPreferredWidth(40);//amount
         //
         tblProcessDetail.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());//date
-        tblProcessDetail.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));//code
-        tblProcessDetail.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo));//name
+        tblProcessDetail.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));//code
+        tblProcessDetail.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));//name
         inventoryRepo.getLocation().subscribe((t) -> {
             tblProcessDetail.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));//location
         });

@@ -46,8 +46,8 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<Stock> getStock(String str, String compCode, Integer deptId) {
-        return dao.getStock(str, compCode, deptId);
+    public List<Stock> getStock(String str, String compCode, Integer deptId, boolean contain) {
+        return dao.getStock(str, compCode, deptId, contain);
     }
 
     @Override
@@ -72,9 +72,9 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public Boolean updateDeleted(StockKey key,boolean status) {
+    public Boolean updateDeleted(StockKey key, boolean status) {
         return dao.updateDeleted(key, status);
-                
+
     }
 
 }

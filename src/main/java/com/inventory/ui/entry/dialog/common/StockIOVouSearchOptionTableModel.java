@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StockIOVouSearchOptionTableModel extends AbstractTableModel {
 
     private List<VStockIO> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Description", "Remark", "Voucher Type", "In Qty", "Out Qty", "Post", "Select"};
+    private final String[] columnNames = {"Date", "Vou No", "Description", "Trader", "Voucher Type", "In Qty", "Out Qty", "Post", "Select"};
     @Getter
     private int size;
     @Getter
@@ -50,7 +50,12 @@ public class StockIOVouSearchOptionTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return false;
+        return switch (column) {
+            case 8 ->
+                true;
+            default ->
+                false;
+        };
     }
 
     @Override
@@ -90,7 +95,7 @@ public class StockIOVouSearchOptionTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     //user
-                    return his.getRemark();
+                    return his.getTraderName();
                 }
                 case 4 -> {
                     return his.getVouTypeName();
@@ -103,10 +108,10 @@ public class StockIOVouSearchOptionTableModel extends AbstractTableModel {
                     //v-total
                     return his.getOutQty();
                 }
-                case 7->{
+                case 7 -> {
                     return his.isPost();
                 }
-                case 8->{
+                case 8 -> {
                     return his.isSelect();
                 }
             }
@@ -114,6 +119,20 @@ public class StockIOVouSearchOptionTableModel extends AbstractTableModel {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
         return null;
+    }
+     @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        try {
+            VStockIO his = listDetail.get(rowIndex);
+            switch (columnIndex) {
+                case 8 -> {
+                    if (aValue instanceof Boolean select) {
+                        his.setSelect(select);
+                    }
+                }
+            }
+        } catch (Exception e) {
+        }
     }
 
     public List<VStockIO> getListDetail() {

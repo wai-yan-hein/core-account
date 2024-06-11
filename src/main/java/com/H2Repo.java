@@ -252,8 +252,8 @@ public class H2Repo {
         return Mono.justOrEmpty(stockService.find(key));
     }
 
-    public Mono<List<Stock>> getStock(String str) {
-        return Mono.justOrEmpty(stockService.getStock(str, Global.compCode, 0));
+    public Mono<List<Stock>> getStock(String str, boolean contain) {
+        return Mono.justOrEmpty(stockService.getStock(str, Global.compCode, 0, contain));
     }
 
     public Mono<List<Stock>> getStock(boolean active) {

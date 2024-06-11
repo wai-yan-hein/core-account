@@ -171,8 +171,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);// unit
         tblRet.getColumnModel().getColumn(8).setPreferredWidth(70);//price
         tblRet.getColumnModel().getColumn(9).setPreferredWidth(100);//amt
-        tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.subscribe((t) -> {
             tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         });
@@ -494,8 +494,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     public void setVoucher(RetOutHis ro) {
         if (ro != null) {
             progress.setIndeterminate(true);
+            disableForm(false);
             ri = ro;
-            setHeader(ri);
             String vouNo = ri.getKey().getVouNo();
             Integer deptId = ri.getDeptId();
             ri.setVouLock(!deptId.equals(Global.deptId));
@@ -503,9 +503,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     .doOnSuccess((t) -> {
                         roTableModel.setListDetail(t);
                         roTableModel.addNewRow();
-                        progress.setIndeterminate(false);
-                        focusTable();
-                    }).subscribe();
+                    }).doOnTerminate(() -> {
+                setHeader(ri);
+                progress.setIndeterminate(false);
+                focusTable();
+            }).subscribe();
 
         }
     }

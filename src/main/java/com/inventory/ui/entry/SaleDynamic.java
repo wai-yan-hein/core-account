@@ -383,8 +383,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
         tblSale.getColumnModel().getColumn(6).setPreferredWidth(1);//price
         tblSale.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.useBarCode()));
-        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.useBarCode(), ProUtil.isSSContain()));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
             tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
@@ -429,8 +429,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(9).setPreferredWidth(50);//total
         tblSale.getColumnModel().getColumn(10).setPreferredWidth(50);//price
         tblSale.getColumnModel().getColumn(11).setPreferredWidth(60);//amt
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
             tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
@@ -459,8 +459,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(5).setPreferredWidth(50);//total
         tblSale.getColumnModel().getColumn(6).setPreferredWidth(50);//price
         tblSale.getColumnModel().getColumn(7).setPreferredWidth(60);//amt
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//weight
         tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//avg-weight
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
@@ -484,8 +484,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(6).setPreferredWidth(50);//total
         tblSale.getColumnModel().getColumn(7).setPreferredWidth(50);//price
         tblSale.getColumnModel().getColumn(8).setPreferredWidth(60);//amt
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblSale.getColumnModel().getColumn(3).setCellEditor(new StockUnitEditor(t));//unit
@@ -503,8 +503,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         salePaddyTableModel.setObserver(this);
         salePaddyTableModel.setLblRec(lblRec);
         salePaddyTableModel.setSale(this);
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
@@ -535,8 +535,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(6).setPreferredWidth(80);//price
         tblSale.getColumnModel().getColumn(7).setPreferredWidth(100);//amt
         tblSale.getColumnModel().getColumn(0).setCellEditor(new BatchCellEditor(inventoryRepo));//
-        tblSale.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(3).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblSale.getColumnModel().getColumn(3).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
@@ -561,8 +561,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         tblSale.getColumnModel().getColumn(3).setPreferredWidth(20);//unit
         tblSale.getColumnModel().getColumn(4).setPreferredWidth(100);//price
         tblSale.getColumnModel().getColumn(5).setPreferredWidth(120);//amount
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));//
-        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));//
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblSale.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblSale.getColumnModel().getColumn(3).setCellEditor(new StockUnitEditor(t));
@@ -915,6 +915,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         param.put("p_comp_address", Global.companyAddress);
         param.put("p_comp_phone", Global.companyPhone);
         param.put("p_logo_path", ProUtil.logoPath());
+        param.put("p_watermark", ProUtil.waterMark());
         param.put("p_remark", p.getRemark());
         param.put("p_vou_no", p.getKey().getVouNo());
         param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
@@ -1220,14 +1221,14 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
 
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
-            progress.setIndeterminate(true);
             this.sh = sh;
-            setHeader(sh);
             setDetail(sh);
         }
     }
 
     private void setDetail(SaleHis sh) {
+        progress.setIndeterminate(true);
+        disableForm(false);
         String vouNo = sh.getKey().getVouNo();
         inventoryRepo.getSaleDetail(vouNo).doOnSuccess((t) -> {
             setListDetail(t);
@@ -1235,6 +1236,7 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         }).doOnTerminate(() -> {
+            setHeader(sh);
             focusTable();
             progress.setIndeterminate(false);
         }).subscribe();
@@ -1377,9 +1379,9 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
         try {
             String reportName = getReportName();
             if (reportName != null) {
-                VSale sale = list.getFirst();
                 Map<String, Object> param = getDefaultParam(sh);
                 if (!list.isEmpty()) {
+                    VSale sale = list.getFirst();
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode n1 = mapper.readTree(Util1.gson.toJson(sale.getListDiscount()));
                     JsonDataSource d1 = new JsonDataSource(n1, null) {
@@ -2239,6 +2241,8 @@ public class SaleDynamic extends javax.swing.JPanel implements SelectionObserver
                 .addComponent(lblRec)
                 .addContainerGap())
         );
+
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         jLabel13.setFont(Global.lableFont);
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);

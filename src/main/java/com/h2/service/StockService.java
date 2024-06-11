@@ -24,7 +24,7 @@ public interface StockService {
 
     List<Stock> findAll(String compCode);
 
-    List<Stock> getStock(String str, String compCode, Integer deptId);
+    List<Stock> getStock(String str, String compCode, Integer deptId, boolean contain);
 
     String getMaxDate();
 

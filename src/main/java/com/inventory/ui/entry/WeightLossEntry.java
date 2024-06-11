@@ -9,6 +9,7 @@ import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationCellEditor;
@@ -109,8 +110,8 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         tblWeight.getColumnModel().getColumn(7).setPreferredWidth(10);
         tblWeight.getColumnModel().getColumn(8).setPreferredWidth(10);
         tblWeight.getColumnModel().getColumn(9).setPreferredWidth(10);
-        tblWeight.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblWeight.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblWeight.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblWeight.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         inventoryRepo.getLocation().subscribe((t) -> {
             tblWeight.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         });

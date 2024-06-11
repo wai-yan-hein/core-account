@@ -39,6 +39,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -58,30 +59,12 @@ public final class StockAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private List<String> listOption = new ArrayList<>();
+    @Setter
     private SelectionObserver observer;
-    private InventoryRepo inventoryRepo;
     private boolean filter;
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public List<String> getListOption() {
-        return listOption;
-    }
-
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
-    }
-
-    private void initOption() {
-        listOption.clear();
-    }
+    @Setter
+    private InventoryRepo inventoryRepo;
+    private boolean contain;
 
     public StockAutoCompleter() {
     }
@@ -95,7 +78,6 @@ public final class StockAutoCompleter implements KeyListener {
         if (this.filter) {
             setStock(new Stock("-", "All"));
         }
-        initOption();
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.STOCK));
         textComp.setFont(Global.textFont);
@@ -361,8 +343,8 @@ public final class StockAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                inventoryRepo.getStock(str).subscribe((t) -> {
-                    if (this.filter) {
+                inventoryRepo.getStock(str, contain).doOnSuccess((t) -> {
+                    if (filter) {
                         Stock s = new Stock("-", "All");
                         t.add(s);
                     }
@@ -370,7 +352,7 @@ public final class StockAutoCompleter implements KeyListener {
                     if (!t.isEmpty()) {
                         table.setRowSelectionInterval(0, 0);
                     }
-                });
+                }).subscribe();
             }
         }
     }

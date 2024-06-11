@@ -205,8 +205,8 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(6).setPreferredWidth(50);//weight_unit
         tblOpening.getColumnModel().getColumn(7).setPreferredWidth(100);//price
         tblOpening.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
-        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//weight
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
@@ -232,8 +232,8 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(6).setPreferredWidth(50);//bag
         tblOpening.getColumnModel().getColumn(7).setPreferredWidth(100);//price
         tblOpening.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
-        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
 
         tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//moi
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice
@@ -255,8 +255,8 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         tblOpening.getColumnModel().getColumn(3).setPreferredWidth(50);//rice       
         tblOpening.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
         tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//bag
-        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
 
         tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//moi
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//rice

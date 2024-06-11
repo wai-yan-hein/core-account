@@ -182,8 +182,8 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblRFID.getColumnModel().getColumn(3).setPreferredWidth(5);//Unit
         tblRFID.getColumnModel().getColumn(4).setPreferredWidth(20);//price
         tblRFID.getColumnModel().getColumn(5).setPreferredWidth(20);//amount
-        tblRFID.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRFID.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblRFID.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblRFID.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblRFID.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblRFID.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblRFID.setDefaultRenderer(Object.class, new DecimalFormatRender());

@@ -49,7 +49,7 @@ import org.springframework.core.task.TaskExecutor;
  */
 @Slf4j
 public class StockImportDialog extends javax.swing.JDialog {
-    
+
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
@@ -59,11 +59,11 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final HashMap<String, String> hmBrand = new HashMap<>();
     private HashMap<Integer, Integer> hmZG = new HashMap<>();
     List<CFont> listFont = new ArrayList<>();
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
@@ -78,16 +78,16 @@ public class StockImportDialog extends javax.swing.JDialog {
         initComponents();
         initTable();
     }
-    
+
     private void initTable() {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
         tblTrader.setFont(Global.textFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
         tblTrader.setDefaultRenderer(Float.class, new TableCellRender());
-        
+
     }
-    
+
     private void chooseFile() {
         FileDialog dialog = new FileDialog(this, "Choose CSV File", FileDialog.LOAD);
         dialog.setDirectory("D:\\");
@@ -101,7 +101,7 @@ public class StockImportDialog extends javax.swing.JDialog {
             readFile(filePath);
         }
     }
-    
+
     private void removeBOMFromFile(String filePath) {
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8); BufferedReader bufferedReader = new BufferedReader(reader)) {
 
@@ -130,7 +130,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         } catch (IOException e) {
         }
     }
-    
+
     private void save() {
         List<Stock> traders = tableModel.getListStock();
         btnSave.setEnabled(false);
@@ -141,7 +141,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         lblLog.setText("Success.");
         dispose();
     }
-    
+
     private static int parseIntegerOrDefault(String value, int defaultValue) {
         try {
             return Integer.parseInt(value);
@@ -149,15 +149,15 @@ public class StockImportDialog extends javax.swing.JDialog {
             return defaultValue;
         }
     }
-    
+
     private static boolean isContainBOM(Path path) throws IOException {
-        
+
         if (Files.notExists(path)) {
             throw new IllegalArgumentException("Path: " + path + " does not exists!");
         }
-        
+
         boolean result = false;
-        
+
         byte[] bom = new byte[3];
         try (InputStream is = new FileInputStream(path.toFile())) {
 
@@ -169,12 +169,12 @@ public class StockImportDialog extends javax.swing.JDialog {
             if ("efbbbf".equalsIgnoreCase(content)) {
                 result = true;
             }
-            
+
         }
-        
+
         return result;
     }
-    
+
     private void readFile(String path) {
         listFont = FontUtil.generateCFonts();
         hmZG = new HashMap<>();
@@ -212,12 +212,12 @@ public class StockImportDialog extends javax.swing.JDialog {
                     key.setStockCode(null);
                     t.setKey(key);
                     t.setDeptId(r.isMapped("Department") ? parseIntegerOrDefault(r.get("Department"), Global.deptId) : Global.deptId);
-                    t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
+                    t.setUserCode(Util1.convertToUniCode(r.get("UserCode")));
                     t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getDouble(r.get("SalePrice")) : Util1.getDouble("0"));
-                    t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup"), t.getDeptId()) : "");
-                    t.setCatCode(r.isMapped("Category") ? getCategoryCode(r.get("Category"), t.getDeptId()) : "");
+                    t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(Util1.convertToUniCode(r.get("StockGroup")), t.getDeptId()) : "");
+                    t.setCatCode(r.isMapped("Category") ? getCategoryCode(Util1.convertToUniCode(r.get("Category")), t.getDeptId()) : "");
                     t.setCatName(r.isMapped("Category") ? Util1.convertToUniCode(r.get("Category")) : "");
-                    t.setBrandCode(r.isMapped("Brand") ? getBrandCode(r.get("Brand"), t.getDeptId()) : "");
+                    t.setBrandCode(r.isMapped("Brand") ? getBrandCode(Util1.convertToUniCode(r.get("Brand")), t.getDeptId()) : "");
                     t.setBrandName(r.isMapped("Brand") ? Util1.convertToUniCode(r.get("Brand")) : "");
                     t.setActive(true);
                     t.setCreatedDate(LocalDateTime.now());
@@ -230,10 +230,10 @@ public class StockImportDialog extends javax.swing.JDialog {
             tableModel.setListStock(listStock);
         } catch (IOException e) {
             log.error("Read CSV File :" + e.getMessage());
-            
+
         }
     }
-    
+
     private String getZawgyiText(String text) {
         String tmpStr = "";
         if (text != null) {
@@ -260,10 +260,10 @@ public class StockImportDialog extends javax.swing.JDialog {
                 }
             }
         }
-        
+
         return tmpStr;
     }
-    
+
     private String getGroupCode(String str, Integer deptId) {
         if (hmGroup.isEmpty()) {
             List<StockType> list = inventoryRepo.getStockType().block();
@@ -272,7 +272,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                     hmGroup.put(t.getStockTypeName(), t.getKey().getStockTypeCode());
                 });
             }
-            
+
         }
         if (hmGroup.get(str) == null && !str.isEmpty()) {
             StockType st = saveGroup(str, deptId);
@@ -280,11 +280,11 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
         return hmGroup.get(str);
     }
-    
+
     private StockType saveGroup(String str, Integer deptId) {
         StockType stockType = new StockType();
         stockType.setUserCode(Global.loginUser.getUserCode());
-        stockType.setStockTypeName(str);
+        stockType.setStockTypeName(Util1.convertToUniCode(str));
         stockType.setAccount("");
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
@@ -298,7 +298,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         stockType.setGroupType(0);
         return inventoryRepo.saveStockType(stockType).block();
     }
-    
+
     private String getCategoryCode(String str, Integer deptId) {
         if (hmCat.isEmpty()) {
             List<Category> list = inventoryRepo.getCategory().block();
@@ -307,7 +307,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                     hmCat.put(t.getCatName(), t.getKey().getCatCode());
                 });
             }
-            
+
         }
         if (hmCat.get(str) == null && !str.isEmpty()) {
             Category ct = saveCategory(str, deptId);
@@ -315,7 +315,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
         return hmCat.get(str);
     }
-    
+
     private Category saveCategory(String str, Integer deptId) {
         Category category = new Category();
         CategoryKey key = new CategoryKey();
@@ -328,12 +328,12 @@ public class StockImportDialog extends javax.swing.JDialog {
         category.setCreatedDate(LocalDateTime.now());
         category.setMacId(Global.macId);
         category.setUserCode(Global.loginUser.getUserCode());//txtUserCode.getText()
-        category.setCatName(str);
+        category.setCatName(Util1.convertToUniCode(str));
         category.setActive(true);
         return inventoryRepo.saveCategory(category).block();
-        
+
     }
-    
+
     private String getBrandCode(String str, Integer deptId) {
         if (hmBrand.isEmpty()) {
             List<StockBrand> list = inventoryRepo.getStockBrand().block();
@@ -349,11 +349,11 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
         return hmBrand.get(str);
     }
-    
+
     private StockBrand saveBrand(String str, Integer deptId) {
         StockBrand brand = new StockBrand();
         brand.setUserCode(Global.loginUser.getUserCode());
-        brand.setBrandName(str);
+        brand.setBrandName(Util1.convertToUniCode(str));
         StockBrandKey key = new StockBrandKey();
         key.setBrandCode(null);
         key.setCompCode(Global.compCode);

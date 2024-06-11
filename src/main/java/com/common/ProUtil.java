@@ -122,7 +122,9 @@ public class ProUtil {
     public static final String ENABLE_TRADER_COA = "enable.trader.coa";
     public static final String PURCHASE_VOUCHER_EDIT = "purchase.voucher.edit";
     public static final String SALE_CLOSED = "sale.closed";
-
+    public static final String LOGO = "logo.name";
+    public static final String WATERMARK = "wartermark.name";
+    public static final String SS_CONTAIN = "stock.search.contain";
     public static int getDecimalPalace() {
         return Util1.getInteger(ProUtil.getProperty(ProUtil.DECIMAL_PLACE));
     }
@@ -173,6 +175,9 @@ public class ProUtil {
 
     public static boolean isCalStock() {
         return Util1.getBoolean(Global.hmRoleProperty.get("calculate.stock"));
+    }
+    public static boolean isSSContain() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(SS_CONTAIN));
     }
 
     public static boolean isUnitRelation() {
@@ -337,7 +342,11 @@ public class ProUtil {
     }
 
     public static String logoPath() {
-        return String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+        return String.format("images%s%s", File.separator, ProUtil.getProperty(LOGO));
+    }
+
+    public static String waterMark() {
+        return String.format("images%s%s", File.separator, ProUtil.getProperty(WATERMARK));
     }
 
     public static DefaultFormatterFactory getDecimalFormatter() {

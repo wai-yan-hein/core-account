@@ -228,8 +228,8 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         tblOrder.getColumnModel().getColumn(8).setPreferredWidth(30);//unit
         tblOrder.getColumnModel().getColumn(9).setPreferredWidth(50);//price
         tblOrder.getColumnModel().getColumn(10).setPreferredWidth(50);//amt
-        tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
@@ -274,8 +274,8 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
         tblOrder.getColumnModel().getColumn(8).setPreferredWidth(30);//unit
         tblOrder.getColumnModel().getColumn(9).setPreferredWidth(50);//price
         tblOrder.getColumnModel().getColumn(10).setPreferredWidth(50);//amt
-        tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
@@ -359,6 +359,7 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
             txtOrderDate.setDate(Util1.getTodayDate());
         }
         orderStatusCompleter.setOrderStatus(null);
+        chkInvUpdate.setSelected(false);
     }
 
     private void clearDetail() {
@@ -614,16 +615,18 @@ public class OrderDynamic extends javax.swing.JPanel implements SelectionObserve
     public void setOrderVoucher(OrderHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
+            disableForm(false);
             oh = sh;
-            setHeader(oh);
             String vouNo = sh.getKey().getVouNo();
             inventoryRepo.getOrderDetail(vouNo)
                     .doOnSuccess((t) -> {
                         setListDetail(t);
-                        addNewRow();
-                        focusTable();
-                        progress.setIndeterminate(false);
-                    }).subscribe();
+                    }).doOnTerminate(() -> {
+                addNewRow();
+                focusTable();
+                progress.setIndeterminate(false);
+                setHeader(oh);
+            }).subscribe();
         }
     }
 

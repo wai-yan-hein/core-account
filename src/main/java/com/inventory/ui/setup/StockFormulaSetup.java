@@ -7,6 +7,7 @@ package com.inventory.ui.setup;
 import com.acc.dialog.FindDialog;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
@@ -297,7 +298,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblGrade.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblGrade.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblGrade.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblGrade.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblGrade.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblGrade.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblGrade.getColumnModel().getColumn(0).setPreferredWidth(200);

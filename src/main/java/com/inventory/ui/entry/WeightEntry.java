@@ -127,7 +127,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
-        stockAutoCompleter = new StockAutoCompleter1(txtStock, inventoryRepo, null, false);
+        stockAutoCompleter = new StockAutoCompleter1(txtStock, inventoryRepo, null, false, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
     }
 

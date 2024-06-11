@@ -184,8 +184,8 @@ public class ConsignEntry extends javax.swing.JPanel implements PanelControl, Se
         tblStockIR.getColumnModel().getColumn(4).setPreferredWidth(100);
         tblStockIR.getColumnModel().getColumn(5).setPreferredWidth(100);
         tblStockIR.getColumnModel().getColumn(6).setPreferredWidth(100);
-        tblStockIR.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblStockIR.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStockIR.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblStockIR.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblStockIR.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblStockIR.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblStockIR.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());

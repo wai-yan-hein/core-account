@@ -205,8 +205,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(4).setPreferredWidth(10);
         tblTransfer.getColumnModel().getColumn(5).setPreferredWidth(100);
         tblTransfer.getColumnModel().getColumn(6).setPreferredWidth(10);
-        tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
@@ -229,8 +229,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblTransfer.getColumnModel().getColumn(7).setPreferredWidth(100);
         tblTransfer.getColumnModel().getColumn(8).setPreferredWidth(150);
-        tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblTransfer.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
@@ -461,17 +461,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         return status;
     }
 
-    private void setVoucher(TransferHis s, boolean local) {
-        progress.setIndeterminate(true);
-        io = s;
-        Integer deptId = io.getDeptId();
+    private void setHeader(TransferHis io) {
         inventoryRepo.findLocation(io.getLocCodeFrom()).doOnSuccess((t) -> {
             fromLocaitonCompleter.setLocation(t);
         }).subscribe();
         inventoryRepo.findLocation(io.getLocCodeTo()).doOnSuccess((t) -> {
             toLocaitonCompleter.setLocation(t);
         }).subscribe();
-        inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
+        inventoryRepo.findTrader(io.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
         inventoryRepo.findLabourGroup(io.getLabourGroupCode()).doOnSuccess((t) -> {
@@ -505,12 +502,20 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             lblStatus.setForeground(Color.blue);
             disableForm(true);
         }
+    }
+
+    private void setVoucher(TransferHis s) {
+        io = s;
+        progress.setIndeterminate(true);
+        disableForm(false);
+        String vouNo = io.getKey().getVouNo();
         inventoryRepo.getTransferDetail(vouNo).doOnSuccess((t) -> {
             setListDetail(t);
         }).doOnError((e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         }).doOnTerminate(() -> {
+            setHeader(io);
             progress.setIndeterminate(false);
             focusOnTable();
         }).subscribe();
@@ -961,7 +966,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         if (source.toString().equals("TR-HISTORY")) {
             if (selectObj instanceof VTransfer v) {
                 inventoryRepo.findTransfer(v.getVouNo()).doOnSuccess((t) -> {
-                    setVoucher(t, v.isLocal());
+                    setVoucher(t);
                 }).subscribe();
             }
         }

@@ -208,8 +208,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblRaw.getColumnModel().getColumn(4).setPreferredWidth(50);//price
         tblRaw.getColumnModel().getColumn(5).setPreferredWidth(60);//amt
         tblRaw.getColumnModel().getColumn(6).setPreferredWidth(50);//total
-        tblRaw.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRaw.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblRaw.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblRaw.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblRaw.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//weight
         tblRaw.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
         tblRaw.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//price
@@ -270,8 +270,8 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.getColumnModel().getColumn(7).setPreferredWidth(10);//wt %
         tblOutput.getColumnModel().getColumn(8).setPreferredWidth(10);//qty %
         tblOutput.getColumnModel().getColumn(9).setPreferredWidth(5);//qty %
-        tblOutput.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOutput.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblOutput.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblOutput.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblOutput.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//weight
         tblOutput.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
         tblOutput.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//price

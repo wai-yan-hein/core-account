@@ -179,8 +179,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         tblGRN.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
         tblGRN.getColumnModel().getColumn(5).setPreferredWidth(5);//unit
         tblGRN.getColumnModel().getColumn(6).setPreferredWidth(70);//total
-        tblGRN.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblGRN.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblGRN.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
+        tblGRN.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         inventoryRepo.getLocation().doOnSuccess((t) -> {
             tblGRN.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
         }).subscribe();

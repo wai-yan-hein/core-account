@@ -377,29 +377,31 @@ public class SaleTableModel extends AbstractTableModel {
     }
 
     public boolean isValidEntry() {
-        boolean status = true;
+        if (listDetail.isEmpty()) {
+            JOptionPane.showMessageDialog(Global.parentForm, "No Transaction.",
+                    "Invalid.", JOptionPane.ERROR_MESSAGE);
+            parent.requestFocus();
+            return false;
+        }
         for (SaleHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
                 if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    status = false;
                     parent.requestFocus();
-                    break;
+                    return false;
                 } else if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
-                    status = false;
                     parent.requestFocus();
-                    break;
+                    return false;
                 } else if (sdh.getUnitCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Sale Unit.");
-                    status = false;
                     parent.requestFocus();
-                    break;
+                    return false;
                 }
             }
         }
-        return status;
+        return true;
     }
 
     private double getTraderPrice(Stock s) {

@@ -32,15 +32,19 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
     private StockAutoCompleter1 completer;
     private InventoryRepo inventoryRepo;
     private boolean barcode;
+    private boolean contain;
     private JTextField jtf;
 
-    public StockCellEditor(InventoryRepo inventoryRepo) {
+    public StockCellEditor(InventoryRepo inventoryRepo, boolean contain) {
         this.inventoryRepo = inventoryRepo;
+        this.contain = contain;
+
     }
 
-    public StockCellEditor(InventoryRepo inventoryRepo, boolean barcode) {
+    public StockCellEditor(InventoryRepo inventoryRepo, boolean barcode, boolean contain) {
         this.inventoryRepo = inventoryRepo;
         this.barcode = barcode;
+        this.contain = contain;
     }
 
     public StockCellEditor() {
@@ -87,7 +91,7 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
         if (barcode) {
             return component;
         }
-        completer = new StockAutoCompleter1(jtf, inventoryRepo, this, false);
+        completer = new StockAutoCompleter1(jtf, inventoryRepo, this, false, contain);
         return component;
     }
 

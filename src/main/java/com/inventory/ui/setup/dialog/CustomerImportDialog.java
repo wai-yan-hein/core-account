@@ -5,7 +5,6 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.FontUtil;
-import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -99,25 +98,23 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         List<Trader> traders = tableModel.getListTrader();
         btnSave.setEnabled(false);
         progress.setIndeterminate(true);
-        Flux.fromIterable(traders)
-                .delayElements(Duration.ofMillis(300))
-                .doOnNext((trader) -> {
-                    inventoryRepo.saveTrader(trader)
-                            .doOnSuccess((t) -> {
-                                lblLog.setText("Importing :" + trader.getTraderName());
-                                lblLog.setForeground(Color.black);
-                                observer.selected("Trader", t);
-                            }).subscribe();
-                }).doOnError((e) -> {
-            progress.setIndeterminate(false);
-            btnSave.setEnabled(true);
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }).doOnTerminate(() -> {
-            lblLog.setText("Imported");
-            lblLog.setForeground(Color.green);
-            tableModel.clear();
-            btnSave.setEnabled(true);
-        }).subscribe();
+        traders.forEach((trader) -> {
+            inventoryRepo.saveTrader(trader)
+                    .doOnError((e) -> {
+                        progress.setIndeterminate(false);
+                        btnSave.setEnabled(true);
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    })
+                    .doOnSuccess((t) -> {
+                        lblLog.setText("Importing :" + trader.getTraderName());
+                        lblLog.setForeground(Color.black);
+                        observer.selected("Trader", t);
+                    }).block();
+        });
+        lblLog.setText("Imported");
+        lblLog.setForeground(Color.green);
+        tableModel.clear();
+        btnSave.setEnabled(true);
     }
 
     private String getRegion(String str) {
@@ -231,12 +228,13 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     .setIgnoreHeaderCase(true)
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(in);
-            Flux.fromIterable(records).doOnNext((row) -> {
+            records.forEach((row) -> {
                 Trader t = new Trader();
                 String name = row.isMapped("Name") ? row.get("Name") : ""; // Util1.convertToUniCode(row.get("Name"))
                 t.setTraderName(chkIntegra.isSelected() ? Util1.convertToUniCode(FontUtil.getZawgyiText(name, hmZG)) : Util1.convertToUniCode(name));
                 t.setTraderName(Util1.convertToTitleCase(t.getTraderName()));
                 if (!t.getTraderName().equals("")) {
+                    log.info(name);
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
                     t.setKey(key);
@@ -258,9 +256,9 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setAccount(getAccount());
                     tableModel.addObject(t);
                 }
-            }).doOnTerminate(() -> {
-                progress.setIndeterminate(false);
-            }).subscribe();
+            });
+            lblLog.setText("Records : " + tableModel.getListTrader().size());
+            progress.setIndeterminate(false);
         } catch (IOException e) {
             progress.setIndeterminate(false);
             log.error("readFile : " + e.getMessage());

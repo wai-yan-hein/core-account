@@ -337,7 +337,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     }
 
     public List<SaleHisDetail> getListDetail() {
-        return listDetail;
+        return listDetail.stream().filter((t) -> !Util1.isNullOrEmpty(t.getStockCode())).toList();
     }
 
     public void setListDetail(List<SaleHisDetail> listDetail) {

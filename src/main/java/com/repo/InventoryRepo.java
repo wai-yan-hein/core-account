@@ -6,6 +6,7 @@ package com.repo;
 
 import com.H2Repo;
 import com.acc.model.VDescription;
+import com.common.ErrorResponse;
 import com.inventory.entity.CFont;
 import com.common.Global;
 import com.common.ProUtil;
@@ -146,8 +147,10 @@ import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -966,7 +969,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockInOutDetail>> getStockIODetail(String vouNo, boolean local) {
+    public Mono<List<StockInOutDetail>> getStockIODetail(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/stockio/getStockIODetail")
                 .queryParam("vouNo", vouNo)
@@ -1317,9 +1320,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<Stock>> getStock(String str) {
+    public Mono<List<Stock>> getStock(String str, boolean contain) {
         if (localDatabase) {
-            return h2Repo.getStock(str);
+            return h2Repo.getStock(str, contain);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getStockList")
@@ -1602,10 +1605,6 @@ public class InventoryRepo {
                     if (localDatabase) {
                         h2Repo.save(s);
                     }
-                })
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
                 });
     }
 
@@ -2816,11 +2815,7 @@ public class InventoryRepo {
                 .uri("/process/deleteProcessDetail")
                 .body(Mono.just(key), ProcessHisDetailKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(Boolean.class);
     }
 
     public Mono<Boolean> restore(ProcessHisKey key) {
@@ -2883,11 +2878,7 @@ public class InventoryRepo {
                 .uri("/process/saveProcessDetail")
                 .body(Mono.just(his), ProcessHisDetail.class)
                 .retrieve()
-                .bodyToMono(ProcessHisDetail.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
+                .bodyToMono(ProcessHisDetail.class);
     }
 
     public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo) {
@@ -3259,7 +3250,13 @@ public class InventoryRepo {
                 .uri("/sale/saveSale")
                 .body(Mono.just(sh), SaleHis.class)
                 .retrieve()
-                .bodyToMono(SaleHis.class);
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                }).bodyToMono(SaleHis.class);
 
     }
 

@@ -27,13 +27,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class StockSettingDialog extends javax.swing.JDialog {
-    
+
     private SelectionObserver observer;
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     private final ActionListener action = (ActionEvent e) -> {
         if (e.getSource() instanceof JCheckBox chk) {
             String key = chk.getName();
@@ -77,9 +77,9 @@ public class StockSettingDialog extends javax.swing.JDialog {
         addActionListener(panel2);
         addActionListener(panel3);
         initTextBox();
-        
+
     }
-    
+
     private void initTextBox() {
         chkDisableMill.setName(ProUtil.DISABLE_MILL);
         chkDisableSale.setName(ProUtil.DISABLE_SALE);
@@ -95,8 +95,9 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkRIR.setName(ProUtil.DEFAULT_STOCK_RI_REC);
         chkROP.setName(ProUtil.DEFAULT_STOCK_RO_PAY);
         chkSkipInv.setName(ProUtil.DEFAULT_STOCK_SKIP_INV);
+        chkSSC.setName(ProUtil.SS_CONTAIN);
     }
-    
+
     public void setData(HashMap<String, String> hmProperty) {
         chkDisableSale.setSelected(Util1.getBoolean(hmProperty.get(chkDisableSale.getName())));
         chkDisablePur.setSelected(Util1.getBoolean(hmProperty.get(chkDisablePur.getName())));
@@ -112,15 +113,16 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkRIR.setSelected(Util1.getBoolean(hmProperty.get(chkRIR.getName())));
         chkROP.setSelected(Util1.getBoolean(hmProperty.get(chkROP.getName())));
         chkSkipInv.setSelected(Util1.getBoolean(hmProperty.get(chkSkipInv.getName())));
+        chkSSC.setSelected(Util1.getBoolean(hmProperty.get(chkSSC.getName())));
     }
-    
+
     private void save(SysProperty p) {
         int yn = JOptionPane.showConfirmDialog(this, "Are you sure to change setting?", "Setting", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (yn == JOptionPane.YES_OPTION) {
             observer.selected("save", p);
         }
     }
-    
+
     private void addActionListener(JPanel panel) {
         for (Component component : panel.getComponents()) {
             if (component instanceof JTextField txt) {
@@ -153,6 +155,7 @@ public class StockSettingDialog extends javax.swing.JDialog {
         chkSWB = new javax.swing.JCheckBox();
         chkWeight = new javax.swing.JCheckBox();
         chkWeightPoint = new javax.swing.JCheckBox();
+        chkSSC = new javax.swing.JCheckBox();
         panel3 = new javax.swing.JPanel();
         chkRec = new javax.swing.JCheckBox();
         chkPay = new javax.swing.JCheckBox();
@@ -217,6 +220,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
 
         chkWeightPoint.setText("Weight Point");
 
+        chkSSC.setText("Search Stock Contain");
+
         javax.swing.GroupLayout panel2Layout = new javax.swing.GroupLayout(panel2);
         panel2.setLayout(panel2Layout);
         panel2Layout.setHorizontalGroup(
@@ -226,7 +231,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
                 .addGroup(panel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkSWB)
                     .addComponent(chkWeight)
-                    .addComponent(chkWeightPoint))
+                    .addComponent(chkWeightPoint)
+                    .addComponent(chkSSC))
                 .addContainerGap(28, Short.MAX_VALUE))
         );
         panel2Layout.setVerticalGroup(
@@ -237,6 +243,8 @@ public class StockSettingDialog extends javax.swing.JDialog {
                 .addComponent(chkWeight)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkWeightPoint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkSSC)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -341,6 +349,7 @@ public class StockSettingDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox chkRIR;
     private javax.swing.JCheckBox chkROP;
     private javax.swing.JCheckBox chkRec;
+    private javax.swing.JCheckBox chkSSC;
     private javax.swing.JCheckBox chkSWB;
     private javax.swing.JCheckBox chkSkipInv;
     private javax.swing.JCheckBox chkWeight;
