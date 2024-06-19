@@ -10,7 +10,6 @@ import com.acc.editor.DateAutoCompleter;
 import com.common.ComponentUtil;
 import com.common.ExcelExporter;
 import com.common.Global;
-import com.common.IconUtil;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
@@ -281,7 +280,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);

@@ -9,6 +9,7 @@ import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -99,7 +100,7 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
     }
 
     private void initTableVoucher() {

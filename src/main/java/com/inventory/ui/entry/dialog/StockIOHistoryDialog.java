@@ -9,6 +9,7 @@ import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -131,7 +132,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
             vouStatusAutoCompleter.setListData(t);
         }).subscribe();
 
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
     }
 
@@ -493,7 +494,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         chkDel.setText("Deleted");
 
         jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Department");
+        jLabel12.setText("Branch");
 
         txtDep.setFont(Global.textFont);
         txtDep.setName("txtUser"); // NOI18N

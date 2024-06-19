@@ -356,15 +356,12 @@ public final class RefAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                accountRepo.getReference(str).subscribe((t) -> {
+                accountRepo.getReference(str).doOnSuccess((t) -> {
                     if (this.filter) {
                         t.add(new VDescription("All"));
                     }
                     refModel.setListAutoText(t);
-                }, (er) -> {
-                    log.error(er.getMessage());
-                }, () -> {
-                });
+                }).subscribe();
             }
 
         }
@@ -372,5 +369,10 @@ public final class RefAutoCompleter implements KeyListener {
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
+
+    public void clear() {
+        VDescription des = new VDescription("All");
+        setAutoText(des);
     }
 }

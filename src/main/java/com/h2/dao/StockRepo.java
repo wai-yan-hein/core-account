@@ -12,43 +12,44 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author Lenovo
  */
 @Repository
+@Service
+@Transactional
 @Slf4j
-public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockDao {
+@RequiredArgsConstructor
+public class StockRepo extends AbstractDao<StockKey, Stock> {
 
-    @Override
     public Stock save(Stock stock) {
         saveOrUpdate(stock, stock.getKey());
         return stock;
     }
 
-    @Override
     public List<Stock> findAll() {
         String hsql = "select o from Stock o";
         return findHSQL(hsql);
     }
 
-    @Override
     public List<Stock> findAll(String compCode) {
         String hsql = "select o from Stock o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
 
-    @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from Stock o";
         LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
-    @Override
     public List<Stock> getStock(String str, String compCode, Integer deptId, boolean contain) {
         str = Util1.cleanStr(str);
         str = contain ? "%".concat(str).concat("%") : str.concat("%");
@@ -107,6 +108,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                     s.setStockName(rs.getString("stock_name"));
                     s.setUserCode(rs.getString("user_code"));
                     s.setFormulaCode(rs.getString("formula_code"));
+                    s.setRelCode(rs.getString("rel_code"));
                     s.setRelName(rs.getString("rel_name"));
                     s.setGroupName(rs.getString("stock_type_name"));
                     s.setCatName(rs.getString("cat_name"));
@@ -125,17 +127,15 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
         return listStock;
     }
 
-    @Override
     public Stock find(StockKey key) {
         return getByKey(key);
     }
 
-    @Override
     public List<Stock> search(String stockCode, String stockType, String cat, String brand,
             String compCode, Integer deptId, boolean active, boolean deleted) {
         List<Stock> list = new ArrayList<>();
         String sql = """
-                select s.*,st.stock_type_name,cat.cat_name
+                select s.*,st.stock_type_name,cat.cat_name,rel.rel_name
                 from stock s
                 left join stock_type st
                 on s.stock_type_code = st.stock_type_code
@@ -143,6 +143,9 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                 left join category cat
                 on s.category_code = cat.cat_code
                 and s.comp_code = cat.comp_code
+                left join unit_relation rel
+                on s.rel_code = rel.rel_code
+                and s.comp_code = rel.comp_code
                 where s.comp_code =?
                 and s.deleted = ?
                 and s.active = ?  
@@ -191,6 +194,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                 s.setUserCode(rs.getString("user_code"));
                 s.setMacId(rs.getInt("mac_id"));
                 s.setRelCode(rs.getString("rel_code"));
+                s.setRelName(rs.getString("rel_name"));
                 s.setCalculate(rs.getBoolean("calculate"));
                 s.setDeptId(rs.getInt("dept_id"));
                 s.setExplode(rs.getBoolean("explode"));
@@ -213,33 +217,29 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
             // calculate, dept_id, explode, intg_upd_status, weight_unit, weight, favorite,
             // sale_closed, deleted, sale_qty, formula_code, sale_amt, pur_amt, pur_qty, stock_type_name, cat_name
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error("searchStock : " + e.getMessage());
         }
         return list;
     }
 
-    @Override
     public List<Stock> findActiveStock(String compCode) {
         String hsql = "select o from Stock o where o.active = true and o.key.compCode = '" + compCode + "'";
         return findHSQL(hsql);
     }
 
-    @Override
     public Stock findStockByBarcode(StockKey key) {
         String hsql = "select o from Stock o where o.key.stockCode ='" + key.getStockCode() + "' and o.key.compCode ='" + key.getCompCode() + "'";
         List<Stock> list = findHSQL(hsql);
         return list.isEmpty() ? null : list.getFirst();
     }
 
-    @Override
     public Boolean updateDeleted(StockKey key, boolean status) {
         Stock s = find(key);
         if (s != null) {
-            s.setDeleted(true);
+            s.setDeleted(status);
             s.setUpdatedDate(LocalDateTime.now());
         }
         return true;
     }
-
 }

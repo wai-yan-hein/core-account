@@ -111,7 +111,7 @@
               <Connection code="Global.menuFont" type="code"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="Department"/>
+            <Property name="text" type="java.lang.String" value="Branch"/>
           </Properties>
         </Component>
       </SubComponents>

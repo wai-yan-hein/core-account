@@ -175,18 +175,9 @@ public class OpeningTableModel extends AbstractTableModel {
                     }
                 }
                 case 3 -> { // weight
-                    if (value != null) {
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                record.setWeight(Util1.getDouble(value));
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number");
-                            setSelection(row, column);
-                        }
+                    double wt = Util1.getDouble(value);
+                    if (wt > 0) {
+                        record.setWeight(wt);
                     }
                 }
                 case 4 -> {
@@ -199,26 +190,18 @@ public class OpeningTableModel extends AbstractTableModel {
                 }
                 case 5 -> {
                     // Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            if (ProUtil.isUseWeightPoint()) {
-                                String str = String.valueOf(value);
-                                double wt = Util1.getDouble(record.getWeight());
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                                setSelection(row, 5);
-                            } else {
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
-                            }
-
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
+                        if (ProUtil.isUseWeightPoint()) {
+                            String str = String.valueOf(value);
+                            double wt = Util1.getDouble(record.getWeight());
+                            record.setQty(Util1.getDouble(value));
+                            record.setTotalWeight(Util1.getTotalWeight(wt, str));
+                            setSelection(row, 5);
                         } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
+                            record.setQty(Util1.getDouble(value));
+                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
                     }
                     setSelection(row, 5);
                 }
@@ -234,18 +217,11 @@ public class OpeningTableModel extends AbstractTableModel {
 
                 case 7 -> {
                     // Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setPrice(Util1.getDouble(value));
-                            setSelection(row + 1, 0);
-                            calculateAmount(record);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
+                    double price = Util1.getDouble(value);
+                    if (price > 0) {
+                        record.setPrice(price);
+                        setSelection(row + 1, 0);
+                        calculateAmount(record);
                     }
                 }
                 case 8 -> {

@@ -20,7 +20,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "department_user")
-public class DepartmentUser {
+public class Branch {
 
     @EmbeddedId
     private DepartmentKey key;
@@ -28,6 +28,8 @@ public class DepartmentUser {
     private String userCode;
     @Column(name = "dept_name")
     private String deptName;
+    @Column(name = "title")
+    private String title;
     @Column(name = "inv_queue")
     private String inventoryQ;
     @Column(name = "acc_queue")
@@ -54,13 +56,13 @@ public class DepartmentUser {
         return deptName;
     }
 
-    public DepartmentUser(Integer deptId, String deptName) {
+    public Branch(Integer deptId, String deptName) {
         this.key = new DepartmentKey();
         this.key.setDeptId(deptId);
         this.deptName = deptName;
     }
 
-    public DepartmentUser() {
+    public Branch() {
     }
 
 }

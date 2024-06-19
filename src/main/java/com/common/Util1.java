@@ -56,7 +56,6 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import java.awt.datatransfer.Clipboard;
@@ -106,22 +105,7 @@ public class Util1 {
         return Util1.toDateTimeStrMYSQL(Util1.toDate("1998-10-07"));
     }
 
-    public static boolean isNumber(Object obj) {
-        try {
-            if (!Util1.isNull(obj)) {
-                String str = obj.toString();
-                if (str.contains(",")) {
-                    str = str.replaceAll(",", "");
-                }
-                Float.valueOf(str);
-                return true;
-            }
-        } catch (NumberFormatException ex) {
-            return false;
-        }
-
-        return false;
-    }
+   
 
     public static String getPropValue(String key) {
         return Global.hmRoleProperty.get(key);

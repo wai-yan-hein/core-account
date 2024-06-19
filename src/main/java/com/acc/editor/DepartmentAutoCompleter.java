@@ -10,6 +10,7 @@ import com.acc.model.DepartmentA;
 import com.common.Global;
 import com.common.IconUtil;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.inventory.entity.OptionModel;
@@ -32,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -66,6 +66,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private List<DepartmentA> listDepartment;
     private SelectionObserver observer;
     private boolean filter;
+    private StartWithRowFilter swrf;
 
     public List<String> getListOption() {
         return listOption;
@@ -128,10 +129,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
         scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
@@ -196,6 +194,13 @@ public final class DepartmentAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
+        initRowSorter(textComp);
+    }
+
+    private void initRowSorter(JTextComponent comp) {
+        sorter = new TableRowSorter(table.getModel());
+        table.setRowSorter(sorter);
+        swrf = new StartWithRowFilter(comp);
     }
 
     public void mouseSelect() {
@@ -419,7 +424,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
         if (str.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(startsWithFilter);
+            sorter.setRowFilter(swrf);
             try {
                 if (!containKey(e)) {
                     if (table.getRowCount() >= 0) {
@@ -431,19 +436,6 @@ public final class DepartmentAutoCompleter implements KeyListener {
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

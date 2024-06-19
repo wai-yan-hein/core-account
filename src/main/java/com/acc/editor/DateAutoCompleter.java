@@ -337,7 +337,7 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         textComp.setText(dateModel == null ? null : dateModel.getDescription());
     }
 
-    private void setTodayDate() {
+    public void setTodayDate() {
         LocalDate todayDate = LocalDate.now();
         DateModel today = new DateModel();
         String todayDateStr = todayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

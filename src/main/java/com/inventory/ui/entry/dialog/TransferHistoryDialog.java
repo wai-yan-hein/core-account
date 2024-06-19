@@ -9,6 +9,7 @@ import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -100,7 +101,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
             departmentAutoCompleter.setDepartment(t);
         }).subscribe();
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, true, "CUS");
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
     }
 
     private void initTableVoucher() {
@@ -362,7 +363,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         chkDel.setText("Deleted");
 
         jLabel13.setFont(Global.lableFont);
-        jLabel13.setText("Department");
+        jLabel13.setText("Branch");
 
         txtDep.setFont(Global.textFont);
         txtDep.setName("txtUser"); // NOI18N
@@ -591,7 +592,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(txtSearch)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

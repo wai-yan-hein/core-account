@@ -427,7 +427,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         supCompleter.setObserver(this);
         locCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locCompleter.setObserver(this);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
         departmentAutoCompleter.setObserver(this);

@@ -114,7 +114,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         inventoryRepo.getStockBrand().doOnSuccess((t) -> {
             brandAutoCompleter.setListStockBrand(t);
         }).subscribe();
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
     }
 
@@ -160,10 +160,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.getSelectionModel().addListSelectionListener((e) -> {
-            int selectRow = tblStock.getSelectedRow();
-            if (selectRow >= 0) {
-                row = tblStock.convertRowIndexToModel(selectRow);
-            }
+            row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         });
         searchStock();
     }

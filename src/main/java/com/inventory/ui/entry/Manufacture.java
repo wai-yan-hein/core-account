@@ -34,14 +34,12 @@ import com.user.editor.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -127,7 +125,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false,ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         unitAutoCompleter = new UnitAutoCompleter(txtUnit, null);
         unitAutoCompleter.setObserver(this);

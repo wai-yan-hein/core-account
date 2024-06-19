@@ -37,7 +37,7 @@ import com.common.YNOptionPane;
 import com.dms.CoreDrive;
 import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.LabourPaymentEntry;
 import com.repo.InventoryRepo;
@@ -94,12 +94,13 @@ import com.inventory.ui.setup.LanguageSetup;
 import com.inventory.ui.setup.OpeningDynamic;
 import com.inventory.ui.setup.PatternSetup;
 import com.inventory.ui.setup.StockFormulaSetup;
+import com.inventory.ui.setup.StockPriceSetup;
 import com.repo.DMSRepo;
 import com.repo.HMSRepo;
 import com.ui.management.StockBalance;
 import com.ui.management.StockPayable;
 import com.user.dialog.CompanyOptionDialog;
-import com.user.dialog.DepartmentDialog;
+import com.user.dialog.BranchDialog;
 import com.user.dialog.ProgramDownloadDialog;
 import com.user.model.Menu;
 import com.user.setup.SystemProperty;
@@ -176,6 +177,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private KeyEventDispatcher keyEventDispatcher; // Maintain a reference to the dispatcher
     private JDialog ynDialog;
+    private boolean offline;
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
         JMenuItem actionMenu = (JMenuItem) evt.getSource();
         String menuName = actionMenu.getText();
@@ -496,6 +498,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 StockSetup setup = new StockSetup(ProUtil.isStockNoUnit());
                 setup.setName(menuName);
                 setup.setUserRepo(userRepo);
+                setup.setInventoryRepo(inventoryRepo);
+                setup.setObserver(this);
+                setup.setProgress(progress);
+                setup.initMain();
+                return setup;
+            }
+            case "Stock Price" -> {
+                StockPriceSetup setup = new StockPriceSetup();
+                setup.setName(menuName);
                 setup.setInventoryRepo(inventoryRepo);
                 setup.setObserver(this);
                 setup.setProgress(progress);
@@ -1087,7 +1098,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         cash.setProgress(progress);
                         cash.setTaskExecutor(taskExecutor);
                         cash.setSourceAccId(srcAcc);
-                        cash.setAccounRepo(accounRepo);
+                        cash.setAccountRepo(accounRepo);
                         cash.setUserRepo(userRepo);
                         cash.initMain();
                         return cash;
@@ -1099,7 +1110,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         db.setProgress(progress);
                         db.setTaskExecutor(taskExecutor);
                         db.setSourceAccId(srcAcc);
-                        db.setAccounRepo(accounRepo);
+                        db.setAccountRepo(accounRepo);
                         db.setUserRepo(userRepo);
                         db.initMain();
                         return db;
@@ -1336,18 +1347,19 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         if (Util1.isNullOrEmpty(deptId) || deptId == 0) {
             userRepo.getDeparment(true).doOnSuccess((t) -> {
                 if (!t.isEmpty()) {
-                    DepartmentUser dep;
+                    Branch dep;
                     if (t.size() > 1) {
-                        DepartmentDialog dialog = new DepartmentDialog(t);
+                        BranchDialog dialog = new BranchDialog(t);
                         dialog.initMain();
                         dialog.setLocationRelativeTo(null);
                         dialog.setVisible(true);
                         dep = dialog.getDeparment();
                     } else {
-                        dep = t.get(0);
+                        dep = t.getFirst();
                     }
                     lblDep.setText(dep.getDeptName());
                     Global.deptId = dep.getKey().getDeptId();
+                    Global.department = dep;
                 } else {
                     JOptionPane.showMessageDialog(this, "No Active Department.");
                     menuBar.setEnabled(false);
@@ -1365,8 +1377,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     if (!Util1.isNullOrEmpty(phoneNo)) {
                         Global.companyPhone = phoneNo;
                     }
-                    Global.deptName = dep.getDeptName();
-                    lblDep.setText(Global.deptName);
+                    lblDep.setText(dep.getDeptName());
+                    Global.department = dep;
                 } else {
                     JOptionPane.showMessageDialog(this, "Department not found.");
                     System.exit(0);
@@ -1553,8 +1565,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void setNetwork(long time) {
-//        log.info(time + "ms");
         if (time < 0) {
+            offline = true;
             btnWifi.setText("Offline");
             btnWifi.setIcon(IconUtil.getIcon(IconUtil.WIFI_OFF));
         } else if (time < 100) {
@@ -1566,6 +1578,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         } else {
             btnWifi.setText(time + " ms");
             btnWifi.setIcon(IconUtil.getIcon(IconUtil.WIFI, Color.RED));
+        }
+        if (offline) {
+            offline = false;
+            log.info("download start coz of offline");
+            integration.start();
         }
     }
 

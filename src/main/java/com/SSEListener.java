@@ -91,6 +91,8 @@ public class SSEListener {
                                 integration.downloadJob();
                             case MessageType.PATTERN ->
                                 integration.downloadPattern();
+                            case MessageType.STOCK_PRICE->
+                                integration.downloadStockUnitPrice();
                         }
                         showMessage(message.getMessage());
                     }

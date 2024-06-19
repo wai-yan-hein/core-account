@@ -120,6 +120,7 @@ public class ReportFilter {
     private boolean pl;
     private boolean ie;
     private boolean bs;
+    private int paymentType;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

@@ -5,7 +5,7 @@
 package com.user.common;
 
 import com.repo.UserRepo;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -16,10 +16,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class DepartmentTableModel extends AbstractTableModel {
+public class BranchTableModel extends AbstractTableModel {
 
-    private List<DepartmentUser> listDepartment = new ArrayList();
-    private final String[] columnNames = {"Code", "Department Name"};
+    private List<Branch> listDepartment = new ArrayList();
+    private final String[] columnNames = {"Code", "Branch Name"};
     private UserRepo userRepo;
 
     public UserRepo getUserRepo() {
@@ -48,7 +48,7 @@ public class DepartmentTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            DepartmentUser p = listDepartment.get(row);
+            Branch p = listDepartment.get(row);
             switch (column) {
                 case 0 -> {
                     return p.getUserCode();
@@ -78,24 +78,24 @@ public class DepartmentTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public void addDepartment(DepartmentUser info) {
+    public void addDepartment(Branch info) {
         listDepartment.add(info);
         fireTableRowsInserted(listDepartment.size() - 1, listDepartment.size() - 1);
     }
 
-    public void setDepartment(int row, DepartmentUser user) {
+    public void setDepartment(int row, Branch user) {
         if (!listDepartment.isEmpty()) {
             listDepartment.set(row, user);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public DepartmentUser getDepartment(int row) {
+    public Branch getDepartment(int row) {
         return listDepartment.get(row);
     }
 
     public void addNewRow() {
-        listDepartment.add(new DepartmentUser());
+        listDepartment.add(new Branch());
         fireTableRowsInserted(listDepartment.size() - 1, listDepartment.size() - 1);
     }
 
@@ -104,11 +104,11 @@ public class DepartmentTableModel extends AbstractTableModel {
         fireTableRowsDeleted(row, row);
     }
 
-    public List<DepartmentUser> getListDepartment() {
+    public List<Branch> getListDepartment() {
         return listDepartment;
     }
 
-    public void setListDepartment(List<DepartmentUser> listDepartment) {
+    public void setListDepartment(List<Branch> listDepartment) {
         this.listDepartment = listDepartment;
         fireTableDataChanged();
     }

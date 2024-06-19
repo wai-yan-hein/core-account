@@ -10,6 +10,7 @@ import com.user.editor.DepartmentUserAutoCompleter;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -105,7 +106,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
 
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "SUP");
@@ -425,7 +426,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         });
 
         jLabel10.setFont(Global.lableFont);
-        jLabel10.setText("Department");
+        jLabel10.setText("Branch");
 
         txtDep.setFont(Global.textFont);
         txtDep.setName("txtUser"); // NOI18N

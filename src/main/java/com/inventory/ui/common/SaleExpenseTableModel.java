@@ -133,7 +133,8 @@ public class SaleExpenseTableModel extends AbstractTableModel {
                             }
                         }
                         case 1 -> {
-                            if (Util1.isNumber(value)) {
+                            double amt = Util1.getDouble(value);
+                            if (amt > 0) {
                                 e.setAmount(Util1.getDouble(value));
                                 checkAndFocus(row + 1);
                             }

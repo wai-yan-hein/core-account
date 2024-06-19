@@ -28,19 +28,19 @@ public class VTransfer {
     private String stockName;
     private String unit;
     private String unitName;
-    private Double qty;
-    private Double bag;
-    private Double price;
-    private Double amount;
+    private double qty;
+    private double bag;
+    private double price;
+    private double amount;
     private String stockTypeName;
     private String createdBy;
     private boolean deleted;
     private Integer deptId;
-    private Double weight;
+    private double weight;
     private String weightUnit;
     private String weightUnitName;
     private String labourGroupName;
     private String traderName;
     private boolean local;
-    private Double saleAmt;
+    private double saleAmt;
 }

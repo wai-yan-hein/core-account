@@ -33,6 +33,7 @@ public class OrderHisDetail {
     private String groupName;
     private String brandName;
     private String catName;
+    private String relCode;
     private String relName;
     private String locName;
     private String traderName;
@@ -52,5 +53,6 @@ public class OrderHisDetail {
     private String saleManName;
     private String vouNo;
     private double heatPressQty;
+    
 
 }

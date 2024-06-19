@@ -64,7 +64,7 @@ public class RelationDetailTableModel extends AbstractTableModel {
         UnitRelationDetail rel = listRelation.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                rel.getQty();
+                Util1.toNull(rel.getQty());
             case 1 ->
                 rel.getUnit();
             default ->
@@ -79,8 +79,9 @@ public class RelationDetailTableModel extends AbstractTableModel {
                 UnitRelationDetail rd = listRelation.get(rowIndex);
                 switch (columnIndex) {
                     case 0 -> {
-                        if (Util1.isNumber(aValue)) {
-                            rd.setQty(Util1.getFloat(aValue));
+                        double qty = Util1.getDouble(aValue);
+                        if (qty > 0) {
+                            rd.setQty(qty);
                         }
                     }
                     case 1 -> {

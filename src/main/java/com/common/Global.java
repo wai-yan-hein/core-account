@@ -8,6 +8,7 @@ package com.common;
 import com.acc.model.DateModel;
 import com.inventory.entity.AccSetting;
 import com.user.model.AppUser;
+import com.user.model.Branch;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.HashMap;
@@ -44,7 +45,8 @@ public class Global {
     public static Integer macId;
     public static String machineName;
     public static Integer deptId;
-    public static String deptName;
+    public static Branch department;
+    
     public static boolean mqConStatus = false;
     public static int x;
     public static int y;
@@ -88,7 +90,8 @@ public class Global {
         loginDate = null;
         macId = null;
         machineName = null;
-        deptId = null;
+        department = null;
+        deptId =null;
         mqConStatus = false;
         x = 0;
         y = 0;

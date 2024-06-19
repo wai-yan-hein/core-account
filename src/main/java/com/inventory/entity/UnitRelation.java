@@ -10,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -32,9 +33,10 @@ public class UnitRelation {
     private String intgUpdStatus;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
-    private transient List<UnitRelationDetail> detailList;
     @Column(name = "dept_id")
     private Integer deptId;
+    @Transient
+    private List<UnitRelationDetail> detailList;
 
     public UnitRelation() {
     }

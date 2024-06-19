@@ -59,6 +59,10 @@ public class SaleHisDetail {
     private double orgPrice;
     @Column(name = "weight_loss")
     private double weightLoss;
+    @Column(name = "dis_amt")
+    private double disAmt;
+    @Column(name = "foc")
+    private boolean foc;
     private double wet;
     private double rice;
     private double bag;
@@ -79,6 +83,8 @@ public class SaleHisDetail {
     private String brandName;
     @Transient
     private String catName;
+    @Transient
+    private String relCode;
     @Transient
     private String relName;
     @Transient

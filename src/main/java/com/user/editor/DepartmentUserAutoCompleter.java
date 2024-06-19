@@ -5,13 +5,13 @@
  */
 package com.user.editor;
 
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import com.common.Global;
 import com.common.IconUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.user.common.DepartmentTableModel;
+import com.user.common.BranchTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -51,8 +51,8 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
-    private DepartmentTableModel departmentTableModel = new DepartmentTableModel();
-    private DepartmentUser department;
+    private BranchTableModel departmentTableModel = new BranchTableModel();
+    private Branch department;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
@@ -64,9 +64,9 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
         this.observer = observer;
     }
 
-    public void setListDepartment(List<DepartmentUser> list) {
+    public void setListDepartment(List<Branch> list) {
         if (filter) {
-            DepartmentUser sb = allDepartment();
+            Branch sb = allDepartment();
             list.add(0, sb);
             setDepartment(sb);
         }
@@ -76,8 +76,8 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
         }
     }
 
-    private DepartmentUser allDepartment() {
-        return new DepartmentUser(0, "All");
+    private Branch allDepartment() {
+        return new Branch(0, "All");
     }
 
     public DepartmentUserAutoCompleter() {
@@ -162,11 +162,11 @@ public class DepartmentUserAutoCompleter implements KeyListener, SelectionObserv
         table.setRequestFocusEnabled(false);
     }
 
-    public DepartmentUser getDepartment() {
+    public Branch getDepartment() {
         return department;
     }
 
-    public final void setDepartment(DepartmentUser department) {
+    public final void setDepartment(Branch department) {
         this.department = department;
         if (this.department != null) {
             this.textComp.setText(department.getDeptName());

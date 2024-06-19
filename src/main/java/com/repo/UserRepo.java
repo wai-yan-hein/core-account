@@ -15,7 +15,7 @@ import com.inventory.entity.AppRole;
 import com.inventory.entity.Country;
 import com.inventory.entity.Language;
 import com.user.model.AppUser;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import com.user.model.MachineInfo;
 import com.inventory.entity.Message;
 import com.inventory.entity.MessageType;
@@ -351,7 +351,7 @@ public class UserRepo {
                 .retrieve().bodyToMono(AppRole.class);
     }
     
-    public Mono<DepartmentUser> findDepartment(Integer deptId) {
+    public Mono<Branch> findDepartment(Integer deptId) {
         if (Util1.isNullOrEmpty(deptId)) {
             return Mono.empty();
         }
@@ -365,19 +365,19 @@ public class UserRepo {
                 .uri("/user/findDepartment")
                 .body(Mono.just(key), DepartmentKey.class)
                 .retrieve()
-                .bodyToMono(DepartmentUser.class)
+                .bodyToMono(Branch.class)
                 .onErrorResume((e) -> {
                     log.error("findDepartment : " + e.getMessage());
                     return Mono.empty();
                 });
     }
     
-    public Mono<DepartmentUser> saveDepartment(DepartmentUser d) {
+    public Mono<Branch> saveDepartment(Branch d) {
         return userApi.post()
                 .uri("/user/saveDepartment")
-                .body(Mono.just(d), DepartmentUser.class)
+                .body(Mono.just(d), Branch.class)
                 .retrieve()
-                .bodyToMono(DepartmentUser.class)
+                .bodyToMono(Branch.class)
                 .doOnSuccess((t) -> {
                     if (localdatabase) {
                         h2Repo.save(t);
@@ -492,7 +492,7 @@ public class UserRepo {
                 });
     }
     
-    public Mono<List<DepartmentUser>> getDeparment(Boolean active) {
+    public Mono<List<Branch>> getDeparment(Boolean active) {
         if (localdatabase) {
             return h2Repo.getDeparment(active, Global.compCode);
         }
@@ -501,7 +501,7 @@ public class UserRepo {
                 .queryParam("active", active)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(DepartmentUser.class)
+                .retrieve().bodyToFlux(Branch.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("getDeparment :" + e.getMessage());
@@ -890,12 +890,12 @@ public class UserRepo {
                 });
     }
     
-    public Mono<List<DepartmentUser>> getDepartmentByDate(String updatedDate) {
+    public Mono<List<Branch>> getDepartmentByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getDepartmentByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
-                .retrieve().bodyToFlux(DepartmentUser.class)
+                .retrieve().bodyToFlux(Branch.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("getDepartmentByDate : " + e.getMessage());

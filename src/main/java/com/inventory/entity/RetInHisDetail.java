@@ -5,11 +5,6 @@
 package com.inventory.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.Data;
 
 /**
@@ -40,6 +35,7 @@ public class RetInHisDetail {
     private String groupName;
     private String brandName;
     private String catName;
+    private String relCode;
     private String relName;
     private String locName;
     private String unit;

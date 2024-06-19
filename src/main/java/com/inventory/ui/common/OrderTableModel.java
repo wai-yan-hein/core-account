@@ -14,8 +14,12 @@ import com.inventory.entity.OrderDetailKey;
 import com.inventory.entity.OrderHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
+import com.inventory.entity.StockUnitPrice;
+import com.inventory.entity.StockUnitPriceKey;
 import com.inventory.ui.entry.OrderDynamic;
 import com.inventory.ui.entry.dialog.StockBalanceFrame;
+import com.inventory.ui.entry.dialog.UnitChooser;
+import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
@@ -32,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit",
-        "Order Qty", "Actual Qty", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation",
+        "Order Qty", "Actual Qty", "Unit", "Price", "Amount", "Weight", "Weight Unit", "Location"};
     @Setter
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
@@ -46,6 +50,8 @@ public class OrderTableModel extends AbstractTableModel {
     private JLabel lblRecord;
     @Setter
     private StockBalanceFrame dialog;
+    @Setter
+    private InventoryRepo inventoryRepo;
 
     @Override
     public String getColumnName(int column) {
@@ -73,7 +79,7 @@ public class OrderTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 6, 7, 9, 10 ->
+            case 3, 4, 6, 7, 8 ->
                 Double.class;
             default ->
                 String.class;
@@ -83,10 +89,7 @@ public class OrderTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 4 -> {//wt
-                return ProUtil.isUseWeight();
-            }
-            case 2, 10 -> {//relation,totalqty,amt
+            case 2, 7 -> {
                 return false;
             }
         }
@@ -118,33 +121,34 @@ public class OrderTableModel extends AbstractTableModel {
                     return sd.getRelName();
                 }
                 case 3 -> {
-                    //loc
-                    return sd.getLocName();
-                }
-                case 4 -> {
-                    return Util1.toNull(sd.getWeight());
-                }
-                case 5 -> {
-                    return sd.getWeightUnit();
-                }
-                case 6 -> {
                     //qty
                     return Util1.toNull(sd.getOrderQty());
                 }
-                case 7 -> {
+                case 4 -> {
                     //qty
                     return Util1.toNull(sd.getQty());
                 }
-                case 8 -> {
+                case 5 -> {
                     return sd.getUnitCode();
                 }
-                case 9 -> {
+                case 6 -> {
                     //price
                     return Util1.toNull(sd.getPrice());
                 }
-                case 10 -> {
+                case 7 -> {
                     //amount
                     return Util1.toNull(sd.getAmount());
+                }
+
+                case 8 -> {
+                    return Util1.toNull(sd.getWeight());
+                }
+                case 9 -> {
+                    return sd.getWeightUnit();
+                }
+                case 10 -> {
+                    //loc
+                    return sd.getLocName();
                 }
                 default -> {
                     return null;
@@ -165,100 +169,83 @@ public class OrderTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
+                            dialog.calStock(s, Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
+                            sd.setRelCode(s.getRelCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0);
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
-                            if (ProUtil.isUseWeight()) {
-                                setSelection(row, 4);
-                            } else {
-                                setSelection(row, 6);
-                            }
                             addNewRow();
+                            setSelection(row, 3);
                         }
                     }
                     case 3 -> {
-                        //Loc
-                        if (value instanceof Location l) {
-                            sd.setLocCode(l.getKey().getLocCode());
-                            sd.setLocName(l.getLocName());
+                        //Order-Qty
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setOrderQty(qty);
+                            sd.setQty(qty);
+                            showPriceDialog(sd, row);
+                            if (sd.getUnitCode() == null) {
+                                setSelection(row, 5);
+                            } else {
+                                double price = sd.getPrice();
+                                if (price == 0) {
+                                    setSelection(row, 6);
+                                } else {
+                                    setSelection(row + 1, 0);
+                                }
+                            }
+
                         }
                     }
                     case 4 -> {
-                        sd.setWeight(Util1.getDouble(value));
-                        setSelection(row, 6);
+                        //Qty
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setQty(qty);
+                        }
                     }
                     case 5 -> {
-                        if (value instanceof StockUnit u) {
-                            sd.setWeightUnit(u.getKey().getUnitCode());
-                            setSelection(row, 6);
-                        }
-                    }
-                    case 6 -> {
-                        //Order-Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setOrderQty(Util1.getDouble(value));
-                                sd.setQty(Util1.getDouble(value));
-                                setSelection(row, 7);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    }
-                    case 7 -> {
-                        //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                                if (sd.getUnitCode() == null) {
-                                    setSelection(row, 8);
-                                } else {
-                                    setSelection(row, 9);
-                                }
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            setSelection(row, column);
-                        }
-                    }
-                    case 8 -> {
                         //Unit
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
 
                     }
-                    case 9 -> {
+                    case 6 -> {
                         //price
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                setSelection(row + 1, 0);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            sd.setPrice(Util1.getDouble(value));
+                            setSelection(row + 1, 0);
+                        }
+                    }
+                    case 7 -> {
+                        //amt
+                        sd.setAmount(Util1.getDouble(value));
+                    }
+
+                    case 8 -> {
+                        sd.setWeight(Util1.getDouble(value));
+                        setSelection(row, 6);
+                    }
+                    case 9 -> {
+                        if (value instanceof StockUnit u) {
+                            sd.setWeightUnit(u.getKey().getUnitCode());
+                            setSelection(row, 6);
                         }
                     }
                     case 10 -> {
-                        //amt
-                        sd.setAmount(Util1.getDouble(value));
+                        //Loc
+                        if (value instanceof Location l) {
+                            sd.setLocCode(l.getKey().getLocCode());
+                            sd.setLocName(l.getLocName());
+                            setSelection(row + 1, column);
+                        }
                     }
 
                 }
@@ -272,6 +259,37 @@ public class OrderTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void showPriceDialog(OrderHisDetail sd, int row) {
+        String stockCode = sd.getStockCode();
+        String relCode = sd.getRelCode();
+        if (!Util1.isNullOrEmpty(relCode)) {
+            UnitChooser chooser = new UnitChooser(inventoryRepo, relCode);
+            sd.setUnitCode(chooser.getSelectUnit());
+            double price = sd.getPrice();
+            if (price == 0) {
+                StockUnitPrice sup = getPriceByUnit(stockCode, Global.compCode, sd.getUnitCode());
+                if (sup != null) {
+                    sd.setPrice(sup.getSalePriceN());
+                } else {
+                    sd.setPrice(sd.getStock() == null ? 0 : sd.getStock().getSalePriceN());
+                }
+                setSelection(row + 1, 0);
+            }
+        } else {
+            Stock s = sd.getStock();
+            sd.setUnitCode(s.getSaleUnitCode());
+            sd.setPrice(sd.getStock() == null ? 0 : sd.getStock().getSalePriceN());
+        }
+    }
+
+    private StockUnitPrice getPriceByUnit(String stockCode, String compCode, String unit) {
+        StockUnitPriceKey key = new StockUnitPriceKey();
+        key.setCompCode(compCode);
+        key.setStockCode(stockCode);
+        key.setUnit(unit);
+        return inventoryRepo.findStockUnitPrice(key).block();
     }
 
     private void setSelection(int row, int column) {

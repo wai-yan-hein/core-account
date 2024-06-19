@@ -4,7 +4,7 @@
  */
 package com.common;
 
-import java.util.Objects;
+import java.text.DecimalFormat;
 import javax.swing.RowFilter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +24,17 @@ public class StartWithRowFilter extends RowFilter<Object, Object> {
 
     @Override
     public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
+        DecimalFormat f = new DecimalFormat("#");
         for (int i = 0; i < entry.getValueCount(); i++) {
-            String value = replaceAll(entry.getStringValue(i).toLowerCase());
+            Object valueObj = entry.getValue(i);
             String text = replaceAll(jtf.getText().toLowerCase());
+            String value = "";
+            if (valueObj instanceof Double d) {
+                String v = f.format(d);
+                value = replaceAll(Util1.getString(v));
+            } else if (valueObj instanceof String s) {
+                value = replaceAll(s.toLowerCase());
+            }
             if (!Util1.isNullOrEmpty(value)) {
                 if (value.startsWith(text)) {
                     return true;

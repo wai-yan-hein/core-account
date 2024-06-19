@@ -292,9 +292,6 @@ public class ProUtil {
         return "report/";
     }
 
-    public static Integer getDepId() {
-        return Util1.getBoolean(Global.hmRoleProperty.get("department.filter")) ? Global.deptId : 0;
-    }
 
     public static double getMaxSW() {
         double wt = Util1.getDouble(Global.hmRoleProperty.get(MAX_STOCK_WEIGHT));

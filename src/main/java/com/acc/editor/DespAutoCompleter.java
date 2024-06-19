@@ -355,13 +355,10 @@ public final class DespAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                accountRepo.getDescription(str).subscribe((t) -> {
+                accountRepo.getDescription(str).doOnSuccess((t) -> {
                     t.add(new VDescription("All"));
                     despModel.setListAutoText(t);
-                }, (err) -> {
-                    log.error(err.getMessage());
-                }, () -> {
-                });
+                }).subscribe();
             }
 
         }
@@ -369,5 +366,10 @@ public final class DespAutoCompleter implements KeyListener {
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
+
+    public void clear() {
+        VDescription des = new VDescription("All");
+        setAutoText(des);
     }
 }

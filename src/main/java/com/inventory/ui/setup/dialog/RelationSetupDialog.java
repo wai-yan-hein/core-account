@@ -119,7 +119,7 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         tblRelD.setModel(relationDetailTableModel);
         tblRelD.getTableHeader().setFont(Global.lableFont);
         tblRelD.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblRelD.setDefaultRenderer(Float.class, new UnitFormatRender());
+        tblRelD.setDefaultRenderer(Double.class, new UnitFormatRender());
         tblRel.setRowHeight(Global.tblRowHeight);
         tblRelD.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {

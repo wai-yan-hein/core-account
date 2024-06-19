@@ -191,12 +191,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void initTransfer() {
-        tranTableModel.setVouDate(txtDate);
         tranTableModel.setLblRec(lblRec);
         tranTableModel.setInventoryRepo(inventoryRepo);
         tranTableModel.addNewRow();
         tranTableModel.setParent(tblTransfer);
-        tranTableModel.setObserver(this);
         tblTransfer.setModel(tranTableModel);
         tblTransfer.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblTransfer.getColumnModel().getColumn(1).setPreferredWidth(250);
@@ -310,17 +308,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         return null;
     }
 
-    private List<THDetailKey> getDeleteList() {
-        switch (type) {
-            case TRAN -> {
-                return tranTableModel.getDeleteList();
-            }
-            case TRAN_PADDY -> {
-                return tranPaddingTableModel.getDeleteList();
-            }
-        }
-        return null;
-    }
 
     public void saveVoucher(boolean print) {
         if (isValidEntry() && isValidDetail()) {
@@ -332,7 +319,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             observer.selected("save", false);
             progress.setIndeterminate(true);
             io.setListTD(getListDetail());
-            io.setDelList(getDeleteList());
             inventoryRepo.save(io).doOnSuccess((t) -> {
                 io.getKey().setVouNo(t.getKey().getVouNo());
                 io.setVouDate(t.getVouDate());
@@ -430,7 +416,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             io.setLocCodeFrom(fromLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setLocCodeTo(toLocaitonCompleter.getLocation().getKey().getLocCode());
-            io.setStatus(lblStatus.getText());
             io.setSkipInv(rdoSkipInv.isSelected());
             Trader t = traderAutoCompleter.getTrader();
             if (t != null) {

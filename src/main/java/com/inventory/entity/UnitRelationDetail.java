@@ -6,6 +6,10 @@ package com.inventory.entity;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 /**
  *
@@ -13,10 +17,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
+@Table(name = "unit_relation_detail")
 public class UnitRelationDetail {
 
+    @EmbeddedId
     private RelationDetailKey key;
-    private Float qty;
+    @Column(name = "qty")
+    private double qty;
+    @Column(name = "unit")
     private String unit;
-    private Float smallestQty;
+    @Column(name = "smallest_qty")
+    private double smallestQty;
 }

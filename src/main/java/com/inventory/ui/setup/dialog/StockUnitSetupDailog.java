@@ -111,7 +111,6 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                 }
             }
         });
-
     }
 
     private void setItemUnit(StockUnit unit) {

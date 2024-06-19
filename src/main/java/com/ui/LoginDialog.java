@@ -15,7 +15,6 @@ import com.common.TokenFile;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.user.model.MachineInfo;
@@ -140,6 +139,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             }
         }).doOnError((e) -> {
             d.setVisible(false);
+            log.info(e.getMessage());
             int yn = JOptionPane.showConfirmDialog(this, "Internet Offline. Try Again?", "Offline", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yn == JOptionPane.YES_OPTION) {
                 checkMachineRegister();

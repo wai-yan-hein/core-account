@@ -152,7 +152,7 @@ public class StockPayable extends javax.swing.JPanel implements SelectionObserve
         locationAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "CUS");
         traderAutoCompleter.setObserver(this);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         inventoryRepo.getStockType().doOnSuccess((t) -> {
             stockTypeAutoCompleter.setListStockType(t);

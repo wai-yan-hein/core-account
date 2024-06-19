@@ -5,7 +5,7 @@
 package com.user.common;
 
 import com.repo.UserRepo;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DepartmentConfigTableModel extends AbstractTableModel {
 
-    private List<DepartmentUser> listDepartment = new ArrayList();
+    private List<Branch> listDepartment = new ArrayList();
     private final String[] columnNames = {"Id", "Short Name", "Department Name", "Inventory Q", "Account Q"};
     private UserRepo userRepo;
     private JTable table;
@@ -58,7 +58,7 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            DepartmentUser p = listDepartment.get(row);
+            Branch p = listDepartment.get(row);
             switch (column) {
                 case 0 -> {
                     return p.getKey().getDeptId();
@@ -84,7 +84,7 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
-        DepartmentUser p = listDepartment.get(row);
+        Branch p = listDepartment.get(row);
         if (value != null) {
             switch (column) {
                 case 0 -> {
@@ -109,14 +109,14 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
         }
     }
 
-    private void save(DepartmentUser d) {
+    private void save(Branch d) {
         if (isValidEntry(d)) {
             userRepo.saveDepartment(d);
             addNewRow();
         }
     }
 
-    private boolean isValidEntry(DepartmentUser d) {
+    private boolean isValidEntry(Branch d) {
         if (d.getKey().getDeptId() == null) {
             return false;
         } else if (d.getUserCode() == null) {
@@ -137,24 +137,24 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public void addDepartment(DepartmentUser info) {
+    public void addDepartment(Branch info) {
         listDepartment.add(info);
         fireTableRowsInserted(listDepartment.size() - 1, listDepartment.size() - 1);
     }
 
-    public void setDepartment(int row, DepartmentUser user) {
+    public void setDepartment(int row, Branch user) {
         if (!listDepartment.isEmpty()) {
             listDepartment.set(row, user);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public DepartmentUser getDepartment(int row) {
+    public Branch getDepartment(int row) {
         return listDepartment.get(row);
     }
 
     public void addNewRow() {
-        listDepartment.add(new DepartmentUser());
+        listDepartment.add(new Branch());
         fireTableRowsInserted(listDepartment.size() - 1, listDepartment.size() - 1);
     }
 
@@ -163,11 +163,11 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
         fireTableRowsDeleted(row, row);
     }
 
-    public List<DepartmentUser> getListDepartment() {
+    public List<Branch> getListDepartment() {
         return listDepartment;
     }
 
-    public void setListDepartment(List<DepartmentUser> listDepartment) {
+    public void setListDepartment(List<Branch> listDepartment) {
         this.listDepartment = listDepartment;
         fireTableDataChanged();
     }

@@ -21,7 +21,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import com.repo.UserRepo;
 import com.user.model.DepartmentKey;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.awt.Color;
 import java.awt.FileDialog;
 import java.io.FileReader;
@@ -180,7 +180,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             return Global.deptId;
         }
         if (hmDepartment.isEmpty()) {
-            List<DepartmentUser> list = userRepo.getDeparment(true).block();
+            List<Branch> list = userRepo.getDeparment(true).block();
             if (list != null) {
                 list.forEach((t) -> {
                     hmDepartment.put(t.getDeptName(), t.getKey().getDeptId().toString());
@@ -189,14 +189,14 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             }
         }
         if (hmDepartment.get(str) == null && !str.isEmpty()) {
-            DepartmentUser t = saveDepartment(str);
+            Branch t = saveDepartment(str);
             hmDepartment.put(t.getDeptName(), t.getKey().getDeptId().toString());
         }
         return Integer.valueOf(hmDepartment.get(str));
     }
 
-    private DepartmentUser saveDepartment(String str) {
-        DepartmentUser user = new DepartmentUser();
+    private Branch saveDepartment(String str) {
+        Branch user = new Branch();
         DepartmentKey key = new DepartmentKey();
         key.setDeptId(null);
         key.setCompCode(Global.compCode);

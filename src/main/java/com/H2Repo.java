@@ -14,7 +14,13 @@ import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ReportFilter;
 import com.common.Util1;
+import com.h2.dao.BranchRepo;
 import com.h2.dao.DateFilterRepo;
+import com.h2.dao.JobRepo;
+import com.h2.dao.MacPropertyRepo;
+import com.h2.dao.RelationRepo;
+import com.h2.dao.StockRepo;
+import com.h2.dao.StockUnitPriceRepo;
 import com.h2.service.AccSettingService;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
@@ -23,13 +29,10 @@ import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DateLockService;
-import com.h2.service.DepartmentUserService;
 import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
-import com.h2.service.JobService;
 import com.h2.service.LabourGroupService;
 import com.h2.service.LocationService;
-import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.PrivilegeCompanyService;
@@ -38,7 +41,6 @@ import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
 import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
-import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
@@ -71,7 +73,7 @@ import com.inventory.entity.TraderKey;
 import com.inventory.entity.VouStatus;
 import com.inventory.entity.VouStatusKey;
 import com.user.model.Currency;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import com.user.model.ExchangeRate;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
@@ -85,7 +87,6 @@ import com.h2.service.OrderStatusService;
 import com.h2.service.PatternService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.RegionService;
-import com.h2.service.RelationService;
 import com.h2.service.SaleHisDetailService;
 import com.h2.service.StockCriteriaService;
 import com.h2.service.StockFormulaService;
@@ -111,7 +112,10 @@ import com.inventory.entity.StockFormulaKey;
 import com.inventory.entity.StockFormulaPrice;
 import com.inventory.entity.StockFormulaPriceKey;
 import com.inventory.entity.StockFormulaQty;
+import com.inventory.entity.StockUnitPrice;
+import com.inventory.entity.StockUnitPriceKey;
 import com.inventory.entity.UnitRelation;
+import com.inventory.entity.UnitRelationDetail;
 import com.inventory.entity.VSale;
 import com.inventory.entity.WareHouse;
 import com.inventory.entity.WareHouseKey;
@@ -121,6 +125,7 @@ import com.user.model.MenuKey;
 import com.user.model.PrivilegeMenu;
 import java.util.HashMap;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -131,20 +136,24 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Component
+@RequiredArgsConstructor
 public class H2Repo {
 
+    private final RelationRepo relationRepo;
+    private final StockRepo stockRepo;
+    private final StockUnitPriceRepo unitPriceRepo;
+    private final JobRepo jobRepo;
+    private final BranchRepo branchRepo;
+    private final StockUnitPriceRepo stockUnitRepo;
+    private final MacPropertyRepo macPropertyRepo;
     @Autowired
     private RegionService regionService;
-    @Autowired
-    private RelationService relationService;
     @Autowired
     private LocationService locationService;
     @Autowired
     private StockUnitService stockUnitService;
     @Autowired
     private SaleManService saleManService;
-    @Autowired
-    private StockService stockService;
     @Autowired
     private CategoryService categoryService;
     @Autowired
@@ -186,8 +195,6 @@ public class H2Repo {
     @Autowired
     private RolePropertyService rolePropertyService;
     @Autowired
-    private MacPropertyService macPropertyService;
-    @Autowired
     private DepartmentAccService departmentAccService;
     @Autowired
     private TraderAService traderAccService;
@@ -197,8 +204,6 @@ public class H2Repo {
     private VRoleCompanyService vRoleCompanyService;
     @Autowired
     private VRoleMenuService vRoleMenuService;
-    @Autowired
-    private DepartmentUserService deptUserService;
     @Autowired
     private SaleHisDetailService saleHisDetailService;
     @Autowired
@@ -211,8 +216,6 @@ public class H2Repo {
     private StockCriteriaService stockCriteriaService;
     @Autowired
     private LabourGroupService labourGroupService;
-    @Autowired
-    private JobService jobService;
     @Autowired
     private PatternService patternService;
     @Autowired
@@ -228,8 +231,24 @@ public class H2Repo {
         return Mono.justOrEmpty(locationService.find(key));
     }
 
+    public Mono<List<StockUnit>> getStockUnitByRelation(String relCode) {
+        return Mono.justOrEmpty(relationRepo.getUnitByRelation(relCode, Global.compCode));
+    }
+
+    public Mono<List<UnitRelationDetail>> getSmallestUnit() {
+        return Mono.justOrEmpty(relationRepo.getSmallestUnit(Global.compCode));
+    }
+
+    public Mono<Double> getSmallestQty(String relCode, String unit, String compCode) {
+        return Mono.justOrEmpty(relationRepo.getSmallestQty(relCode, unit, compCode));
+    }
+
     public Mono<List<StockUnit>> getStockUnit() {
         return Mono.justOrEmpty(stockUnitService.findAll(Global.compCode));
+    }
+
+    public List<StockUnitPrice> getStockUnitPrice(String stockCode) {
+        return stockUnitRepo.getStockUnitPrice(stockCode, Global.compCode);
     }
 
     public Mono<StockUnit> find(StockUnitKey key) {
@@ -245,19 +264,19 @@ public class H2Repo {
     }
 
     public Mono<Stock> find(StockKey key) {
-        return Mono.justOrEmpty(stockService.find(key));
+        return Mono.justOrEmpty(stockRepo.find(key));
     }
 
     public Mono<Stock> findStockByBarcode(StockKey key) {
-        return Mono.justOrEmpty(stockService.find(key));
+        return Mono.justOrEmpty(stockRepo.find(key));
     }
 
     public Mono<List<Stock>> getStock(String str, boolean contain) {
-        return Mono.justOrEmpty(stockService.getStock(str, Global.compCode, 0, contain));
+        return Mono.justOrEmpty(stockRepo.getStock(str, Global.compCode, 0, contain));
     }
 
     public Mono<List<Stock>> getStock(boolean active) {
-        List<Stock> listB = active ? stockService.findActiveStock(Global.compCode) : stockService.findAll(Global.compCode);
+        List<Stock> listB = active ? stockRepo.findActiveStock(Global.compCode) : stockRepo.findAll(Global.compCode);
         return Mono.justOrEmpty(listB);
     }
 
@@ -333,7 +352,7 @@ public class H2Repo {
 //        return Mono.justOrEmpty(saleHisService.save(sh));
 //    } 
     public Mono<Job> save(Job sh) {
-        return Mono.justOrEmpty(jobService.save(sh));
+        return Mono.justOrEmpty(jobRepo.save(sh));
     }
 
     public Mono<Pattern> save(Pattern sh) {
@@ -368,8 +387,8 @@ public class H2Repo {
         return pmService.save(pc);
     }
 
-    public DepartmentUser save(DepartmentUser du) {
-        return deptUserService.save(du);
+    public Branch save(Branch du) {
+        return branchRepo.save(du);
     }
 
     public SysProperty save(SysProperty sp) {
@@ -377,7 +396,7 @@ public class H2Repo {
     }
 
     public MachineProperty save(MachineProperty rp) {
-        return macPropertyService.save(rp);
+        return macPropertyRepo.save(rp);
     }
 
     public BusinessType save(BusinessType rp) {
@@ -401,11 +420,11 @@ public class H2Repo {
     }
 
     public Stock save(Stock obj) {
-        return stockService.save(obj);
+        return stockRepo.save(obj);
     }
 
     public boolean updateDeleted(StockKey key, boolean status) {
-        return stockService.updateDeleted(key, status);
+        return stockRepo.updateDeleted(key, status);
     }
 
     public Location save(Location obj) {
@@ -445,7 +464,7 @@ public class H2Repo {
     }
 
     public UnitRelation save(UnitRelation obj) {
-        return relationService.save(obj);
+        return relationRepo.save(obj);
     }
 
     public StockFormula save(StockFormula obj) {
@@ -594,7 +613,7 @@ public class H2Repo {
     }
 
     public Mono<List<MachineProperty>> getMacProperty(Integer macId) {
-        return Mono.justOrEmpty(macPropertyService.getMacProperty(macId));
+        return Mono.justOrEmpty(macPropertyRepo.getMacProperty(macId));
     }
 
     public Mono<List<DepartmentA>> getDepartmentAccount() {
@@ -609,12 +628,12 @@ public class H2Repo {
         return Mono.justOrEmpty(roleService.findById(roleCode));
     }
 
-    public Mono<DepartmentUser> findDepartment(DepartmentKey key) {
-        return Mono.justOrEmpty(deptUserService.findById(key));
+    public Mono<Branch> findDepartment(DepartmentKey key) {
+        return Mono.justOrEmpty(branchRepo.findById(key));
     }
 
-    public Mono<List<DepartmentUser>> getDeparment(Boolean active, String compCode) {
-        return Mono.justOrEmpty(deptUserService.findAll(active, compCode));
+    public Mono<List<Branch>> getDeparment(Boolean active, String compCode) {
+        return Mono.justOrEmpty(branchRepo.findAll(active, compCode));
     }
 
     public Mono<BusinessType> find(Integer id) {
@@ -768,7 +787,7 @@ public class H2Repo {
         String compCode = filter.getCompCode();
         boolean active = filter.isActive();
         boolean deleted = filter.isDeleted();
-        return Flux.fromIterable(stockService.search(stockCode, typCode, catCode, brandCode, compCode, deptId, active, deleted));
+        return Flux.fromIterable(stockRepo.search(stockCode, typCode, catCode, brandCode, compCode, deptId, active, deleted));
     }
 
     public Mono<Region> find(RegionKey key) {
@@ -776,7 +795,7 @@ public class H2Repo {
     }
 
     public Mono<UnitRelation> find(RelationKey key) {
-        return Mono.justOrEmpty(relationService.findByKey(key));
+        return Mono.justOrEmpty(relationRepo.findByKey(key));
     }
 
     public LabourGroup save(LabourGroup t) {
@@ -808,15 +827,15 @@ public class H2Repo {
     }
 
     public Mono<List<Job>> getJob(ReportFilter filter) {
-        return Mono.justOrEmpty(jobService.findAll(filter));
+        return Mono.justOrEmpty(jobRepo.findAll(filter));
     }
 
     public Mono<List<Job>> getActiveJob(String compCode) {
-        return Mono.justOrEmpty(jobService.getActiveJob(compCode));
+        return Mono.justOrEmpty(jobRepo.getActiveJob(compCode));
     }
 
     public Mono<Job> find(JobKey key) {
-        return Mono.justOrEmpty(jobService.findById(key));
+        return Mono.justOrEmpty(jobRepo.findById(key));
     }
 
     public AccSetting save(AccSetting acc) {
@@ -841,5 +860,17 @@ public class H2Repo {
 
     public Mono<LabourGroup> find(LabourGroupKey key) {
         return Mono.justOrEmpty(labourGroupService.findById(key));
+    }
+
+    public Mono<StockUnitPrice> findStockUnitPrice(StockUnitPriceKey key) {
+        return Mono.justOrEmpty(unitPriceRepo.findById(key));
+    }
+
+    public Mono<List<UnitRelation>> getUnitRelation() {
+        return Mono.justOrEmpty(relationRepo.findAll(Global.compCode));
+    }
+
+    public Mono<List<UnitRelationDetail>> getRelationDetail(String relCode) {
+        return Mono.justOrEmpty(relationRepo.getRelationDetail(relCode, Global.compCode));
     }
 }

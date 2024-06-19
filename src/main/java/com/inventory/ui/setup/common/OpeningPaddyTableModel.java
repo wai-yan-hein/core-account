@@ -184,23 +184,18 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
                     }
                 }
                 case 4 -> { // weight
-                    if (value != null) {
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                record.setWeight(Util1.getDouble(value));
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number");
-                            setSelection(row, column);
-                        }
+                    double wt = Util1.getDouble(value);
+                    if (wt > 0) {
+                        record.setWeight(Util1.getDouble(value));
+                    } else {
+                        showMessageBox("Input value must be number");
+                        setSelection(row, column);
                     }
                 }
                 case 5 -> {
                     // Qty
-                    if (Util1.isNumber(value)) {
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
                         if (Util1.isPositive(Util1.getDouble(value))) {
                             record.setQty(Util1.getDouble(value));
                             record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
@@ -216,18 +211,11 @@ public class OpeningPaddyTableModel extends AbstractTableModel {
                 }
                 case 7 -> {
                     // Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setPrice(Util1.getDouble(value));
-                            setSelection(row + 1, 0);
-                            calculateAmount(record);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
+                    double price = Util1.getDouble(value);
+                    if (price > 0) {
+                        record.setPrice(price);
+                        setSelection(row + 1, 0);
+                        calculateAmount(record);
                     }
                 }
                 case 8 -> {

@@ -112,8 +112,12 @@ public class StockCompleterTableModel extends AbstractTableModel {
     public void addStock(Stock stock) {
         if (listStock != null) {
             listStock.add(stock);
-            fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
-
+            int lastIndex = listStock.size() - 1;
+            if (lastIndex >= 0) {
+                fireTableRowsInserted(lastIndex, lastIndex);
+            } else {
+                fireTableRowsInserted(0, 0);
+            }
         }
     }
 
@@ -137,6 +141,5 @@ public class StockCompleterTableModel extends AbstractTableModel {
         listStock.clear();
         fireTableDataChanged();
     }
-    
 
 }

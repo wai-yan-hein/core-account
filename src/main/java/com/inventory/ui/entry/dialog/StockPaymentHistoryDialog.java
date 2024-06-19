@@ -45,7 +45,6 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
     private final StockPaymentSearchTableModel tableModel = new StockPaymentSearchTableModel();
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
-    private StockAutoCompleter stockAutoCompleter;
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
@@ -92,7 +91,6 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
 
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "-");
-        stockAutoCompleter = new StockAutoCompleter(txtAccount, inventoryRepo, null, true);
     }
 
     private void initTableVoucher() {
@@ -128,7 +126,6 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
         filter.setVouNo(txtVouNo.getText());
         filter.setSaleVouNo(txtSaleVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
-        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setTranOption(tranOption);
         progress.setIndeterminate(true);
@@ -182,7 +179,6 @@ public class StockPaymentHistoryDialog extends javax.swing.JDialog implements Ke
         txtVouNo.setText(null);
         txtRemark.setText(null);
         traderAutoCompleter.setTrader(new Trader("-", "All"));
-        stockAutoCompleter.setStock(new Stock("-", "All"));
     }
 
     /**

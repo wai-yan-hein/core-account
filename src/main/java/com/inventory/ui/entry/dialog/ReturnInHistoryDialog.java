@@ -9,6 +9,7 @@ import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -96,7 +97,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
         departmentAutoCompleter = new DepartmentUserAutoCompleter(txtDep, null, true);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, null, true);
         inventoryRepo.getLocation().doOnSuccess((t) -> {
@@ -391,7 +392,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         chkDel.setText("Deleted");
 
         jLabel9.setFont(Global.lableFont);
-        jLabel9.setText("Department");
+        jLabel9.setText("Branch");
 
         txtDep.setFont(Global.textFont);
         txtDep.setName("txtUser"); // NOI18N

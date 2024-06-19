@@ -14,6 +14,7 @@ public class MessageType {
     public static final String DOWNLOAD = "DOWNLOAD";
     public static final String PRINTER = "PRINTER";
     public static final String STOCK = "STOCK";
+    public static final String STOCK_PRICE = "STOCK_PRICE";
     public static final String TRADER_INV = "TRADER_INV";
     public static final String CATEGORY = "CATEGORY";
     public static final String BRAND = "BRAND";
@@ -37,7 +38,6 @@ public class MessageType {
     public static final String JOB = "JOB";
     public static final String PATTERN = "PATTERN";
     public static final String WARE_HOUSE = "WARE_HOUSE";
-
     //account
     public static final String DEPARTMENT_ACC = "DEPARTMENT_ACC";
     public static final String TRADER_ACC = "TRADER_ACC";

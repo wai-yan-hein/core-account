@@ -9,12 +9,15 @@ import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.entity.Stock;
+import com.inventory.ui.common.StockBalanceRelationTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.common.StockBalanceWeightTableModel;
 import com.repo.InventoryRepo;
 import com.ui.management.model.ClosingBalance;
 import javax.swing.JFrame;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,13 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockBalanceFrame extends javax.swing.JInternalFrame {
 
+    @Setter
     private InventoryRepo inventoryRepo;
     private StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
+    private StockBalanceRelationTableModel relationTableModel = new StockBalanceRelationTableModel();
     private StockBalanceWeightTableModel stockBalanceWeightTableModel = new StockBalanceWeightTableModel();
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     /**
      * Creates new form StockBalanceIFrame
@@ -39,7 +40,7 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
         initComponents();
     }
 
-    private void initMain(boolean weight) {
+    private void initMain(boolean weight, String relCode) {
         if (weight) {
             tblStock.setModel(stockBalanceWeightTableModel);
             tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//loc
@@ -47,7 +48,11 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
             tblStock.getColumnModel().getColumn(2).setPreferredWidth(80);//qty
             tblStock.getColumnModel().getColumn(3).setPreferredWidth(80);//bag
         } else {
-            tblStock.setModel(stockBalanceTableModel);
+            if (Util1.isNullOrEmpty(relCode)) {
+                tblStock.setModel(stockBalanceTableModel);
+            } else {
+                tblStock.setModel(relationTableModel);
+            }
             tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);//
             tblStock.getColumnModel().getColumn(1).setPreferredWidth(100); // qty
         }
@@ -57,32 +62,48 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
         tblStock.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
-    public void calStock(String stockCode, JFrame frame) {
+    public void calStock(Stock s, JFrame frame) {
+        String stockCode = s.getKey().getStockCode();
+        String relCode = s.getRelCode();
         if (ProUtil.isCalStock()) {
             progress.setIndeterminate(true);
             boolean weight = ProUtil.isUseWeight();
-            initMain(weight);
+            initMain(weight, relCode);
             ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
             filter.setStockCode(stockCode);
             filter.setToDate(Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd"));
             filter.setSummary(chkSummary.isSelected());
             clear();
-            inventoryRepo.getStockBalanceQty(filter)
-                    .doOnNext(this::addObject)
-                    .doOnNext(obj -> calTotal())
-                    .doOnError((e) -> {
-                        log.error("getStockBalanceQty : " + e.getMessage());
-                        progress.setIndeterminate(false);
-                    }).doOnTerminate(() -> {
-                progress.setIndeterminate(false);
-                setVisible(true);
-            }).subscribe();
+            if (Util1.isNullOrEmpty(relCode)) {
+                inventoryRepo.getStockBalanceQty(filter)
+                        .doOnNext(this::addObject)
+                        .doOnNext(obj -> calTotal())
+                        .doOnError((e) -> {
+                            log.error("getStockBalanceQty : " + e.getMessage());
+                            progress.setIndeterminate(false);
+                        }).doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    setVisible(true);
+                }).subscribe();
+            } else {
+                inventoryRepo.getStockBalanceRel(filter)
+                        .doOnNext(relationTableModel::addObject)
+                        .doOnNext(obj -> calTotal())
+                        .doOnError((e) -> {
+                            log.error("getStockBalanceRel : " + e.getMessage());
+                            progress.setIndeterminate(false);
+                        }).doOnTerminate(() -> {
+                    progress.setIndeterminate(false);
+                    setVisible(true);
+                }).subscribe();
+            }
         }
     }
 
     public void clear() {
         stockBalanceTableModel.clearList();
         stockBalanceWeightTableModel.clearList();
+        relationTableModel.clearList();
 
     }
 
@@ -93,7 +114,6 @@ public class StockBalanceFrame extends javax.swing.JInternalFrame {
         } else {
             stockBalanceTableModel.addObject(cl);
         }
-
     }
 
     private void calTotal() {

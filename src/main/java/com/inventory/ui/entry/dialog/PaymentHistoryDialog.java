@@ -11,6 +11,7 @@ import com.common.ComponentUtil;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -52,7 +53,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
-    private StockAutoCompleter stockAutoCompleter;
     private SelectionObserver observer;
     private UserRepo userRepo;
     private AccountRepo accountRepo;
@@ -116,7 +116,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         userRepo.getAppUser().doOnSuccess((t) -> {
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
-        stockAutoCompleter = new StockAutoCompleter(txtAccount, inventoryRepo, null, true);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().doOnSuccess((t) -> {
@@ -168,7 +167,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setVouNo(txtVouNo.getText());
         filter.setSaleVouNo(txtSaleVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
-        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setCurCode(getCurCode());
         filter.setAccount(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
@@ -227,7 +225,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         txtVouNo.setText(null);
         txtRemark.setText(null);
         traderAutoCompleter.setTrader(new Trader("-", "All"));
-        stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         currencyAutoCompleter.setCurrency(null);
     }

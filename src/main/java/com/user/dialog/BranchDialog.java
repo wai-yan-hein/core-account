@@ -5,8 +5,8 @@
 package com.user.dialog;
 
 import com.common.Global;
-import com.user.common.DepartmentTableModel;
-import com.user.model.DepartmentUser;
+import com.user.common.BranchTableModel;
+import com.user.model.Branch;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -19,10 +19,10 @@ import javax.swing.ListSelectionModel;
  *
  * @author DELL
  */
-public class DepartmentDialog extends javax.swing.JDialog {
+public class BranchDialog extends javax.swing.JDialog {
 
-    private final DepartmentTableModel departmentTableModel = new DepartmentTableModel();
-    private final List<DepartmentUser> listDep;
+    private final BranchTableModel branchTableModel = new BranchTableModel();
+    private final List<Branch> listDep;
     private static final String solve = "Solve";
 
     /**
@@ -30,7 +30,7 @@ public class DepartmentDialog extends javax.swing.JDialog {
      *
      * @param listDep
      */
-    public DepartmentDialog(List<DepartmentUser> listDep) {
+    public BranchDialog(List<Branch> listDep) {
         super(Global.parentForm, true);
         this.listDep = listDep;
         initComponents();
@@ -39,14 +39,14 @@ public class DepartmentDialog extends javax.swing.JDialog {
 
     public void initMain() {
 
-        tblDepartment.setModel(departmentTableModel);
+        tblDepartment.setModel(branchTableModel);
         tblDepartment.getTableHeader().setFont(Global.tblHeaderFont);
         tblDepartment.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblDepartment.getColumnModel().getColumn(1).setPreferredWidth(100);
         tblDepartment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblDepartment.setRowHeight(Global.tblRowHeight);
         tblDepartment.setFont(Global.textFont);
-        departmentTableModel.setListDepartment(listDep);
+        branchTableModel.setListDepartment(listDep);
         tblDepartment.setRowSelectionInterval(0, 0);
         tblDepartment.requestFocus();
     }
@@ -66,9 +66,9 @@ public class DepartmentDialog extends javax.swing.JDialog {
         }
     }
 
-    public DepartmentUser getDeparment() {
+    public Branch getDeparment() {
         int row = tblDepartment.convertRowIndexToModel(tblDepartment.getSelectedRow());
-        return departmentTableModel.getDepartment(row);
+        return branchTableModel.getDepartment(row);
     }
 
     /**
@@ -120,7 +120,7 @@ public class DepartmentDialog extends javax.swing.JDialog {
 
         jLabel1.setFont(Global.menuFont);
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Department");
+        jLabel1.setText("Branch");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);

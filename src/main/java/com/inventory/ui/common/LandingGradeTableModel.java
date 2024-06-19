@@ -7,7 +7,7 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.StockAutoCompleter1;
+import com.inventory.editor.StockAutoCompleter;
 import com.inventory.entity.LandingHisGrade;
 import com.inventory.entity.LandingHisPrice;
 import com.inventory.entity.Stock;
@@ -191,7 +191,7 @@ public class LandingGradeTableModel extends AbstractTableModel {
     }
 
     private Stock getLandingStock() {
-        StockAutoCompleter1 completer = landing.getStockAutoCompleter();
+        StockAutoCompleter completer = landing.getStockAutoCompleter();
         if (completer != null) {
             return completer.getStock();
         }

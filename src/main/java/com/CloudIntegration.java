@@ -1,9 +1,15 @@
-/* * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template */package com;
+package com;
 
 import com.repo.AccountRepo;
 import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.SelectionObserver;
+import com.h2.dao.BranchRepo;
+import com.h2.dao.JobRepo;
+import com.h2.dao.MacPropertyRepo;
+import com.h2.dao.RelationRepo;
+import com.h2.dao.StockRepo;
+import com.h2.dao.StockUnitPriceRepo;
 import com.h2.service.AccSettingService;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
@@ -13,16 +19,12 @@ import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DateLockService;
 import com.h2.service.DepartmentAccService;
-import com.h2.service.DepartmentUserService;
 import com.h2.service.LocationService;
 import com.h2.service.PriceOptionService;
-import com.h2.service.RelationService;
 import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.ExchangeRateService;
-import com.h2.service.JobService;
 import com.h2.service.LabourGroupService;
-import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OrderStatusService;
@@ -35,7 +37,6 @@ import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
 import com.h2.service.StockCriteriaService;
 import com.h2.service.StockFormulaService;
-import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
@@ -48,9 +49,9 @@ import com.inventory.entity.SaleHis;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,105 +59,106 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class CloudIntegration {
 
-    @Autowired
-    private boolean localDatabase;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private InventoryRepo inventoryRepo;
-    @Autowired
-    private AccountRepo accountRepo;
-    @Autowired
-    private RegionService regionService;
-    @Autowired
-    private StockService stockService;
-    @Autowired
-    private StockTypeService stockTypeService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BusinessTypeService businessTypeService;
-    @Autowired
-    private CompanyInfoService companyInfoService;
-    @Autowired
-    private CurrencyService currencyService;
-    @Autowired
-    private DepartmentUserService departmentService;
-    @Autowired
-    private CategoryService categoryService;
-    @Autowired
-    private BrandService brandService;
-    @Autowired
-    private StockUnitService stockUnitService;
-    @Autowired
-    private RelationService relationService;
-    @Autowired
-    private LocationService locationService;
-    @Autowired
-    private SaleManService saleManService;
-    @Autowired
-    private TraderInvService traderInvService;
-    @Autowired
-    private VouStatusService vouStatusService;
-    @Autowired
-    private OrderStatusService orderStatusService;
-    @Autowired
-    private PriceOptionService priceOptionService;
-    @Autowired
-    private SaleHisService saleHisService;
-    @Autowired
-    private ExchangeRateService exchangeRateService;
-    @Autowired
-    private MachineInfoService machineInfoService;
-    @Autowired
-    private MacPropertyService macPropertyService;
-    @Autowired
-    private MenuService menuService;
-    @Autowired
-    private PrivilegeCompanyService pcService;
-    @Autowired
-    private PrivilegeMenuService pmService;
-    @Autowired
-    private ProjectService pService;
-    @Autowired
-    private RoleService roleService;
-    @Autowired
-    private RolePropertyService rpService;
-    @Autowired
-    private SystemPropertyService sysPropertyService;
-    @Autowired
-    private DateLockService dateLockService;
-    @Autowired
-    private COAService coaService;
-    @Autowired
-    private TraderAService traderService;
-    @Autowired
-    private DepartmentAccService departmentAService;
-    @Autowired
-    private DateLockUtil dateLockUtil;
-    @Autowired
-    private StockFormulaService stockFormulaService;
-    @Autowired
-    private StockCriteriaService stockCriteriaService;
-    @Autowired
-    private LabourGroupService labourGroupService;
-    @Autowired
-    private JobService jobService;
-    @Autowired
-    private PatternService patternService;
-    @Autowired
-    private AccSettingService accSettingService;
-    @Autowired
-    private WareHouseService warehouseService;
+    private final boolean localDatabase;
+
+    private final UserRepo userRepo;
+
+    private final InventoryRepo inventoryRepo;
+
+    private final AccountRepo accountRepo;
+
+    private final RegionService regionService;
+
+    private final StockRepo stockRepo;
+
+    private final StockTypeService stockTypeService;
+
+    private final UserService userService;
+
+    private final BusinessTypeService businessTypeService;
+
+    private final CompanyInfoService companyInfoService;
+
+    private final CurrencyService currencyService;
+
+    private final BranchRepo branchRep;
+
+    private final CategoryService categoryService;
+
+    private final BrandService brandService;
+
+    private final StockUnitService stockUnitService;
+
+    private final RelationRepo relationRepo;
+
+    private final LocationService locationService;
+
+    private final SaleManService saleManService;
+
+    private final TraderInvService traderInvService;
+
+    private final VouStatusService vouStatusService;
+
+    private final OrderStatusService orderStatusService;
+
+    private final PriceOptionService priceOptionService;
+
+    private final SaleHisService saleHisService;
+
+    private final ExchangeRateService exchangeRateService;
+
+    private final MachineInfoService machineInfoService;
+
+    private final MacPropertyRepo macPropertyRepo;
+
+    private final MenuService menuService;
+
+    private final PrivilegeCompanyService pcService;
+
+    private final PrivilegeMenuService pmService;
+
+    private final ProjectService pService;
+
+    private final RoleService roleService;
+
+    private final RolePropertyService rpService;
+
+    private final SystemPropertyService sysPropertyService;
+
+    private final DateLockService dateLockService;
+
+    private final COAService coaService;
+
+    private final TraderAService traderService;
+
+    private final DepartmentAccService departmentAService;
+
+    private final DateLockUtil dateLockUtil;
+
+    private final StockFormulaService stockFormulaService;
+
+    private final StockCriteriaService stockCriteriaService;
+
+    private final LabourGroupService labourGroupService;
+
+    private final JobRepo jobRepo;
+
+    private final PatternService patternService;
+
+    private final AccSettingService accSettingService;
+
+    private final WareHouseService warehouseService;
+    private final StockUnitPriceRepo stockUnitPriceRepo;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public void startDownload() {
+    private void startDownload() {
         if (localDatabase) {
             observer.selected("download", "download start.");
             downloadUser();
@@ -190,8 +192,6 @@ public class CloudIntegration {
         }
         return "Upload Success.";
     }
-
-
 
     private void downloadUser() {
         downloadAppUser();
@@ -303,11 +303,11 @@ public class CloudIntegration {
     }
 
     public void downloadDepartment() {
-        userRepo.getDepartmentByDate(departmentService.getMaxDate()).doOnSuccess((d) -> {
+        userRepo.getDepartmentByDate(branchRep.getMaxDate()).doOnSuccess((d) -> {
             if (d != null) {
                 observer.selected("download", "downloadDepartment list : " + d.size());
                 d.forEach((a) -> {
-                    departmentService.save(a);
+                    branchRep.save(a);
                 });
                 observer.selected("download", "downloadDepartment done.");
             }
@@ -339,11 +339,11 @@ public class CloudIntegration {
     }
 
     public void downloadMacProperty() {
-        userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).doOnSuccess((m) -> {
+        userRepo.getMacPropertyByDate(macPropertyRepo.getMaxDate()).doOnSuccess((m) -> {
             if (m != null) {
                 observer.selected("download", "downloadMacProperty list : " + m.size());
                 m.forEach((a) -> {
-                    macPropertyService.save(a);
+                    macPropertyRepo.save(a);
                 });
                 observer.selected("download", "downloadMacProperty done.");
             }
@@ -471,6 +471,7 @@ public class CloudIntegration {
         downloadAccSettings();
         downloadWarehouse();
         downloadRegion();
+        downloadStockUnitPrice();
     }
 
     public void downloadPriceOption() {
@@ -546,12 +547,12 @@ public class CloudIntegration {
     }
 
     public void downloadRelation() {
-        inventoryRepo.getUpdateRelation(relationService.getMaxDate()).doOnSuccess((t) -> {
+        inventoryRepo.getUpdateRelation(relationRepo.getMaxDate()).doOnSuccess((t) -> {
 
             if (t != null) {
                 observer.selected("download", "downloadRelation list : " + t.size());
                 t.forEach((s) -> {
-                    relationService.save(s);
+                    relationRepo.save(s);
                 });
                 observer.selected("download", "downloadRelation done.");
             }
@@ -559,7 +560,7 @@ public class CloudIntegration {
     }
 
     public void downloadUnit() {
-        inventoryRepo.getUpdateUnit(stockService.getMaxDate()).doOnSuccess((t) -> {
+        inventoryRepo.getUpdateUnit(stockRepo.getMaxDate()).doOnSuccess((t) -> {
             if (t != null) {
 
                 observer.selected("download", "downloadUnit list : " + t.size());
@@ -609,13 +610,13 @@ public class CloudIntegration {
     }
 
     public void downloadStock() {
-        String maxDate = stockService.getMaxDate();
+        String maxDate = stockRepo.getMaxDate();
         inventoryRepo.getUpdateStock(maxDate).doOnSuccess((t) -> {
 
             if (t != null) {
                 observer.selected("download", "downloadStock list : " + t.size());
                 t.forEach((s) -> {
-                    stockService.save(s);
+                    stockRepo.save(s);
                 });
                 observer.selected("download", "downloadStock done.");
             }
@@ -689,12 +690,12 @@ public class CloudIntegration {
     }
 
     public void downloadJob() {
-        String maxDate = jobService.getMaxDate();
+        String maxDate = jobRepo.getMaxDate();
         inventoryRepo.getUpdateJob(maxDate).doOnSuccess((t) -> {
             if (t != null) {
                 observer.selected("download", "job list : " + t.size());
                 t.forEach((s) -> {
-                    jobService.save(s);
+                    jobRepo.save(s);
                 });
                 observer.selected("download", "dwonloadJob done.");
             }
@@ -740,7 +741,19 @@ public class CloudIntegration {
         }).subscribe();
     }
 
- 
+    public void downloadStockUnitPrice() {
+        String maxDate = stockUnitPriceRepo.getMaxDate();
+        inventoryRepo.getUpdateStockUnitPrice(maxDate).doOnSuccess((t) -> {
+            if (t != null) {
+                log.info("downloadStockUnitPrice :" + t.size());
+                observer.selected("download", "downloadStockUnitPrice list : " + t.size());
+                t.forEach((s) -> {
+                    stockUnitPriceRepo.save(s);
+                });
+                observer.selected("download", "downloadStockUnitPrice done.");
+            }
+        }).subscribe();
+    }
 
     public void downloadAccSettings() {
         String maxDate = accSettingService.getMaxDate();

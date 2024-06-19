@@ -7,14 +7,11 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.common.IconUtil;
-import com.common.Resolution;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.common.Util1;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.inventory.entity.Stock;
-import com.repo.InventoryRepo;
-import com.inventory.ui.common.StockCompleterTableModel;
+import com.inventory.dto.PaymentType;
+import com.inventory.ui.common.PaymentTypeTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -23,6 +20,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -45,39 +44,33 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
+public class PaymentTypeCompleter implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
-    private StockCompleterTableModel tableModel;
-    private Stock stock;
+    private PaymentTypeTableModel tableModel;
+    private PaymentType object;
     public AbstractCellEditor editor;
     private int x = 0;
     private int y = 0;
     @Setter
     private SelectionObserver observer;
-    private boolean filter;
-    @Setter
-    private InventoryRepo inventoryRepo;
-    private boolean contain;
 
-    public StockAutoCompleter1() {
+    public PaymentTypeCompleter() {
     }
 
-    public StockAutoCompleter1(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter, boolean contain) {
+    public PaymentTypeCompleter(JTextComponent comp,
+            AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-        this.inventoryRepo = inventoryRepo;
-        this.contain = contain;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_ICON, IconUtil.getIcon(IconUtil.STOCK));
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
-        tableModel = new StockCompleterTableModel();
+        tableModel = new PaymentTypeTableModel();
         table.setModel(tableModel);
         table.setFont(Global.textFont); // NOI18N
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -86,12 +79,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(250);//Code
-        table.getColumnModel().getColumn(2).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(3).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(4).setPreferredWidth(50);//Code
-
+        table.getColumnModel().getColumn(0).setPreferredWidth(100);//Ref No
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -104,8 +92,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        Resolution r = Util1.getPopSize();
-        popup.setPopupSize(r.getWidth(), r.getHeight());
+        popup.setPopupSize(150, 200);
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -145,34 +132,56 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         });
 
         table.setRequestFocusEnabled(false);
+        initPaymentType();
     }
 
-    public Stock getStock() {
-        return stock;
+    public void setListData(List<PaymentType> list) {
+        tableModel.setListDetail(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
-    public void setStock(Stock stock) {
-        this.stock = stock;
-        this.textComp.setText(this.stock == null ? null : this.stock.getStockName());
+    private void initPaymentType() {
+        PaymentType t1 = new PaymentType(1, "Cash");
+        PaymentType t2 = new PaymentType(2, "Credit");
+        List<PaymentType> list = new ArrayList<>();
+        list.add(getAll());
+        list.add(t1);
+        list.add(t2);
+        setListData(list);
+        setObject(getAll());
+
+    }
+
+    private PaymentType getAll() {
+        return new PaymentType(0, "All");
+    }
+
+    public PaymentType getObject() {
+        return object;
+    }
+
+    public void setObject(PaymentType stock) {
+        this.object = stock;
+        this.textComp.setText(this.object == null ? null : this.object.getType());
     }
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            stock = tableModel.getStock(table.convertRowIndexToModel(
+            object = tableModel.getObject(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             try {
-                textComp.setText(stock.getStockName());
+                textComp.setText(object.getType());
             } catch (Exception e) {
             }
             popup.setVisible(false);
             if (observer != null) {
-                observer.selected("STOCK", "STOCK");
+                observer.selected("PaymentType", "PaymentType");
             }
             if (editor != null) {
                 editor.stopCellEditing();
-
             }
-
         }
     }
 
@@ -213,7 +222,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockAutoCompleter1 completer = (StockAutoCompleter1) tf.getClientProperty(AUTOCOMPLETER);
+            PaymentTypeCompleter completer = (PaymentTypeCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -227,7 +236,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockAutoCompleter1 completer = (StockAutoCompleter1) tf.getClientProperty(AUTOCOMPLETER);
+            PaymentTypeCompleter completer = (PaymentTypeCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -239,7 +248,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockAutoCompleter1 completer = (StockAutoCompleter1) tf.getClientProperty(AUTOCOMPLETER);
+            PaymentTypeCompleter completer = (PaymentTypeCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
             }
@@ -319,25 +328,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        String str = textComp.getText();
-        if (!str.isEmpty()) {
-            if (!containKey(e)) {
-                inventoryRepo.getStock(str, contain).doOnSuccess((t) -> {
-                    if (filter) {
-                        Stock s = new Stock("-", "All");
-                        t.add(s);
-                    }
-                    tableModel.setListStock(t);
-                    if (!t.isEmpty()) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
-                }).subscribe();
-            }
-        }
-    }
 
-    private boolean containKey(KeyEvent e) {
-        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
 
 }

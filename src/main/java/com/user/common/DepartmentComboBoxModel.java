@@ -4,7 +4,7 @@
  */
 package com.user.common;
 
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
@@ -14,16 +14,16 @@ import javax.swing.event.ListDataListener;
  *
  * @author Lenovo
  */
-public class DepartmentComboBoxModel extends AbstractListModel<DepartmentUser> implements ComboBoxModel<DepartmentUser> {
+public class DepartmentComboBoxModel extends AbstractListModel<Branch> implements ComboBoxModel<Branch> {
 
-    private List<DepartmentUser> data;
-    private DepartmentUser selected;
+    private List<Branch> data;
+    private Branch selected;
 
-    public List<DepartmentUser> getData() {
+    public List<Branch> getData() {
         return data;
     }
 
-    public void setData(List<DepartmentUser> data) {
+    public void setData(List<Branch> data) {
         if (data == null) {
             return;
         }
@@ -35,7 +35,7 @@ public class DepartmentComboBoxModel extends AbstractListModel<DepartmentUser> i
         if (anItem == null) {
             this.selected = null;
             fireContentsChanged(this, -1, -1);
-        } else if (anItem instanceof DepartmentUser coa) {
+        } else if (anItem instanceof Branch coa) {
             this.selected = coa;
             fireContentsChanged(this, -1, -1);
         }
@@ -53,7 +53,7 @@ public class DepartmentComboBoxModel extends AbstractListModel<DepartmentUser> i
     }
 
     @Override
-    public DepartmentUser getElementAt(int index) {
+    public Branch getElementAt(int index) {
         return data.get(index);
     }
 

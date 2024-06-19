@@ -10,6 +10,7 @@ import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.ImageCache;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.RowHeader;
 import com.common.SelectionObserver;
 import com.common.Util1;
@@ -156,7 +157,7 @@ public class OrderNoteEntry extends javax.swing.JPanel implements SelectionObser
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false,ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {

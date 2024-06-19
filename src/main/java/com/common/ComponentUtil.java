@@ -6,11 +6,14 @@ package com.common;
 
 import com.toedter.calendar.JDateChooser;
 import com.toedter.calendar.JTextFieldDateEditor;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.im.InputContext;
+import java.util.Locale;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JMenuBar;
@@ -68,13 +71,16 @@ public class ComponentUtil {
 
     public static void setTextProperty(Component component) {
         switch (component) {
-            case JDateChooser dateChooser -> {
-                dateChooser.setFont(Global.textFont);
+            case JDateChooser dc -> {
+                dc.setFont(Global.textFont);
+                JTextField tf = (JTextField) dc.getDateEditor().getUiComponent();
+                tf.setForeground(Util1.DARK_MODE ? Color.WHITE : Color.BLACK);
+                tf.repaint();
             }
-            case JFormattedTextField textField -> {
-                textField.setFont(Global.amtFont);
-                textField.setHorizontalAlignment(JTextField.RIGHT);
-                textField.setFormatterFactory(ProUtil.getDecimalFormatter());
+            case JFormattedTextField tf -> {
+                tf.setFont(Global.amtFont);
+                tf.setHorizontalAlignment(JTextField.RIGHT);
+                tf.setFormatterFactory(ProUtil.getDecimalFormatter());
             }
             case Container container -> {
                 for (Component child : container.getComponents()) {
@@ -130,7 +136,8 @@ public class ComponentUtil {
                 } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
                     txt.selectAll();
                 }
-            });
+            }
+            );
         }
     };
 
@@ -147,18 +154,18 @@ public class ComponentUtil {
 
     public static void scrollTable(JTable table, int row, int column) {
         SwingUtilities.invokeLater(() -> {
-            if (table.getRowCount() > row) {
+            int rc = table.getRowCount();
+            if (rc > 0) {
+                final int finalRow = (row == -1) ? rc - 1 : row;
                 boolean enable = table.getCellSelectionEnabled();
                 if (enable) {
-                    table.changeSelection(row, column, false, false);
+                    table.changeSelection(finalRow, column, false, false);
                 } else {
-                    table.setRowSelectionInterval(row, row);
+                    table.setRowSelectionInterval(finalRow, finalRow);
                     table.setColumnSelectionInterval(column, column);
                 }
-                if (row != -1) {
-                    table.scrollRectToVisible(table.getCellRect(row + 10, 0, false));
-                    table.requestFocus();
-                }
+                table.scrollRectToVisible(table.getCellRect(finalRow + 10, 0, false));
+                table.requestFocus();
             }
         });
     }

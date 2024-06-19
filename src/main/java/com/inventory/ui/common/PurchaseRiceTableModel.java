@@ -240,16 +240,10 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     //weight
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setWeight(Util1.getDouble(value));
-                        } else {
-                            showMessageBox("Input value must be positive.");
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
+                    double wt = Util1.getDouble(value);
+                    if (wt > 0) {
+                        record.setWeight(Util1.getDouble(value));
                     }
-                    parent.setColumnSelectionInterval(5, 5);
                 }
                 case 4 -> {
                     //weight unit
@@ -259,15 +253,12 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                 }
                 case 5 -> {
                     //Qty
-                    if (Util1.isNumber(value)) {
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
                         record.setQty(Util1.getDouble(value));
                         if (record.getWeight() > 0) {
                             record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
-                        parent.setRowSelectionInterval(row, row);
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setRowSelectionInterval(row, column);
                     }
                 }
                 case 6 -> {
@@ -291,19 +282,12 @@ public class PurchaseRiceTableModel extends AbstractTableModel {
                 }
                 case 8 -> {
                     //Pur Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setPrice(Util1.getDouble(value));
-                            record.setOrgPrice(record.getPrice());
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
+                    double price = Util1.getDouble(value);
+                    if (price > 0) {
+                        record.setPrice(Util1.getDouble(value));
+                        record.setOrgPrice(record.getPrice());
+                        parent.setColumnSelectionInterval(0, 0);
+                        parent.setRowSelectionInterval(row + 1, row + 1);
                     }
                 }
                 case 9 -> {

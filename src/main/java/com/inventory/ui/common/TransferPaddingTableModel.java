@@ -157,8 +157,9 @@ public class TransferPaddingTableModel extends AbstractTableModel {
                         }
                     }
                     case 4 -> { // weight
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
+                        double wt = Util1.getDouble(value);
+                        if (wt > 0) {
+                            if (Util1.isPositive(wt)) {
                                 io.setWeight(Util1.getDouble(value));
                                 setSelection(row, column + 1);
                             } else {
@@ -171,8 +172,9 @@ public class TransferPaddingTableModel extends AbstractTableModel {
                         }
                     }
                     case 5 -> { // qty
-                        if (Util1.isNumber(value)) {
-                            io.setQty(Util1.getDouble(value));
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            io.setQty(qty);
                             setSelection(row, column + 1);
                         }
                     }

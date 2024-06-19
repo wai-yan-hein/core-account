@@ -15,7 +15,7 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.StockAutoCompleter1;
+import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.Stock;
 import com.inventory.entity.Trader;
@@ -74,7 +74,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     @Setter
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
-    private StockAutoCompleter1 stockAutoCompleter;
+    private StockAutoCompleter stockAutoCompleter;
 
     private final WeightDetailTableModel tableModel = new WeightDetailTableModel();
     private WeightHistoryDialog dialog;
@@ -127,7 +127,7 @@ public class WeightEntry extends javax.swing.JPanel implements SelectionObserver
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
-        stockAutoCompleter = new StockAutoCompleter1(txtStock, inventoryRepo, null, false, ProUtil.isSSContain());
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
     }
 

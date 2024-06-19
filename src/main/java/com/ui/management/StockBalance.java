@@ -156,7 +156,7 @@ public class StockBalance extends javax.swing.JPanel implements SelectionObserve
         categoryAutoCompleter.setObserver(this);
         locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, true, true);
         locationAutoCompleter.setObserver(this);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         inventoryRepo.getStockType().doOnSuccess((t) -> {
             stockTypeAutoCompleter.setListStockType(t);

@@ -178,19 +178,12 @@ public class SaleDesginTableModel extends AbstractTableModel {
                         }
                     }
                     case 7 -> {
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                sd.setOrgPrice(sd.getPrice());
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            sd.setPrice(Util1.getDouble(value));
+                            sd.setOrgPrice(sd.getPrice());
+                            parent.setColumnSelectionInterval(0, 0);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
                         }
                     }
                 }

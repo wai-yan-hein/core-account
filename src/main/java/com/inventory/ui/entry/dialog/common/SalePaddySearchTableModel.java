@@ -34,6 +34,9 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
     private double qty;
     @Getter
     private double bag;
+    @Getter
+    private double discount;
+
     @Setter
     private InventoryRepo inventoryRepo;
 
@@ -103,11 +106,11 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //user
-                        return his.getQty();
+                        return Util1.toNull(his.getQty());
                     }
                     case 6 -> {
                         //user
-                        return his.getBag();
+                        return Util1.toNull(his.getBag());
                     }
                     case 7 -> {
                         //paid
@@ -170,6 +173,7 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
         paidTotal += t.getPaid();
         qty += t.getQty();
         bag += t.getBag();
+        discount +=t.getDiscount();
         size += 1;
         int lastIndex = listSaleHis.size() - 1;
         if (lastIndex >= 0) {
@@ -186,6 +190,7 @@ public class SalePaddySearchTableModel extends AbstractTableModel {
         qty = 0;
         bag = 0;
         size = 0;
+        discount=0;
         fireTableDataChanged();
     }
 }

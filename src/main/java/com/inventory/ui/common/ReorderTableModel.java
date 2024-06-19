@@ -20,6 +20,7 @@ import java.util.Objects;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,33 +33,10 @@ public class ReorderTableModel extends AbstractTableModel {
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Stock Balance", "Location", "Status"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
+    @Setter
     private InventoryRepo inventoryRepo;
-    private String patternCode;
+    @Setter
     private JTable table;
-
-    public JTable getTable() {
-        return table;
-    }
-
-    public void setTable(JTable table) {
-        this.table = table;
-    }
-
-    public String getPatternCode() {
-        return patternCode;
-    }
-
-    public void setPatternCode(String patternCode) {
-        this.patternCode = patternCode;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     @Override
     public int getRowCount() {
@@ -86,11 +64,11 @@ public class ReorderTableModel extends AbstractTableModel {
             case 2 ->
                 p.getRelName();
             case 3 ->
-                p.getMinQty();
+                Util1.toNull(p.getMinQty());
             case 4 ->
                 p.getMinUnitCode();
             case 5 ->
-                p.getMaxQty();
+                Util1.toNull(p.getMaxQty());
             case 6 ->
                 p.getMaxUnitCode();
             case 7 ->

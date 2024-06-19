@@ -165,26 +165,21 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblRet.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
         tblRet.getColumnModel().getColumn(2).setPreferredWidth(60);//rel
-        tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
-        tblRet.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
-        tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
-        tblRet.getColumnModel().getColumn(6).setPreferredWidth(60);//weight
-        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//weight unit
-        tblRet.getColumnModel().getColumn(8).setPreferredWidth(1);//price
-        tblRet.getColumnModel().getColumn(9).setPreferredWidth(40);//amt
+        tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//qty
+        tblRet.getColumnModel().getColumn(4).setPreferredWidth(1);//unit
+        tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//price
+        tblRet.getColumnModel().getColumn(6).setPreferredWidth(40);//amt
+        tblRet.getColumnModel().getColumn(7).setPreferredWidth(60);//Location
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
-            tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+            tblRet.getColumnModel().getColumn(7).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
-        tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblRet.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
-            tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
-            tblRet.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));
+            tblRet.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
-        tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblRet.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblRet.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblRet.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -264,7 +259,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         disableForm(true);
         retInTableModel.clear();
         retInTableModel.addNewRow();
-        retInTableModel.clearDelList();
         initTextBoxValue();
         assignDefaultValue();
         ri = new RetInHis();
@@ -373,6 +367,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             ri.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
             ri.setSRec(rdoRec.isSelected());
+            //financial
+            ri.setCashAcc(Util1.isNull(ri.getCashAcc(), Global.department.getCashAcc()));
+            ri.setDeptCode(Util1.isNull(ri.getDeptCode(), Global.department.getDeptCode()));
             if (lblStatus.getText().equals("NEW")) {
                 RetInHisKey key = new RetInHisKey();
                 key.setCompCode(Global.compCode);
@@ -474,6 +471,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     public void setVoucher(RetInHis ri) {
         if (ri != null) {
+            this.ri = ri;
             setDetail(ri);
         }
     }
@@ -586,7 +584,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 })
                 .doOnTerminate(() -> {
                     retInTableModel.addNewRow();
-                    setHeader(ri);
+                    setHeader(his);
                     progress.setIndeterminate(false);
                     focusTable();
                 }).subscribe();

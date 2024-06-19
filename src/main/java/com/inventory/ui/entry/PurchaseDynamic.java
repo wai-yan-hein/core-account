@@ -379,22 +379,22 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
         tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblPur.getColumnModel().getColumn(1).setPreferredWidth(350);//Name
         tblPur.getColumnModel().getColumn(2).setPreferredWidth(100);//amt
-        tblPur.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
-        tblPur.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
-        tblPur.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
-        tblPur.getColumnModel().getColumn(6).setPreferredWidth(1);//price
-        tblPur.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
+        tblPur.getColumnModel().getColumn(3).setPreferredWidth(60);//qty
+        tblPur.getColumnModel().getColumn(4).setPreferredWidth(1);//unit
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(1);//price
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(40);//amt
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(60);//Location
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
-            tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+            tblPur.getColumnModel().getColumn(7).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
-        tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
+        tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
-            tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+            tblPur.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
     }
 
     private void initWeightTable() {
@@ -872,9 +872,10 @@ public class PurchaseDynamic extends javax.swing.JPanel implements SelectionObse
             ph.setSRec(rdoRec.isSelected());
             ph.setTranSource(type);
             LabourGroup lg = labourGroupAutoCompleter.getObject();
-            if (lg != null) {
-                ph.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
-            }
+            ph.setLabourGroupCode(lg == null ? null : lg.getKey().getCode());
+            //financial
+            ph.setCashAcc(Util1.isNull(ph.getCashAcc(), Global.department.getCashAcc()));
+            ph.setDeptCode(Util1.isNull(ph.getDeptCode(), Global.department.getDeptCode()));
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
                 key.setCompCode(Global.compCode);

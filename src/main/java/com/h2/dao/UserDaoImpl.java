@@ -5,7 +5,6 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.h2.service.MacPropertyService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.SystemPropertyService;
 import com.user.model.AppUser;
@@ -15,8 +14,8 @@ import com.user.model.SysProperty;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -25,14 +24,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Slf4j
+@RequiredArgsConstructor
 public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao {
 
-    @Autowired
-    private RolePropertyService rpService;
-    @Autowired
-    private MacPropertyService mpService;
-    @Autowired
-    private SystemPropertyService spService;
+    private final RolePropertyService rpService;
+    private final MacPropertyRepo mpRepo;
+    private final SystemPropertyService spService;
 
     @Override
     public AppUser save(AppUser appUser) {
@@ -79,7 +76,7 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
                 }
             }
         }
-        List<MachineProperty> machineProperties = mpService.getMacProperty(macId);
+        List<MachineProperty> machineProperties = mpRepo.getMacProperty(macId);
         if (!machineProperties.isEmpty()) {
             for (MachineProperty p : machineProperties) {
                 String value = p.getPropValue();

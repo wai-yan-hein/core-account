@@ -199,7 +199,8 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                         setSelection(row, 3);
                     }
                     case 3 -> {
-                        if (Util1.isNumber(value)) {
+                        double wt = Util1.getDouble(value);
+                        if (wt > 0) {
                             io.setWeight(Util1.getDouble(value));
                             if (io.getWeightUnit() != null) {
                                 setSelection(row, 4);
@@ -216,8 +217,9 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                         }
                     }
                     case 5 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setInQty(Util1.getDouble(value));
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            io.setInQty(qty);
                             io.setOutQty(0);
                             io.setOutUnitCode(null);
                             if (io.getInUnitCode() != null) {
@@ -237,7 +239,8 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                         }
                     }
                     case 7 -> {
-                        if (Util1.isNumber(value)) {
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
                             io.setOutQty(Util1.getDouble(value));
                             io.setInQty(0);
                             io.setInUnitCode(null);
@@ -257,7 +260,8 @@ public class StockInOutWeightTableModel extends AbstractTableModel {
                         }
                     }
                     case 9 -> {
-                        if (Util1.isNumber(value)) {
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
                             io.setCostPrice(Util1.getDouble(value));
                             io.setAmount(calAmount(io));
                             addNewRow();

@@ -32,6 +32,8 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
     @Getter
     private double bag;
     @Getter
+    private double discount;
+    @Getter
     private int size;
 
     @Override
@@ -134,10 +136,11 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
 
     public void addObject(VSale t) {
         listSaleHis.add(t);
-        vouTotal += t.getVouTotal();
-        paidTotal += t.getPaid();
-        qty += t.getQty();
-        bag += t.getBag();
+        vouTotal += Util1.getDouble(t.getVouTotal());
+        paidTotal += Util1.getDouble(t.getPaid());
+        qty += Util1.getDouble(t.getQty());
+        bag += Util1.getDouble(t.getBag());
+        discount += Util1.getDouble(t.getDiscount());
         size += 1;
         int lastIndex = listSaleHis.size() - 1;
         if (lastIndex >= 0) {
@@ -154,6 +157,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
         qty = 0;
         bag = 0;
         size = 0;
+        discount =0;
         fireTableDataChanged();
     }
 }

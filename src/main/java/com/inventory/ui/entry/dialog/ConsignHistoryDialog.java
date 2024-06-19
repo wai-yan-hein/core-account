@@ -8,6 +8,7 @@ package com.inventory.ui.entry.dialog;
 import com.common.ReportFilter;
 import com.common.Global;
 import com.common.IconUtil;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -102,7 +103,7 @@ public class ConsignHistoryDialog extends javax.swing.JDialog implements KeyList
             departmentAutoCompleter.setDepartment(t);
         }).subscribe();
         traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, true, "CUS");
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
     }
 
     private void initTableVoucher() {
@@ -334,7 +335,7 @@ public class ConsignHistoryDialog extends javax.swing.JDialog implements KeyList
         chkDel.setText("Deleted");
 
         jLabel13.setFont(Global.lableFont);
-        jLabel13.setText("Department");
+        jLabel13.setText("Branch");
 
         txtDep.setFont(Global.textFont);
         txtDep.setName("txtUser"); // NOI18N

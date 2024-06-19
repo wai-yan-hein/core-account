@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,7 +33,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
@@ -224,6 +222,9 @@ public class CoreAccountApplication {
         UIManager.put("TabbedPane.showTabSeparators", true);
         UIManager.put("TableHeader.foreground", Color.WHITE);
         UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
+        UIManager.put("JTextField.foreground", Util1.DARK_MODE ? Color.WHITE : Color.BLACK);
+        UIManager.put("JTextField.background", Util1.DARK_MODE ? Color.DARK_GRAY : Color.WHITE);
+
     }
 
     private static void initIcon() {

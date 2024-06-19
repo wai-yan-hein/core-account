@@ -16,6 +16,7 @@ import com.inventory.entity.RetOutHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
 import com.inventory.ui.entry.ReturnOut;
+import com.inventory.ui.entry.dialog.UnitChooser;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,21 +34,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReturnOutTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Qty", "Unit", "Price", "Amount", "Location"};
     @Setter
     private JTable parent;
     private List<RetOutHisDetail> listDetail = new ArrayList();
     @Setter
     private SelectionObserver observer;
     @Setter
-    private ReturnOut returnOut;
-    @Setter
     private InventoryRepo inventoryRepo;
     @Setter
     private JDateChooser vouDate;
     @Setter
     private JLabel lblRec;
+    @Setter
+    private ReturnOut returnOut;
 
     @Override
     public String getColumnName(int column) {
@@ -69,16 +69,13 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (listDetail == null) {
-            return 0;
-        }
         return listDetail.size();
     }
 
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 6, 8, 9 ->
+            case 3, 5, 6 ->
                 Double.class;
             default ->
                 String.class;
@@ -88,7 +85,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2, 9 ->
+            case 6 ->
                 false;
             default ->
                 true;
@@ -102,7 +99,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //code
-                    return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
+                    return record.getUserCode();
                 }
                 case 1 -> {
                     //Name
@@ -118,36 +115,28 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-
                     return record.getRelName();
                 }
                 case 3 -> {
-                    //loc
-                    return record.getLocName();
-                }
-                case 4 -> {
-                    return Util1.getDouble(record.getWeight()) == 0 ? null : record.getWeight();
-                }
-                case 5 -> {
-                    return record.getWeightUnit();
-                }
-                case 6 -> {
                     //qty
                     return Util1.toNull(record.getQty());
                 }
-
-                case 7 -> {
+                case 4 -> {
                     //unit
                     return record.getUnitCode();
                 }
 
-                case 8 -> {
+                case 5 -> {
                     //price
                     return Util1.toNull(record.getPrice());
                 }
-                case 9 -> {
+                case 6 -> {
                     //amount
                     return Util1.toNull(record.getAmount());
+                }
+                case 7 -> {
+                    //loc
+                    return record.getLocName();
                 }
                 default -> {
                     return new Object();
@@ -156,124 +145,106 @@ public class ReturnOutTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+
         return null;
     }
 
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            RetOutHisDetail record = listDetail.get(row);
-            switch (column) {
-                case 0, 1 -> {
-                    //Code
-                    if (value != null) {
+            if (value != null) {
+                RetOutHisDetail record = listDetail.get(row);
+                switch (column) {
+                    case 0, 1 -> {
+                        //Code
                         if (value instanceof Stock s) {
                             record.setStockCode(s.getKey().getStockCode());
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
+                            record.setRelCode(s.getRelCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0);
+                            record.setQty(0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
-                            if (ProUtil.isUseWeight()) {
+                            setSelection(row, 3);
+                        }
+                    }
+                    case 3 -> {
+                        //Qty
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            record.setQty(qty);
+                            String relCode = record.getRelCode();
+                            if (!Util1.isNullOrEmpty(relCode)) {
+                                UnitChooser chooser = new UnitChooser(inventoryRepo, relCode);
+                                record.setUnitCode(chooser.getSelectUnit());
+                            }
+                            if (record.getUnitCode() == null) {
                                 setSelection(row, 4);
                             } else {
-                                setSelection(row, 6);
+                                double price = record.getPrice();
+                                if (price == 0) {
+                                    setSelection(row, 5);
+                                } else {
+                                    setSelection(row + 1, 0);
+                                }
                             }
                         }
                     }
-                }
-                case 3 -> {
-                    //Loc
-                    if (value instanceof Location l) {
-                        record.setLocCode(l.getKey().getLocCode());
-                        record.setLocName(l.getLocName());
-
-                    }
-                }
-                case 4 -> {
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setWeight(Util1.getDouble(value));
-                            setSelection(row, 7);
-                        } else {
-                            setSelection(row, column);
-                            showMessageBox("Input value must be positive.");
-                        }
-                    } else {
-                        setSelection(row, column);
-                        showMessageBox("Input value must be number.");
-                    }
-                }
-                case 5 -> {
-                    if (value instanceof StockUnit unit) {
-                        record.setWeightUnit(unit.getKey().getUnitCode());
-                        setSelection(row, 8);
-                    }
-                }
-                case 6 -> {
-                    //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setQty(Util1.getDouble(value));
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
-                    }
-                }
-
-                case 7 -> {
-                    //Unit
-                    if (value != null) {
-                        if (value instanceof StockUnit stockUnit) {
-                            record.setUnitCode(stockUnit.getKey().getUnitCode());
-                            setSelection(row, 6);
+                    case 4 -> {
+                        //Unit
+                        if (value instanceof StockUnit s) {
+                            record.setUnitCode(s.getKey().getUnitCode());
+                            setSelection(row, 5);
                         }
                     }
-                }
 
-                case 8 -> {
-                    //Pur Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
+                    case 5 -> {
+                        // Price
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
                             record.setPrice(Util1.getDouble(value));
                             setSelection(row + 1, 0);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
                     }
-                }
+                    case 6 -> {
+                        //Amount
+                        record.setAmount(Util1.getDouble(value));
 
-            }
-            if (column != 8) {
-                if (Util1.getDouble(record.getPrice()) == 0) {
-                    if (record.getStockCode() != null && record.getUnitCode() != null) {
-                        inventoryRepo.getPurRecentPrice(record.getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"),
-                                record.getUnitCode()).doOnSuccess((t) -> {
-                            record.setPrice(t.getAmount());
-                            calculateAmount(record);
-                            fireTableRowsUpdated(row, row);
-                        }).subscribe();
+                    }
+                    case 7 -> {
+                        //Loc
+                        if (value instanceof Location l) {
+                            record.setLocCode(l.getKey().getLocCode());
+                            record.setLocName(l.getLocName());
+                            setSelection(row + 1, column);
+                        }
                     }
                 }
+                if (column != 6) {
+                    if (Util1.getDouble(record.getPrice()) == 0) {
+                        if (record.getStockCode() != null && record.getUnitCode() != null) {
+                            inventoryRepo.getSaleRecentPrice(
+                                    record.getStockCode(),
+                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"),
+                                    record.getUnitCode())
+                                    .doOnSuccess((t) -> {
+                                        record.setPrice(t == null ? 0 : t.getAmount());
+                                        calculateAmount(record);
+                                        fireTableRowsUpdated(row, row);
+                                    }).subscribe();
+                        }
+                    }
+                }
+                assignLocation(record);
+                calculateAmount(record);
+                setRecord(listDetail.size() - 1);
+                fireTableRowsUpdated(row, row);
+                observer.selected("SALE-TOTAL", "SALE-TOTAL");
+                parent.requestFocusInWindow();
             }
-            assignLocation(record);
-            calculateAmount(record);
-            setRecord(listDetail.size() - 1);
-            fireTableRowsUpdated(row, row);
-            observer.selected("SALE-TOTAL", "SALE-TOTAL");
-            parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
@@ -339,10 +310,6 @@ public class ReturnOutTableModel extends AbstractTableModel {
         s.setAmount(amount);
     }
 
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(Global.parentForm, text);
-    }
-
     public boolean isValidEntry() {
         boolean status = true;
         for (RetOutHisDetail sdh : listDetail) {
@@ -368,7 +335,6 @@ public class ReturnOutTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        RetOutHisDetail sdh = listDetail.get(row);
         listDetail.remove(row);
         addNewRow();
         fireTableRowsDeleted(row, row);
@@ -393,4 +359,5 @@ public class ReturnOutTableModel extends AbstractTableModel {
             fireTableDataChanged();
         }
     }
+
 }

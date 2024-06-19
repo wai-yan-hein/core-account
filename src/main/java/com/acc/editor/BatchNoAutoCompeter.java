@@ -353,7 +353,7 @@ public final class BatchNoAutoCompeter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                accountRepo.getBatchNo(str).subscribe((t) -> {
+                accountRepo.getBatchNo(str).doOnSuccess((t) -> {
                     if (this.filter) {
                         VDescription s = new VDescription("All");
                         t.add(s);
@@ -362,9 +362,7 @@ public final class BatchNoAutoCompeter implements KeyListener {
                     if (!t.isEmpty()) {
                         table.setRowSelectionInterval(0, 0);
                     }
-                }, (err) -> {
-                    log.error(err.getMessage());
-                });
+                }).subscribe();
 
             }
 
@@ -373,5 +371,10 @@ public final class BatchNoAutoCompeter implements KeyListener {
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
+
+    public void clear() {
+        VDescription des = new VDescription("All");
+        setAutoText(des);
     }
 }

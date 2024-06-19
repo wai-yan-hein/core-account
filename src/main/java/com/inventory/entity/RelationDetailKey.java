@@ -6,6 +6,9 @@ package com.inventory.entity;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 
 /**
  *
@@ -13,8 +16,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RelationDetailKey {
+@Embeddable
+public class RelationDetailKey implements Serializable {
 
-    private String uniqueId;
+    @Column(name = "unique_id")
+    private Integer uniqueId;
+    @Column(name = "rel_code")
     private String relCode;
+    @Column(name = "comp_code")
+    private String compCode;
 }

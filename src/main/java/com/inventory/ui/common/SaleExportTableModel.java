@@ -54,7 +54,6 @@ public class SaleExportTableModel extends AbstractTableModel {
         this.dialog = dialog;
     }
 
-
     public void setLblRecord(JLabel lblRecord) {
         this.lblRecord = lblRecord;
     }
@@ -174,7 +173,7 @@ public class SaleExportTableModel extends AbstractTableModel {
                     case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
+                            dialog.calStock(s, Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -200,21 +199,14 @@ public class SaleExportTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                                if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(7, 7);
-                                } else {
-                                    parent.setColumnSelectionInterval(9, 9);
-                                }
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setQty(Util1.getDouble(value));
+                            if (sd.getUnitCode() == null) {
+                                parent.setColumnSelectionInterval(7, 7);
                             } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                parent.setColumnSelectionInterval(9, 9);
                             }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
                         }
                     }
                     case 5 -> {
@@ -226,18 +218,11 @@ public class SaleExportTableModel extends AbstractTableModel {
 
                     case 7 -> {
                         //price
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getDouble(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            sd.setPrice(Util1.getDouble(value));
+                            parent.setColumnSelectionInterval(0, 0);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
                         }
                     }
                     case 8 -> {
@@ -305,8 +290,6 @@ public class SaleExportTableModel extends AbstractTableModel {
         lblRecord.setText("Records : " + size);
     }
 
-    
-
     private void calculateAmount(SaleHisDetail s) {
         double price = Util1.getDouble(s.getPrice());
         double qty = Util1.getDouble(s.getQty());
@@ -350,7 +333,7 @@ public class SaleExportTableModel extends AbstractTableModel {
         return status;
     }
 
-     public void delete(int row) {
+    public void delete(int row) {
         listDetail.remove(row);
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {

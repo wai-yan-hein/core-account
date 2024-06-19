@@ -30,8 +30,6 @@ import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
-import com.user.model.Currency;
-import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
 import com.common.DateLockUtil;
@@ -74,6 +72,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -81,17 +80,26 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
-import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-public class AllCash extends javax.swing.JPanel implements SelectionObserver,
-        PanelControl {
+public class AllCash extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
+    @Setter
     private TaskExecutor taskExecutor;
+    @Setter
+    private SelectionObserver observer;
+    @Setter
+    private String sourceAccId;
+    @Setter
+    private JProgressBar progress;
+    @Setter
+    private AccountRepo accountRepo;
+    @Setter
+    private UserRepo userRepo;
     private DateAutoCompleter dateAutoCompleter;
     private TraderAAutoCompleter traderAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -102,49 +110,17 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private TranSourceAutoCompleter tranSourceAutoCompleter;
     private BatchNoAutoCompeter batchNoAutoCompeter;
     private ProjectAutoCompleter projectAutoCompleter;
-    private SelectionObserver observer;
-    private String sourceAccId;
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
-    private JProgressBar progress;
-    private AccountRepo accountRepo;
-    private UserRepo userRepo;
-    private Mono<List<DepartmentA>> monoDep;
-    private Mono<List<Currency>> monoCur;
     private DateTableDecorator decorator;
     private final boolean single;
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
     private ColumnHeaderListener listener;
-    private int selectRow = 0;
+    private int selectRow = -1;
     private int selectCol = 0;
     private ReportModeDialog reportModeDialog;
     private FindDialog findDialog;
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public void setAccounRepo(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
-    }
-
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-
-    public void setSourceAccId(String sourceAccId) {
-        this.sourceAccId = sourceAccId;
-
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     /**
      * Creates new form CashBook
@@ -258,21 +234,19 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initFilter() {
-        monoDep = accountRepo.getDepartment();
-        monoCur = userRepo.getCurrency();
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, null, true, true);
         departmentAutoCompleter.setObserver(this);
-        monoDep.doOnSuccess((t) -> {
+        accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
-        monoCur.subscribe((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             currencyAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
         tranSourceAutoCompleter.setObserver(this);
         accountRepo.getTranSource().doOnSuccess((t) -> {
@@ -332,7 +306,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(9).setPreferredWidth(1);// Curr      
         tblCash.getColumnModel().getColumn(10).setPreferredWidth(60);// Dr-Amt   
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        monoDep.doOnSuccess((t) -> {
+        accountRepo.getDepartment().doOnSuccess((t) -> {
             tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
         }).subscribe();
         tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
@@ -344,7 +318,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }).subscribe();
         tblCash.getColumnModel().getColumn(7).setCellEditor(new TraderCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        monoCur.doOnSuccess((t) -> {
+        userRepo.getCurrency().doOnSuccess((t) -> {
             tblCash.getColumnModel().getColumn(9).setCellEditor(new CurrencyEditor(t));
         }).subscribe();
         tblCash.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
@@ -787,6 +761,27 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void initFindDialog() {
         findDialog = new FindDialog(Global.parentForm, tblCash);
+    }
+
+    private void defaultFilter() {
+        dateAutoCompleter.setTodayDate();
+        traderAutoCompleter.clear();
+        coaAutoCompleter.clear();
+        despAutoCompleter.clear();
+        refAutoCompleter.clear();
+        batchNoAutoCompeter.clear();
+        projectAutoCompleter.clear();
+        tranSourceAutoCompleter.clear();
+        accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
+            if (t != null) {
+                departmentAutoCompleter.setDepartment(t);
+            } else {
+                departmentAutoCompleter.clear();
+            }
+        });
+        tblCash.setRowSorter(null);
+        selectRow = -1;
+        selectCol = 1;
     }
 
     private void observeMain() {
@@ -1569,6 +1564,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void newForm() {
+        defaultFilter();
         searchCash();
     }
 

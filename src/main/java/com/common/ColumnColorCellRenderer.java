@@ -19,11 +19,12 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class ColumnColorCellRenderer extends DefaultTableCellRenderer {
 
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
+    private DecimalFormat formatter;
     private Color color;
 
     public ColumnColorCellRenderer(Color color) {
         this.color = color;
+        this.formatter = ProUtil.getDecimalFormat();;
     }
 
     @Override

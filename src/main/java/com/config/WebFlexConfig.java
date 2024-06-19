@@ -75,7 +75,6 @@ public class WebFlexConfig {
                 .build();
     }
 
-
     @Bean
     public WebClient userApi() {
         String url = environment.getProperty("user.url");
@@ -168,11 +167,13 @@ public class WebFlexConfig {
 
     @Bean
     public String getToken() {
-        log.info("getToken.");
         String url = environment.getProperty("user.url");
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();
-        WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
+        WebClient webClient = WebClient.builder()
+                .baseUrl(getUrls(url, port))
+                .clientConnector(reactorClientHttpConnector())
+                .build();
         return authenticate(webClient, serialNo);
     }
 
@@ -191,17 +192,17 @@ public class WebFlexConfig {
                         if (response != null && response.getAccessToken() != null) {
                             try {
                                 file.write(response); // Assuming this writes the response to a file
-                                log.info("New Token: " + response.getAccessToken());
+                                log.info("New Token Generate.");
                             } catch (Exception e) {
                                 log.error("Error writing response to file: " + e.getMessage());
                             }
                         } else {
-                            log.info("serialNo need register.");
+                            log.info("serialNo need register : "+serialNo);
                             response.setAccessToken("");
                         }
                     })
                     .map(AuthenticationResponse::getAccessToken)
-                    .block(Duration.ofSeconds(3)); // Extract and return the access token
+                    .block(Duration.ofSeconds(10)); // Extract and return the access token
         } catch (Exception e) {
             log.error("Error during authentication: " + e.getMessage());
             AuthenticationResponse response = file.read();

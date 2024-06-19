@@ -17,6 +17,7 @@ import com.inventory.entity.PurHisDetail;
 import com.inventory.entity.Stock;
 import com.inventory.entity.StockUnit;
 import com.inventory.ui.entry.PurchaseDynamic;
+import com.inventory.ui.entry.dialog.UnitChooser;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PurchaseTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Qty", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation",
+        "Qty", "Unit", "Price", "Amount", "Location"};
     @Setter
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
@@ -80,7 +81,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 6, 7 ->
+            case 3, 5, 6 ->
                 Double.class;
             default ->
                 String.class;
@@ -90,7 +91,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2, 7 ->
+            case 2, 6 ->
                 false;
             default ->
                 true;
@@ -124,24 +125,24 @@ public class PurchaseTableModel extends AbstractTableModel {
                         return record.getRelName();
                     }
                     case 3 -> {
-                        //loc
-                        return record.getLocName();
-                    }
-                    case 4 -> {
                         //qty
                         return Util1.toNull(record.getQty());
                     }
-                    case 5 -> {
+                    case 4 -> {
                         //unit
                         return record.getUnitCode();
                     }
-                    case 6 -> {
+                    case 5 -> {
                         //price
                         return Util1.toNull(record.getPrice());
                     }
-                    case 7 -> {
+                    case 6 -> {
                         //amount
                         return Util1.toNull(record.getAmount());
+                    }
+                    case 7 -> {
+                        //loc
+                        return record.getLocName();
                     }
                     default -> {
                         return new Object();
@@ -166,37 +167,37 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setStockCode(s.getKey().getStockCode());
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
+                            record.setRelCode(s.getRelCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(4, 4);
+                    setSelection(row, 3);
                 }
                 case 3 -> {
-                    //Loc
-                    if (value instanceof Location l) {
-                        record.setLocCode(l.getKey().getLocCode());
-                        record.setLocName(l.getLocName());
+                    //Qty
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
+                        record.setQty(qty);
+                        String relCode = record.getRelCode();
+                        if (!Util1.isNullOrEmpty(relCode)) {
+                            UnitChooser chooser = new UnitChooser(inventoryRepo, relCode);
+                            record.setUnitCode(chooser.getSelectUnit());
+                        }
+                        if (record.getUnitCode() == null) {
+                            setSelection(row, 4);
+                        } else {
+                            double price = record.getPrice();
+                            if (price == 0) {
+                                setSelection(row, 5);
+                            } else {
+                                setSelection(row + 1, 0);
+                            }
+                        }
                     }
                 }
                 case 4 -> {
-                    //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setQty(Util1.getDouble(value));
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
-                    }
-                    parent.setRowSelectionInterval(row, row);
-                }
-                case 5 -> {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit u) {
@@ -205,31 +206,31 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                     parent.setColumnSelectionInterval(6, 6);
                 }
-                case 6 -> {
+                case 5 -> {
                     //Pur Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setPrice(Util1.getDouble(value));
-                            record.setOrgPrice(record.getPrice());
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
+                    double price = Util1.getDouble(value);
+                    if (price > 0) {
+                        record.setPrice(Util1.getDouble(value));
+                        record.setOrgPrice(record.getPrice());
+                        setSelection(row + 1, 0);
                     }
                 }
-                case 7 -> {
+                case 6 -> {
                     //Amount
                     if (value != null) {
                         record.setAmount(Util1.getDouble(value));
                     }
                 }
+                case 7 -> {
+                    //Loc
+                    if (value instanceof Location l) {
+                        record.setLocCode(l.getKey().getLocCode());
+                        record.setLocName(l.getLocName());
+                        setSelection(row + 1, column);
+                    }
+                }
             }
-            if (column != 6) {
+            if (column != 5) {
                 if (Util1.getDouble(record.getPrice()) == 0) {
                     String stockCode = record.getStockCode();
                     if (stockCode != null && record.getUnitCode() != null) {
@@ -252,6 +253,11 @@ public class PurchaseTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(PurHisDetail sd) {

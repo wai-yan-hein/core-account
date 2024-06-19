@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,16 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 public class OPVouSearchTableModel extends AbstractTableModel {
 
     private List<OPHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Opening Date", "Vou No", "Location", "Remark", "Qty", "Bag", "Amount",};
+    private final String[] columnNames = {"Opening Date", "Vou No", "Location", "Remark", "Qty", "Bag", "Amount"};
+    @Setter
     private JTable parent;
 
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public String getColumnName(int column) {

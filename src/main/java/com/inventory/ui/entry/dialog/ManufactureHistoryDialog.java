@@ -8,6 +8,7 @@ import com.CloudIntegration;
 import com.common.DecimalFormatRender;
 import com.common.ReportFilter;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -118,7 +119,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, null, true);
         vouStatusAutoCompleter.setObserver(this);
@@ -320,7 +321,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         });
 
         jLabel23.setFont(Global.lableFont);
-        jLabel23.setText("Department");
+        jLabel23.setText("Branch");
 
         txtDep.setFont(Global.textFont);
 

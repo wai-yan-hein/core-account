@@ -37,6 +37,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.Setter;
 
 /**
  *
@@ -54,17 +55,10 @@ public final class CategoryAutoCompleter implements KeyListener {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    @Setter
     private SelectionObserver observer;
     private List<Category> listCategory;
     private boolean filter;
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public void setListCategory(List<Category> list) {
         if (filter) {

@@ -24,7 +24,7 @@ import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.ui.SecurityDialog;
 import com.user.dialog.DateLockDialog;
-import com.user.dialog.DepartmentSetupDialog;
+import com.user.dialog.BranchSetupDialog;
 import com.user.dialog.MachineInfoDialog;
 import com.user.dialog.QRDialog;
 import com.user.dialog.YearEndFixDialog;
@@ -73,7 +73,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private DateLockDialog dateLockDialog;
     private MachineInfoDialog machineInfoDialog;
     private YearEndFixDialog yeFixDialog;
-    private DepartmentSetupDialog depDialog;
+    private BranchSetupDialog depDialog;
 
     /**
      * Creates new form Company
@@ -331,9 +331,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void departmentDialog() {
         if (depDialog == null) {
-            depDialog = new DepartmentSetupDialog(Global.parentForm);
-            depDialog.setLocationRelativeTo(null);
+            depDialog = new BranchSetupDialog(Global.parentForm);
             depDialog.setSize(Global.width - 200, Global.height - 200);
+            depDialog.setLocationRelativeTo(null);
             depDialog.setUserRepo(userRepo);
             depDialog.setAccountRepo(accountRepo);
             depDialog.initMain();
@@ -639,7 +639,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelAdvLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtReportUrl)
-                    .addComponent(txtReportCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 303, Short.MAX_VALUE))
+                    .addComponent(txtReportCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelAdvLayout.setVerticalGroup(
@@ -689,10 +689,10 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
-                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
-                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
-                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
+                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
+                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
                             .addComponent(txtSecurity)))
                     .addGroup(panelEntryLayout.createSequentialGroup()
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -798,7 +798,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         });
 
         jButton2.setFont(Global.lableFont);
-        jButton2.setText("Department");
+        jButton2.setText("Branch");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -928,7 +928,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

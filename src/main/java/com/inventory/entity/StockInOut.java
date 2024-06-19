@@ -39,6 +39,7 @@ public class StockInOut {
     private String carNo;
     private String traderCode;
     private Integer printCount;
+    private Boolean post;
     private String status = "STATUS";
     private List<StockInOutDetail> listSH;
     private List<StockInOutKey> listDel;

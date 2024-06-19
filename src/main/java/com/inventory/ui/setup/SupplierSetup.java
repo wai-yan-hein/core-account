@@ -31,7 +31,7 @@ import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import com.repo.UserRepo;
 import com.user.editor.DepartmentUserAutoCompleter;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -232,7 +232,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private boolean isValidEntry() {
         boolean status;
-        DepartmentUser department = departmentUserAutoCompleter.getDepartment();
+        Branch department = departmentUserAutoCompleter.getDepartment();
         Region region = regionAutoCompleter.getRegion();
         ChartOfAccount coa = cOAAutoCompleter.getCOA();
         TraderGroup traderGroup = traderGroupAutoCompleter.getGroup();

@@ -12,19 +12,21 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Repository
-public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
+@Service
+@Transactional
+@Slf4j
+public class JobRepo extends AbstractDao<JobKey, Job> {
 
-    @Override
     public Job save(Job job) {
         job.setUpdatedDate(LocalDateTime.now());
         saveOrUpdate(job, job.getKey());
         return job;
     }
 
-    @Override
     public List<Job> findAll(ReportFilter ReportFilter) {
         String compCode = ReportFilter.getCompCode();
         Integer deptId = ReportFilter.getDeptId();
@@ -38,7 +40,8 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
                     + "and end_date <='" + toDate + "'";
         }
         String sql = """ 
-                select * from job
+                select * 
+                from job
                 where deleted = false
                 and dept_id = ?
                 and comp_code = ?
@@ -57,8 +60,15 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
                     job.setJobName(rs.getString("job_name"));
                     job.setStartDate(rs.getDate("start_date").toLocalDate());
                     job.setEndDate(rs.getDate("end_date").toLocalDate());
+                    job.setUpdatedDate(rs.getTimestamp("updated_date").toLocalDateTime());
+                    job.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
                     job.setDeptId(rs.getInt("dept_id"));
                     job.setCreatedBy(rs.getString("created_by"));
+                    job.setUpdatedBy(rs.getString("updated_by"));
+                    job.setDeleted(rs.getBoolean("deleted"));
+                    job.setFinished(rs.getBoolean("finished"));
+                    job.setOutputCost(rs.getDouble("output_cost"));
+                    job.setOutputQty(rs.getDouble("output_qty"));
                     jList.add(job);
                 }
             } catch (SQLException e) {
@@ -68,18 +78,15 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
         return jList;
     }
 
-    @Override
     public int delete(JobKey key) {
         remove(key);
         return 1;
     }
 
-    @Override
     public Job findById(JobKey id) {
         return getByKey(id);
     }
 
-    @Override
     public List<Job> search(String des) {
         String strSql = "";
 
@@ -96,20 +103,17 @@ public class JobDaoImpl extends AbstractDao<JobKey, Job> implements JobDao {
         return findHSQL(strSql);
     }
 
-    @Override
     public List<Job> unUpload() {
         String hsql = "select o from Job o where o.intgUpdStatus is null";
         return findHSQL(hsql);
     }
 
-    @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from Job o";
         LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
-    @Override
     public List<Job> getActiveJob(String compCode) {
         String sql = "select o from Job o where o.key.compCode = '" + compCode + "' and o.deleted = false";
         return findHSQL(sql);

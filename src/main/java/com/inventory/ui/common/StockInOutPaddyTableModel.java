@@ -172,10 +172,11 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                             io.setStockCode(s.getKey().getStockCode());
                             io.setStockName(s.getStockName());
                             io.setUserCode(s.getUserCode());
-                            io.setCostPrice(0.0f);
+                            io.setCostPrice(0.0);
                             io.setWeight(s.getWeight());
                             assignDefaultLocation(io, row);
                             addNewRow();
+                            setSelection(row, 3);
                         }
                     }
                     case 2 -> {
@@ -254,8 +255,9 @@ public class StockInOutPaddyTableModel extends AbstractTableModel {
                         }
                     }
                     case 10 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setCostPrice(Util1.getDouble(value));
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            io.setCostPrice(price);
                             setSelection(row + 1, 0);
                         }
                     }

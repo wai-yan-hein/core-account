@@ -14,7 +14,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.JobSearchTableModel;
 import com.repo.UserRepo;
 import com.user.common.DepartmentComboBoxModel;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
@@ -84,7 +84,7 @@ public class JobSearchDialog extends javax.swing.JDialog {
 
     public void search() {
         progress.setIndeterminate(true);
-        DepartmentUser d = (DepartmentUser) cboDep.getSelectedItem();
+        Branch d = (Branch) cboDep.getSelectedItem();
         int deptId = d.getKey() == null ? Global.deptId : d.getKey().getDeptId();
         ReportFilter ReportFilter = new ReportFilter(Global.macId, Global.compCode, deptId);
         ReportFilter.setFinished(chkFinished.isSelected());
@@ -472,7 +472,7 @@ public class JobSearchDialog extends javax.swing.JDialog {
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<DepartmentUser> cboDep;
+    private javax.swing.JComboBox<Branch> cboDep;
     private javax.swing.JCheckBox chkFinished;
     private com.toedter.calendar.JDateChooser fromDate;
     private javax.swing.JButton jButton1;

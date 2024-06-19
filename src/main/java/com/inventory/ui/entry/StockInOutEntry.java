@@ -22,6 +22,7 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.JobAutoCompleter;
 import com.inventory.editor.LabourGroupAutoCompleter;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
@@ -91,6 +92,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     @Setter
     private UserRepo userRepo;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
+    private LocationAutoCompleter locationAutoCompleter;
     private StockInOut io = new StockInOut();
     @Setter
     private SelectionObserver observer;
@@ -120,10 +122,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public void initMain() {
         assignDefault();
+        initCombo();
         initTable();
         initModel();
         initRowHeader();
-        initCombo();
         initData();
         initFind();
         clear();
@@ -184,12 +186,20 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jobAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
 
     }
 
     private void initData() {
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListData(t);
+        }).subscribe();
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
+            locationAutoCompleter.setListLocation(t);
+        }).subscribe();
+        inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
         }).subscribe();
         inventoryRepo.getLabourGroup().doOnSuccess((t) -> {
             if (t != null) {
@@ -229,29 +239,30 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         outTableModel.setLblRec(lblRec);
         outTableModel.setParent(tblStock);
         outTableModel.setObserver(this);
+        outTableModel.setLocationCompleter(locationAutoCompleter);
         tblStock.setModel(outTableModel);
         monoLoc = inventoryRepo.getLocation();
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(100);
         tblStock.getColumnModel().getColumn(1).setPreferredWidth(250);
-        tblStock.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(3).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);
+        tblStock.getColumnModel().getColumn(8).setPreferredWidth(100);
         tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo, ProUtil.isSSContain()));
         monoLoc.doOnSuccess((t) -> {
-            tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+            tblStock.getColumnModel().getColumn(8).setCellEditor(new LocationCellEditor(t));
         }).subscribe();
-        tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
-            tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
-            tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+            tblStock.getColumnModel().getColumn(3).setCellEditor(new StockUnitEditor(t));
+            tblStock.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
-        tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
     }
 
     private void initStockIOWeight() {
@@ -394,7 +405,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             observer.selected("save", false);
             progress.setIndeterminate(true);
             io.setListSH(getListDetail());
-            io.setListDel(getListDelete());
             inventoryRepo.save(io).doOnSuccess((t) -> {
                 String customReport = null;
                 String title = null;
@@ -550,21 +560,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             }
             case IO_PADDY -> {
                 return paddyTableModel.getListStock();
-            }
-        }
-        return null;
-    }
-
-    private List<StockInOutKey> getListDelete() {
-        switch (type) {
-            case IO -> {
-                return outTableModel.getDeleteList();
-            }
-            case IO_W -> {
-                return weightTableModel.getDeleteList();
-            }
-            case IO_PADDY -> {
-                return paddyTableModel.getDeleteList();
             }
         }
         return null;
@@ -782,6 +777,19 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         vouStatusAutoCompleter.setListData(vsDialog.getVouStatusList());
     }
 
+    private void setAllLocation() {
+        List<StockInOutDetail> listSaleDetail = getListDetail();
+        Location loc = locationAutoCompleter.getLocation();
+        if (listSaleDetail != null) {
+            listSaleDetail.forEach(sd -> {
+                sd.setLocCode(loc.getKey().getLocCode());
+                sd.setLocName(loc.getLocName());
+            });
+        }
+        setListDetail(listSaleDetail);
+        focusOnTable();
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -814,13 +822,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtVouType = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
         txtLG = new javax.swing.JTextField();
         txtJob = new javax.swing.JTextField();
         txtVou = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
         txtTrader = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        txtLocation = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -833,6 +842,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel2 = new javax.swing.JLabel();
         lblWeight = new javax.swing.JLabel();
         txtWeight = new javax.swing.JFormattedTextField();
+        jButton2 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -899,16 +909,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Labour Group");
 
-        jButton2.setBackground(Global.selectionColor);
-        jButton2.setFont(Global.lableFont);
-        jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setText("More");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-
         txtLG.setFont(Global.textFont);
         txtLG.setName("txtRemark"); // NOI18N
 
@@ -934,6 +934,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtTrader.setFont(Global.textFont);
         txtTrader.setName("txtRemark"); // NOI18N
 
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Locaiton");
+
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtRemark"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -945,22 +951,22 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
-                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE))
+                    .addComponent(txtLG, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
+                    .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)
-                    .addComponent(txtJob, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+                    .addComponent(txtJob, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE))
+                        .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -974,9 +980,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtTrader)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE))
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtLocation)
                 .addContainerGap())
         );
 
@@ -994,30 +1002,26 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                             .addComponent(jLabel7)
                             .addComponent(txtVouType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton3)
-                            .addComponent(jButton2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(txtTrader, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel12)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLabel6)
-                                    .addComponent(jLabel3))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel6)
+                                .addComponent(jLabel3)
+                                .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
                             .addComponent(jLabel10)
                             .addComponent(jLabel4)
                             .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtLG, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(txtJob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11)
+                            .addComponent(txtTrader, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(5, 5, 5))
         );
 
@@ -1068,6 +1072,16 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtWeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtWeight.setFont(Global.amtFont);
 
+        jButton2.setBackground(Global.selectionColor);
+        jButton2.setFont(Global.lableFont);
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
+        jButton2.setText("More");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1077,11 +1091,13 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addComponent(lblStatus)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblRec, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtInQty, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
@@ -1112,7 +1128,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addComponent(lblRec)
                         .addComponent(jButton1)
                         .addComponent(lblWeight)
-                        .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton2))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1135,7 +1152,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
+                .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -1174,6 +1191,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1195,6 +1213,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JFormattedTextField txtInQty;
     private javax.swing.JTextField txtJob;
     private javax.swing.JTextField txtLG;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtOutQty;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtTrader;
@@ -1258,6 +1277,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     setVoucher(t);
                 }).subscribe();
             }
+        }
+        if (source.toString().equals("Location")) {
+            setAllLocation();
         }
         if (source.toString().equals("CAL-TOTAL")) {
             calTotalAmt();

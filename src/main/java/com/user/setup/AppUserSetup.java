@@ -23,7 +23,7 @@ import com.user.model.AppUser;
 import com.user.common.UserTableModel;
 import com.user.editor.DepartmentUserAutoCompleter;
 import com.user.editor.RoleAutoCompleter;
-import com.user.model.DepartmentUser;
+import com.user.model.Branch;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
@@ -186,7 +186,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             txtRole.requestFocus();
             return false;
         } else {
-            DepartmentUser dep = departmentUserAutoCompleter.getDepartment();
+            Branch dep = departmentUserAutoCompleter.getDepartment();
             DepartmentA depAcc = departmentAutoCompleter.getDepartment();
             Location location = locationAutoCompleter.getLocation();
             appUser.setDeptId(dep == null ? null : dep.getKey().getDeptId());

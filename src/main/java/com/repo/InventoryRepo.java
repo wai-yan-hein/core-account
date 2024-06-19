@@ -112,6 +112,8 @@ import com.inventory.entity.StockType;
 import com.inventory.entity.StockTypeKey;
 import com.inventory.entity.StockUnit;
 import com.inventory.entity.StockUnitKey;
+import com.inventory.entity.StockUnitPrice;
+import com.inventory.entity.StockUnitPriceKey;
 import com.inventory.entity.Trader;
 import com.inventory.entity.TraderGroup;
 import com.inventory.entity.TraderGroupKey;
@@ -200,7 +202,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getPriceOption")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("option", option)
                 .build())
                 .retrieve()
@@ -516,7 +517,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getBrand")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(StockBrand.class)
@@ -548,7 +548,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getType")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(StockType.class)
@@ -804,7 +803,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/findTraderRFID")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("rfId", rfId)
                 .build())
                 .retrieve()
@@ -819,7 +817,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getRegion")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(Region.class)
@@ -1213,7 +1210,6 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/setup/getStock")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("active", active)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
@@ -1328,7 +1324,7 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/setup/getStockList")
                 .queryParam("text", str)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
@@ -1379,7 +1375,6 @@ public class InventoryRepo {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getService")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
@@ -1415,7 +1410,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .doOnNext(t -> {
-                    h2Repo.updateDeleted(key, true);
+                    h2Repo.updateDeleted(key, false);
                 })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -1567,10 +1562,12 @@ public class InventoryRepo {
     }
 
     public Mono<List<UnitRelation>> getUnitRelation() {
+        if (localDatabase) {
+            return h2Repo.getUnitRelation();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUnitRelation")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(UnitRelation.class)
@@ -2181,6 +2178,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<UnitRelationDetail>> getRelationDetail(String relCode) {
+        if (localDatabase) {
+            return h2Repo.getRelationDetail(relCode);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUnitRelationDetail")
                 .queryParam("code", relCode)
@@ -3159,6 +3159,13 @@ public class InventoryRepo {
                 .uri("/pur/savePurchase")
                 .body(Mono.just(ph), PurHis.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(PurHis.class);
 
     }
@@ -3211,6 +3218,13 @@ public class InventoryRepo {
                 .uri("/returnIn/saveReturnIn")
                 .body(Mono.just(rh), RetInHis.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(RetInHis.class);
 
     }
@@ -3231,6 +3245,13 @@ public class InventoryRepo {
                 .uri("/retOut/saveReturnOut")
                 .body(Mono.just(ro), RetInHis.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(RetOutHis.class);
     }
 
@@ -3293,11 +3314,17 @@ public class InventoryRepo {
     }
 
     public Mono<TransferHis> save(TransferHis th) {
-
         return inventoryApi.post()
                 .uri("/transfer/saveTransfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(TransferHis.class);
     }
 
@@ -3341,6 +3368,13 @@ public class InventoryRepo {
                 .uri("/stockio/saveStockIO")
                 .body(Mono.just(sio), StockInOut.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(StockInOut.class);
     }
 
@@ -3368,6 +3402,13 @@ public class InventoryRepo {
                 .uri("/order/saveOrder")
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(OrderHis.class);
 
     }
@@ -3414,6 +3455,13 @@ public class InventoryRepo {
                 .uri("/payment/savePayment")
                 .body(Mono.just(ph), PaymentHis.class)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response -> {
+                    if (response.statusCode() == HttpStatus.BAD_REQUEST) {
+                        return response.bodyToMono(ErrorResponse.class)
+                                .flatMap(e -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage())));
+                    }
+                    return response.createException().flatMap(Mono::error);
+                })
                 .bodyToMono(PaymentHis.class);
     }
 
@@ -3487,6 +3535,18 @@ public class InventoryRepo {
     public Flux<ClosingBalance> getStockBalanceQty(ReportFilter filter) {
         return inventoryApi.post()
                 .uri("/report/getStockBalanceQty")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(ClosingBalance.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Flux.empty();
+                });
+    }
+
+    public Flux<ClosingBalance> getStockBalanceRel(ReportFilter filter) {
+        return inventoryApi.post()
+                .uri("/report/getStockBalanceRel")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(ClosingBalance.class)
@@ -3620,6 +3680,15 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<List<VSale>> getSaleSummaryByDepartment(ReportFilter filter) {
+        return inventoryApi.post()
+                .uri("/sale/getSaleSummaryByDepartment")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(VSale.class)
+                .collectList();
     }
 
     public Flux<RetInHisDetail> getReturnInReport(String vouNo) {
@@ -4362,4 +4431,60 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToFlux(OrderHis.class);
     }
+
+    public Mono<List<StockUnitPrice>> getStockUnitPrice(String stockCode) {
+        if (localDatabase) {
+            List<StockUnitPrice> list = h2Repo.getStockUnitPrice(stockCode);
+            if (!list.isEmpty()) {
+                return Mono.just(list);
+            }
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getStockUnitPrice")
+                .queryParam("stockCode", stockCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockUnitPrice.class)
+                .collectList();
+    }
+
+    public Mono<Boolean> saveStockUnitPrice(List<StockUnitPrice> list) {
+        return inventoryApi.post()
+                .uri("/setup/saveStockUnitPrice")
+                .bodyValue(list)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<List<StockUnitPrice>> getUpdateStockUnitPrice(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateStockUnitPrice")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockUnitPrice.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Double> getSmallestQty(String relCode, String unit) {
+        return h2Repo.getSmallestQty(relCode, unit, Global.compCode);
+    }
+
+    public Mono<List<UnitRelationDetail>> getSmallestUnit() {
+        return h2Repo.getSmallestUnit();
+    }
+
+    public Mono<List<StockUnit>> getUnitByRelation(String relCode) {
+        return h2Repo.getStockUnitByRelation(relCode);
+    }
+
+    public Mono<StockUnitPrice> findStockUnitPrice(StockUnitPriceKey key) {
+        return h2Repo.findStockUnitPrice(key);
+    }
+
 }

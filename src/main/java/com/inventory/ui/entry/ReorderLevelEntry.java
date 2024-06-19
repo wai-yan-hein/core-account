@@ -38,6 +38,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.Setter;
 import reactor.core.publisher.Mono;
 
 /**
@@ -47,6 +48,7 @@ import reactor.core.publisher.Mono;
 public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
     
     private final ButtonGroup g = new ButtonGroup();
+    @Setter
     private InventoryRepo inventoryRepo;
     private final ReorderTableModel reorderTableModel = new ReorderTableModel();
     private StockTypeAutoCompleter typeAutoCompleter;
@@ -54,32 +56,14 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private BrandAutoCompleter brandAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
+    @Setter
     private JProgressBar progress;
+    @Setter
     private SelectionObserver observer;
     private Mono<List<StockUnit>> monoUnit;
     private TableRowSorter<TableModel> sorter;
     private FindDialog findDialog;
     
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-    
-    public JProgressBar getProgress() {
-        return progress;
-    }
-    
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
-    
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-    
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
     /**
      * Creates new form ReorderLevel
      */
@@ -138,28 +122,28 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, true, true);
         locationAutoCompleter.setObserver(this);
-        inventoryRepo.getLocation().subscribe((t) -> {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
             locationAutoCompleter.setLocation(t);
-        });
+        }).subscribe();
         typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, null, true);
         typeAutoCompleter.setObserver(this);
-        inventoryRepo.getStockType().subscribe((t) -> {
+        inventoryRepo.getStockType().doOnSuccess((t) -> {
             typeAutoCompleter.setListStockType(t);
-        });
+        }).subscribe();
         categoryAutoCompleter = new CategoryAutoCompleter(txtCat, null, true);
         categoryAutoCompleter.setObserver(this);
-        inventoryRepo.getCategory().subscribe((t) -> {
+        inventoryRepo.getCategory().doOnSuccess((t) -> {
             categoryAutoCompleter.setListCategory(t);
-        });
+        }).subscribe();
         brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
         brandAutoCompleter.setObserver(this);
-        inventoryRepo.getStockBrand().subscribe((t) -> {
+        inventoryRepo.getStockBrand().doOnSuccess((t) -> {
             brandAutoCompleter.setListStockBrand(t);
-        });
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        }).subscribe();
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true,ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         
     }

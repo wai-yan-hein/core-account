@@ -30,6 +30,8 @@ import com.user.editor.AutoClearEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.OPHisDetailKey;
+import com.inventory.entity.Stock;
+import com.inventory.entity.UnitRelationDetail;
 import com.inventory.ui.setup.common.OpeningConsignTableModel;
 import com.inventory.ui.setup.common.OpeningPaddyTableModel;
 import com.user.editor.CurrencyAutoCompleter;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JList;
@@ -90,6 +93,8 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
     private TaskExecutor taskExecutor;
     private TraderAutoCompleter traderAutoCompleter;
     private FindDialog findDialog;
+    private HashMap<String, String> hmUnit = new HashMap<>();
+    private HashMap<String, Stock> hmStock = new HashMap<>();
 
     /**
      * Creates new form OpeningSetup
@@ -627,7 +632,6 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
     }
 
     private void readFile(String path) {
-        List<OPHisDetail> listOP = new ArrayList<>();
         try {
             progress.setIndeterminate(true);
             Reader in = new FileReader(path);
@@ -639,22 +643,12 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
                     .setIgnoreHeaderCase(true)
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(in);
-            records.forEach((CSVRecord row) -> {
-                OPHisDetail op = new OPHisDetail();
-                op.setStockCode(row.isMapped("SystemCode") ? Util1.convertToUniCode(row.get("SystemCode")) : "");
-                op.setStockName(row.isMapped("StockName") ? Util1.convertToUniCode(row.get("StockName")) : "");
-                op.setWeight(row.isMapped("Weight") ? Double.parseDouble(row.get("Weight")) : 0.0);
-                op.setWeightUnit(row.isMapped("WeightUnit") ? Util1.convertToUniCode(row.get("WeightUnit")) : "");
-                op.setQty(row.isMapped("Qty") ? Double.valueOf(row.get("Qty")) : 0.0);
-                op.setUnitCode(row.isMapped("Unit") ? Util1.convertToUniCode(row.get("Unit")) : "");
-                op.setPrice(row.isMapped("Price") ? Double.valueOf(row.get("Price")) : 0.0);
-                op.setAmount(op.getQty() * op.getPrice());
-                listOP.add(op);
-
-            });
-            openingTableModel.setListDetail(listOP);
-            calculatAmount();
-            progress.setIndeterminate(false);
+            int yn = JOptionPane.showConfirmDialog(Global.parentForm, "Import is Relation?", "Message", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (yn == JOptionPane.YES_OPTION) {
+                importWithRelation(records);
+            } else if (yn == JOptionPane.NO_OPTION) {
+                importStandard(records);
+            }
         } catch (IOException e) {
             progress.setIndeterminate(false);
             log.error("readFile : " + e.getMessage());
@@ -662,52 +656,64 @@ public class OpeningDynamic extends javax.swing.JPanel implements PanelControl, 
         }
     }
 
-//    private void readFile(String path) {
-//        String line;
-//        String splitBy = ",";
-//        int lineCount = 0;
-//        List<OPHisDetail> listOP = new ArrayList<>();
-//        try {
-//            try (BufferedReader br = new BufferedReader(new InputStreamReader(
-//                    new FileInputStream(path), "UTF8"))) {
-//                while ((line = br.readLine()) != null) //returns a Boolean value
-//                {
-//                    OPHisDetail op = new OPHisDetail();
-//                    String[] data = line.split(splitBy);    // use comma as separator
-//                    String stockCode = null;
-//                    String qty = null;
-//                    String price = null;
-//                    lineCount++;
-//                    try {
-//                        stockCode = data[0];
-//                        qty = data[1].replace("\"", "");
-//                        price = data[2].replace("\"", "");
-//
-//                    } catch (IndexOutOfBoundsException e) {
-//                        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
-//                    }
-//                    Stock s = hm.get(stockCode.toLowerCase());
-//                    if (s != null) {
-//                        op.setStockCode(s.getKey().getStockCode());
-//                        op.setQty(Util1.getDouble(qty));
-//                        op.setPrice(Util1.getDouble(price));
-//                        op.setAmount(op.getQty() * op.getPrice());
-//                        op.setUnitCode("pcs");
-//                        if (op.getQty() != 0) {
-//                            listOP.add(op);
-//                        }
-//                    } else {
-//                        log.info(stockCode + "\n");
-//                    }
-//                }
-//                openingTableModel.setListDetail(listOP);
-//                calculatAmount();
-//            }
-//        } catch (IOException e) {
-//            log.error("Read CSV File :" + e.getMessage());
-//
-//        }
-//    }
+    private void importStandard(Iterable<CSVRecord> records) {
+        List<OPHisDetail> listOP = new ArrayList<>();
+        records.forEach((CSVRecord row) -> {
+            OPHisDetail op = new OPHisDetail();
+            op.setStockCode(row.isMapped("SystemCode") ? Util1.convertToUniCode(row.get("SystemCode")) : "");
+            op.setStockName(row.isMapped("StockName") ? Util1.convertToUniCode(row.get("StockName")) : "");
+            op.setWeight(row.isMapped("Weight") ? Double.parseDouble(row.get("Weight")) : 0.0);
+            op.setWeightUnit(row.isMapped("WeightUnit") ? Util1.convertToUniCode(row.get("WeightUnit")) : "");
+            op.setQty(row.isMapped("Qty") ? Double.valueOf(row.get("Qty")) : 0.0);
+            op.setUnitCode(row.isMapped("Unit") ? Util1.convertToUniCode(row.get("Unit")) : "");
+            op.setPrice(row.isMapped("Price") ? Double.valueOf(row.get("Price")) : 0.0);
+            op.setAmount(op.getQty() * op.getPrice());
+            listOP.add(op);
+
+        });
+        openingTableModel.setListDetail(listOP);
+        calculatAmount();
+        progress.setIndeterminate(false);
+    }
+
+    private void importWithRelation(Iterable<CSVRecord> records) {
+        List<OPHisDetail> listOP = new ArrayList<>();
+        List<UnitRelationDetail> list = inventoryRepo.getSmallestUnit().block();
+        if (!list.isEmpty()) {
+            list.forEach((t) -> {
+                hmUnit.put(t.getKey().getRelCode(), t.getUnit());
+            });
+        }
+        List<Stock> listStock = inventoryRepo.getStock(false).block();
+        if (!listStock.isEmpty()) {
+            listStock.forEach((t) -> {
+                hmStock.put(t.getUserCode(), t);
+            });
+        }
+        records.forEach((CSVRecord row) -> {
+            String userCode = row.get("UserCode");
+            double qty = Util1.getDouble(row.get("Qty"));
+            if (!Util1.isNullOrEmpty(userCode)) {
+                Stock stock = hmStock.get(userCode);
+                if (stock != null) {
+                    OPHisDetail op = new OPHisDetail();
+                    op.setUserCode(userCode);
+                    op.setStockCode(stock.getKey().getStockCode());
+                    op.setStockName(stock.getStockName());
+                    op.setUnitCode(hmUnit.get(stock.getRelCode()));
+                    op.setQty(qty);
+                    listOP.add(op);
+                } else {
+                    log.info("Not Found Stock : " + userCode);
+                }
+
+            }
+        });
+        openingTableModel.setListDetail(listOP);
+        calculatAmount();
+        progress.setIndeterminate(false);
+    }
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);

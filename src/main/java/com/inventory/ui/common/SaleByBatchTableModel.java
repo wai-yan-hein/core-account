@@ -224,7 +224,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                     case 2, 3 -> {
                         //Code
                         if (value instanceof Stock s) {
-                            dialog.calStock(s.getKey().getStockCode(), Global.parentForm);
+                            dialog.calStock(s, Global.parentForm);
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
@@ -239,21 +239,14 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                                if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(5, 5);
-                                } else {
-                                    parent.setColumnSelectionInterval(6, 6);
-                                }
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setQty(Util1.getDouble(value));
+                            if (sd.getUnitCode() == null) {
+                                parent.setColumnSelectionInterval(5, 5);
                             } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                parent.setColumnSelectionInterval(6, 6);
                             }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
                         }
                     }
                     case 5 -> {
@@ -266,18 +259,11 @@ public class SaleByBatchTableModel extends AbstractTableModel {
 
                     case 6 -> {
                         //price
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            sd.setPrice(Util1.getDouble(value));
+                            parent.setColumnSelectionInterval(0, 0);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
                         }
                     }
 
@@ -343,8 +329,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         lblRecord.setText("Records : " + size);
     }
 
-   
-
     private void calculateAmount(SaleHisDetail sale) {
         if (sale.getStockCode() != null) {
             float saleQty = Util1.getFloat(sale.getQty());
@@ -384,8 +368,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         return status;
     }
 
-
-     public void delete(int row) {
+    public void delete(int row) {
         listDetail.remove(row);
         fireTableRowsDeleted(row, row);
         if (row - 1 >= 0) {

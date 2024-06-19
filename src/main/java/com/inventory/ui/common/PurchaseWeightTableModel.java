@@ -242,16 +242,10 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     //weight
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setWeight(Util1.getDouble(value));
-                        } else {
-                            showMessageBox("Input value must be positive.");
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
+                    double wt = Util1.getDouble(value);
+                    if (wt > 0) {
+                        record.setWeight(Util1.getDouble(value));
                     }
-                    parent.setColumnSelectionInterval(5, 5);
                 }
                 case 5 -> {
                     //weight unit
@@ -261,27 +255,19 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 }
                 case 6 -> {
                     //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            if (ProUtil.isUseWeightPoint()) {
-                                String str = String.valueOf(value);
-                                double wt = Util1.getDouble(record.getWeight());
-                                record.setQty(Util1.getDouble(value));
-                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                            } else {
-                                record.setQty(Util1.getDouble(value));
-                                if (record.getQty() > 0 && record.getWeight() > 0) {
-                                    record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
-                                }
-                            }
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
+                        if (ProUtil.isUseWeightPoint()) {
+                            String str = String.valueOf(value);
+                            double wt = Util1.getDouble(record.getWeight());
+                            record.setQty(Util1.getDouble(value));
+                            record.setTotalWeight(Util1.getTotalWeight(wt, str));
                         } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setRowSelectionInterval(row, column);
+                            record.setQty(Util1.getDouble(value));
+                            if (record.getQty() > 0 && record.getWeight() > 0) {
+                                record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
+                            }
                         }
-                        parent.setRowSelectionInterval(row, row);
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setRowSelectionInterval(row, column);
                     }
                 }
                 case 7 -> {
@@ -295,13 +281,15 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 }
                 case 8 -> {
                     //std weight
-                    if (Util1.isNumber(value)) {
+                    double stdWt = Util1.getDouble(value);
+                    if (stdWt > 0) {
                         record.setStdWeight(Util1.getDouble(value));
                     }
                 }
                 case 10 -> {
                     //Pur Price
-                    if (Util1.isNumber(value)) {
+                    double price = Util1.getDouble(value);
+                    if (price > 0) {
                         if (Util1.isPositive(Util1.getDouble(value))) {
                             record.setPrice(Util1.getDouble(value));
                             record.setOrgPrice(record.getPrice());
@@ -311,9 +299,6 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
                     }
                 }
                 case 11 -> {

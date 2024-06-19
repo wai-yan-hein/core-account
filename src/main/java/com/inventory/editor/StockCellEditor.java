@@ -13,11 +13,14 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.im.InputContext;
 import java.util.EventObject;
+import java.util.Locale;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StockCellEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
-    private StockAutoCompleter1 completer;
+    private StockAutoCompleter completer;
     private InventoryRepo inventoryRepo;
     private boolean barcode;
     private boolean contain;
@@ -91,7 +94,13 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
         if (barcode) {
             return component;
         }
-        completer = new StockAutoCompleter1(jtf, inventoryRepo, this, false, contain);
+        completer = new StockAutoCompleter(jtf, inventoryRepo, this, false, contain);
+
+        // Ensure the component is part of the table's hierarchy
+        if (component.getParent() == null) {
+            table.add(component);
+        }
+
         return component;
     }
 

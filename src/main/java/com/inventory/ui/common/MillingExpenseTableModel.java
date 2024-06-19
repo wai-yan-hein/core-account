@@ -51,7 +51,6 @@ public class MillingExpenseTableModel extends AbstractTableModel {
         this.observer = observer;
     }
 
-
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -162,23 +161,17 @@ public class MillingExpenseTableModel extends AbstractTableModel {
                         }
                     }
                     case 2 -> {
-                        if (Util1.isNumber(value)) {
-                            b.setQty(Util1.getFloat(value));
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            b.setQty(qty);
                             setSelection(row, column);
                         }
                     }
                     case 3 -> {
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                b.setPrice(Util1.getFloat(value));
-                                setSelection(row+1, column);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
+                        double price = Util1.getDouble(value);
+                        if (price > 0) {
+                            b.setPrice(price);
+                            setSelection(row + 1, column);
                         }
                     }
                     case 4 ->
@@ -279,7 +272,8 @@ public class MillingExpenseTableModel extends AbstractTableModel {
             deleteList.clear();
         }
     }
-    public void clear(){
+
+    public void clear() {
         listDetail.clear();
         fireTableDataChanged();
     }

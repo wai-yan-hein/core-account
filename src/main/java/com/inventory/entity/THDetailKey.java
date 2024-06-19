@@ -4,9 +4,6 @@
  */
 package com.inventory.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import java.io.Serializable;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -16,14 +13,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Embeddable
-public class THDetailKey implements Serializable {
+public class THDetailKey {
 
-    @Column(name = "vou_no")
     private String vouNo;
-    @Column(name = "unique_id")
     private int uniqueId;
-    @Column(name = "comp_code")
     private String compCode;
 
 }

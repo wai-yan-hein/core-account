@@ -218,37 +218,23 @@ public class PurchaseOrderTableModel extends AbstractTableModel {
                     }
                     case 6 -> {
                         //Order-Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setOrderQty(Util1.getDouble(value));
-                                sd.setQty(Util1.getDouble(value));
-                                setSelection(row, 7);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setOrderQty(Util1.getDouble(value));
+                            sd.setQty(Util1.getDouble(value));
+                            setSelection(row, 7);
                         }
                     }
                     case 7 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getDouble(value));
-                                if (sd.getUnitCode() == null) {
-                                    setSelection(row, 8);
-                                } else {
-                                    setSelection(row, 9);
-                                }
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setQty(Util1.getDouble(value));
+                            if (sd.getUnitCode() == null) {
+                                setSelection(row, 8);
                             } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
+                                setSelection(row, 9);
                             }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            setSelection(row, column);
                         }
                     }
                     case 8 -> {
@@ -260,17 +246,10 @@ public class PurchaseOrderTableModel extends AbstractTableModel {
                     }
                     case 9 -> {
                         //price
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getDouble(value));
-                                setSelection(row + 1, 0);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                        double qty = Util1.getDouble(value);
+                        if (qty > 0) {
+                            sd.setPrice(Util1.getDouble(value));
+                            setSelection(row + 1, 0);
                         }
                     }
                     case 10 -> {

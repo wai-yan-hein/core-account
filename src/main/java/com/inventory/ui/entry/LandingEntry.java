@@ -15,7 +15,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.editor.StockAutoCompleter1;
+import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCriteriaEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.entity.LandingHisPrice;
@@ -68,7 +68,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
-    private StockAutoCompleter1 stockAutoCompleter;
+    private StockAutoCompleter stockAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
@@ -76,7 +76,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     private LandingHistoryDialog dialog;
     private FindDialog findDialog;
 
-    public StockAutoCompleter1 getStockAutoCompleter() {
+    public StockAutoCompleter getStockAutoCompleter() {
         return stockAutoCompleter;
     }
 
@@ -269,7 +269,7 @@ public class LandingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initCompleter() {
-        stockAutoCompleter = new StockAutoCompleter1(txtStock, inventoryRepo, null, false, ProUtil.isSSContain());
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false, ProUtil.isSSContain());
         stockAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);

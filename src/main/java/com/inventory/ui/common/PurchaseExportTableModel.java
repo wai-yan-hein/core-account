@@ -213,14 +213,16 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     //length
-                    if (Util1.isNumber(value)) {
+                    double len = Util1.getDouble(value);
+                    if (len > 0) {
                         record.setLength(Util1.getDouble(value));
                     }
                 }
                 case 4 -> {
                     //width
-                    if (Util1.isNumber(value)) {
-                        record.setWidth(Util1.getDouble(value));
+                    double wid = Util1.getDouble(value);
+                    if (wid > 0) {
+                        record.setWidth(wid);
                     }
                 }
                 case 5 -> {
@@ -230,9 +232,11 @@ public class PurchaseExportTableModel extends AbstractTableModel {
 
                 case 6 -> {
                     //weight
-                    if (Util1.isNumber(value)) {
-                        record.setWeight(Util1.getDouble(value));
+                    double wid = Util1.getDouble(value);
+                    if (wid > 0) {
+                        record.setWeight(wid);
                     }
+
                 }
                 case 7 -> {
                     //weight unit
@@ -242,7 +246,8 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 }
                 case 8 -> {
                     //Qty
-                    if (Util1.isNumber(value)) {
+                    double qty = Util1.getDouble(value);
+                    if (qty > 0) {
                         record.setQty(Util1.getDouble(value));
                         parent.setRowSelectionInterval(row, row);
                     }
@@ -252,24 +257,17 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                     if (value != null) {
                         if (value instanceof StockUnit u) {
                             record.setUnitCode(u.getKey().getUnitCode());
+                            setSelection(row, 8);
                         }
                     }
-                    parent.setColumnSelectionInterval(8, 8);
                 }
                 case 11 -> {
                     //Pur Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getDouble(value))) {
-                            record.setPrice(Util1.getDouble(value));
-                            record.setOrgPrice(record.getPrice());
-                            setSelection(row + 1, 0);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            setSelection(row, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        setSelection(row, column);
+                    double price = Util1.getDouble(value);
+                    if (price > 0) {
+                        record.setPrice(Util1.getDouble(value));
+                        record.setOrgPrice(record.getPrice());
+                        setSelection(row + 1, 0);
                     }
                 }
                 case 12 -> {

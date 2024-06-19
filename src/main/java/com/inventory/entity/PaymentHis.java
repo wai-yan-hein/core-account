@@ -22,6 +22,7 @@ public class PaymentHis {
     private String createdBy;
     private String updatedBy;
     private Integer macId;
+    private String deptCode;
     private String account;
     private String projectNo;
     private String curCode;
